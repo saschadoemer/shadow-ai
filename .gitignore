@@ -1,0 +1,21 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+
+# Test runners
+playwright-report/
+test-results/
+
+# Local agent configuration and worktrees
+CLAUDE.local.md
+.claude/worktrees/
+
+# Environment and editors
+.env
+.env.*
+.idea/
+.vscode/
+*.swp
+.DS_Store
+*.log
