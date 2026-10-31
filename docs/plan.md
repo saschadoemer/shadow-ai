@@ -20,7 +20,7 @@ specification.
 | # | Milestone | Marks |
 |---|---|---|
 | M1 | **Harness** — the base documentation: `CLAUDE.md`, `docs/spec/`, ADRs, this plan, the feature workflow | |
-| M2 | **Walk the campus** — the outdoor map in Tiled, the player figure, movement, collision, scrolling camera (feature 0001) | |
+| M2 | **Walk the campus** — toolchain and container, surface and loop, tile map, the figure, collision, camera and the campus map (features 0001–0006) | |
 | M3 | **The lamp and the first creature** — the cone of light, freezing, capturing, overview | |
 | M4 | **Dialogue, language table and journal** — talking to figures, German and English through keys, the three tabs | |
 | M5 | **Act 1 complete** — the call, Sales, the data protection officer, the first cleared region | **Trade-fair teaser** |
@@ -58,7 +58,11 @@ feature workflow exist, agree with each other, and the author has read and appro
 
 ### M2 — Walk the campus
 
-Specified in `docs/features/0001-walk-the-campus.md` once that spec is approved.
+Six features, each its own pull request with its own acceptance plan, in this order: 0001
+toolchain, CI and container · 0002 surface, loop and scaling · 0003 tile map · 0004 the figure ·
+0005 collision · 0006 camera and campus. Map before figure, so the figure walks on something from
+the start; collision before camera, because the camera needs a map larger than the screen. M2 is
+done when 0006 is implemented.
 
 ## 5. Deferred, with reasons
 

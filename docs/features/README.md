@@ -20,4 +20,9 @@ the plan grows past that, the feature is cut in two.
 
 | # | Feature | Milestone | Status |
 |---|---|---|---|
-| [0001](0001-walk-the-campus.md) | Walk the campus | M2 | draft |
+| [0001](0001-toolchain-ci-container.md) | Toolchain, CI and container | M2 | draft |
+| [0002](0002-surface-loop-scaling.md) | Surface, loop and scaling | M2 | draft |
+| [0003](0003-tile-map.md) | Tile map | M2 | draft |
+| [0004](0004-the-figure.md) | The figure | M2 | draft |
+| [0005](0005-collision.md) | Collision | M2 | draft |
+| [0006](0006-camera-and-campus.md) | Camera and campus | M2 | draft |
