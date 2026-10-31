@@ -13,7 +13,10 @@ A feature spec refines the specification in `docs/spec/`; it never contradicts i
 would, the spec is changed first. Once a feature is implemented, what is durable about it lives in
 `docs/spec/`, and the feature file stays as history of how it got there.
 
-Use `0000-template.md`. Numbers are numbers: "80 px/s", not "a comfortable speed".
+Use `0000-template.md`. Numbers are numbers: "80 px/s", not "a comfortable speed". Every spec
+carries an acceptance plan for the manual test (`docs/spec/testing.md` §5); without one it is not
+approved. A feature is the smallest change the author can test by hand in a few minutes — when
+the plan grows past that, the feature is cut in two.
 
 | # | Feature | Milestone | Status |
 |---|---|---|---|

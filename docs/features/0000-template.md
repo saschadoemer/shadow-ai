@@ -32,10 +32,25 @@ is reported as "criterion 4", not as an interpretation.
 Which unit tests, which architecture or asset tests, what the smoke test asserts. Which fixtures
 are added under `tests/fixtures/`.
 
-## Feel checklist
+## Acceptance plan (manual test)
 
-The handful of things only a player notices. The agent walks through these in a browser before
-asking for acceptance; the author walks through them before merging.
+The test the author runs before merging, and the agent runs in a browser before asking for
+acceptance. Written so that a failure is reported as "step 7", not as an impression. The rules
+are in `docs/spec/testing.md` §5.
+
+**Preconditions:** how to start (`npm run dev` or the container), which browser, which window
+size, where in the game to begin.
+
+**Steps:** one flat numbered list. An action step says what to press or do, in the words of the
+keys and the screen. Every expected result is its own numbered step, never a parenthesis on the
+action step.
+
+1. Start …
+2. Expected: …
+
+**Feel:** the few things only a player notices, as questions with room for a number or a note.
+
+**Result:** pass or fail per step, filled in by the author.
 
 ## Open questions
 

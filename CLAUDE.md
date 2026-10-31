@@ -83,12 +83,14 @@ change that weakens the test has violated the invariant.
 
 ## 3. The feature workflow
 
-The game is built feature by feature. Nothing is built that was not approved.
+The game is built feature by feature, in small steps: a feature is the smallest change the
+author can test by hand in a few minutes. Nothing is built that was not approved.
 
 1. **Draft.** A feature gets a spec at `docs/features/NNNN-<name>.md`, from
    `docs/features/0000-template.md`, with `Status: draft`. It states the goal, the scope (in, and
-   explicitly out), the exact behaviour, testable acceptance criteria, the test plan and the open
-   questions. Numbers are numbers, not adjectives.
+   explicitly out), the exact behaviour, testable acceptance criteria, the test plan, an
+   **acceptance plan for the manual test** (`docs/spec/testing.md` §5) and the open questions.
+   Numbers are numbers, not adjectives. A spec without an acceptance plan is not approved.
 2. **Approval.** Only the author approves, in conversation. The agent then sets
    `Status: approved` with the date and commits that change. An agent never approves a spec.
 3. **Implementation.** Only for `approved`. One branch per feature, named
@@ -96,7 +98,8 @@ The game is built feature by feature. Nothing is built that was not approved.
    built; it becomes a new draft. Tests come first for logic (§4).
 4. **Acceptance.** A feature is done when all tests are green (unit, architecture, assets, smoke),
    typecheck and Biome are clean, the build and the container run, the affected files in
-   `docs/spec/` are updated — and **the author has played it and accepted it.** The author merges
+   `docs/spec/` are updated, the agent has run the acceptance plan in a browser and reported
+   every step — and **the author has run the acceptance plan and accepted it.** The author merges
    the pull request; the merge is the acceptance. Then `Status: implemented`. What is durable has
    moved into `docs/spec/`; the feature spec stays as history.
 

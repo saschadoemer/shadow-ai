@@ -50,11 +50,26 @@ A guard without such a test is a comment.
 
 ## 5. Human acceptance
 
-The last test of every feature is the author playing it (`CLAUDE.md` §3). Each feature spec
-carries a short **feel checklist** — the handful of things only a player notices: does the figure
-snag at corners, does the camera shimmer, does the walk speed feel right. The agent runs through
-it in a browser before asking for acceptance and reports what it saw. The author's merge is the
-sign-off.
+The last test of every feature is the author running its **acceptance plan**: a manual test
+written into the feature spec and mandatory for approval (`CLAUDE.md` §3). The automated layers
+prove the rules hold; the acceptance plan proves they are *reachable* — that the screen shows what
+the spec says, and that the game feels the way the numbers intended.
+
+An acceptance plan has three parts:
+
+- **Preconditions.** How to start — `npm run dev` or the container — which browser, which window
+  size, and where in the game to begin. Nothing the tester has to work out.
+- **Steps.** One flat numbered list from start to finish. An action step says what to press or do,
+  in the words of the keys and the screen. **Every expected result is its own numbered step**,
+  never a parenthesis on the action step, so a failure is reported as "step 7" and needs no
+  interpretation.
+- **Feel.** The few things only a player notices — a snag at a corner, a shimmer, a speed that is
+  off — as questions with room for a number or a note.
+
+The agent runs the whole plan in a browser before asking for acceptance and reports the result of
+every step, including the ones that failed. The author runs it again; the merge is the sign-off.
+A plan takes a few minutes, not an afternoon. If it does not fit, the feature is too big and is
+cut.
 
 ## 6. Test data
 
