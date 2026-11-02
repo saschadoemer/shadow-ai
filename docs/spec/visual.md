@@ -30,13 +30,17 @@ a figure is only its lower part — the feet — so a figure can walk "behind" d
 
 Every colour in the game comes from **Endesga 32** — thirty-two colours, warm, enough for office
 interiors and outdoor grounds. A test checks every PNG under `public/` against the palette; a
-pixel outside it fails the build.
+pixel outside it fails the build. A pixel is either opaque or fully transparent — alpha 255 or
+0, nothing between, because a half-transparent pixel blends into a colour outside the palette.
+The colour of a transparent pixel is not checked. The palette is data in
+`src/render/palette.ts`.
 
-**The signature colour.** One violet/magenta of the palette is reserved for the shadow and for
-nothing else in the world. Every trace of shadow AI glows in it. The player learns in seconds what
-to look for, without a word of text. Because colour alone excludes colour-blind players, the
-signature colour is always accompanied by **form and motion** — flicker, dithering — so the shadow
-is unmistakable without it.
+**The signature colour.** One violet of the palette, `#68386c`, is reserved for the shadow and
+for nothing else in the world; the asset test rejects it in every PNG under `public/` until the
+feature that introduces the shadow assets names the exception. Every trace of shadow AI glows in
+it. The player learns in seconds what to look for, without a word of text. Because colour alone
+excludes colour-blind players, the signature colour is always accompanied by **form and
+motion** — flicker, dithering — so the shadow is unmistakable without it.
 
 **Shadowed and cleared.** A region under shadow renders desaturated with violet dithering; a
 cleared region renders in the full palette. The world shows progress by colour (`vision.md` §5).

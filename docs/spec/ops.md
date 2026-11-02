@@ -17,10 +17,12 @@ One multi-stage `Dockerfile` at the repository root:
 2. **Serve stage** — the unprivileged nginx image, `dist/` copied to its web root, listening on
    port 8080.
 
-The nginx configuration lives in the repository and does four things: serves `dist/` with
-long-lived cache headers for hashed assets and no caching for `index.html`; compresses text
-responses; sends the security headers below; returns 404 for anything that is not a file. There
-is no rewrite to `index.html` — the game is one page, not a routed application.
+The nginx configuration (`nginx.conf`) lives in the repository and does four things: serves
+`dist/`, with `Cache-Control: public, max-age=31536000, immutable` for the hashed files under
+`/assets/` and `Cache-Control: no-cache` for everything else, `index.html` included; compresses
+text responses with gzip; sends the security headers below on every response, 404s included;
+returns 404 for anything that is not a file, directories included. There is no rewrite to
+`index.html` — the game is one page, not a routed application.
 
 **Headers, on every response:**
 
@@ -44,21 +46,25 @@ docker run --rm -p 8080:8080 shadow-ai
 ```
 
 The game is then at `http://localhost:8080`. This is how the game runs until the end of the
-project (plan M8). The smoke test runs against the built container as well as the dev server, so
-the headers and the static serving are tested, not assumed.
+project (plan M8). The smoke test runs against the built container as well as the dev server —
+`BASE_URL=http://localhost:8080 npm run test:e2e` — so the headers and the static serving are
+tested, not assumed.
 
 ## 4. Continuous integration
 
-GitHub Actions, on every pull request and on `main`, one workflow:
+GitHub Actions, on every pull request and on `main`, one workflow with one job, `ci`:
 
 1. install with `npm ci`
 2. typecheck
 3. Biome check
-4. unit, architecture and asset tests
-5. build
-6. build the container and run the Playwright smoke test against it
+4. build
+5. unit, architecture and asset tests — after the build, because the dist scan reads it
+6. the Playwright smoke test against the dev server
+7. build the container, start it, and run the smoke test again with `BASE_URL` pointing at it
 
-Red blocks the merge. There is no separate "fast" path; the whole run is short enough to wait for.
+Red blocks the merge: `main` is protected so that the check `ci` must pass before a pull request
+can be merged — a GitHub setting the author keeps. There is no separate "fast" path; the whole
+run is short enough to wait for.
 
 ## 5. Deployment target
 
