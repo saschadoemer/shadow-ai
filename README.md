@@ -11,9 +11,10 @@ hour game to play at home. German first, English second.
 
 ## Status
 
-Early. The toolchain is in place (feature 0001), and the surface and the loop run (feature
-0002): a test pattern with a moving square, scaled by whole factors in device pixels, with `F`
-for fullscreen. The tile map is feature 0003. The roadmap is in [docs/plan.md](docs/plan.md).
+Early. The toolchain is in place (feature 0001), the surface and the loop run (feature 0002),
+and the game shows a tile map (feature 0003): a test map authored in Tiled, drawn from generated
+placeholder tiles, scaled by whole factors in device pixels, with `F` for fullscreen. The figure
+is feature 0004. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 
@@ -24,7 +25,11 @@ npm ci
 npm run dev          # the dev server at http://localhost:5173
 npm run check        # typecheck, lint, build and the headless tests
 npm run test:e2e     # the smoke test against the dev server
+npm run gen-tiles    # regenerate the placeholder tiles under public/tiles/
 ```
+
+Maps are edited in [Tiled](https://www.mapeditor.org/) 1.10 or newer: open
+`public/maps/test.tmj`, save, reload the page.
 
 The container is what ships — static files behind nginx on port 8080:
 
