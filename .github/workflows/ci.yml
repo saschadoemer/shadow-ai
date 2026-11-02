@@ -39,9 +39,11 @@ jobs:
         run: docker build -t shadow-ai .
 
       - name: Start the container
+        # docker-proxy accepts the connection before nginx listens and then resets it; curl does
+        # not count a reset as transient, so every error is retried, for at most about 30 s.
         run: |
           docker run -d --rm -p 8080:8080 --name shadow-ai shadow-ai
-          curl -sf --retry 30 --retry-delay 1 --retry-connrefused -o /dev/null http://localhost:8080/
+          curl -sf --retry 30 --retry-delay 1 --retry-all-errors -o /dev/null http://localhost:8080/
 
       - name: Smoke test against the container
         run: npm run test:e2e
