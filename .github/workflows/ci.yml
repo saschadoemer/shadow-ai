@@ -1,0 +1,61 @@
+# The whole check on every pull request and on main (ops.md §4). One job, so the required
+# status check for branch protection is simply "ci".
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+
+      - name: Install the Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke test against the dev server
+        run: npm run test:e2e
+
+      - name: Build the container
+        run: docker build -t shadow-ai .
+
+      - name: Start the container
+        run: |
+          docker run -d --rm -p 8080:8080 --name shadow-ai shadow-ai
+          curl -sf --retry 30 --retry-delay 1 --retry-connrefused -o /dev/null http://localhost:8080/
+
+      - name: Smoke test against the container
+        run: npm run test:e2e
+        env:
+          BASE_URL: http://localhost:8080
+
+      - name: Stop the container
+        if: always()
+        run: docker stop shadow-ai || true
+
+      - name: Keep the Playwright report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
