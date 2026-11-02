@@ -142,61 +142,162 @@ function isTileLayerName(name: string): name is TileLayerName {
   return (TILE_LAYER_NAMES as readonly string[]).includes(name);
 }
 
+const LAYER_NAMES = [...TILE_LAYER_NAMES, OBJECT_LAYER_NAME].join(', ');
+
+/** The smallest map that covers the 320x180 surface (rule 6): 20 columns, 12 rows. */
+const MIN_COLUMNS = 20;
+const MIN_ROWS = 12;
+
+/** Any gid at or above this has one of Tiled's four flip and rotation bits set (rule 8). */
+const FIRST_FLAGGED_GID = 0x10000000;
+
 /** What a tile layer's cells need to know about the map and its tileset. */
 interface CellContext {
   readonly file: string;
   readonly width: number;
   readonly height: number;
   readonly firstGid: number;
+  readonly tileCount: number;
 }
 
-/** Layer data as tileset ids: gid 0 is EMPTY, gid g is g − firstgid. */
+/** Rule 7: only Tiled's default, CSV, where `data` is an array of numbers. */
+function checkFormat(layer: Json, name: TileLayerName, file: string): void {
+  for (const field of ['encoding', 'compression'] as const) {
+    const value = layer[field];
+    const absent = value === undefined || (field === 'encoding' ? value === 'csv' : value === '');
+    if (!absent) {
+      fail(
+        file,
+        `layer "${name}" uses ${field} ${JSON.stringify(value)}; only CSV (an array of numbers) is supported`,
+      );
+    }
+  }
+}
+
+/** Layer data as tileset ids: gid 0 is EMPTY, gid g is g − firstgid (rules 7, 8, 9). */
 function readCells(layer: Json, name: TileLayerName, context: CellContext): number[] {
-  const data = asArray(layer.data, context.file, `layer "${name}" data`);
-  return data.map((value, index) => {
-    const gid = asNumber(value, context.file, `layer "${name}" cell ${index}`);
-    return gid === 0 ? EMPTY : gid - context.firstGid;
+  const { file, width, height, firstGid, tileCount } = context;
+  checkFormat(layer, name, file);
+  const data = asArray(layer.data, file, `layer "${name}" data`);
+  if (data.length !== width * height) {
+    fail(file, `layer "${name}" has ${data.length} cells; ${width * height} are required`);
+  }
+  const lastGid = firstGid + tileCount - 1;
+  return data.map((gid, index) => {
+    const cell = `layer "${name}" cell (${index % width}, ${Math.floor(index / width)})`;
+    if (typeof gid !== 'number' || !Number.isInteger(gid) || gid < 0) {
+      fail(file, `${cell} is not a whole number`);
+    }
+    if (gid >= FIRST_FLAGGED_GID) {
+      fail(file, `${cell} is flipped or rotated; flipped or rotated tiles are not supported`);
+    }
+    if (gid === 0) {
+      return EMPTY;
+    }
+    if (gid < firstGid || gid > lastGid) {
+      fail(
+        file,
+        `${cell} has tile id ${gid}, which is outside the tileset (${firstGid}–${lastGid})`,
+      );
+    }
+    return gid - firstGid;
   });
 }
 
+/** Rule 4: exactly one point object named `spawn`. */
 function readSpawn(layer: Json, file: string): Point {
-  const objects = asArray(layer.objects, file, `layer "${OBJECT_LAYER_NAME}" objects`).map(
-    (value) => asRecord(value, file, 'object'),
-  );
-  const spawn = objects.find((object) => object.point === true && object.name === 'spawn');
+  const what = `layer "${OBJECT_LAYER_NAME}"`;
+  const spawns = asArray(layer.objects, file, `${what} objects`)
+    .map((value) => asRecord(value, file, 'object'))
+    .filter((object) => object.point === true && object.name === 'spawn');
+  const [spawn] = spawns;
   if (spawn === undefined) {
-    fail(file, `layer "${OBJECT_LAYER_NAME}" has no point object named "spawn"`);
+    fail(file, `${what} has no point object named "spawn"`);
+  }
+  if (spawns.length > 1) {
+    fail(file, `${what} has ${spawns.length} point objects named "spawn"; exactly one is required`);
   }
   return { x: asNumber(spawn.x, file, 'spawn x'), y: asNumber(spawn.y, file, 'spawn y') };
 }
 
+/** Rules 11, 7, 5 and 6: what the map as a whole must be, before any layer is read. */
+function checkMap(map: Json, file: string): { readonly width: number; readonly height: number } {
+  const orientation = asString(map.orientation, file, 'orientation');
+  if (orientation !== 'orthogonal') {
+    fail(file, `orientation "${orientation}" is not supported; only orthogonal`);
+  }
+  if (map.infinite === true) {
+    fail(file, 'infinite maps are not supported');
+  }
+  checkTileSize(map, file);
+  const width = asNumber(map.width, file, 'width');
+  const height = asNumber(map.height, file, 'height');
+  if (width < MIN_COLUMNS || height < MIN_ROWS) {
+    fail(
+      file,
+      `map is ${width}x${height} tiles; at least ${MIN_COLUMNS}x${MIN_ROWS} (320x180 px) is required`,
+    );
+  }
+  return { width, height };
+}
+
+/** Rules 1 and 2: a known name, and the layer type that goes with it. */
+function checkLayer(layer: Json, file: string): TileLayerName | typeof OBJECT_LAYER_NAME {
+  const name = asString(layer.name, file, 'layer name');
+  if (name !== OBJECT_LAYER_NAME && !isTileLayerName(name)) {
+    fail(file, `layer "${name}" is not one of ${LAYER_NAMES}`);
+  }
+  const type = asString(layer.type, file, `layer "${name}" type`);
+  if (name === OBJECT_LAYER_NAME && type !== 'objectgroup') {
+    fail(file, `layer "${name}" must be an object layer`);
+  }
+  if (name !== OBJECT_LAYER_NAME && type !== 'tilelayer') {
+    fail(file, `layer "${name}" must be a tile layer`);
+  }
+  return name;
+}
+
 export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string): TileMap {
   const map = asRecord(mapJson, mapFile, 'map');
-  const width = asNumber(map.width, mapFile, 'width');
-  const height = asNumber(map.height, mapFile, 'height');
+  const { width, height } = checkMap(map, mapFile);
   const firstGid = asNumber(tilesetEntry(map, mapFile).firstgid, mapFile, 'firstgid');
-  const context: CellContext = { file: mapFile, width, height, firstGid };
+  const context: CellContext = {
+    file: mapFile,
+    width,
+    height,
+    firstGid,
+    tileCount: tileset.tileCount,
+  };
   const layers: Partial<Record<TileLayerName, number[]>> = {};
-  let spawn: Point | undefined;
+  const seen = new Set<string>();
+  let objects: Json | undefined;
   for (const value of asArray(map.layers, mapFile, 'layers')) {
     const layer = asRecord(value, mapFile, 'layer');
-    const name = asString(layer.name, mapFile, 'layer name');
+    const name = checkLayer(layer, mapFile);
+    if (seen.has(name)) {
+      fail(mapFile, `layer "${name}" appears twice`);
+    }
+    seen.add(name);
     if (name === OBJECT_LAYER_NAME) {
-      spawn = readSpawn(layer, mapFile);
-    } else if (isTileLayerName(name)) {
+      objects = layer;
+    } else {
       layers[name] = readCells(layer, name, context);
     }
   }
-  if (spawn === undefined) {
+  const { ground } = layers;
+  if (ground === undefined) {
+    fail(mapFile, 'layer "ground" is missing');
+  }
+  if (objects === undefined) {
     fail(mapFile, `layer "${OBJECT_LAYER_NAME}" is missing`);
   }
+  const spawn = readSpawn(objects, mapFile);
   const empty = () => new Array<number>(width * height).fill(EMPTY);
-  const ground = layers.ground ?? empty();
   const detail = layers.detail ?? empty();
   const above = layers.above ?? empty();
   const isSolid = (id: number | undefined) => id !== undefined && tileset.solid[id] === true;
   const solid = ground.map(
-    (_, index) => isSolid(ground[index]) || isSolid(detail[index]) || isSolid(above[index]),
+    (id, index) => isSolid(id) || isSolid(detail[index]) || isSolid(above[index]),
   );
   return { width, height, ground, detail, above, spawn, solid };
 }

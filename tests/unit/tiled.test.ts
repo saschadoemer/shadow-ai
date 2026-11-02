@@ -130,3 +130,263 @@ describe('parseTileMap on the corridor', () => {
     expect(JSON.parse(JSON.stringify(map))).toStrictEqual(map);
   });
 });
+
+/** The message a call throws, exactly; a call that does not throw fails the comparison. */
+function messageOf(run: () => unknown): string {
+  try {
+    run();
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  }
+  return '(no error)';
+}
+
+interface LayerJson {
+  [key: string]: unknown;
+  name: string;
+  type: string;
+  data?: unknown;
+  objects?: Record<string, unknown>[];
+}
+
+interface MapJson {
+  [key: string]: unknown;
+  layers: LayerJson[];
+}
+
+describe('parseTileMap rejects', () => {
+  const tiles = fixture('fixture-tiles.tsj');
+  const tileset = parseTileset(tiles.json, tiles.file);
+  const corridor = fixture('corridor.tmj');
+  const FILE = corridor.file;
+
+  function layer(map: MapJson, name: string): LayerJson {
+    const found = map.layers.find((candidate) => candidate.name === name);
+    if (found === undefined) {
+      throw new Error(`the corridor has no layer "${name}"`);
+    }
+    return found;
+  }
+
+  function groundData(map: MapJson): unknown[] {
+    const data = layer(map, 'ground').data;
+    if (!Array.isArray(data)) {
+      throw new Error('the corridor ground has no data array');
+    }
+    return data;
+  }
+
+  /** A copy of the corridor with one change. */
+  function variant(change: (map: MapJson) => void): MapJson {
+    const copy = structuredClone(corridor.json) as MapJson;
+    change(copy);
+    return copy;
+  }
+
+  function rejection(json: unknown, file = FILE): string {
+    return messageOf(() => parseTileMap(json, tileset, file));
+  }
+
+  it('an orientation other than orthogonal (rule 11)', () => {
+    const map = variant((m) => {
+      m.orientation = 'isometric';
+    });
+    expect(rejection(map)).toBe(
+      `${FILE}: orientation "isometric" is not supported; only orthogonal`,
+    );
+  });
+
+  it('an infinite map (rule 7)', () => {
+    const map = variant((m) => {
+      m.infinite = true;
+    });
+    expect(rejection(map)).toBe(`${FILE}: infinite maps are not supported`);
+  });
+
+  it('a tile size other than 16x16 (rule 5)', () => {
+    const { file, json } = fixture('tile-32.tmj');
+    expect(rejection(json, file)).toBe(`${file}: tile size is 32x32; tiles are 16x16`);
+  });
+
+  it('a map smaller than 20x12 tiles (rule 6)', () => {
+    const { file, json } = fixture('too-small.tmj');
+    expect(rejection(json, file)).toBe(
+      `${file}: map is 10x6 tiles; at least 20x12 (320x180 px) is required`,
+    );
+  });
+
+  it('a map smaller than 20x12 tiles before reading any layer (rule 6)', () => {
+    const { file, json } = fixture('too-small.tmj');
+    const map = structuredClone(json) as MapJson;
+    map.layers.push({ name: 'decor', type: 'tilelayer', data: [] });
+    expect(rejection(map, file)).toBe(
+      `${file}: map is 10x6 tiles; at least 20x12 (320x180 px) is required`,
+    );
+  });
+
+  it('a layer name outside ground, detail, above, objects (rule 1)', () => {
+    const { file, json } = fixture('unknown-layer.tmj');
+    expect(rejection(json, file)).toBe(
+      `${file}: layer "decor" is not one of ground, detail, above, objects`,
+    );
+  });
+
+  it('an unknown layer name whatever its type (rule 1)', () => {
+    const map = variant((m) => {
+      m.layers.push({ name: 'triggers', type: 'objectgroup', objects: [] });
+    });
+    expect(rejection(map)).toBe(
+      `${FILE}: layer "triggers" is not one of ground, detail, above, objects`,
+    );
+  });
+
+  it('an objects layer that is not an object layer (rule 2)', () => {
+    const map = variant((m) => {
+      layer(m, 'objects').type = 'tilelayer';
+    });
+    expect(rejection(map)).toBe(`${FILE}: layer "objects" must be an object layer`);
+  });
+
+  it('a ground layer that is not a tile layer (rule 2)', () => {
+    const map = variant((m) => {
+      layer(m, 'ground').type = 'objectgroup';
+    });
+    expect(rejection(map)).toBe(`${FILE}: layer "ground" must be a tile layer`);
+  });
+
+  it('a layer name used twice (rule 3)', () => {
+    const map = variant((m) => {
+      m.layers.push(structuredClone(layer(m, 'ground')));
+    });
+    expect(rejection(map)).toBe(`${FILE}: layer "ground" appears twice`);
+  });
+
+  it('a missing ground layer (rule 3)', () => {
+    const map = variant((m) => {
+      m.layers = m.layers.filter((candidate) => candidate.name !== 'ground');
+    });
+    expect(rejection(map)).toBe(`${FILE}: layer "ground" is missing`);
+  });
+
+  it('a missing objects layer (rule 3)', () => {
+    const map = variant((m) => {
+      m.layers = m.layers.filter((candidate) => candidate.name !== 'objects');
+    });
+    expect(rejection(map)).toBe(`${FILE}: layer "objects" is missing`);
+  });
+
+  it('no point object named spawn (rule 4)', () => {
+    const { file, json } = fixture('no-spawn.tmj');
+    expect(rejection(json, file)).toBe(
+      `${file}: layer "objects" has no point object named "spawn"`,
+    );
+  });
+
+  it('a spawn that is not a point object (rule 4)', () => {
+    const map = variant((m) => {
+      for (const object of layer(m, 'objects').objects ?? []) {
+        object.point = false;
+      }
+    });
+    expect(rejection(map)).toBe(`${FILE}: layer "objects" has no point object named "spawn"`);
+  });
+
+  it('more than one spawn (rule 4)', () => {
+    const map = variant((m) => {
+      layer(m, 'objects').objects?.push({ id: 2, name: 'spawn', point: true, x: 8, y: 8 });
+    });
+    expect(rejection(map)).toBe(
+      `${FILE}: layer "objects" has 2 point objects named "spawn"; exactly one is required`,
+    );
+  });
+
+  it('layer data with an encoding (rule 7)', () => {
+    const map = variant((m) => {
+      layer(m, 'ground').encoding = 'base64';
+      layer(m, 'ground').data = 'AQAAAAEAAAA=';
+    });
+    expect(rejection(map)).toBe(
+      `${FILE}: layer "ground" uses encoding "base64"; only CSV (an array of numbers) is supported`,
+    );
+  });
+
+  it('layer data with a compression (rule 7)', () => {
+    const map = variant((m) => {
+      layer(m, 'ground').compression = 'zlib';
+    });
+    expect(rejection(map)).toBe(
+      `${FILE}: layer "ground" uses compression "zlib"; only CSV (an array of numbers) is supported`,
+    );
+  });
+
+  it('layer data whose length is not width × height (rule 7)', () => {
+    const map = variant((m) => {
+      layer(m, 'ground').data = [1, 1, 1];
+    });
+    expect(rejection(map)).toBe(`${FILE}: layer "ground" has 3 cells; 240 are required`);
+  });
+
+  it('a cell that is not a whole number (rule 7)', () => {
+    const map = variant((m) => {
+      groundData(m)[0] = 1.5;
+    });
+    expect(rejection(map)).toBe(`${FILE}: layer "ground" cell (0, 0) is not a whole number`);
+  });
+
+  it('a flipped or rotated tile (rule 8)', () => {
+    const map = variant((m) => {
+      groundData(m)[0] = 0x80000001;
+    });
+    expect(rejection(map)).toBe(
+      `${FILE}: layer "ground" cell (0, 0) is flipped or rotated; flipped or rotated tiles are not supported`,
+    );
+  });
+
+  it('every one of the four flag bits (rule 8)', () => {
+    for (const flag of [0x80000000, 0x40000000, 0x20000000, 0x10000000]) {
+      const map = variant((m) => {
+        groundData(m)[0] = flag + 1;
+      });
+      expect(rejection(map), flag.toString(16)).toBe(
+        `${FILE}: layer "ground" cell (0, 0) is flipped or rotated; flipped or rotated tiles are not supported`,
+      );
+    }
+  });
+
+  it('a gid outside the tileset (rule 9)', () => {
+    const map = variant((m) => {
+      groundData(m)[5] = 3;
+    });
+    expect(rejection(map)).toBe(
+      `${FILE}: layer "ground" cell (5, 0) has tile id 3, which is outside the tileset (1–2)`,
+    );
+  });
+
+  it('a gid below the first gid of the tileset (rule 9)', () => {
+    const map = variant((m) => {
+      m.tilesets = [{ firstgid: 2, source: 'fixture-tiles.tsj' }];
+      groundData(m).fill(2);
+      groundData(m)[5] = 1;
+    });
+    expect(rejection(map)).toBe(
+      `${FILE}: layer "ground" cell (5, 0) has tile id 1, which is outside the tileset (2–3)`,
+    );
+  });
+
+  it('accepts encoding "csv" and compression "" as absent (rule 7)', () => {
+    const map = variant((m) => {
+      layer(m, 'ground').encoding = 'csv';
+      layer(m, 'ground').compression = '';
+    });
+    expect(rejection(map)).toBe('(no error)');
+  });
+
+  it('names the map file at the start of every message', () => {
+    const map = variant((m) => {
+      m.infinite = true;
+    });
+    expect(rejection(map, 'maps/elsewhere.tmj')).toBe(
+      'maps/elsewhere.tmj: infinite maps are not supported',
+    );
+  });
+});
