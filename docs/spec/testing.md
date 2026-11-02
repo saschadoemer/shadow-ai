@@ -11,7 +11,7 @@ rule can be proved without a browser.
 | **Unit** | Vitest, Node | engine math (movement, collision, camera), game rules, the map loader against Tiled JSON fixtures, the loop with a fake clock, the language table |
 | **Architecture** | Vitest, Node | the import graph and source text of `src/game/` (INV-2); the branded text type is enforced by the compiler (INV-4) |
 | **Assets** | Vitest, Node | every PNG under `public/` against Endesga 32 and the reserved colour, alpha 0 or 255 with transparent pixels exempt; tilesets under `public/tiles/` sized in multiples of 16; `.tsj` files against their PNG (INV-6) |
-| **Smoke** | Playwright, one spec | the page loads, the canvas exists, one second of "right" moves the player — against the dev server and against the built container; against the container (`BASE_URL`) also the four security headers, the cache headers and gzip (INV-5) |
+| **Smoke** | Playwright, one spec | the page loads, the canvas exists at the full factor with the picture's corner unclipped, the picture changes over time, one second of "right" moves the player — against the dev server and against the built container; against the container (`BASE_URL`) also the four security headers, the cache headers and gzip (INV-5) |
 
 All four run in CI on every pull request (`ops.md` §4). Red blocks the merge.
 
@@ -21,7 +21,7 @@ All four run in CI on every pull request (`ops.md` §4). Red blocks the merge.
 |---|---|
 | INV-1 plain state | `JSON.parse(JSON.stringify(state))` deep-equals a populated `GameState` |
 | INV-2 no browser in `game/` | `tests/arch/` fails on any import of `render/` or any occurrence of `window`, `document`, `HTMLCanvasElement`, `Image`, `fetch` in `src/game/` |
-| INV-3 fixed step | loop tests: 16.7 ms elapsed yields one step, 100 ms yields five and drops the rest, 8 ms yields none and carries the remainder |
+| INV-3 fixed step | loop tests: 16.7 ms elapsed yields one step, 100 ms yields five and drops the rest, 8 ms yields none and carries the remainder; frames alternating 16.5 and 16.8 ms yield exactly one step each, frames of 8.4 ms one every second frame, 17 ms is not snapped; the loop driver with a fake frame scheduler advances at most five steps after a ten-second gap |
 | INV-4 text through keys | the compiler, via `TextKey`; a unit test that `de` and `en` have identical key sets |
 | INV-5 own origin only | a test over `dist/` for `http://` and `https://`, which is why `npm run check` builds before it tests; the smoke test reads the CSP header from the container |
 | INV-6 palette | the asset tests: palette, reserved colour, alpha, tileset size, each with a negative case |

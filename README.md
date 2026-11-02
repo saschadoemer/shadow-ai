@@ -11,9 +11,9 @@ hour game to play at home. German first, English second.
 
 ## Status
 
-Early. The specification is written and the toolchain is in place (feature 0001): the page
-loads with an empty canvas, and nothing is drawn yet. The first thing to see — the surface and
-the loop — is feature 0002. The roadmap is in [docs/plan.md](docs/plan.md).
+Early. The toolchain is in place (feature 0001), and the surface and the loop run (feature
+0002): a test pattern with a moving square, scaled by whole factors in device pixels, with `F`
+for fullscreen. The tile map is feature 0003. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 
