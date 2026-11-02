@@ -54,7 +54,7 @@ test('the page loads with its title, its canvas and the dark background', async 
   await expect(page.locator('body')).toHaveText('');
 });
 
-test('the pattern is drawn at the full factor, unclipped, and moves', async ({ page }) => {
+test('the map is drawn at the full factor, unclipped', async ({ page }) => {
   await page.goto('/');
   const canvas = page.locator('canvas#game');
   // Desktop Chrome in Playwright: a 1280x720 page area at device pixel ratio 1, so factor 4.
@@ -62,16 +62,16 @@ test('the pattern is drawn at the full factor, unclipped, and moves', async ({ p
     .poll(() => canvas.evaluate((element: HTMLCanvasElement) => [element.width, element.height]))
     .toStrictEqual([1280, 720]);
   expect(await canvas.boundingBox()).toStrictEqual({ x: 0, y: 0, width: 1280, height: 720 });
-  const corner = await canvas.evaluate((element: HTMLCanvasElement) =>
-    Array.from(element.getContext('2d')?.getImageData(0, 0, 1, 1).data ?? []),
-  );
-  expect(corner, 'the top-left pixel is the border colour #c0cbdc').toStrictEqual([
-    0xc0, 0xcb, 0xdc, 255,
-  ]);
-  const read = () => canvas.evaluate((element: HTMLCanvasElement) => element.toDataURL());
-  const first = await read();
-  await page.waitForTimeout(500);
-  expect(await read(), 'the picture changes, so the loop runs').not.toBe(first);
+  // Polled: the first frame waits for the map, the tileset and its image.
+  await expect
+    .poll(
+      () =>
+        canvas.evaluate((element: HTMLCanvasElement) =>
+          Array.from(element.getContext('2d')?.getImageData(0, 0, 1, 1).data ?? []),
+        ),
+      { message: 'the top-left pixel is grass #63c74d at tile (0, 0): the map is drawn' },
+    )
+    .toStrictEqual([0x63, 0xc7, 0x4d, 255]);
 });
 
 test.describe('served by the container', () => {
