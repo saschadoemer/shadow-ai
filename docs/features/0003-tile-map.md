@@ -1,6 +1,6 @@
 # 0003 — Tile map
 
-**Status:** draft
+**Status:** approved 2026-11-02
 **Milestone:** M2
 **Drafted:** 2026-10-31
 
