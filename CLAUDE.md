@@ -118,6 +118,10 @@ Harness changes approved in conversation may go directly to `main`.
   recorded by changing the spec text, and the reason travels in the commit message. There is no
   decision log — `git log` is the history. Architectural decisions get an ADR in `docs/adr/`.
 - **Stay in scope.** If a task seems to need something the spec does not cover, stop and ask.
+- **Start from the latest `main`.** When implementation starts, and again before the pull
+  request is opened, `main` is merged into the feature branch and the checks are rerun. A pull
+  request is opened only when it merges cleanly; a conflict is resolved on the branch, never on
+  `main`.
 - **Respect the content budget** in `docs/plan.md` §3. More content means changing the number
   first, then the content.
 
