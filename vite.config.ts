@@ -6,5 +6,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/unit/**/*.test.ts', 'tests/arch/**/*.test.ts'],
+    // Name every test file and test on every run, in a terminal and in CI alike.
+    reporters: ['tree'],
   },
 });
