@@ -117,3 +117,86 @@ export function tilesetSource(mapJson: unknown, mapFile: string): string {
   }
   return source;
 }
+
+export interface Point {
+  readonly x: number;
+  readonly y: number;
+}
+
+export interface TileMap {
+  /** In tiles. */
+  readonly width: number;
+  /** In tiles. */
+  readonly height: number;
+  /** Row-major, width × height, tileset ids or EMPTY. */
+  readonly ground: readonly number[];
+  readonly detail: readonly number[];
+  readonly above: readonly number[];
+  /** Pixels; 0004 uses it as the feet position. */
+  readonly spawn: Point;
+  /** Row-major, width × height: a solid tile on any of the three layers. */
+  readonly solid: readonly boolean[];
+}
+
+function isTileLayerName(name: string): name is TileLayerName {
+  return (TILE_LAYER_NAMES as readonly string[]).includes(name);
+}
+
+/** What a tile layer's cells need to know about the map and its tileset. */
+interface CellContext {
+  readonly file: string;
+  readonly width: number;
+  readonly height: number;
+  readonly firstGid: number;
+}
+
+/** Layer data as tileset ids: gid 0 is EMPTY, gid g is g − firstgid. */
+function readCells(layer: Json, name: TileLayerName, context: CellContext): number[] {
+  const data = asArray(layer.data, context.file, `layer "${name}" data`);
+  return data.map((value, index) => {
+    const gid = asNumber(value, context.file, `layer "${name}" cell ${index}`);
+    return gid === 0 ? EMPTY : gid - context.firstGid;
+  });
+}
+
+function readSpawn(layer: Json, file: string): Point {
+  const objects = asArray(layer.objects, file, `layer "${OBJECT_LAYER_NAME}" objects`).map(
+    (value) => asRecord(value, file, 'object'),
+  );
+  const spawn = objects.find((object) => object.point === true && object.name === 'spawn');
+  if (spawn === undefined) {
+    fail(file, `layer "${OBJECT_LAYER_NAME}" has no point object named "spawn"`);
+  }
+  return { x: asNumber(spawn.x, file, 'spawn x'), y: asNumber(spawn.y, file, 'spawn y') };
+}
+
+export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string): TileMap {
+  const map = asRecord(mapJson, mapFile, 'map');
+  const width = asNumber(map.width, mapFile, 'width');
+  const height = asNumber(map.height, mapFile, 'height');
+  const firstGid = asNumber(tilesetEntry(map, mapFile).firstgid, mapFile, 'firstgid');
+  const context: CellContext = { file: mapFile, width, height, firstGid };
+  const layers: Partial<Record<TileLayerName, number[]>> = {};
+  let spawn: Point | undefined;
+  for (const value of asArray(map.layers, mapFile, 'layers')) {
+    const layer = asRecord(value, mapFile, 'layer');
+    const name = asString(layer.name, mapFile, 'layer name');
+    if (name === OBJECT_LAYER_NAME) {
+      spawn = readSpawn(layer, mapFile);
+    } else if (isTileLayerName(name)) {
+      layers[name] = readCells(layer, name, context);
+    }
+  }
+  if (spawn === undefined) {
+    fail(mapFile, `layer "${OBJECT_LAYER_NAME}" is missing`);
+  }
+  const empty = () => new Array<number>(width * height).fill(EMPTY);
+  const ground = layers.ground ?? empty();
+  const detail = layers.detail ?? empty();
+  const above = layers.above ?? empty();
+  const isSolid = (id: number | undefined) => id !== undefined && tileset.solid[id] === true;
+  const solid = ground.map(
+    (_, index) => isSolid(ground[index]) || isSolid(detail[index]) || isSolid(above[index]),
+  );
+  return { width, height, ground, detail, above, spawn, solid };
+}
