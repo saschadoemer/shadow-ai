@@ -1,10 +1,11 @@
 import { globSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
 import { ENDESGA_32, PAGE_BACKGROUND, SHADOW_COLOUR } from '../../src/render/palette';
 import { checkPng } from './png-check';
+import { checkTileset, type TilesetFacts } from './tileset-check';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const RULES = { palette: new Set<string>(ENDESGA_32), reserved: SHADOW_COLOUR };
@@ -81,5 +82,63 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
   it('rejects a tileset whose size is not a multiple of 16', () => {
     const findings = checkPng(FIXTURE, read(FIXTURE), { ...RULES, multipleOf16: true });
     expect(findings[0]).toBe(`${FIXTURE}: size 2x2 is not a multiple of 16`);
+  });
+});
+
+describe('every tileset under public/tiles/ matches its PNG (INV-6)', () => {
+  const FACTS: TilesetFacts = {
+    tilewidth: 16,
+    tileheight: 16,
+    columns: 7,
+    tilecount: 7,
+    imagewidth: 112,
+    imageheight: 16,
+    image: 'placeholder.png',
+  };
+
+  it('finds every .tsj consistent with the PNG it names', () => {
+    const files = globSync('public/tiles/**/*.tsj', { cwd: ROOT }).sort();
+    expect(files.length).toBeGreaterThan(0);
+    const findings = files.flatMap((file) => {
+      const tsj = JSON.parse(read(file).toString('utf8')) as TilesetFacts;
+      const png = PNG.sync.read(read(join(dirname(file), tsj.image)));
+      return checkTileset(file, tsj, png);
+    });
+    expect(findings).toStrictEqual([]);
+  });
+
+  it('accepts a consistent tileset', () => {
+    expect(checkTileset('x.tsj', FACTS, { width: 112, height: 16 })).toStrictEqual([]);
+  });
+
+  it('rejects a tilecount that does not match columns × rows', () => {
+    expect(
+      checkTileset('x.tsj', { ...FACTS, tilecount: 8 }, { width: 112, height: 16 }),
+    ).toStrictEqual(['x.tsj: tilecount 8 does not match columns × rows = 7']);
+  });
+
+  it('rejects an image size that does not match the PNG', () => {
+    expect(checkTileset('x.tsj', FACTS, { width: 128, height: 16 })).toStrictEqual([
+      'x.tsj: image size 112x16 does not match the PNG (128x16)',
+    ]);
+  });
+
+  it('rejects a tile size other than 16x16', () => {
+    expect(
+      checkTileset(
+        'x.tsj',
+        { ...FACTS, tilewidth: 32, tileheight: 32 },
+        { width: 112, height: 16 },
+      ),
+    ).toStrictEqual(['x.tsj: tile size is 32x32; tiles are 16x16']);
+  });
+
+  it('rejects a column count that does not match imagewidth / 16', () => {
+    expect(
+      checkTileset('x.tsj', { ...FACTS, columns: 6 }, { width: 112, height: 16 }),
+    ).toStrictEqual([
+      'x.tsj: columns 6 does not match imagewidth / 16 = 7',
+      'x.tsj: tilecount 7 does not match columns × rows = 6',
+    ]);
   });
 });
