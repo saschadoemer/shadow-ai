@@ -1,3 +1,4 @@
+import { TILE_SIZE } from '../../engine/tiled';
 import type { PaletteColour } from '../palette';
 import { type Renderer, SURFACE_HEIGHT, SURFACE_WIDTH } from '../renderer';
 import type { Layout } from '../scale';
@@ -33,6 +34,8 @@ export function createCanvas2dRenderer(visible: HTMLCanvasElement): SurfaceRende
   surface.width = SURFACE_WIDTH;
   surface.height = SURFACE_HEIGHT;
   const draw = context2d(surface);
+  // The surface is never resized, so this holds for every tile drawn onto it.
+  draw.imageSmoothingEnabled = false;
   const screen = context2d(visible);
   let applied: Layout | undefined;
 
@@ -46,6 +49,11 @@ export function createCanvas2dRenderer(visible: HTMLCanvasElement): SurfaceRende
       fill(0, 0, SURFACE_WIDTH, SURFACE_HEIGHT, colour);
     },
     fillRect: fill,
+    drawTile(tileset, id, x, y) {
+      const sx = (id % tileset.columns) * TILE_SIZE;
+      const sy = Math.floor(id / tileset.columns) * TILE_SIZE;
+      draw.drawImage(tileset.image, sx, sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+    },
     present(layout) {
       if (!sameLayout(applied, layout)) {
         visible.width = layout.width;

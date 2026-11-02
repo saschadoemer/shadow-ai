@@ -25,6 +25,9 @@ function recordingRenderer(): Renderer & { readonly calls: Call[] } {
     fillRect(x, y, width, height, colour) {
       calls.push({ kind: 'fillRect', x, y, width, height, colour });
     },
+    drawTile() {
+      // The pattern draws no tiles; this file goes with the pattern in the next commit.
+    },
   };
 }
 
