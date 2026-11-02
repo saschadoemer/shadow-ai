@@ -1,6 +1,6 @@
 # 0002 — Surface, loop and scaling
 
-**Status:** approved 2026-11-02
+**Status:** implemented 2026-11-02
 **Milestone:** M2
 **Drafted:** 2026-10-31
 
