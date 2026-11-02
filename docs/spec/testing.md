@@ -8,10 +8,10 @@ rule can be proved without a browser.
 
 | Layer | Runs with | Covers |
 |---|---|---|
-| **Unit** | Vitest, Node | engine math (movement, collision, camera), game rules, the map loader against Tiled JSON fixtures, the loop with a fake clock, the language table |
+| **Unit** | Vitest, Node | engine math (movement, collision, camera), game rules, the map loader against Tiled JSON fixtures and the shipped test map, path resolution, the draw order of the map, the tile generator against the committed tileset, the loop with a fake clock, the language table |
 | **Architecture** | Vitest, Node | the import graph and source text of `src/game/` (INV-2); the branded text type is enforced by the compiler (INV-4) |
 | **Assets** | Vitest, Node | every PNG under `public/` against Endesga 32 and the reserved colour, alpha 0 or 255 with transparent pixels exempt; tilesets under `public/tiles/` sized in multiples of 16; `.tsj` files against their PNG (INV-6) |
-| **Smoke** | Playwright, one spec | the page loads, the canvas exists at the full factor with the picture's corner unclipped, the picture changes over time, one second of "right" moves the player — against the dev server and against the built container; against the container (`BASE_URL`) also the four security headers, the cache headers and gzip (INV-5) |
+| **Smoke** | Playwright, one spec | the page loads, the canvas exists at the full factor and unclipped, the picture's corner shows the map's first tile (grass `#63c74d`); from 0004, one second of "right" moves the player — against the dev server and against the built container; against the container (`BASE_URL`) also the four security headers, the cache headers and gzip (INV-5) |
 
 All four run in CI on every pull request (`ops.md` §4). Red blocks the merge.
 
@@ -24,8 +24,8 @@ All four run in CI on every pull request (`ops.md` §4). Red blocks the merge.
 | INV-3 fixed step | loop tests: 16.7 ms elapsed yields one step, 100 ms yields five and drops the rest, 8 ms yields none and carries the remainder; frames alternating 16.5 and 16.8 ms yield exactly one step each, frames of 8.4 ms one every second frame, 17 ms is not snapped; the loop driver with a fake frame scheduler advances at most five steps after a ten-second gap |
 | INV-4 text through keys | the compiler, via `TextKey`; a unit test that `de` and `en` have identical key sets |
 | INV-5 own origin only | a test over `dist/` for `http://` and `https://`, which is why `npm run check` builds before it tests; the smoke test reads the CSP header from the container |
-| INV-6 palette | the asset tests: palette, reserved colour, alpha, tileset size, each with a negative case |
-| INV-7 map truth | loader tests reject unknown layers, a missing spawn and a non-16 tile size; a world-data test orders regions by density against the upgrades that precede them |
+| INV-6 palette | the asset tests: palette, reserved colour, alpha, tileset size, each `.tsj` against its PNG, each with a negative case |
+| INV-7 map truth | loader tests read the solid grid as the union of the three tile layers, and reject, each with its message: an unknown layer name, a layer whose type does not match its name, a missing `ground` or `objects` layer or a name used twice, no spawn or two, a tile size other than 16x16, a map under 20x12 tiles, an infinite map or encoded, compressed or mis-sized layer data, a flipped or rotated tile, a gid outside the tileset, anything but one external `.tsj`, an animated tile in the tileset, an orientation other than orthogonal (`architecture.md` §6); a world-data test orders regions by density against the upgrades that precede them |
 
 ## 3. Test first
 

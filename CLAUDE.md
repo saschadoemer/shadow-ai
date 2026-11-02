@@ -93,9 +93,9 @@ author can test by hand in a few minutes. Nothing is built that was not approved
    Numbers are numbers, not adjectives. A spec without an acceptance plan is not approved.
 2. **Approval.** Only the author approves, in conversation. The agent then sets
    `Status: approved` with the date and commits that change. An agent never approves a spec.
-3. **Implementation.** Only for `approved`. One branch per feature, named
-   `feature/NNNN-<name>`, pull request against `main`, CI green. What is not in the spec is not
-   built; it becomes a new draft. Tests come first for logic (§4).
+3. **Implementation.** Only for `approved`, and on the implementation model (§4). One branch
+   per feature, named `feature/NNNN-<name>`, pull request against `main`, CI green. What is not
+   in the spec is not built; it becomes a new draft. Tests come first for logic (§4).
 4. **Acceptance.** A feature is done when all tests are green (unit, architecture, assets, smoke),
    typecheck and Biome are clean, the build and the container run, the affected files in
    `docs/spec/` are updated, the agent has run the acceptance plan in a browser and reported
@@ -118,6 +118,14 @@ Harness changes approved in conversation may go directly to `main`.
   recorded by changing the spec text, and the reason travels in the commit message. There is no
   decision log — `git log` is the history. Architectural decisions get an ADR in `docs/adr/`.
 - **Stay in scope.** If a task seems to need something the spec does not cover, stop and ask.
+- **The model fits the step.** Thinking runs on the most capable model, doing on the cheaper
+  one. Feature specs and implementation plans are written on the strongest model available —
+  today Claude Fable. Implementation — code, tests, the acceptance run, the pull request — runs
+  on Claude Opus, which is enough for work a plan already lays out step by step and costs a
+  fraction per token. The planning session hands over by starting the implementation session
+  on Opus with the plan as its brief; subagents that write code run on Opus too. When the
+  implementation meets a question the plan does not answer, it stops and asks; the answer comes
+  from the author or the planning session, not from more tokens.
 - **Start from the latest `main`.** When implementation starts, and again before the pull
   request is opened, `main` is merged into the feature branch and the checks are rerun. A pull
   request is opened only when it merges cleanly; a conflict is resolved on the branch, never on
