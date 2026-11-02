@@ -1,0 +1,25 @@
+{
+ "columns":2,
+ "image":"fixture-tiles.png",
+ "imageheight":16,
+ "imagewidth":32,
+ "margin":0,
+ "name":"fixture-tiles",
+ "spacing":0,
+ "tilecount":2,
+ "tiledversion":"1.11.2",
+ "tileheight":16,
+ "tiles":[
+        {
+         "id":1,
+         "properties":[
+                {
+                 "name":"solid",
+                 "type":"bool",
+                 "value":true
+                }]
+        }],
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}

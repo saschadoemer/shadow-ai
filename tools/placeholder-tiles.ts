@@ -1,3 +1,4 @@
+import { TILE_SIZE } from '../src/engine/tiled.ts';
 import type { PaletteColour } from '../src/render/palette.ts';
 
 /**
@@ -6,7 +7,7 @@ import type { PaletteColour } from '../src/render/palette.ts';
  * Pixel (0, 0) of every tile is its base colour.
  */
 
-export const TILE_SIZE = 16;
+export { TILE_SIZE };
 
 export interface TileKind {
   readonly id: number;
