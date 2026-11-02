@@ -165,6 +165,7 @@ these.
 | `docs/spec/testing.md` | the four test layers, the test behind each invariant, test-first, what is not tested, human acceptance |
 | `docs/plan.md` | roadmap M1–M8, content budget, open milestones, deferred ideas — **not** a source of product rules |
 | `docs/features/` | one spec per feature with its status, and the template |
+| `docs/plans/` | one implementation plan per approved feature — a working document for the agent, not specification |
 | `docs/adr/` | architecture decision records; ADR-0001 is the engine decision |
 
 **Precedence.** `CLAUDE.md` and `docs/spec/` are the specification. `docs/plan.md` controls scope
