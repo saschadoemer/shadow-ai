@@ -79,6 +79,13 @@ export function parseTileset(json: unknown, file: string): Tileset {
   const tiles = tileset.tiles === undefined ? [] : asArray(tileset.tiles, file, 'tiles');
   for (const entry of tiles) {
     const tile = asRecord(entry, file, 'tile');
+    // Rule 12: the game has no animated tiles; drawing the still image instead would hide that.
+    if (Array.isArray(tile.animation) && tile.animation.length > 0) {
+      fail(
+        file,
+        `tile ${asNumber(tile.id, file, 'tile id')} is animated; animated tiles are not supported`,
+      );
+    }
     const properties =
       tile.properties === undefined ? [] : asArray(tile.properties, file, 'tile properties');
     if (properties.some((property) => isSolidProperty(property, file))) {

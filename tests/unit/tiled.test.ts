@@ -34,6 +34,29 @@ describe('parseTileset', () => {
   it('rejects a tileset that is not an object', () => {
     expect(() => parseTileset([], 'x.tsj')).toThrow('x.tsj: tileset is not an object');
   });
+
+  it('rejects an animated tile (rule 12)', () => {
+    const { file, json } = fixture('fixture-tiles.tsj');
+    const animated = structuredClone(json) as { tiles: Record<string, unknown>[] };
+    for (const tile of animated.tiles) {
+      tile.animation = [
+        { duration: 100, tileid: 0 },
+        { duration: 100, tileid: 1 },
+      ];
+    }
+    expect(messageOf(() => parseTileset(animated, file))).toBe(
+      `${file}: tile 1 is animated; animated tiles are not supported`,
+    );
+  });
+
+  it('accepts an empty animation list', () => {
+    const { file, json } = fixture('fixture-tiles.tsj');
+    const still = structuredClone(json) as { tiles: Record<string, unknown>[] };
+    for (const tile of still.tiles) {
+      tile.animation = [];
+    }
+    expect(parseTileset(still, file).solid).toStrictEqual([false, true]);
+  });
 });
 
 describe('tilesetSource', () => {

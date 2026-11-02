@@ -144,7 +144,7 @@ and `objects`, and optionally `detail` and `above`, each at most once.
 **What it rejects.** Anything else stops the game before it starts, with an error that names the
 file and the problem. First the tileset: not exactly one tileset in the map, an embedded tileset,
 a source that does not end in `.tsj`, a `.tsj` that does not load, a tileset whose tiles are not
-16x16. Then the map, in this order:
+16x16, a tileset tile with an `animation`. Then the map, in this order:
 
 - an orientation other than orthogonal, or an infinite map;
 - a tile size other than 16x16;
@@ -160,7 +160,8 @@ Last, the tileset's image must load.
 
 Flipped and rotated tiles, more than one tileset per map, embedded tilesets, encoded or
 compressed data and infinite maps stay rejected until a feature needs one and lifts its rule. A
-tile's `animation` is not read: an animated tile draws as its own still image.
+tileset tile with an `animation` is rejected too: the game has no animated tiles, and a still
+image in place of one would be a silent lie.
 
 ## 7. Assets and the tile generator
 

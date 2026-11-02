@@ -123,6 +123,7 @@ property `solid`. Everything else Tiled writes — `visible`, `opacity`, offsets
   10. not exactly one tileset, an embedded tileset (no `source`), a `source` that does not end in
       `.tsj`, or an external tileset or image that cannot be loaded
   11. `orientation` other than `orthogonal`
+  12. a tileset tile with an `animation`: animated tiles are not supported
 - `gen-tiles` run twice produces byte-identical files; the PNG carries no timestamp. A unit test
   generates in memory and compares with the committed files, so `npm run check` fails when the
   committed files and the generator disagree.
@@ -143,7 +144,7 @@ property `solid`. Everything else Tiled writes — `visible`, `opacity`, offsets
 5. The asset tests pass on `public/tiles/placeholder.png` and `public/tiles/placeholder.tsj`,
    including the `.tsj`-against-PNG check, and that check fails on a mismatching pair.
 6. Loader tests accept the corridor fixture — size, cells, spawn, solid grid — and reject every
-   case of rules 1–11 with a message that names the problem.
+   case of rules 1–12 with a message that names the problem.
 7. `public/maps/test.tmj` opens in Tiled with its four layers and its tileset, and the map Tiled
    shows is the map the game shows.
 8. The smoke test no longer asserts the border colour or a changing picture; it asserts the
@@ -156,7 +157,7 @@ property `solid`. Everything else Tiled writes — `visible`, `opacity`, offsets
   `tests/fixtures/maps/fixture-tiles.tsj` (two tiles: floor, wall with `solid`) and checks width,
   height, the cells of each layer, the spawn position and the solid grid (INV-7). Rejects the
   fixtures `unknown-layer.tmj`, `no-spawn.tmj`, `tile-32.tmj` with `fixture-tiles-32.tsj`, and
-  `too-small.tmj`; the remaining cases of rules 1–11 are in-memory variants of the corridor —
+  `too-small.tmj`; the remaining cases of rules 1–12 are in-memory variants of the corridor —
   each case asserts the message.
 - `tests/unit/gen-tiles.test.ts` — generation in memory is byte-identical on two runs and equal
   to the committed PNG and `.tsj`; the PNG is 112x16; pixel (0, 0) of each tile is its base
