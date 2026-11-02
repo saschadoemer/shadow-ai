@@ -10,8 +10,8 @@ rule can be proved without a browser.
 |---|---|---|
 | **Unit** | Vitest, Node | engine math (movement, collision, camera), game rules, the map loader against Tiled JSON fixtures, the loop with a fake clock, the language table |
 | **Architecture** | Vitest, Node | the import graph and source text of `src/game/` (INV-2); the branded text type is enforced by the compiler (INV-4) |
-| **Assets** | Vitest, Node | every PNG under `public/` against Endesga 32 and the reserved colour; tileset dimensions; `.tsj` files against their PNG (INV-6) |
-| **Smoke** | Playwright, one spec | the page loads, the canvas exists, one second of "right" moves the player, the CSP header is present — against the dev server and against the built container |
+| **Assets** | Vitest, Node | every PNG under `public/` against Endesga 32 and the reserved colour, alpha 0 or 255 with transparent pixels exempt; tilesets under `public/tiles/` sized in multiples of 16; `.tsj` files against their PNG (INV-6) |
+| **Smoke** | Playwright, one spec | the page loads, the canvas exists, one second of "right" moves the player — against the dev server and against the built container; against the container (`BASE_URL`) also the four security headers, the cache headers and gzip (INV-5) |
 
 All four run in CI on every pull request (`ops.md` §4). Red blocks the merge.
 
@@ -23,8 +23,8 @@ All four run in CI on every pull request (`ops.md` §4). Red blocks the merge.
 | INV-2 no browser in `game/` | `tests/arch/` fails on any import of `render/` or any occurrence of `window`, `document`, `HTMLCanvasElement`, `Image`, `fetch` in `src/game/` |
 | INV-3 fixed step | loop tests: 16.7 ms elapsed yields one step, 100 ms yields five and drops the rest, 8 ms yields none and carries the remainder |
 | INV-4 text through keys | the compiler, via `TextKey`; a unit test that `de` and `en` have identical key sets |
-| INV-5 own origin only | a test over `dist/` for `http://` and `https://`; the smoke test reads the CSP header |
-| INV-6 palette | the asset tests |
+| INV-5 own origin only | a test over `dist/` for `http://` and `https://`, which is why `npm run check` builds before it tests; the smoke test reads the CSP header from the container |
+| INV-6 palette | the asset tests: palette, reserved colour, alpha, tileset size, each with a negative case |
 | INV-7 map truth | loader tests reject unknown layers, a missing spawn and a non-16 tile size; a world-data test orders regions by density against the upgrades that precede them |
 
 ## 3. Test first

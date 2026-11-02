@@ -11,8 +11,28 @@ hour game to play at home. German first, English second.
 
 ## Status
 
-Early. The specification is written; the first feature — walking the campus — is drafted and not
-yet built. There is nothing to run yet. The roadmap is in [docs/plan.md](docs/plan.md).
+Early. The specification is written and the toolchain is in place (feature 0001): the page
+loads with an empty canvas, and nothing is drawn yet. The first thing to see — the surface and
+the loop — is feature 0002. The roadmap is in [docs/plan.md](docs/plan.md).
+
+## Run it
+
+Node 26 (see `.nvmrc`) and, for the container, Docker.
+
+```
+npm ci
+npm run dev          # the dev server at http://localhost:5173
+npm run check        # typecheck, lint, build and the headless tests
+npm run test:e2e     # the smoke test against the dev server
+```
+
+The container is what ships — static files behind nginx on port 8080:
+
+```
+docker build -t shadow-ai .
+docker run --rm -p 8080:8080 shadow-ai      # http://localhost:8080
+BASE_URL=http://localhost:8080 npm run test:e2e
+```
 
 ## How it is built
 
