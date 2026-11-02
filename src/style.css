@@ -2,10 +2,15 @@ html,
 body {
   margin: 0;
   height: 100%;
+  /* #181425: the page and the letterbox around the canvas (visual.md §2). */
   background: #181425;
   overflow: hidden;
 }
 
 canvas {
   display: block;
+  /* Placed on whole device pixels by src/render/scale.ts. */
+  position: absolute;
+  /* The safety net: should the browser ever resample the canvas, it does so without blur. */
+  image-rendering: pixelated;
 }

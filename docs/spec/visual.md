@@ -15,10 +15,25 @@ Alternatives considered: 256x224 (SNES, authentic but letterboxed on every moder
 
 ## 2. Scaling
 
-Integer factors only, nearest-neighbour sampling, the largest factor that fits the window.
-Remaining space is filled with a dark palette colour. Fractional scaling is never used — the
+Integer factors only, nearest-neighbour sampling, the largest factor that fits the page area —
+**counted in device pixels**:
+
+```
+factor = max(1, floor(min(innerWidth × dpr / 320, innerHeight × dpr / 180)))
+```
+
+where `dpr` is the device pixel ratio. Every game pixel is then exactly factor × factor physical
+pixels on every display. A factor counted in CSS pixels would not be: on a Retina display, where
+a CSS pixel is 2x2 device pixels, the browser would resample the finished image and soften it;
+on a laptop at 125 % a factor of 3 would make game pixels 3.75 device pixels wide, so columns
+alternate between 3 and 4. The visible canvas is exactly `320·f × 180·f` device pixels, placed on
+whole device pixels; `image-rendering: pixelated` is the safety net should the browser resample
+anyway. The same picture thus reads factor 6 on a 1920x1080 screen and 12 on a Retina display of
+the same CSS size.
+
+Remaining space is the page background, `#181425`. Fractional scaling is never used — the
 shimmer it produces on movement is the most common defect in browser pixel games. Fullscreen
-through the Fullscreen API, for the booth.
+through the Fullscreen API, on `F`, for the booth.
 
 ## 3. Tiles and figures
 
@@ -63,4 +78,5 @@ nothing is loaded from a third party at run time (`vision.md` §5).
 ## 6. Frame rate
 
 Logic runs at a fixed 60 Hz; rendering happens once per browser frame. On a 120 Hz display frames
-are drawn twice; after a stall at most five logic steps are caught up.
+are drawn twice; after a stall at most five logic steps are caught up. Frame times near a step are
+snapped, so 60 Hz and 120 Hz displays move without stutter (`architecture.md` §3).

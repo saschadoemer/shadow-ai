@@ -53,7 +53,8 @@ what it may not do is read anything but its arguments or write anything but its 
 Fixed step at 60 Hz (INV-3), rendering once per browser frame:
 
 ```
-accumulator += min(elapsed, cap)
+elapsed = snap(elapsed)             within 0.25 ms of ½, 1 or 2 steps: exactly that
+accumulator += min(elapsed, cap)    counted in steps, not milliseconds
 while accumulator >= step:          step = 1/60 s
     state = update(state, input, content)
     accumulator -= step
@@ -63,7 +64,19 @@ render(state, content)
 The cap limits catch-up after a stall to five steps; anything beyond is dropped, so a background
 tab does not fast-forward the game on return. Rendering draws the latest state without
 interpolation — with integer pixel positions there is nothing to interpolate. The loop is a pure
-function of a clock and is tested with a fake one.
+function of a clock and is tested with a fake one (`engine/loop`: `advance` is the pure core,
+`runLoop` drives it from a frame scheduler).
+
+**Snapping.** On a 60 Hz or 120 Hz display a frame lasts almost exactly one step or half of one.
+Without snapping the remainder sits on the threshold, and clock jitter of a tenth of a
+millisecond gives none and then two steps in a row — the moving picture stops and jumps. Snapped,
+a 60 Hz display advances exactly one step per frame and a 120 Hz display one every second frame;
+on 59.94 Hz the game runs 0.1 % slow, which nobody sees. Other rates, such as 144 Hz, are not
+snapped and show the uneven cadence that a fixed step without interpolation implies.
+
+**Steps, not milliseconds.** The accumulator counts steps. In milliseconds floating point loses a
+step: five capped steps of `1000 / 60` ms, subtracted one by one, leave 16.66666666666666 and run
+only four.
 
 ## 4. Input
 
@@ -78,8 +91,11 @@ the game.
 `render/renderer.ts` declares what the game needs drawn, in game pixels on a 320x180 surface:
 tiles from a tileset, sprites from a sprite sheet, later text from a bitmap font and rectangles
 for UI. `render/canvas2d/` implements it with the Canvas 2D API, draws to an offscreen 320x180
-canvas, and blits that onto the visible canvas at the largest integer factor that fits
-(`visual.md` §2). All positions the renderer receives are integers; the camera offset is rounded
+canvas, and blits that onto the visible canvas at the largest integer factor that fits, counted
+in device pixels (`visual.md` §2). `render/scale` computes that layout as a pure function of the
+page area and the device pixel ratio; `main.ts` reads both every frame, so resize, zoom,
+fullscreen and a move to another monitor share one path, and the renderer resizes the canvas
+only when the layout changes. All positions the renderer receives are integers; the camera offset is rounded
 before drawing, never after.
 
 The interface exists so the implementation can change (ADR-0001 names PixiJS as the candidate)
