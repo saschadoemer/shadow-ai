@@ -126,6 +126,58 @@ describe('stepPlayer: the clamp keeps the whole sprite inside the map', () => {
   });
 });
 
+describe('stepPlayer: the walk cycle at 8 frames per second', () => {
+  const at = (steps: number): [number, number] => {
+    const walked = walk(standing(160, 96), press('right'), steps);
+    return [walked.frame, walked.frameTimer];
+  };
+
+  it('shows phase 1 with timer 0 on the step that starts moving', () => {
+    expect(at(1)).toStrictEqual([1, 0]);
+  });
+
+  it('advances the phase after 8, then 7 steps, exactly, and cycles 1–4', () => {
+    expect(at(8)).toStrictEqual([1, 7]);
+    expect(at(9)).toStrictEqual([2, 0.5]);
+    expect(at(15)).toStrictEqual([2, 6.5]);
+    expect(at(16)).toStrictEqual([3, 0]);
+    expect(at(23)).toStrictEqual([3, 7]);
+    expect(at(24)).toStrictEqual([4, 0.5]);
+    expect(at(30)).toStrictEqual([4, 6.5]);
+    expect(at(31)).toStrictEqual([1, 0]);
+    // 60 steps after the origin are 8 phases of 7.5: the cycle is back where it started.
+    expect(at(61)).toStrictEqual([1, 0]);
+  });
+
+  it('keeps the timer a multiple of 0.5 over a long walk: the arithmetic is exact', () => {
+    let player = standing(160, 96);
+    for (let step = 1; step <= 600; step += 1) {
+      player = stepPlayer(player, press('down', 'left'), MAP);
+      expect(Number.isInteger(player.frameTimer * 2), `step ${step}`).toBe(true);
+      expect(player.frame, `step ${step}`).toBeGreaterThanOrEqual(1);
+      expect(player.frame, `step ${step}`).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it('resets to the standing frame and timer 0 when the figure stops', () => {
+    const walking = walk(standing(160, 96), press('right'), 5);
+    expect([walking.frame, walking.frameTimer]).toStrictEqual([1, 4]);
+    const stopped = stepPlayer(walking, NONE, MAP);
+    expect([stopped.frame, stopped.frameTimer]).toStrictEqual([0, 0]);
+  });
+
+  it('resets when opposite actions cancel', () => {
+    const walking = walk(standing(160, 96), press('right'), 5);
+    const cancelled = stepPlayer(walking, press('left', 'right'), MAP);
+    expect([cancelled.frame, cancelled.frameTimer]).toStrictEqual([0, 0]);
+  });
+
+  it('keeps stepping in place when the clamp holds the figure', () => {
+    const held = walk(standing(8, 96), press('left'), 9);
+    expect([held.x, held.facing, held.frame, held.frameTimer]).toStrictEqual([8, 'left', 2, 0.5]);
+  });
+});
+
 describe('createInitialState', () => {
   it("puts the player at the map's spawn, facing down, standing", () => {
     expect(createInitialState(grassMap(20, 12, { x: 40, y: 56 })).player).toStrictEqual({
