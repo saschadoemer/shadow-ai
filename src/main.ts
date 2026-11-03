@@ -3,11 +3,21 @@ import { type Bindings, createKeyboard, listenToKeyboard, resolveActions } from 
 import { runLoop } from './engine/loop';
 import { parseTileMap, parseTileset, tilesetSource } from './engine/tiled';
 import type { MovementInput } from './game/player';
-import { createInitialState } from './game/state';
+import { createInitialState, type GameState } from './game/state';
 import { update } from './game/update';
 import { createCanvas2dRenderer } from './render/canvas2d/canvas2d-renderer';
 import { drawScene, type SceneContent } from './render/draw-scene';
 import { computeLayout } from './render/scale';
+
+declare global {
+  interface Window {
+    /**
+     * The game's one global (0004): the state passed to the last render, so that the smoke test
+     * can read the player's position. Read-only by convention; absent until the content loaded.
+     */
+    shadowAi?: { state: GameState };
+  }
+}
 
 const MAP_URL = '/maps/test.tmj';
 const PLAYER_SHEET_URL = '/sprites/player.png';
@@ -86,12 +96,15 @@ function readInput(): MovementInput {
 async function start(): Promise<void> {
   const renderer = createCanvas2dRenderer(findCanvas());
   const content = await loadContent();
+  const handle = { state: createInitialState(content.map) };
+  window.shadowAi = handle;
   runLoop(
-    createInitialState(content.map),
+    handle.state,
     {
       readInput,
       update: (state, input) => update(state, input, content.map),
       render(state) {
+        handle.state = state;
         drawScene(renderer, state, content);
         // Read every frame: this covers resize, zoom, fullscreen and a move to another monitor.
         renderer.present(
