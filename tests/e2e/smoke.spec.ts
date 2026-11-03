@@ -74,6 +74,22 @@ test('the map is drawn at the full factor, unclipped', async ({ page }) => {
     .toStrictEqual([0x63, 0xc7, 0x4d, 255]);
 });
 
+test('one second of ArrowRight moves the figure right by at least 70 px', async ({ page }) => {
+  await page.goto('/');
+  // The handle appears with the first frame; the figure starts at the spawn, x = 136.
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.player.x), {
+      message: 'window.shadowAi.state.player.x is the spawn: the game runs',
+    })
+    .toBe(136);
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(1000);
+  await page.keyboard.up('ArrowRight');
+  const player = await page.evaluate(() => window.shadowAi?.state.player);
+  expect(player?.x).toBeGreaterThanOrEqual(136 + 70); // 60 steps of 1.333 px are 80; CI may drop a few frames
+  expect(player?.facing).toBe('right');
+});
+
 test.describe('served by the container', () => {
   test.skip(containerUrl === undefined, 'header checks run against the container (BASE_URL)');
 

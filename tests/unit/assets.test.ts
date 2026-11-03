@@ -49,6 +49,10 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
     expect(findings).toStrictEqual([]);
   });
 
+  it('checks the player sheet under public/sprites/ with every other PNG', () => {
+    expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/player.png');
+  });
+
   it('finds every tileset under public/tiles/ sized in multiples of 16', () => {
     const files = globSync('public/tiles/**/*.png', { cwd: ROOT }).sort();
     const findings = files.flatMap((file) =>

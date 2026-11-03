@@ -14,7 +14,9 @@ hour game to play at home. German first, English second.
 Early. The toolchain is in place (feature 0001), the surface and the loop run (feature 0002),
 and the game shows a tile map (feature 0003): a test map authored in Tiled, drawn from generated
 placeholder tiles, scaled by whole factors in device pixels, with `F` for fullscreen. The figure
-is feature 0004. The roadmap is in [docs/plan.md](docs/plan.md).
+walks on it (feature 0004): arrow keys or WASD, eight directions, a generated placeholder with a
+walk cycle. Walls do not stop it yet; collision is feature 0005. The roadmap is in
+[docs/plan.md](docs/plan.md).
 
 ## Run it
 
@@ -26,6 +28,7 @@ npm run dev          # the dev server at http://localhost:5173
 npm run check        # typecheck, lint, build and the headless tests
 npm run test:e2e     # the smoke test against the dev server
 npm run gen-tiles    # regenerate the placeholder tiles under public/tiles/
+npm run gen-sprites  # regenerate the placeholder figure under public/sprites/
 ```
 
 Maps are edited in [Tiled](https://www.mapeditor.org/) 1.10 or newer: open
