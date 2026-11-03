@@ -8,6 +8,7 @@ import { FACINGS, PHASES_PER_FACING } from '../../src/game/state';
 import { encodePng } from '../../tools/gen-sprites.ts';
 import {
   FRAME_COUNT,
+  frameRows,
   INKS,
   renderPlayer,
   SHEET_HEIGHT,
@@ -82,6 +83,18 @@ describe('the placeholder figure generator', () => {
     }
   });
 
+  it('rejects a phase outside 0–4', () => {
+    expect(() => frameRows('down', 5)).toThrow();
+    expect(() => frameRows('down', -1)).toThrow();
+  });
+
+  it('draws facing right as facing left mirrored, phase by phase', () => {
+    for (let phase = 0; phase < PHASES_PER_FACING; phase += 1) {
+      const mirrored = frame(2, phase).map((row) => row.split('').reverse().join(''));
+      expect(frame(3, phase), `phase ${phase}`).toStrictEqual(mirrored);
+    }
+  });
+
   it('raises phases 2 and 4 by one pixel from the standing pose', () => {
     for (const [f, facing] of FACINGS.entries()) {
       const raised = [...frame(f, 0).slice(1), BLANK];
@@ -100,6 +113,8 @@ describe('the placeholder figure generator', () => {
     expect(left[7]?.[10]).not.toBe('K');
     expect(right[7]?.[10], 'the eye at the right edge of the face').toBe('K');
     expect(right[7]?.[5]).not.toBe('K');
+    expect(left[11]?.[5], 'the strap at the chest front facing left').toBe('L');
+    expect(right[11]?.[10], 'the strap at the chest front facing right').toBe('L');
   });
 
   it('keeps everything outside the figure transparent: the first and last rows of a standing frame', () => {
