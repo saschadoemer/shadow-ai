@@ -1,6 +1,8 @@
 import { loadImage, loadJson, resolvePath } from './engine/assets';
+import { type Bindings, createKeyboard, listenToKeyboard, resolveActions } from './engine/input';
 import { runLoop } from './engine/loop';
 import { parseTileMap, parseTileset, type TileMap, tilesetSource } from './engine/tiled';
+import type { MovementInput } from './game/player';
 import { createInitialState } from './game/state';
 import { update } from './game/update';
 import { createCanvas2dRenderer } from './render/canvas2d/canvas2d-renderer';
@@ -39,14 +41,39 @@ function toggleFullscreen(): void {
   });
 }
 
-// One listener until 0004 brings the action table; then F becomes the action `fullscreen`.
-// A held key toggles once, and with Ctrl, Alt or Cmd the browser keeps its own shortcut.
+type Action = keyof MovementInput | 'fullscreen';
+
+/** architecture.md §4: the one table from physical keys to actions. */
+const BINDINGS: Bindings<Action> = {
+  up: ['ArrowUp', 'KeyW'],
+  down: ['ArrowDown', 'KeyS'],
+  left: ['ArrowLeft', 'KeyA'],
+  right: ['ArrowRight', 'KeyD'],
+  fullscreen: ['KeyF'],
+};
+const BOUND_CODES: ReadonlySet<string> = new Set(Object.values(BINDINGS).flat());
+
+const keyboard = createKeyboard();
+listenToKeyboard(keyboard, window);
+
+// A bound key without Ctrl, Alt or Cmd belongs to the game: its default is prevented, so the
+// arrows never scroll the page; with a modifier the browser keeps its own shortcut. F toggles
+// fullscreen once per press here and never reaches the game.
 window.addEventListener('keydown', (event) => {
-  if (event.code !== 'KeyF' || event.repeat || event.ctrlKey || event.altKey || event.metaKey) {
+  if (!BOUND_CODES.has(event.code) || event.ctrlKey || event.altKey || event.metaKey) {
     return;
   }
-  toggleFullscreen();
+  event.preventDefault();
+  if (BINDINGS.fullscreen.includes(event.code) && !event.repeat) {
+    toggleFullscreen();
+  }
 });
+
+/** The movement actions of this frame; `fullscreen` stays in main.ts. */
+function readInput(): MovementInput {
+  const { up, down, left, right } = resolveActions(keyboard.held, BINDINGS);
+  return { up, down, left, right };
+}
 
 /** Loading finishes before the first frame; until then the page shows its background. */
 async function start(): Promise<void> {
@@ -55,6 +82,7 @@ async function start(): Promise<void> {
   runLoop(
     createInitialState(content.map),
     {
+      readInput,
       update,
       render() {
         drawMap(renderer, content.map, content.tileset);

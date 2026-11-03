@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { advance, type FrameCallback, runLoop, STEP_MS } from '../../src/engine/loop';
+import {
+  advance,
+  type FrameCallback,
+  runLoop,
+  STEP_MS,
+  STEPS_PER_SECOND,
+} from '../../src/engine/loop';
 
 /** Steps per frame for a run of frame times, each frame carrying the remainder of the last. */
 function stepsPerFrame(frameTimes: readonly number[]): number[] {
@@ -17,6 +23,7 @@ function sum(values: readonly number[]): number {
 
 describe('advance: the fixed 60 Hz step (INV-3)', () => {
   it('has a step of 1/60 s', () => {
+    expect(STEPS_PER_SECOND).toBe(60);
     expect(STEP_MS).toBeCloseTo(16.6667, 4);
   });
 
@@ -102,7 +109,15 @@ function fakeFrames() {
 function startCounting() {
   const frames = fakeFrames();
   const rendered: number[] = [];
-  runLoop(0, { update: (n: number) => n + 1, render: (n) => rendered.push(n) }, frames.request);
+  runLoop(
+    0,
+    {
+      readInput: () => undefined,
+      update: (n: number) => n + 1,
+      render: (n) => rendered.push(n),
+    },
+    frames.request,
+  );
   return { frames, rendered };
 }
 
@@ -135,5 +150,30 @@ describe('runLoop with a fake clock (INV-3)', () => {
     frames.fire(0);
     frames.fire(10);
     expect(() => frames.fire(20)).not.toThrow();
+  });
+
+  it('reads the input once per frame, before the steps, and every step of the frame sees it', () => {
+    const frames = fakeFrames();
+    let reads = 0;
+    const seen: number[] = [];
+    runLoop(
+      0,
+      {
+        readInput: () => {
+          reads += 1;
+          return reads;
+        },
+        update: (n: number, input: number) => {
+          seen.push(input);
+          return n + 1;
+        },
+        render: () => undefined,
+      },
+      frames.request,
+    );
+    frames.fire(1000); // the first frame runs no step and still reads the input once
+    frames.fire(1100); // 100 ms: five steps, one read
+    expect(reads).toBe(2);
+    expect(seen).toStrictEqual([2, 2, 2, 2, 2]);
   });
 });
