@@ -53,7 +53,7 @@ async function start(): Promise<void> {
   const renderer = createCanvas2dRenderer(findCanvas());
   const content = await loadContent();
   runLoop(
-    createInitialState(),
+    createInitialState(content.map),
     {
       update,
       render() {
