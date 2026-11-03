@@ -128,9 +128,9 @@ down. The game gets the four movement actions as booleans and nothing else. A ga
 and remappable keys are additions to the table, not changes to the game.
 
 A bound key pressed without Ctrl, Alt or Cmd belongs to the game: `main.ts` prevents its default,
-so the arrow keys never scroll the page. With a modifier the browser keeps its own shortcut.
-`fullscreen` is toggled in `main.ts` on the `keydown` of F without `repeat` and without a
-modifier; it never reaches the game.
+so the arrow keys never scroll the page. With Ctrl, Alt or Cmd the browser keeps its own shortcut.
+`fullscreen` is toggled in `main.ts` on the `keydown` of F without `repeat` and without Ctrl,
+Alt or Cmd; it never reaches the game.
 
 ## 5. The renderer interface
 
