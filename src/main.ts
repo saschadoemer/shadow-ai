@@ -83,7 +83,7 @@ async function start(): Promise<void> {
     createInitialState(content.map),
     {
       readInput,
-      update,
+      update: (state, input) => update(state, input, content.map),
       render() {
         drawMap(renderer, content.map, content.tileset);
         // Read every frame: this covers resize, zoom, fullscreen and a move to another monitor.
