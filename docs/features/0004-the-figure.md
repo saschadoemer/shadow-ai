@@ -99,8 +99,9 @@ nothing in the game needs one yet, and `lamp` (M3) brings it.
 
 - `frame` is the phase, 0–4; `frameTimer` counts steps. While moving, `frameTimer` grows by 1
   per step; when it reaches 7.5 the phase advances, 1 → 2 → 3 → 4 → 1, and 7.5 is subtracted.
-  The cycle thus runs at 8 frames per second, alternating 8 and 7 steps per frame. The first
-  step of moving shows phase 1 at once.
+  The cycle thus runs at 8 frames per second, alternating 8 and 7 steps per frame. The step
+  that starts moving shows phase 1 at once with the timer at 0, and the counting begins with
+  the next step, so the first phase lasts a full 8 steps.
 - When not moving the phase is 0 and the timer 0.
 - The sprite's top-left corner is at (round(x) − 8, round(y) − 24): the feet are the bottom
   centre of the sprite, so they sit on the tile grid and the figure stands on its tile.
