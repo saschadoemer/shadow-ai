@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EMPTY, type TileMap } from '../../src/engine/tiled';
-import { drawMap } from '../../src/render/draw-map';
+import { drawLayer, drawMap } from '../../src/render/draw-map';
 import type { Renderer, TilesetImage } from '../../src/render/renderer';
 
 /** A renderer that only records what it was asked to draw, one line per call. */
@@ -22,6 +22,9 @@ function recordingRenderer(): Renderer & {
     drawTile(tileset, id, x, y) {
       tilesets.push(tileset);
       calls.push(`drawTile ${id} at ${x},${y}`);
+    },
+    drawSprite(_sheet, frame, x, y) {
+      calls.push(`drawSprite ${frame} at ${x},${y}`);
     },
   };
 }
@@ -67,5 +70,11 @@ describe('drawMap', () => {
     const empty = new Array<number>(6).fill(EMPTY);
     drawMap(renderer, { ...MAP, ground: empty, detail: empty, above: empty }, TILESET);
     expect(renderer.calls).toStrictEqual(['clear #181425']);
+  });
+
+  it('drawLayer draws one layer without clearing', () => {
+    const renderer = recordingRenderer();
+    drawLayer(renderer, MAP, TILESET, 'detail');
+    expect(renderer.calls).toStrictEqual(['drawTile 4 at 16,16']);
   });
 });

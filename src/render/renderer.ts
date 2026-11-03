@@ -10,6 +10,11 @@ export interface TilesetImage {
   readonly columns: number;
 }
 
+/** A decoded sprite sheet: frames of FRAME_WIDTH × FRAME_HEIGHT in one row (engine/sprite). */
+export interface SpriteSheet {
+  readonly image: ImageBitmap;
+}
+
 /**
  * What the game needs drawn, in whole game pixels on the 320x180 surface (architecture.md §5).
  * Colours are palette colours, so a colour outside Endesga 32 does not compile.
@@ -19,4 +24,6 @@ export interface Renderer {
   fillRect(x: number, y: number, width: number, height: number, colour: PaletteColour): void;
   /** Draws tile `id` of the tileset with its top-left corner at (x, y), 16x16. */
   drawTile(tileset: TilesetImage, id: number, x: number, y: number): void;
+  /** Draws frame `frame` of the sheet with its top-left corner at (x, y), 16x24. */
+  drawSprite(sheet: SpriteSheet, frame: number, x: number, y: number): void;
 }

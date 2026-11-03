@@ -1,25 +1,32 @@
 import { loadImage, loadJson, resolvePath } from './engine/assets';
 import { type Bindings, createKeyboard, listenToKeyboard, resolveActions } from './engine/input';
 import { runLoop } from './engine/loop';
-import { parseTileMap, parseTileset, type TileMap, tilesetSource } from './engine/tiled';
+import { parseTileMap, parseTileset, tilesetSource } from './engine/tiled';
 import type { MovementInput } from './game/player';
 import { createInitialState } from './game/state';
 import { update } from './game/update';
 import { createCanvas2dRenderer } from './render/canvas2d/canvas2d-renderer';
-import { drawMap } from './render/draw-map';
-import type { TilesetImage } from './render/renderer';
+import { drawScene, type SceneContent } from './render/draw-scene';
 import { computeLayout } from './render/scale';
 
 const MAP_URL = '/maps/test.tmj';
+const PLAYER_SHEET_URL = '/sprites/player.png';
 
-/** The map, its tileset and the tileset's image, each resolved against the file naming it. */
-async function loadContent(): Promise<{ map: TileMap; tileset: TilesetImage }> {
+/**
+ * The map, its tileset and the tileset's image, each resolved against the file naming it, then
+ * the player's sprite sheet.
+ */
+async function loadContent(): Promise<SceneContent> {
   const mapJson = await loadJson(MAP_URL);
   const tilesetUrl = resolvePath(tilesetSource(mapJson, MAP_URL), MAP_URL);
   const tileset = parseTileset(await loadJson(tilesetUrl), tilesetUrl);
   const map = parseTileMap(mapJson, tileset, MAP_URL);
   const image = await loadImage(resolvePath(tileset.image, tilesetUrl));
-  return { map, tileset: { image, columns: tileset.columns } };
+  return {
+    map,
+    tileset: { image, columns: tileset.columns },
+    playerSheet: { image: await loadImage(PLAYER_SHEET_URL) },
+  };
 }
 
 function findCanvas(): HTMLCanvasElement {
@@ -84,8 +91,8 @@ async function start(): Promise<void> {
     {
       readInput,
       update: (state, input) => update(state, input, content.map),
-      render() {
-        drawMap(renderer, content.map, content.tileset);
+      render(state) {
+        drawScene(renderer, state, content);
         // Read every frame: this covers resize, zoom, fullscreen and a move to another monitor.
         renderer.present(
           computeLayout(window.innerWidth, window.innerHeight, window.devicePixelRatio),

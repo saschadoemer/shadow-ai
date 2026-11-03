@@ -1,3 +1,4 @@
+import { FRAME_HEIGHT, FRAME_WIDTH } from '../../engine/sprite';
 import { TILE_SIZE } from '../../engine/tiled';
 import type { PaletteColour } from '../palette';
 import { type Renderer, SURFACE_HEIGHT, SURFACE_WIDTH } from '../renderer';
@@ -34,7 +35,7 @@ export function createCanvas2dRenderer(visible: HTMLCanvasElement): SurfaceRende
   surface.width = SURFACE_WIDTH;
   surface.height = SURFACE_HEIGHT;
   const draw = context2d(surface);
-  // The surface is never resized, so this holds for every tile drawn onto it.
+  // The surface is never resized, so this holds for every tile and sprite drawn onto it.
   draw.imageSmoothingEnabled = false;
   const screen = context2d(visible);
   let applied: Layout | undefined;
@@ -53,6 +54,19 @@ export function createCanvas2dRenderer(visible: HTMLCanvasElement): SurfaceRende
       const sx = (id % tileset.columns) * TILE_SIZE;
       const sy = Math.floor(id / tileset.columns) * TILE_SIZE;
       draw.drawImage(tileset.image, sx, sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+    },
+    drawSprite(sheet, frame, x, y) {
+      draw.drawImage(
+        sheet.image,
+        frame * FRAME_WIDTH,
+        0,
+        FRAME_WIDTH,
+        FRAME_HEIGHT,
+        x,
+        y,
+        FRAME_WIDTH,
+        FRAME_HEIGHT,
+      );
     },
     present(layout) {
       if (!sameLayout(applied, layout)) {
