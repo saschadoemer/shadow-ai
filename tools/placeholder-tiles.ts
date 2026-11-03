@@ -89,7 +89,7 @@ const PATTERNS: readonly ((x: number, y: number) => Ink)[] = [
   joints,
 ];
 
-function rgb(colour: PaletteColour): readonly [number, number, number] {
+export function rgb(colour: PaletteColour): readonly [number, number, number] {
   return [
     Number.parseInt(colour.slice(1, 3), 16),
     Number.parseInt(colour.slice(3, 5), 16),
