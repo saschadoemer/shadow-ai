@@ -59,7 +59,13 @@ phase; when it reaches 7.5 the phase advances and 7.5 is subtracted, so the time
 multiple of 0.5, which floating point holds exactly. `createInitialState(map)` builds the state
 before the first step from the map: `tick` 0, the player at the map's `spawn`, facing down,
 phase 0, timer 0. How the player moves, turns and stays inside the map is specified in feature
-0004 (`gameplay.md` §8).
+0004 (`gameplay.md` §8). The player's collision box is the lowest 8 px of the sprite, 12 px wide,
+centred under the feet: `[x − 6, x + 6) × [y − 8, y)`. It is derived from the feet when a step
+needs it and never stored. A step moves the box on X, then on Y, and snaps each axis flush to the
+first solid cell it would enter (`engine/collision`, feature 0005); then it clamps the feet to the
+map. Intervals are half-open, so touching a cell is not overlapping it and a box flush against a
+wall slides along it. The solid grid is the union of the three tile layers (§6); cells outside
+the map are open, and the clamp keeps the figure on it.
 
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
