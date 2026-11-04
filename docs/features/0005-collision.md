@@ -1,6 +1,6 @@
 # 0005 — Collision
 
-**Status:** draft
+**Status:** approved 2026-11-04
 **Milestone:** M2
 **Drafted:** 2026-10-31
 
