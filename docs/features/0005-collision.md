@@ -192,8 +192,8 @@ the fence in row 9, columns 11–18. The figure spawns below and left of the pat
 2. Expected: the figure stands at the spawn, facing down, as in 0004.
 3. Hold `W` for between half a second and one second, so that the figure's feet are level with
    the ring's left side. Then hold `D` until the figure stops moving, and keep holding it.
-4. Expected: the figure stops with its feet at the wall's left edge; the right two pixel columns
-   of the sprite overlap the wall. It faces right and keeps stepping in place.
+4. Expected: the figure stops and keeps stepping in place, facing right. Its body ends about two
+   pixels short of the wall: the box is 12 px wide, the placeholder's body 8.
 5. Open the browser console and enter `shadowAi.state.player.x`.
 6. Expected: `186`.
 7. Keep holding `D` and add `W`.
