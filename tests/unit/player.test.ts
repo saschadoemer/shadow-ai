@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import type { TileMap } from '../../src/engine/tiled';
 import { type MovementInput, movementVector, stepPlayer } from '../../src/game/player';
 import { createInitialState, type Facing, type PlayerState } from '../../src/game/state';
 import { grassMap } from './grass-map';
+import { CORRIDOR, pictureMap } from './picture-map';
 
 /** 20x12 tiles, 320x192 px, like the test map; the player starts mid-map. */
 const MAP = grassMap(20, 12, { x: 160, y: 96 });
@@ -20,10 +22,15 @@ function standing(x: number, y: number, facing: Facing = 'down'): PlayerState {
   return { x, y, facing, frame: 0, frameTimer: 0 };
 }
 
-function walk(player: PlayerState, input: MovementInput, steps: number): PlayerState {
+function walk(
+  player: PlayerState,
+  input: MovementInput,
+  steps: number,
+  map: TileMap = MAP,
+): PlayerState {
   let current = player;
   for (let i = 0; i < steps; i += 1) {
-    current = stepPlayer(current, input, MAP);
+    current = stepPlayer(current, input, map);
   }
   return current;
 }
@@ -187,5 +194,81 @@ describe('createInitialState', () => {
       frame: 0,
       frameTimer: 0,
     });
+  });
+});
+
+describe('stepPlayer: solid tiles stop the figure (0005)', () => {
+  /**
+   * The corridor picture in pixels: the wall in column 10 spans x [160, 176), so a figure flush
+   * against it from the left has its feet at x = 154; the lone tile at (4, 3) spans
+   * [64, 80) × [48, 64); the gap in row 6 spans y [96, 112).
+   */
+  const WALLS = pictureMap(CORRIDOR, { x: 40, y: 56 });
+
+  it("stops flush against a wall from the left: feet x at the wall's left edge − 6", () => {
+    expect(walk(standing(152, 72), press('right'), 2, WALLS).x).toBe(154);
+  });
+
+  it('keeps stepping in place and facing its input while held by a wall', () => {
+    const held = walk(standing(152, 72), press('right'), 10, WALLS);
+    expect([held.x, held.y, held.facing, held.frame, held.frameTimer]).toStrictEqual([
+      154,
+      72,
+      'right',
+      2,
+      1.5,
+    ]);
+  });
+
+  it('stops flush against a tile from below (feet at its bottom edge + 8) and from above (feet at its top edge)', () => {
+    expect(walk(standing(72, 74), press('up'), 2, WALLS).y).toBe(72);
+    expect(walk(standing(72, 46), press('down'), 2, WALLS).y).toBe(48);
+  });
+
+  it('slides along a wall at the component speed, facing the input', () => {
+    const slid = stepPlayer(standing(154, 72), press('up', 'right'), WALLS);
+    expect(slid.x).toBe(154);
+    expect(slid.y).toBeCloseTo(71.057, 3);
+    expect(slid.facing).toBe('right');
+  });
+
+  it('passes a corner without a snag: held on x until the box clears the wall, then diagonal', () => {
+    const held = walk(standing(154, 150), press('down', 'right'), 20, WALLS);
+    expect(held.x).toBe(154);
+    expect(held.y).toBeCloseTo(168.856, 2);
+    const past = walk(standing(154, 150), press('down', 'right'), 30, WALLS);
+    expect(past.x).toBeCloseTo(163.428, 2);
+    expect(past.y).toBeCloseTo(178.284, 2);
+  });
+
+  it('walks through a one-tile gap, and is stopped when the box also covers the row above it', () => {
+    expect(walk(standing(140, 108), press('right'), 30, WALLS).x).toBeCloseTo(180, 6);
+    expect(walk(standing(140, 100), press('right'), 30, WALLS).x).toBe(154);
+  });
+
+  it("slides along a wall into the gap and along the gap's ceiling through it", () => {
+    const atWall = walk(standing(154, 120), press('up', 'right'), 9, WALLS);
+    expect(atWall.x).toBe(154);
+    expect(atWall.y).toBeCloseTo(111.515, 2);
+    const inGap = walk(standing(154, 120), press('up', 'right'), 38, WALLS);
+    expect(inGap.y).toBe(104);
+    expect(inGap.x).toBeCloseTo(181.341, 2);
+    const through = walk(standing(154, 120), press('up', 'right'), 40, WALLS);
+    expect(through.x).toBeCloseTo(183.227, 2);
+    expect(through.y).toBeCloseTo(102.114, 2);
+  });
+
+  it('never moves x backwards while sliding into the gap', () => {
+    let current = standing(154, 120);
+    for (let step = 1; step <= 40; step += 1) {
+      const next = stepPlayer(current, press('up', 'right'), WALLS);
+      expect(next.x, `step ${step}`).toBeGreaterThanOrEqual(current.x);
+      current = next;
+    }
+  });
+
+  it('still clamps the feet at the map edge on open ground', () => {
+    expect(walk(standing(8.5, 96), press('left'), 1, WALLS).x).toBe(8);
+    expect(walk(standing(160, 191.5), press('down'), 1, WALLS).y).toBe(192);
   });
 });
