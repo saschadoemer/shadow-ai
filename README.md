@@ -15,8 +15,8 @@ Early. The toolchain is in place (feature 0001), the surface and the loop run (f
 and the game shows a tile map (feature 0003): a test map authored in Tiled, drawn from generated
 placeholder tiles, scaled by whole factors in device pixels, with `F` for fullscreen. The figure
 walks on it (feature 0004): arrow keys or WASD, eight directions, a generated placeholder with a
-walk cycle. Walls do not stop it yet; collision is feature 0005. The roadmap is in
-[docs/plan.md](docs/plan.md).
+walk cycle. Walls, the pond and the fence stop it, and it slides along them (feature 0005). The
+camera and the campus are feature 0006. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 
