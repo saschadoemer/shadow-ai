@@ -24,5 +24,5 @@ the plan grows past that, the feature is cut in two.
 | [0002](0002-surface-loop-scaling.md) | Surface, loop and scaling | M2 | implemented 2026-11-02 |
 | [0003](0003-tile-map.md) | Tile map | M2 | implemented 2026-11-02 |
 | [0004](0004-the-figure.md) | The figure | M2 | implemented 2026-11-03 |
-| [0005](0005-collision.md) | Collision | M2 | draft |
+| [0005](0005-collision.md) | Collision | M2 | approved 2026-11-04 |
 | [0006](0006-camera-and-campus.md) | Camera and campus | M2 | draft |

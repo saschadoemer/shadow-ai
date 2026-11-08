@@ -1,3 +1,4 @@
+import { type Box, moveBox } from '../engine/collision';
 import { STEPS_PER_SECOND } from '../engine/loop';
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
 import { TILE_SIZE, type TileMap } from '../engine/tiled';
@@ -68,18 +69,39 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
+/** The collision box (0005): the lowest 8 px of the 16x24 sprite, 12 px wide, centred under the feet. */
+export const BOX_WIDTH = 12;
+export const BOX_HEIGHT = 8;
+
+/** The box of a figure whose feet are at (x, y): [x − 6, x + 6) × [y − 8, y). 0006 centres the camera on it. */
+export function collisionBox(player: PlayerState): Box {
+  return {
+    x: player.x - BOX_WIDTH / 2,
+    y: player.y - BOX_HEIGHT,
+    width: BOX_WIDTH,
+    height: BOX_HEIGHT,
+  };
+}
+
 /**
- * One step: move along the vector, clamp the feet so the whole 16x24 sprite stays inside the
- * map, turn. "Moving" is the vector before the clamp, so a figure held at an edge keeps its
- * facing and its walk cycle.
+ * One step: move the box along the vector against the solid grid, X then Y (engine/collision),
+ * clamp the feet so the whole 16x24 sprite stays inside the map, turn. "Moving" is the vector
+ * before collision and clamp, so a figure held by a wall or an edge keeps its facing and its
+ * walk cycle.
  */
 export function stepPlayer(player: PlayerState, input: MovementInput, map: TileMap): PlayerState {
   const vector = movementVector(input);
   const moving = vector.x !== 0 || vector.y !== 0;
+  const box = moveBox(
+    collisionBox(player),
+    vector.x * STEP_DISTANCE,
+    vector.y * STEP_DISTANCE,
+    map,
+  );
   const halfWidth = FRAME_WIDTH / 2;
   return {
-    x: clamp(player.x + vector.x * STEP_DISTANCE, halfWidth, map.width * TILE_SIZE - halfWidth),
-    y: clamp(player.y + vector.y * STEP_DISTANCE, FRAME_HEIGHT, map.height * TILE_SIZE),
+    x: clamp(box.x + BOX_WIDTH / 2, halfWidth, map.width * TILE_SIZE - halfWidth),
+    y: clamp(box.y + BOX_HEIGHT, FRAME_HEIGHT, map.height * TILE_SIZE),
     facing: facingOf(vector, player.facing),
     ...walkCycle(player, moving),
   };
