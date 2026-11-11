@@ -1,7 +1,9 @@
 import { loadImage, loadJson, resolvePath } from './engine/assets';
 import { type Bindings, createKeyboard, listenToKeyboard, resolveActions } from './engine/input';
 import { runLoop } from './engine/loop';
+import { FRAME_HEIGHT, FRAME_WIDTH } from './engine/sprite';
 import { parseTileMap, parseTileset, tilesetSource } from './engine/tiled';
+import { CONE_LENGTH } from './game/lamp';
 import type { GameInput } from './game/player';
 import type { GameState } from './game/state';
 import { createInitialState, update } from './game/update';
@@ -21,10 +23,11 @@ declare global {
 
 const MAP_URL = '/maps/campus.tmj';
 const PLAYER_SHEET_URL = '/sprites/player.png';
+const LAMP_SHEET_URL = '/sprites/lamp.png';
 
 /**
  * The map, its tileset and the tileset's image, each resolved against the file naming it, then
- * the player's sprite sheet.
+ * the player's sprite sheet and the lamp's.
  */
 async function loadContent(): Promise<SceneContent> {
   const mapJson = await loadJson(MAP_URL);
@@ -35,7 +38,16 @@ async function loadContent(): Promise<SceneContent> {
   return {
     map,
     tileset: { image, columns: tileset.columns },
-    playerSheet: { image: await loadImage(PLAYER_SHEET_URL) },
+    playerSheet: {
+      image: await loadImage(PLAYER_SHEET_URL),
+      frameWidth: FRAME_WIDTH,
+      frameHeight: FRAME_HEIGHT,
+    },
+    lampSheet: {
+      image: await loadImage(LAMP_SHEET_URL),
+      frameWidth: CONE_LENGTH,
+      frameHeight: CONE_LENGTH,
+    },
   };
 }
 

@@ -1,4 +1,3 @@
-import { FRAME_HEIGHT, FRAME_WIDTH } from '../../engine/sprite';
 import { TILE_SIZE } from '../../engine/tiled';
 import type { PaletteColour } from '../palette';
 import { type Renderer, SURFACE_HEIGHT, SURFACE_WIDTH } from '../renderer';
@@ -56,16 +55,17 @@ export function createCanvas2dRenderer(visible: HTMLCanvasElement): SurfaceRende
       draw.drawImage(tileset.image, sx, sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
     },
     drawSprite(sheet, frame, x, y) {
+      const { frameWidth, frameHeight } = sheet;
       draw.drawImage(
         sheet.image,
-        frame * FRAME_WIDTH,
+        frame * frameWidth,
         0,
-        FRAME_WIDTH,
-        FRAME_HEIGHT,
+        frameWidth,
+        frameHeight,
         x,
         y,
-        FRAME_WIDTH,
-        FRAME_HEIGHT,
+        frameWidth,
+        frameHeight,
       );
     },
     present(layout) {
