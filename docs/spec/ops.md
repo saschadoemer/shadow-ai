@@ -66,6 +66,13 @@ Red blocks the merge: `main` is protected so that the check `ci` must pass befor
 can be merged — a GitHub setting the author keeps. There is no separate "fast" path; the whole
 run is short enough to wait for.
 
+Before step 6 the job installs the Playwright browser alone, `npx playwright install chromium`,
+not `--with-deps`: the system packages that flag installs are font packages fetched from the
+Ubuntu mirrors, which the runner could not resolve on 2026-11-11 and which the game, drawing no
+browser text, does not need; every library Chromium itself needs is on the runner image. If a
+future image lacks one, the smoke test fails with a clear "shared library" error, and that
+library is added to the job by name.
+
 ## 5. Deployment target
 
 **Cloud Run**, when the time comes: a stateless HTTP container, scale to zero, HTTPS included,
