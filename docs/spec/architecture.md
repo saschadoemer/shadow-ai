@@ -27,7 +27,9 @@ tools/
   placeholder-tiles.ts  the placeholder tiles as pure data: pixels and the .tsj (visual.md §5)
   gen-tiles.ts          writes them to public/tiles/; `npm run gen-tiles`
   placeholder-player.ts the placeholder figure as pure data: the pixels of its sprite sheet
-  gen-sprites.ts        writes it to public/sprites/; `npm run gen-sprites`
+  gen-sprites.ts        writes it and the lamp sheet to public/sprites/; `npm run gen-sprites`
+  placeholder-lamp.ts   the placeholder lamp sheet as pure data: the cone of light, one 48x48
+                        frame per facing, drawn from game/lamp
   campus-layout.ts      the campus as pure data: the rectangles of path, water, buildings and
                         fences, and the spawn (world.md §1)
   gen-campus.ts         writes it to public/maps/; `npm run gen-campus`
@@ -50,7 +52,7 @@ against the container alike. It is read-only by convention; nothing in the game 
 ## 2. The state model
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
-logic steps since the start, the player and the camera; later the current map id, NPCs,
+logic steps since the start, the player, the camera and the lamp; later the current map id, NPCs,
 captured creatures, cleared regions and the journal join them. It is plain data: numbers,
 strings, booleans, arrays and plain objects. No functions, no class instances, no `Map` or `Set`,
 no `Date`. A JSON round trip reproduces it exactly, and a test proves that on a populated state.
@@ -79,12 +81,21 @@ start, and kept in the state so a saved game comes back as it was left.
 `createInitialState(map)` lives in `game/update` beside `update`, so that `game/state` holds
 types and constants only.
 
+`lamp` is `{ on }` (feature 0007): on in every step whose input holds `lamp`, derived from the
+input and kept in the state so the renderer knows what to draw and so later fields — strength
+(0010), charge (M6) — join it. While it is on, `stepPlayer` keeps the feet where they are, resets
+the walk cycle to standing and turns the facing by the walking rule; no collision or clamp runs.
+The cone is `game/lamp`: the apex 12 px above the feet, the facing's unit vector, 48 px long and
+half-open, opening with slope 1/2 to each side; `inCone(point, cone)` is the one test the game
+makes on it, and `FRAME_APEX` names where the apex sits in a 48x48 frame of the lamp sheet, per
+facing.
+
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
 save state, it is in `GameState`; if it ships with the build, it is content.
 
 `update(state, input, content)` advances the state by exactly one logic step and returns the new
-state. `input` is the four movement actions `up`, `down`, `left`, `right` as booleans (§4);
+state. `input` is `GameInput`: the four movement actions and `lamp`, as booleans (§4);
 `content` is the loaded map. Whether it mutates in place or returns a copy is an implementation
 choice per module; what it may not do is read anything but its arguments or write anything but
 its result.
@@ -134,19 +145,21 @@ the window and when the document turns hidden (`visibilitychange`), every key is
 because no `keyup` will come for what is held. A `keydown` with `repeat` changes nothing. That
 matters after a release: a key still held when the page regains focus keeps repeating, and must
 not press itself again, so the figure stands until the key is really pressed again. The keyboard
-does not yet keep which keys went down this step, the edge a single press needs; the lamp (M3)
-brings it.
+does not keep which keys went down this step, the edge a single press needs: nothing in the game
+needs one — the lamp is held, not toggled — so the journal (M4) is the first that may.
 
-The game reads named actions — `up`, `down`, `left`, `right`, later `lamp` and `journal` — never
+The game reads named actions — `up`, `down`, `left`, `right` and `lamp`, later `journal` — never
 key codes. The mapping from keys to actions lives in one table in `main.ts`: `up` ← ArrowUp or W,
-`down` ← ArrowDown or S, `left` ← ArrowLeft or A, `right` ← ArrowRight or D, `fullscreen` ← F.
+`down` ← ArrowDown or S, `left` ← ArrowLeft or A, `right` ← ArrowRight or D, `lamp` ← Space,
+`fullscreen` ← F.
 Once per frame, before the steps (§3), `main.ts` resolves the held keys through the table with
 `resolveActions`, a pure function in `engine/input`: an action is on when any of its keys is
-down. The game gets the four movement actions as booleans and nothing else. A gamepad (plan M5)
+down. The game gets the five actions as booleans and nothing else. A gamepad (plan M5)
 and remappable keys are additions to the table, not changes to the game.
 
 A bound key pressed without Ctrl, Alt or Cmd belongs to the game: `main.ts` prevents its default,
-so the arrow keys never scroll the page. With Ctrl, Alt or Cmd the browser keeps its own shortcut.
+so the arrow keys never scroll the page and Space neither scrolls nor clicks a focused control.
+With Ctrl, Alt or Cmd the browser keeps its own shortcut.
 `fullscreen` is toggled in `main.ts` on the `keydown` of F without `repeat` and without Ctrl,
 Alt or Cmd; it never reaches the game.
 
@@ -167,13 +180,18 @@ per layer; a cell at the view's edge is clipped by the surface. Away from the ma
 figure sits at screen (152, 70) for every fractional position, because the camera and the
 sprite round the same value.
 
-`drawSprite(sheet, frame, x, y)` draws frame `frame` of a sprite sheet — frames of 16x24 in one
-row — with its top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
-`render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the player,
-`above` (§6). The player's sprite has its top-left corner at
+`drawSprite(sheet, frame, x, y)` draws frame `frame` of a sprite sheet — frames of the sheet's own
+`frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48 — with its
+top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
+`render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the lamp's
+cone when the lamp is on, the player, `above` (§6). The player's sprite has its top-left corner at
 (round(x) − 8 − camera.x, round(y) − 24 − camera.y): the feet are the bottom centre of the
 sprite, so they sit on the tile grid and the figure stands on its tile. Its frame in the sheet is
-facing × 5 + phase (§7).
+facing × 5 + phase (§7). The cone's frame is drawn with its top-left corner at the apex,
+(round(x), round(y) − 12), minus the frame's apex pixel (`game/lamp`, `FRAME_APEX`: down (24, 0),
+up (24, 47), left (47, 24), right (0, 24)), minus the camera; its frame is the facing's index.
+Cone and figure round the same values, so they agree pixel for pixel, and the cone lies under the
+figure.
 
 The interface exists so the implementation can change (ADR-0001 names PixiJS as the candidate)
 without touching `game/`. It is not an abstraction for its own sake: it has exactly one
@@ -292,6 +310,17 @@ its generator is deterministic; a unit test fails when the committed PNG and the
 disagree. When the art pass draws the figure by hand (`visual.md` §5), the hand-drawn PNG
 replaces `public/sprites/player.png` under the same name and frame order. Nothing in `src/`
 changes.
+
+`tools/placeholder-lamp.ts` draws the lamp sheet the same way and returns its pixels as data:
+`public/sprites/lamp.png`, 192x48, four 48x48 frames in one row in facing order down, up, left,
+right, each a checkerboard of `#fee761` cut to the cone from the frame's apex pixel, drawn from
+`inCone` of `game/lamp` so the picture is the rule. `npm run gen-sprites` writes both sheets; both
+are committed, the generator is deterministic, and a unit test fails when the committed file and
+the generator disagree — for the lamp it re-derives every pixel from `inCone` and counts 576
+opaque pixels per frame. When the art pass draws the cone by hand (`visual.md` §5), the
+hand-drawn PNG replaces the file under the same name, frame order and apex pixels, and the
+generator and its tests go; the frame size and the apex pixels stay, because the renderer places
+the frame by them.
 
 `tools/campus-layout.ts` holds the campus as data — the rectangles of path and water on
 `ground`, the buildings (roof rows, a wall row with its doors) and fence rings on `detail`, and
