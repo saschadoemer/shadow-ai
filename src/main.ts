@@ -3,8 +3,8 @@ import { type Bindings, createKeyboard, listenToKeyboard, resolveActions } from 
 import { runLoop } from './engine/loop';
 import { parseTileMap, parseTileset, tilesetSource } from './engine/tiled';
 import type { MovementInput } from './game/player';
-import { createInitialState, type GameState } from './game/state';
-import { update } from './game/update';
+import type { GameState } from './game/state';
+import { createInitialState, update } from './game/update';
 import { createCanvas2dRenderer } from './render/canvas2d/canvas2d-renderer';
 import { drawScene, type SceneContent } from './render/draw-scene';
 import { computeLayout } from './render/scale';

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { TileMap } from '../../src/engine/tiled';
 import { type MovementInput, movementVector, stepPlayer } from '../../src/game/player';
-import { createInitialState, type Facing, type PlayerState } from '../../src/game/state';
+import type { Facing, PlayerState } from '../../src/game/state';
+import { createInitialState } from '../../src/game/update';
 import { grassMap } from './grass-map';
 import { CORRIDOR, pictureMap } from './picture-map';
 

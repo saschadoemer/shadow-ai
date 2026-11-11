@@ -1,4 +1,4 @@
-import type { TileMap } from '../engine/tiled';
+import type { Point } from '../engine/tiled';
 
 /** The facings in sprite-sheet order: frame index = facing × PHASES_PER_FACING + phase. */
 export const FACINGS = ['down', 'up', 'left', 'right'] as const;
@@ -27,12 +27,9 @@ export interface GameState {
   /** Logic steps since the start; one step is 1/60 s (INV-3). */
   readonly tick: number;
   readonly player: PlayerState;
-}
-
-/** The state before the first step: the player at the map's spawn, facing down, standing. */
-export function createInitialState(map: TileMap): GameState {
-  return {
-    tick: 0,
-    player: { x: map.spawn.x, y: map.spawn.y, facing: 'down', frame: 0, frameTimer: 0 },
-  };
+  /**
+   * The view's top-left corner in map pixels, two integers (0006). Derived from the player after
+   * every step and kept here so a saved game comes back as it was left.
+   */
+  readonly camera: Point;
 }

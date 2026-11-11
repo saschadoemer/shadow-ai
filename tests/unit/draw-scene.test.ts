@@ -53,7 +53,11 @@ const player = (fields: Partial<PlayerState>): PlayerState => ({
   frameTimer: 0,
   ...fields,
 });
-const state = (fields: Partial<PlayerState>): GameState => ({ tick: 0, player: player(fields) });
+const state = (fields: Partial<PlayerState>): GameState => ({
+  tick: 0,
+  player: player(fields),
+  camera: { x: 0, y: 0 },
+});
 
 describe('playerFrame', () => {
   it('is facing × 5 + phase, facings in the order down, up, left, right', () => {

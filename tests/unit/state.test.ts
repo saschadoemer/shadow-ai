@@ -1,12 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { followPlayer } from '../../src/game/camera';
 import type { MovementInput } from '../../src/game/player';
-import {
-  createInitialState,
-  FACINGS,
-  type GameState,
-  PHASES_PER_FACING,
-} from '../../src/game/state';
-import { update } from '../../src/game/update';
+import { FACINGS, type GameState, PHASES_PER_FACING, type PlayerState } from '../../src/game/state';
+import { createInitialState, update } from '../../src/game/update';
 import { grassMap } from './grass-map';
 
 /** The test map's size and spawn, in memory: 20x12 tiles, spawn at (136, 120). */
@@ -28,10 +24,11 @@ function afterSteps(...legs: readonly (readonly [number, MovementInput])[]): Gam
 }
 
 describe('GameState (INV-1)', () => {
-  it('starts at tick 0 with the player at the spawn, facing down, standing', () => {
+  it('starts at tick 0 with the player at the spawn, facing down, standing, the camera on it', () => {
     expect(createInitialState(MAP)).toStrictEqual({
       tick: 0,
       player: { x: 136, y: 120, facing: 'down', frame: 0, frameTimer: 0 },
+      camera: { x: 0, y: 12 },
     });
   });
 
@@ -45,6 +42,7 @@ describe('GameState (INV-1)', () => {
     expect(state.tick).toBe(1234);
     expect(Number.isInteger(state.player.x), 'x is fractional after a diagonal').toBe(false);
     expect(state.player.facing).toBe('left');
+    expect(state.camera).toStrictEqual({ x: 0, y: 0 });
     const copy: unknown = JSON.parse(JSON.stringify(state));
     expect(copy).toStrictEqual(state);
   });
@@ -63,15 +61,46 @@ describe('update', () => {
   const player = { x: 136, y: 120, facing: 'down', frame: 0, frameTimer: 0 } as const;
 
   it('advances tick by exactly one and steps the player', () => {
-    const next = update({ tick: 41, player }, RIGHT, MAP);
+    const next = update({ tick: 41, player, camera: { x: 0, y: 12 } }, RIGHT, MAP);
     expect(next.tick).toBe(42);
     expect(next.player.x).toBeCloseTo(137.3333, 3);
     expect(next.player.facing).toBe('right');
   });
 
   it('leaves its input unchanged', () => {
-    const state: GameState = { tick: 7, player };
+    const state: GameState = { tick: 7, player, camera: { x: 0, y: 12 } };
     update(state, RIGHT, MAP);
-    expect(state).toStrictEqual({ tick: 7, player });
+    expect(state).toStrictEqual({ tick: 7, player, camera: { x: 0, y: 12 } });
+  });
+});
+
+describe('the camera in the state (0006)', () => {
+  /** The campus's size and spawn on open ground: 128x96 tiles, the spawn at (1024, 734). */
+  const CAMPUS = grassMap(128, 96, { x: 1024, y: 734 });
+  const feet = (x: number, y: number): PlayerState => ({
+    x,
+    y,
+    facing: 'down',
+    frame: 0,
+    frameTimer: 0,
+  });
+
+  it('starts centred on the spawn: (864, 640)', () => {
+    expect(createInitialState(CAMPUS).camera).toStrictEqual({ x: 864, y: 640 });
+  });
+
+  it('follows the player: 60 steps right move the player and the camera 80 px', () => {
+    let state = createInitialState(CAMPUS);
+    for (let i = 0; i < 60; i += 1) {
+      state = update(state, RIGHT, CAMPUS);
+    }
+    expect(state.player.x).toBeCloseTo(1104, 6); // 60 × 1.3333… within floating-point noise
+    expect(state.camera).toStrictEqual({ x: 944, y: 640 });
+  });
+
+  it('followPlayer on the 20x12 map is clamped to x 0 and y 0–12', () => {
+    expect(followPlayer(feet(136, 120), MAP)).toStrictEqual({ x: 0, y: 12 });
+    expect(followPlayer(feet(160, 94), MAP)).toStrictEqual({ x: 0, y: 0 });
+    expect(followPlayer(feet(300, 191), MAP)).toStrictEqual({ x: 0, y: 12 });
   });
 });
