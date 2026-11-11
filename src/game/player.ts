@@ -12,6 +12,11 @@ export interface MovementInput {
   readonly right: boolean;
 }
 
+/** Everything the game reads from the keys (0007): the movement actions and `lamp`, on while Space is held. */
+export interface GameInput extends MovementInput {
+  readonly lamp: boolean;
+}
+
 /** Tune: 80 px/s is 1.333 px per step. */
 export const SPEED_PX_PER_SECOND = 80;
 const STEP_DISTANCE = SPEED_PX_PER_SECOND / STEPS_PER_SECOND;
@@ -84,13 +89,17 @@ export function collisionBox(player: PlayerState): Box {
 }
 
 /**
- * One step: move the box along the vector against the solid grid, X then Y (engine/collision),
- * clamp the feet so the whole 16x24 sprite stays inside the map, turn. "Moving" is the vector
- * before collision and clamp, so a figure held by a wall or an edge keeps its facing and its
- * walk cycle.
+ * One step. With the lamp on (0007) the figure stands where it is and the direction keys only
+ * turn it, by the same rule as walking; the walk cycle is standing. Otherwise: move the box
+ * along the vector against the solid grid, X then Y (engine/collision), clamp the feet so the
+ * whole 16x24 sprite stays inside the map, turn. "Moving" is the vector before collision and
+ * clamp, so a figure held by a wall or an edge keeps its facing and its walk cycle.
  */
-export function stepPlayer(player: PlayerState, input: MovementInput, map: TileMap): PlayerState {
+export function stepPlayer(player: PlayerState, input: GameInput, map: TileMap): PlayerState {
   const vector = movementVector(input);
+  if (input.lamp) {
+    return { ...player, facing: facingOf(vector, player.facing), frame: 0, frameTimer: 0 };
+  }
   const moving = vector.x !== 0 || vector.y !== 0;
   const box = moveBox(
     collisionBox(player),

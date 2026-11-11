@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { TileMap } from '../../src/engine/tiled';
-import { type MovementInput, movementVector, stepPlayer } from '../../src/game/player';
+import {
+  type GameInput,
+  type MovementInput,
+  movementVector,
+  stepPlayer,
+} from '../../src/game/player';
 import type { Facing, PlayerState } from '../../src/game/state';
 import { createInitialState } from '../../src/game/update';
 import { grassMap } from './grass-map';
@@ -8,15 +13,21 @@ import { CORRIDOR, pictureMap } from './picture-map';
 
 /** 20x12 tiles, 320x192 px, like the test map; the player starts mid-map. */
 const MAP = grassMap(20, 12, { x: 160, y: 96 });
-const NONE: MovementInput = { up: false, down: false, left: false, right: false };
+const NONE: GameInput = { up: false, down: false, left: false, right: false, lamp: false };
 
-function press(...actions: readonly (keyof MovementInput)[]): MovementInput {
+function press(...actions: readonly (keyof MovementInput)[]): GameInput {
   return {
     up: actions.includes('up'),
     down: actions.includes('down'),
     left: actions.includes('left'),
     right: actions.includes('right'),
+    lamp: false,
   };
+}
+
+/** The movement actions with Space held: the lamp on. */
+function shining(...actions: readonly (keyof MovementInput)[]): GameInput {
+  return { ...press(...actions), lamp: true };
 }
 
 function standing(x: number, y: number, facing: Facing = 'down'): PlayerState {
@@ -25,7 +36,7 @@ function standing(x: number, y: number, facing: Facing = 'down'): PlayerState {
 
 function walk(
   player: PlayerState,
-  input: MovementInput,
+  input: GameInput,
   steps: number,
   map: TileMap = MAP,
 ): PlayerState {
@@ -183,6 +194,51 @@ describe('stepPlayer: the walk cycle at 8 frames per second', () => {
   it('keeps stepping in place when the clamp holds the figure', () => {
     const held = walk(standing(8, 96), press('left'), 9);
     expect([held.x, held.facing, held.frame, held.frameTimer]).toStrictEqual([8, 'left', 2, 0.5]);
+  });
+});
+
+describe('stepPlayer: holding the lamp (0007)', () => {
+  it('does not move on an axis, on a diagonal or with all four held', () => {
+    for (const input of [
+      shining('right'),
+      shining('up', 'left'),
+      shining('up', 'down', 'left', 'right'),
+    ]) {
+      const held = stepPlayer(standing(160, 96), input, MAP);
+      expect([held.x, held.y]).toStrictEqual([160, 96]);
+    }
+  });
+
+  it('turns in place by the walking rule: horizontal wins, vertical alone, cancelling keeps', () => {
+    expect(stepPlayer(standing(160, 96), shining('right'), MAP).facing).toBe('right');
+    expect(stepPlayer(standing(160, 96), shining('up', 'left'), MAP).facing).toBe('left');
+    expect(stepPlayer(standing(160, 96), shining('up'), MAP).facing).toBe('up');
+    expect(stepPlayer(standing(160, 96, 'right'), shining('left', 'right'), MAP).facing).toBe(
+      'right',
+    );
+    expect(stepPlayer(standing(160, 96, 'up'), shining(), MAP).facing).toBe('up');
+  });
+
+  it('shows the standing frame at once, at the position reached: phase 3, timer 4 becomes 0, 0', () => {
+    const walking = walk(standing(160, 96), press('right'), 20);
+    expect([walking.frame, walking.frameTimer]).toStrictEqual([3, 4]);
+    const stopped = stepPlayer(walking, shining('right'), MAP);
+    expect([stopped.frame, stopped.frameTimer, stopped.facing]).toStrictEqual([0, 0, 'right']);
+    expect(stopped.x).toBeCloseTo(186.6667, 3);
+    expect(stopped.y).toBe(96);
+  });
+
+  it('walks from standing on the step after the release: phase 1, timer 0, 1.333 px', () => {
+    const stopped = stepPlayer(walk(standing(160, 96), press('right'), 20), shining('right'), MAP);
+    const resumed = stepPlayer(stopped, press('right'), MAP);
+    expect([resumed.frame, resumed.frameTimer]).toStrictEqual([1, 0]);
+    expect(resumed.x).toBeCloseTo(188, 6);
+  });
+
+  it('leaves its input unchanged', () => {
+    const input = shining('right');
+    stepPlayer(standing(160, 96), input, MAP);
+    expect(input).toStrictEqual(shining('right'));
   });
 });
 

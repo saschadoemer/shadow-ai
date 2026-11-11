@@ -57,6 +57,7 @@ const state = (fields: Partial<PlayerState>, camera = { x: 0, y: 0 }): GameState
   tick: 0,
   player: player(fields),
   camera,
+  lamp: { on: false },
 });
 
 describe('playerFrame', () => {

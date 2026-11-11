@@ -49,15 +49,16 @@ describe('the keyboard', () => {
 });
 
 describe('resolveActions', () => {
-  type Action = 'up' | 'down' | 'left' | 'right' | 'fullscreen';
+  type Action = 'up' | 'down' | 'left' | 'right' | 'lamp' | 'fullscreen';
   const BINDINGS: Bindings<Action> = {
     up: ['ArrowUp', 'KeyW'],
     down: ['ArrowDown', 'KeyS'],
     left: ['ArrowLeft', 'KeyA'],
     right: ['ArrowRight', 'KeyD'],
+    lamp: ['Space'],
     fullscreen: ['KeyF'],
   };
-  const OFF = { up: false, down: false, left: false, right: false, fullscreen: false };
+  const OFF = { up: false, down: false, left: false, right: false, lamp: false, fullscreen: false };
 
   it('turns held keys into actions, one action from either of its keys', () => {
     expect(resolveActions(new Set(['KeyW']), BINDINGS)).toStrictEqual({ ...OFF, up: true });
@@ -71,13 +72,22 @@ describe('resolveActions', () => {
 
   it('gives every action off for no keys and for unbound keys', () => {
     expect(resolveActions(new Set(), BINDINGS)).toStrictEqual(OFF);
-    expect(resolveActions(new Set(['Space', 'KeyQ']), BINDINGS)).toStrictEqual(OFF);
+    expect(resolveActions(new Set(['Enter', 'KeyQ']), BINDINGS)).toStrictEqual(OFF);
   });
 
   it('does not mind both keys of one action being down', () => {
     expect(resolveActions(new Set(['ArrowUp', 'KeyW']), BINDINGS)).toStrictEqual({
       ...OFF,
       up: true,
+    });
+  });
+
+  it('turns Space into lamp, beside the movement keys', () => {
+    expect(resolveActions(new Set(['Space']), BINDINGS)).toStrictEqual({ ...OFF, lamp: true });
+    expect(resolveActions(new Set(['Space', 'KeyA']), BINDINGS)).toStrictEqual({
+      ...OFF,
+      lamp: true,
+      left: true,
     });
   });
 });
