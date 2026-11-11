@@ -94,14 +94,26 @@ author can test by hand in a few minutes. Nothing is built that was not approved
 2. **Approval.** Only the author approves, in conversation. The agent then sets
    `Status: approved` with the date and commits that change. An agent never approves a spec.
 3. **Implementation.** Only for `approved`, and on the implementation model (§4). One branch
-   per feature, named `feature/NNNN-<name>`, pull request against `main`, CI green. What is not
-   in the spec is not built; it becomes a new draft. Tests come first for logic (§4).
-4. **Acceptance.** A feature is done when all tests are green (unit, architecture, assets, smoke),
-   typecheck and Biome are clean, the build and the container run, the affected files in
-   `docs/spec/` are updated, the agent has run the acceptance plan in a browser and reported
-   every step — and **the author has run the acceptance plan and accepted it.** The author merges
-   the pull request; the merge is the acceptance. Then `Status: implemented`. What is durable has
-   moved into `docs/spec/`; the feature spec stays as history.
+   per feature, named `feature/NNNN-<name>`. What is not in the spec is not built; it becomes a
+   new draft. Tests come first for logic (§4). The implementation is complete when all tests
+   are green (unit, architecture, assets, smoke), typecheck and Biome are clean, the build and
+   the container run, and the affected files in `docs/spec/` are updated. Complete starts the
+   walk, not the pull request.
+4. **Acceptance walk.** The agent starts the game as the spec's preconditions say and guides the
+   author through the acceptance plan one step at a time: it names a step, waits for the
+   author's answer — pass or fail, with a note if the author has one — records it, and only then
+   names the next step. The agent never answers a step itself and does not run the plan on its
+   own beforehand; the automated checks are the only pre-check. A failed step ends the walk:
+   the agent fixes the branch, or asks when the fix needs a decision the plan does not make,
+   reruns the checks, and the walk starts again at step 1. When every step has passed and the
+   feel questions are answered, the result goes into the spec's `Result` line with the date and
+   is committed on the branch. **The walk is the quality gate: no pull request is opened before
+   it has passed.** The protocol is `docs/spec/testing.md` §5.
+5. **Pull request and merge.** Only after the walk: `main` is merged in (§4) and the checks are
+   rerun — if the merge changed code, the walk is run again — then the pull request is opened
+   against `main` with the walk's result in its description, and CI must be green. The author
+   merges the pull request; the merge closes the feature. Then `Status: implemented`. What is
+   durable has moved into `docs/spec/`; the feature spec stays as history.
 
 Harness changes approved in conversation may go directly to `main`.
 
@@ -120,16 +132,16 @@ Harness changes approved in conversation may go directly to `main`.
 - **Stay in scope.** If a task seems to need something the spec does not cover, stop and ask.
 - **The model fits the step.** Thinking runs on the most capable model, doing on the cheaper
   one. Feature specs and implementation plans are written on the strongest model available —
-  today Claude Fable. Implementation — code, tests, the acceptance run, the pull request — runs
-  on Claude Opus, which is enough for work a plan already lays out step by step and costs a
-  fraction per token. The planning session hands over by starting the implementation session
-  on Opus with the plan as its brief; subagents that write code run on Opus too. When the
-  implementation meets a question the plan does not answer, it stops and asks; the answer comes
-  from the author or the planning session, not from more tokens.
-- **Start from the latest `main`.** When implementation starts, and again before the pull
-  request is opened, `main` is merged into the feature branch and the checks are rerun. A pull
-  request is opened only when it merges cleanly; a conflict is resolved on the branch, never on
-  `main`.
+  today Claude Fable. Implementation — code, tests, guiding the acceptance walk, the pull
+  request — runs on Claude Opus, which is enough for work a plan already lays out step by step
+  and costs a fraction per token. The planning session hands over by starting the
+  implementation session on Opus with the plan as its brief; subagents that write code run on
+  Opus too. When the implementation meets a question the plan does not answer, it stops and
+  asks; the answer comes from the author or the planning session, not from more tokens.
+- **Start from the latest `main`.** When implementation starts, and again after the walk and
+  before the pull request is opened, `main` is merged into the feature branch and the checks
+  are rerun. A pull request is opened only when it merges cleanly; a conflict is resolved on
+  the branch, never on `main`.
 - **Respect the content budget** in `docs/plan.md` §3. More content means changing the number
   first, then the content.
 
@@ -170,10 +182,10 @@ these.
 | `docs/spec/visual.md` | 320x180, integer scaling, tiles and figures, Endesga 32 and the signature colour, the asset pipeline, frame rate |
 | `docs/spec/architecture.md` | directory structure, the state model, the loop, input, the renderer interface, maps and the Tiled pipeline, text plumbing, tooling, dependency policy |
 | `docs/spec/ops.md` | build, the container, nginx and headers, running locally, CI, the Cloud Run target |
-| `docs/spec/testing.md` | the four test layers, the test behind each invariant, test-first, what is not tested, human acceptance |
+| `docs/spec/testing.md` | the four test layers, the test behind each invariant, test-first, what is not tested, the acceptance walk |
 | `docs/plan.md` | roadmap M1–M8, content budget, open milestones, deferred ideas — **not** a source of product rules |
 | `docs/features/` | one spec per feature with its status, and the template |
-| `docs/plans/` | one implementation plan per approved feature — a working document for the agent, not specification |
+| `docs/plans/` | one implementation plan per approved feature — a working document for the agent, not specification; its last two tasks are always the walk (§3.4) and the pull request (§3.5) |
 | `docs/adr/` | architecture decision records; ADR-0001 is the engine decision |
 
 **Precedence.** `CLAUDE.md` and `docs/spec/` are the specification. `docs/plan.md` controls scope

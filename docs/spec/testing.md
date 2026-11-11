@@ -45,15 +45,17 @@ A guard without such a test is a comment.
 - **Animation timing by image comparison.** Frame indices are unit-tested as numbers; whether the
   walk looks right is judged by eye.
 - **Performance by benchmark in CI.** Frame budget is checked by a person on an ordinary laptop
-  during acceptance. A number in CI would measure the runner, not the game.
+  during the walk. A number in CI would measure the runner, not the game.
 - **Tiled itself.** The loader is tested against committed fixtures, not against the editor.
 
-## 5. Human acceptance
+## 5. Human acceptance: the walk
 
-The last test of every feature is the author running its **acceptance plan**: a manual test
-written into the feature spec and mandatory for approval (`CLAUDE.md` §3). The automated layers
-prove the rules hold; the acceptance plan proves they are *reachable* — that the screen shows what
-the spec says, and that the game feels the way the numbers intended.
+The last test of every feature is the **acceptance walk**: the author runs the feature's
+acceptance plan — the manual test written into the feature spec and mandatory for approval
+(`CLAUDE.md` §3) — guided by the agent, one step at a time. The automated layers prove the rules
+hold; the walk proves they are *reachable* — that the screen shows what the spec says, and that
+the game feels the way the numbers intended. **The walk is the quality gate: no pull request is
+opened before it has passed.**
 
 An acceptance plan has three parts:
 
@@ -66,10 +68,39 @@ An acceptance plan has three parts:
 - **Feel.** The few things only a player notices — a snag at a corner, a shimmer, a speed that is
   off — as questions with room for a number or a note.
 
-The agent runs the whole plan in a browser before asking for acceptance and reports the result of
-every step, including the ones that failed. The author runs it again; the merge is the sign-off.
-A plan takes a few minutes, not an afternoon. If it does not fit, the feature is too big and is
-cut.
+### The walk
+
+The walk begins when the implementation is complete (`CLAUDE.md` §3 step 3): all four layers
+green, typecheck and Biome clean, build and container running, `docs/spec/` updated. The agent
+does not run the plan itself before the walk; the automated layers are the only pre-check, and
+the walk belongs to the author.
+
+1. **Set-up.** The agent starts the game as the preconditions say — the dev server or the
+   container — and states them in one message: the URL, the browser, the window size, where in
+   the game to begin. The author opens the game in their own browser and says when they are
+   ready. Nothing else happens until then.
+2. **One step per message.** The agent names the next action step together with its expected
+   step, in the spec's numbering and words, and nothing more: no hint at what a failure would
+   look like, no summary of the steps to come. The step is the only question of that message,
+   and the agent waits for the answer.
+3. **The author answers.** `pass` or `fail`, with a note if there is one. The agent records the
+   answer as given. It never answers a step itself, never skips one, and never takes silence or
+   a general remark as a pass.
+4. **Fail ends the walk.** The agent records "step n failed" with the author's words and stops
+   the walk. It fixes the branch — or asks, when the fix needs a decision the spec or the plan
+   does not make — reruns the automated checks, and the walk starts again at step 1. A fixed
+   branch is a new build; nothing before the failed step counts as still proven. The failed walk
+   is recorded in the fix's commit message, not in the spec.
+5. **Feel last.** After the last step the agent asks the feel questions, one per message, and
+   records the answers with their numbers and notes. A feel note is not a failure: a number the
+   author would change becomes a new draft, not a change on this branch.
+6. **The record.** When every step has passed and the feel questions are answered, the agent
+   writes the result into the spec's `Result` line — `passed YYYY-MM-DD, steps 1–n`, followed by
+   the feel notes — and commits it on the branch. The pull request description points to it.
+   Only then does `CLAUDE.md` §3 step 5 begin.
+
+A walk takes a few minutes, not an afternoon. If it does not fit, the feature is too big and is
+cut. A merge of `main` after the walk that changes code counts as a fix: the walk is run again.
 
 ## 6. Test data
 

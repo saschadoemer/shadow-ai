@@ -378,7 +378,7 @@ east and south from it, and a path circles the main building to the north avenue
 hardest to identify? Does the map feel large enough to explore — or too large to walk —
 crossing it from fence to fence takes about 25 seconds?
 
-**Result:** pass or fail per step.
+**Result:** not yet walked.
 
 ## Open questions
 
