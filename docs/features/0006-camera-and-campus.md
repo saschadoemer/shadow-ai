@@ -317,7 +317,8 @@ Every number is a pixel unless it says tile or cell.
 - `tests/unit/state.test.ts` extended — on a 128x96 grass map with the spawn at (1024, 734):
   the initial state's camera is (864, 640); after 60 steps right the player's x is 1104 and the
   camera's x is 944; the round-trip state includes the camera; `followPlayer` on a 20x12 map
-  yields (0, 0) at the spawn (136, 120) and (0, 12) for feet at (300, 191).
+  yields (0, 12) at the spawn (136, 120), (0, 0) for feet at (160, 94) and (0, 12) for feet at
+  (300, 191).
 - `tests/unit/draw-map.test.ts` rewritten for `drawLayer` with a camera — on a 40x30 map whose
   `ground` is all grass:
   - camera (0, 0) draws columns 0–19 and rows 0–11, the first at (0, 0), the last at (304, 176);
