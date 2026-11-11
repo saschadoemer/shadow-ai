@@ -9,9 +9,11 @@ export interface TilesetImage {
   readonly columns: number;
 }
 
-/** A decoded sprite sheet: frames of FRAME_WIDTH × FRAME_HEIGHT in one row (engine/sprite). */
+/** A decoded sprite sheet: frames of frameWidth × frameHeight in one row (the figure's 16x24, the lamp's 48x48). */
 export interface SpriteSheet {
   readonly image: ImageBitmap;
+  readonly frameWidth: number;
+  readonly frameHeight: number;
 }
 
 /**
@@ -23,6 +25,6 @@ export interface Renderer {
   fillRect(x: number, y: number, width: number, height: number, colour: PaletteColour): void;
   /** Draws tile `id` of the tileset with its top-left corner at (x, y), 16x16. */
   drawTile(tileset: TilesetImage, id: number, x: number, y: number): void;
-  /** Draws frame `frame` of the sheet with its top-left corner at (x, y), 16x24. */
+  /** Draws frame `frame` of the sheet with its top-left corner at (x, y), frameWidth × frameHeight. */
   drawSprite(sheet: SpriteSheet, frame: number, x: number, y: number): void;
 }

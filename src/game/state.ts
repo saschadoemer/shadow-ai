@@ -19,6 +19,11 @@ export interface PlayerState {
   readonly frameTimer: number;
 }
 
+/** The lamp (0007): on in every step whose input holds `lamp`. Later fields: strength (0010), charge (M6). */
+export interface LampState {
+  readonly on: boolean;
+}
+
 /**
  * Everything that changes while playing (INV-1): plain data only — numbers, strings, booleans,
  * arrays and plain objects.
@@ -32,4 +37,6 @@ export interface GameState {
    * every step and kept here so a saved game comes back as it was left.
    */
   readonly camera: Point;
+  /** Derived from the input every step and kept here so the renderer knows what to draw. */
+  readonly lamp: LampState;
 }

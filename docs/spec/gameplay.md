@@ -29,6 +29,13 @@ Three upgrades over the game, each changing what the player can do:
 | Colour filter | Reveals hidden traces and hidden paths; required for Management |
 | Longer battery | Longer holding, for the dense zones of the server room |
 
+**As built** (feature 0007): Space holds the lamp; there is no toggle. While it is held the
+figure stands and the direction keys turn it, so a sweep is a deliberate act. The cone starts at
+the chest, 12 px above the feet, is 48 px long — three tiles — and opens with slope 1/2 to each
+side, so it is as wide at its end as it is long; both numbers *tune*. It is drawn as a yellow
+checkerboard under the figure. Nothing is lit yet: strength and the density rule arrive with
+0010, the battery with M6.
+
 ## 3. Three layers of opposition
 
 Combat matters but is never the whole answer. Every piece of shadow belongs to one layer:
@@ -90,7 +97,8 @@ There is no map in the journal. The map itself shows by colour what has been cle
 ## 8. Controls and presentation
 
 Desktop browser with keyboard; a gamepad is a feature before the first trade fair; touch and
-mobile are non-goals. Scrolling camera on a 320x180 internal resolution (`visual.md`). Movement,
+mobile are non-goals. Arrow keys or WASD walk, Space holds the lamp, F toggles fullscreen.
+Scrolling camera on a 320x180 internal resolution (`visual.md`). Movement,
 collision and camera behaviour are specified in the feature that introduces them.
 
 ## 9. Deliberately simple in the first draft

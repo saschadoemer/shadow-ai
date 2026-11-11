@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { EMPTY, type TileMap } from '../../src/engine/tiled';
 import type { GameState, PlayerState } from '../../src/game/state';
-import { drawScene, playerFrame, type SceneContent } from '../../src/render/draw-scene';
+import {
+  drawScene,
+  lampFrame,
+  lampFrameOrigin,
+  playerFrame,
+  type SceneContent,
+} from '../../src/render/draw-scene';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
 
 /** A renderer that only records what it was asked to draw, one line per call. */
@@ -43,7 +49,8 @@ const MAP: TileMap = {
 const CONTENT: SceneContent = {
   map: MAP,
   tileset: { image: {} as ImageBitmap, columns: 7 },
-  playerSheet: { image: {} as ImageBitmap },
+  playerSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 },
+  lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
 };
 const player = (fields: Partial<PlayerState>): PlayerState => ({
   x: 0,
@@ -53,10 +60,15 @@ const player = (fields: Partial<PlayerState>): PlayerState => ({
   frameTimer: 0,
   ...fields,
 });
-const state = (fields: Partial<PlayerState>, camera = { x: 0, y: 0 }): GameState => ({
+const state = (
+  fields: Partial<PlayerState>,
+  camera = { x: 0, y: 0 },
+  lampOn = false,
+): GameState => ({
   tick: 0,
   player: player(fields),
   camera,
+  lamp: { on: lampOn },
 });
 
 describe('playerFrame', () => {
@@ -117,5 +129,66 @@ describe('drawScene', () => {
       'drawSprite 13 at 7,0', // round(20.4) − 8 − 5, round(30.6) − 24 − 7
       'drawTile 6 at -5,-7',
     ]);
+    expect(renderer.sheets).toStrictEqual([CONTENT.playerSheet]);
+  });
+});
+
+describe('the lamp in the scene (0007)', () => {
+  const camera = { x: 5, y: 7 };
+
+  it('draws the cone after detail and before the player, from the lamp sheet, when the lamp is on', () => {
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      state({ x: 20.4, y: 30.6, facing: 'left', frame: 3 }, camera, true),
+      CONTENT,
+    );
+    expect(renderer.calls).toStrictEqual([
+      'clear #181425',
+      'drawTile 0 at -5,-7',
+      'drawTile 1 at 11,-7',
+      'drawTile 2 at -5,9',
+      'drawTile 2 at 11,9',
+      'drawTile 2 at 27,9',
+      'drawTile 4 at 11,9',
+      'drawSprite 2 at -32,-12', // the cone facing left: apex (20, 19) − (47, 24) − camera
+      'drawSprite 13 at 7,0',
+      'drawTile 6 at -5,-7',
+    ]);
+    expect(renderer.sheets).toStrictEqual([CONTENT.lampSheet, CONTENT.playerSheet]);
+  });
+
+  it('places the frame by the facing: feet (20.4, 30.6), camera (5, 7)', () => {
+    const feet = { x: 20.4, y: 30.6 };
+    expect(lampFrameOrigin(player({ ...feet, facing: 'down' }), camera)).toStrictEqual({
+      x: -9,
+      y: 12,
+    });
+    expect(lampFrameOrigin(player({ ...feet, facing: 'up' }), camera)).toStrictEqual({
+      x: -9,
+      y: -35,
+    });
+    expect(lampFrameOrigin(player({ ...feet, facing: 'left' }), camera)).toStrictEqual({
+      x: -32,
+      y: -12,
+    });
+    expect(lampFrameOrigin(player({ ...feet, facing: 'right' }), camera)).toStrictEqual({
+      x: 15,
+      y: -12,
+    });
+  });
+
+  it('puts the down-facing frame at (136, 82) at the spawn, its apex on the chest row (160, 82)', () => {
+    expect(lampFrameOrigin(player({ x: 1024, y: 734 }), { x: 864, y: 640 })).toStrictEqual({
+      x: 136,
+      y: 82,
+    });
+  });
+
+  it("uses the facing's index as the frame", () => {
+    expect(lampFrame(player({ facing: 'down' }))).toBe(0);
+    expect(lampFrame(player({ facing: 'up' }))).toBe(1);
+    expect(lampFrame(player({ facing: 'left' }))).toBe(2);
+    expect(lampFrame(player({ facing: 'right' }))).toBe(3);
   });
 });
