@@ -62,7 +62,7 @@ Six features, each its own pull request with its own acceptance plan, in this or
 toolchain, CI and container · 0002 surface, loop and scaling · 0003 tile map · 0004 the figure ·
 0005 collision · 0006 camera and campus. Map before figure, so the figure walks on something from
 the start; collision before camera, because the camera needs a map larger than the screen. M2 is
-done when 0006 is implemented.
+done: 0006 was the last of the six.
 
 ## 5. Deferred, with reasons
 

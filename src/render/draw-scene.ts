@@ -18,19 +18,20 @@ export function playerFrame(player: PlayerState): number {
 }
 
 /**
- * One frame: ground, detail, the player, above. The sprite's top-left corner is at
- * (round(x) − 8, round(y) − 24): the feet are its bottom centre.
+ * One frame: ground, detail, the player, above, all shifted by the camera. The sprite's top-left
+ * corner is at (round(x) − 8 − camera.x, round(y) − 24 − camera.y): the feet are its bottom
+ * centre, and the camera is already whole pixels (engine/camera).
  */
 export function drawScene(renderer: Renderer, state: GameState, content: SceneContent): void {
+  const { player, camera } = state;
   renderer.clear(PAGE_BACKGROUND);
-  drawLayer(renderer, content.map, content.tileset, 'ground');
-  drawLayer(renderer, content.map, content.tileset, 'detail');
-  const { player } = state;
+  drawLayer(renderer, content.map, content.tileset, 'ground', camera);
+  drawLayer(renderer, content.map, content.tileset, 'detail', camera);
   renderer.drawSprite(
     content.playerSheet,
     playerFrame(player),
-    Math.round(player.x) - FRAME_WIDTH / 2,
-    Math.round(player.y) - FRAME_HEIGHT,
+    Math.round(player.x) - FRAME_WIDTH / 2 - camera.x,
+    Math.round(player.y) - FRAME_HEIGHT - camera.y,
   );
-  drawLayer(renderer, content.map, content.tileset, 'above');
+  drawLayer(renderer, content.map, content.tileset, 'above', camera);
 }

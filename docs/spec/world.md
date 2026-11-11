@@ -10,6 +10,17 @@ connected outdoor map. Buildings are entered through transitions into their own 
 are later features; in the first stage the buildings are closed). The campus is built coarsely
 first — paths, building footprints, fences, parking, green — and detailed region by region.
 
+**The map as built** (feature 0006): 128x96 tiles, 2048x1536 px, in placeholder tiles, generated
+from `tools/campus-layout.ts` until the art pass. The main building stands north of the
+courtyard with the entrance and the server-room door in its ground floor; the data protection
+officer's office west of the courtyard, Sales east of it; HR and Accounting along the west,
+Development in the north-east, the meeting rooms behind a fence with one gap between Development
+and Sales; the reception south of the courtyard; the canteen by the pond and Marketing and
+Support along the south avenue; the parking lot, fenced, in the south-west; a canal along the
+east, a fence all round. Every building is closed. The player starts in the courtyard in front of
+the entrance. The tables in `docs/features/0006-camera-and-campus.md` are the layout until the
+art pass.
+
 | Region | Role |
 |---|---|
 | Courtyard | The hub. Reception, the data protection officer's office (where the player wakes up after losing overview), paths to every department. |

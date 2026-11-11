@@ -69,25 +69,36 @@ test('the map is drawn at the full factor, unclipped', async ({ page }) => {
         canvas.evaluate((element: HTMLCanvasElement) =>
           Array.from(element.getContext('2d')?.getImageData(0, 0, 1, 1).data ?? []),
         ),
-      { message: 'the top-left pixel is grass #63c74d at tile (0, 0): the map is drawn' },
+      {
+        message:
+          "the top-left pixel is grass #63c74d at tile (54, 40), the view's corner at the spawn: the map is drawn",
+      },
     )
     .toStrictEqual([0x63, 0xc7, 0x4d, 255]);
 });
 
-test('one second of ArrowRight moves the figure right by at least 70 px', async ({ page }) => {
+test('one second of ArrowRight moves the figure and the camera right by at least 70 px', async ({
+  page,
+}) => {
   await page.goto('/');
-  // The handle appears with the first frame; the figure starts at the spawn, x = 136.
+  // The handle appears with the first frame; the figure starts at the campus spawn, x = 1024.
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.player.x), {
       message: 'window.shadowAi.state.player.x is the spawn: the game runs',
     })
-    .toBe(136);
+    .toBe(1024);
+  expect(await page.evaluate(() => window.shadowAi?.state.camera)).toStrictEqual({
+    x: 864,
+    y: 640,
+  });
   await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(1000);
   await page.keyboard.up('ArrowRight');
-  const player = await page.evaluate(() => window.shadowAi?.state.player);
-  expect(player?.x).toBeGreaterThanOrEqual(136 + 70); // 60 steps of 1.333 px are 80; CI may drop a few frames
-  expect(player?.facing).toBe('right');
+  const state = await page.evaluate(() => window.shadowAi?.state);
+  // 60 steps of 1.333 px are 80; CI may drop a few frames. Row 45 is path to x = 1104.
+  expect(state?.player.x).toBeGreaterThanOrEqual(1024 + 70);
+  expect(state?.camera.x).toBeGreaterThanOrEqual(864 + 70);
+  expect(state?.player.facing).toBe('right');
 });
 
 test.describe('served by the container', () => {

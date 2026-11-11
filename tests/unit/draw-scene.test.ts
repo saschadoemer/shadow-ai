@@ -53,7 +53,11 @@ const player = (fields: Partial<PlayerState>): PlayerState => ({
   frameTimer: 0,
   ...fields,
 });
-const state = (fields: Partial<PlayerState>): GameState => ({ tick: 0, player: player(fields) });
+const state = (fields: Partial<PlayerState>, camera = { x: 0, y: 0 }): GameState => ({
+  tick: 0,
+  player: player(fields),
+  camera,
+});
 
 describe('playerFrame', () => {
   it('is facing × 5 + phase, facings in the order down, up, left, right', () => {
@@ -93,5 +97,25 @@ describe('drawScene', () => {
     const renderer = recordingRenderer();
     drawScene(renderer, state({ x: 10.5, y: 24.5 }), CONTENT);
     expect(renderer.calls).toContain('drawSprite 0 at 3,1'); // round(10.5) = 11, round(24.5) = 25
+  });
+
+  it('shifts tiles and sprite by the camera: camera (5, 7), feet (20.4, 30.6) draw the sprite at (7, 0)', () => {
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      state({ x: 20.4, y: 30.6, facing: 'left', frame: 3 }, { x: 5, y: 7 }),
+      CONTENT,
+    );
+    expect(renderer.calls).toStrictEqual([
+      'clear #181425',
+      'drawTile 0 at -5,-7',
+      'drawTile 1 at 11,-7',
+      'drawTile 2 at -5,9',
+      'drawTile 2 at 11,9',
+      'drawTile 2 at 27,9',
+      'drawTile 4 at 11,9',
+      'drawSprite 13 at 7,0', // round(20.4) − 8 − 5, round(30.6) − 24 − 7
+      'drawTile 6 at -5,-7',
+    ]);
   });
 });
