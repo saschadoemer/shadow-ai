@@ -8,10 +8,10 @@ rule can be proved without a browser.
 
 | Layer | Runs with | Covers |
 |---|---|---|
-| **Unit** | Vitest, Node | engine math (movement, collision, camera), among it the box resolver against a picture grid and the loaded corridor fixture; game rules (the player's movement, facing, clamp and walk cycle, and the player's box against solid tiles: flush stops, the slide, corners and a one-tile gap), the keyboard state and the binding resolver, the map loader against Tiled JSON fixtures and the shipped test map, path resolution, the draw order of the map and of the scene, the tile generator against the committed tileset, the sprite generator against the committed sheet, the loop with a fake clock and its once-per-frame input, the language table |
+| **Unit** | Vitest, Node | engine math (movement, collision, camera), among it the box resolver against a picture grid and the loaded corridor fixture, and the camera: centring, the four clamps, the corners, rounding, the view constants; game rules (the player's movement, facing, clamp and walk cycle, and the player's box against solid tiles: flush stops, the slide, corners and a one-tile gap; and the camera in the state: the spawn's camera, following the walk, the clamp on the small map), the keyboard state and the binding resolver, the map loader against Tiled JSON fixtures and the test map fixture, the campus map against its generator and the spec's layout: closed buildings, reachable doors, the solid ring, the free spawn, the view's first cell; path resolution, the cells a layer draws for a camera, and the draw order of the scene with the camera offset, the tile generator against the committed tileset, the sprite generator against the committed sheet, the loop with a fake clock and its once-per-frame input, the language table |
 | **Architecture** | Vitest, Node | the import graph and source text of `src/game/` (INV-2); the branded text type is enforced by the compiler (INV-4) |
 | **Assets** | Vitest, Node | every PNG under `public/` against Endesga 32 and the reserved colour, alpha 0 or 255 with transparent pixels exempt; tilesets under `public/tiles/` sized in multiples of 16; `.tsj` files against their PNG (INV-6) |
-| **Smoke** | Playwright, one spec | the page loads, the canvas exists at the full factor and unclipped, the picture's corner shows the map's first tile (grass `#63c74d`); one second of ArrowRight moves the player by at least 70 px and leaves it facing right, read from `window.shadowAi.state` — against the dev server and against the built container; against the container (`BASE_URL`) also the four security headers, the cache headers and gzip (INV-5) |
+| **Smoke** | Playwright, one spec | the page loads, the canvas exists at the full factor and unclipped, the picture's corner shows grass `#63c74d`, the view's first cell at the spawn; the player starts at x = 1024 with the camera at (864, 640); one second of ArrowRight moves the player and the camera right by at least 70 px and leaves the player facing right, read from `window.shadowAi.state` — against the dev server and against the built container; against the container (`BASE_URL`) also the four security headers, the cache headers and gzip (INV-5) |
 
 All four run in CI on every pull request (`ops.md` §4). Red blocks the merge.
 
@@ -25,7 +25,7 @@ All four run in CI on every pull request (`ops.md` §4). Red blocks the merge.
 | INV-4 text through keys | the compiler, via `TextKey`; a unit test that `de` and `en` have identical key sets |
 | INV-5 own origin only | a test over `dist/` for `http://` and `https://`, which is why `npm run check` builds before it tests; the smoke test reads the CSP header from the container |
 | INV-6 palette | the asset tests: palette, reserved colour, alpha, tileset size, each `.tsj` against its PNG, each with a negative case |
-| INV-7 map truth | loader tests read the solid grid as the union of the three tile layers, and reject, each with its message: an unknown layer name, a layer whose type does not match its name, a missing `ground` or `objects` layer or a name used twice, no spawn or two, a tile size other than 16x16, a map under 20x12 tiles, an infinite map or encoded, compressed or mis-sized layer data, a flipped or rotated tile, a gid outside the tileset, anything but one external `.tsj`, an animated tile in the tileset, an orientation other than orthogonal (`architecture.md` §6); a world-data test orders regions by density against the upgrades that precede them |
+| INV-7 map truth | loader tests read the solid grid as the union of the three tile layers, and reject, each with its message: an unknown layer name, a layer whose type does not match its name, a missing `ground` or `objects` layer or a name used twice, no spawn or two, a tile size other than 16x16, a map under 20x12 tiles, an infinite map or encoded, compressed or mis-sized layer data, a flipped or rotated tile, a gid outside the tileset, anything but one external `.tsj`, an animated tile in the tileset, an orientation other than orthogonal, a spawn outside the map or on a solid tile (`architecture.md` §6); a world-data test orders regions by density against the upgrades that precede them |
 
 ## 3. Test first
 
@@ -74,6 +74,7 @@ cut.
 ## 6. Test data
 
 Fixtures live beside the tests under `tests/fixtures/`: small Tiled maps built for a purpose (a
-corridor with one solid tile, a map with an unknown layer), a tiny PNG with one off-palette
+corridor of solid tiles, a map with an unknown layer, the test map of 0003 on its own seven-tile
+tileset), a tiny PNG with one off-palette
 pixel. Fixtures are hand-made and committed; they are never generated from the real content, so a
 change to the campus map cannot silently change what a test proves.
