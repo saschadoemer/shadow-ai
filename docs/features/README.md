@@ -6,8 +6,8 @@ workflow that moves it is `CLAUDE.md` §3 and is repeated here in one line each:
 - `draft` — written by an agent, may change freely, builds nothing.
 - `approved` — the author said so in conversation; the agent recorded the date. Code may now be
   written, and only what the spec says.
-- `implemented` — tests green, spec files updated, the author has played it and merged the pull
-  request.
+- `implemented` — tests green, spec files updated, the author has walked the acceptance plan
+  with the agent, and merged the pull request that was opened only after that walk.
 
 A feature spec refines the specification in `docs/spec/`; it never contradicts it. Where it
 would, the spec is changed first. Once a feature is implemented, what is durable about it lives in
@@ -15,8 +15,9 @@ would, the spec is changed first. Once a feature is implemented, what is durable
 
 Use `0000-template.md`. Numbers are numbers: "80 px/s", not "a comfortable speed". Every spec
 carries an acceptance plan for the manual test (`docs/spec/testing.md` §5); without one it is not
-approved. A feature is the smallest change the author can test by hand in a few minutes — when
-the plan grows past that, the feature is cut in two.
+approved, and without a passed walk no pull request is opened. A feature is the smallest change
+the author can test by hand in a few minutes — when the plan grows past that, the feature is cut
+in two.
 
 | # | Feature | Milestone | Status |
 |---|---|---|---|

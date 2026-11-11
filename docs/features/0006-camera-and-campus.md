@@ -88,7 +88,7 @@ world to walk, and M2 is complete.
 **Feel:** Does the campus read as a company's grounds in placeholder tiles? Which region is hardest
 to identify? Does the map feel large enough to explore — or too large to walk?
 
-**Result:** pass or fail per step.
+**Result:** not yet walked.
 
 ## Open questions
 

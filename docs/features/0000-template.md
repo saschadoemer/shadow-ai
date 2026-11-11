@@ -34,9 +34,11 @@ are added under `tests/fixtures/`.
 
 ## Acceptance plan (manual test)
 
-The test the author runs before merging, and the agent runs in a browser before asking for
-acceptance. Written so that a failure is reported as "step 7", not as an impression. The rules
-are in `docs/spec/testing.md` §5.
+The walk the author takes, guided by the agent one step at a time, after the implementation is
+complete and before the pull request is opened. Written so that a failure is reported as
+"step 7", not as an impression. The rules are in `docs/spec/testing.md` §5. The `Result` line is
+filled in by the agent from the author's answers: `passed YYYY-MM-DD, steps 1–n`, then the feel
+notes.
 
 **Preconditions:** how to start (`npm run dev` or the container), which browser, which window
 size, where in the game to begin.
@@ -50,7 +52,7 @@ action step.
 
 **Feel:** the few things only a player notices, as questions with room for a number or a note.
 
-**Result:** pass or fail per step, filled in by the author.
+**Result:** not yet walked.
 
 ## Open questions
 
