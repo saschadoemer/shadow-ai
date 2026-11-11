@@ -5,28 +5,30 @@ import { describe, expect, it } from 'vitest';
 import { EMPTY, parseTileMap, parseTileset, tilesetSource } from '../../src/engine/tiled';
 
 /**
- * The shipped test map obeys the loader. Unlike the fixtures, this reads public/ on purpose:
- * it proves the map the game loads, with the tileset the generator wrote.
+ * The test map of 0003, kept as a fixture since 0006: three layers, a wall ring with a doorway, a
+ * roof on `above`, on a hand-made seven-tile tileset — the one fixture that exercises every
+ * layer and every tile id.
  */
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
-const MAP_FILE = 'public/maps/test.tmj';
+const MAP_FILE = 'tests/fixtures/maps/test.tmj';
 
 function readJson(file: string): unknown {
   return JSON.parse(readFileSync(join(ROOT, file), 'utf8'));
 }
 
-describe('public/maps/test.tmj', () => {
+describe('tests/fixtures/maps/test.tmj', () => {
   const mapJson = readJson(MAP_FILE);
   const source = tilesetSource(mapJson, MAP_FILE);
-  const tilesetFile = join('public/maps', source);
+  const tilesetFile = join('tests/fixtures/maps', source);
   const tileset = parseTileset(readJson(tilesetFile), tilesetFile);
   const map = parseTileMap(mapJson, tileset, MAP_FILE);
   const cell = (column: number, row: number) => row * map.width + column;
 
-  it('references the generated placeholder tileset', () => {
-    expect(source).toBe('../tiles/placeholder.tsj');
-    expect(tilesetFile).toBe('public/tiles/placeholder.tsj');
+  it('references the hand-made seven-tile fixture tileset, never the real one', () => {
+    expect(source).toBe('seven-tiles.tsj');
+    expect(tileset.tileCount).toBe(7);
+    expect(tileset.solid).toStrictEqual([false, false, true, true, true, true, true]);
   });
 
   it('is 20x12 tiles, 320x192 px', () => {

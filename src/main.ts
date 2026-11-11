@@ -19,7 +19,7 @@ declare global {
   }
 }
 
-const MAP_URL = '/maps/test.tmj';
+const MAP_URL = '/maps/campus.tmj';
 const PLAYER_SHEET_URL = '/sprites/player.png';
 
 /**
