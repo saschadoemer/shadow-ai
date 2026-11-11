@@ -264,6 +264,26 @@ function checkLayer(layer: Json, file: string): TileLayerName | typeof OBJECT_LA
   return name;
 }
 
+/** Rule 13: the spawn lies inside the map, on a cell that is not solid. The cell, not a box. */
+function checkSpawn(
+  spawn: Point,
+  width: number,
+  height: number,
+  solid: readonly boolean[],
+  file: string,
+): void {
+  const widthPx = width * TILE_SIZE;
+  const heightPx = height * TILE_SIZE;
+  if (spawn.x < 0 || spawn.y < 0 || spawn.x >= widthPx || spawn.y >= heightPx) {
+    fail(file, `spawn (${spawn.x}, ${spawn.y}) is outside the map (${widthPx}x${heightPx} px)`);
+  }
+  const column = Math.floor(spawn.x / TILE_SIZE);
+  const row = Math.floor(spawn.y / TILE_SIZE);
+  if (solid[row * width + column] === true) {
+    fail(file, `spawn (${spawn.x}, ${spawn.y}) is on a solid tile (${column}, ${row})`);
+  }
+}
+
 export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string): TileMap {
   const map = asRecord(mapJson, mapFile, 'map');
   const { width, height } = checkMap(map, mapFile);
@@ -306,5 +326,6 @@ export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string
   const solid = ground.map(
     (id, index) => isSolid(id) || isSolid(detail[index]) || isSolid(above[index]),
   );
+  checkSpawn(spawn, width, height, solid, mapFile);
   return { width, height, ground, detail, above, spawn, solid };
 }

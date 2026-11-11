@@ -404,6 +404,39 @@ describe('parseTileMap rejects', () => {
     expect(rejection(map)).toBe('(no error)');
   });
 
+  it('a spawn on a solid tile (rule 13)', () => {
+    const { file, json } = fixture('spawn-on-solid.tmj');
+    expect(rejection(json, file)).toBe(`${file}: spawn (24, 40) is on a solid tile (1, 2)`);
+  });
+
+  it('a spawn outside the map (rule 13)', () => {
+    const moved = (x: number, y: number) =>
+      variant((m) => {
+        for (const object of layer(m, 'objects').objects ?? []) {
+          object.x = x;
+          object.y = y;
+        }
+      });
+    expect(rejection(moved(330, 40))).toBe(
+      `${FILE}: spawn (330, 40) is outside the map (320x192 px)`,
+    );
+    expect(rejection(moved(40, 192))).toBe(
+      `${FILE}: spawn (40, 192) is outside the map (320x192 px)`,
+    );
+    expect(rejection(moved(-1, 40))).toBe(
+      `${FILE}: spawn (-1, 40) is outside the map (320x192 px)`,
+    );
+  });
+
+  it('accepts a spawn on the last pixel row, y = 191 (rule 13)', () => {
+    const map = variant((m) => {
+      for (const object of layer(m, 'objects').objects ?? []) {
+        object.y = 191;
+      }
+    });
+    expect(rejection(map)).toBe('(no error)');
+  });
+
   it('names the map file at the start of every message', () => {
     const map = variant((m) => {
       m.infinite = true;
