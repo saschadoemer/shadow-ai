@@ -25,4 +25,4 @@ the plan grows past that, the feature is cut in two.
 | [0003](0003-tile-map.md) | Tile map | M2 | implemented 2026-11-02 |
 | [0004](0004-the-figure.md) | The figure | M2 | implemented 2026-11-03 |
 | [0005](0005-collision.md) | Collision | M2 | implemented 2026-11-08 |
-| [0006](0006-camera-and-campus.md) | Camera and campus | M2 | approved 2026-11-11 |
+| [0006](0006-camera-and-campus.md) | Camera and campus | M2 | implemented 2026-11-11 |

@@ -1,6 +1,6 @@
 # 0006 — Camera and campus
 
-**Status:** approved 2026-11-11
+**Status:** implemented 2026-11-11
 **Milestone:** M2
 **Drafted:** 2026-10-31
 
