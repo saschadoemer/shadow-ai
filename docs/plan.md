@@ -64,6 +64,15 @@ toolchain, CI and container · 0002 surface, loop and scaling · 0003 tile map �
 the start; collision before camera, because the camera needs a map larger than the screen. M2 is
 done: 0006 was the last of the six.
 
+### M3 — The lamp and the first creature
+
+Four features, each its own pull request with its own acceptance plan, in this order: 0007 the
+lamp · 0008 the first creature · 0009 overview · 0010 shadow walls and density. The lamp before
+the creature, so there is something to freeze with; overview after the creature, because a hit
+needs something that hits; the density rule last, together with the first thing it gates — the
+shadow walls — because 0006 left the density data to M3. The shadow as a region's colour —
+desaturation, the violet dithering, the clearing — arrives with the first cleared region in M5.
+
 ## 5. Deferred, with reasons
 
 Ideas judged good and set aside for the first draft. Each records why, so it is not re-argued
