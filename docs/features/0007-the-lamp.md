@@ -237,7 +237,9 @@ prefer. Does the checkerboard read as light at factor 6, or as noise? Does stand
 shining feel deliberate, or does it make you want to walk with the lamp? Is the cone too narrow
 or too wide?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-12, steps 1–20. Feel: 48 px reads as a lamp's reach, no other length
+named; the checkerboard reads as light at factor 6; standing still while shining is fine; the
+cone is neither too narrow nor too wide.
 
 ## Open questions
 
