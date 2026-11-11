@@ -1,8 +1,7 @@
 import type { PaletteColour } from './palette';
 
-/** The game surface in game pixels (visual.md §1). It never changes size. */
-export const SURFACE_WIDTH = 320;
-export const SURFACE_HEIGHT = 180;
+/** The game surface is the view (engine/camera): one 320 and one 180 in the code. */
+export { VIEW_HEIGHT as SURFACE_HEIGHT, VIEW_WIDTH as SURFACE_WIDTH } from '../engine/camera';
 
 /** A decoded tileset image and how many tiles one of its rows holds. */
 export interface TilesetImage {
