@@ -1,6 +1,6 @@
 # 0007 — The lamp
 
-**Status:** draft
+**Status:** approved 2026-11-11
 **Milestone:** M3
 **Drafted:** 2026-11-11
 
