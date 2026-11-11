@@ -101,6 +101,28 @@ test('one second of ArrowRight moves the figure and the camera right by at least
   expect(state?.player.facing).toBe('right');
 });
 
+test('a held Space turns the lamp on and holds the figure in place', async ({ page }) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.player.x), {
+      message: 'window.shadowAi.state.player.x is the spawn: the game runs',
+    })
+    .toBe(1024);
+  await page.keyboard.down('Space');
+  await expect.poll(() => page.evaluate(() => window.shadowAi?.state.lamp.on)).toBe(true);
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(300);
+  const held = await page.evaluate(() => window.shadowAi?.state);
+  // Nothing moves while the lamp is on; the direction key only turns the figure.
+  expect(held?.player.x).toBe(1024);
+  expect(held?.player.facing).toBe('right');
+  expect(held?.player.frame).toBe(0);
+  expect(held?.lamp.on).toBe(true);
+  await page.keyboard.up('Space');
+  await expect.poll(() => page.evaluate(() => window.shadowAi?.state.lamp.on)).toBe(false);
+  await page.keyboard.up('ArrowRight');
+});
+
 test.describe('served by the container', () => {
   test.skip(containerUrl === undefined, 'header checks run against the container (BASE_URL)');
 
