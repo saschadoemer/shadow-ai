@@ -1,7 +1,12 @@
-import { EMPTY, type Point, type TileMap } from '../../src/engine/tiled';
+import { EMPTY, type NamedPoint, type Point, type TileMap } from '../../src/engine/tiled';
 
-/** A map of width × height grass tiles (id 0), nothing solid, with the given spawn. */
-export function grassMap(width: number, height: number, spawn: Point): TileMap {
+/** A map of width × height grass tiles (id 0), nothing solid, with the given spawn and named points. */
+export function grassMap(
+  width: number,
+  height: number,
+  spawn: Point,
+  points: readonly NamedPoint[] = [],
+): TileMap {
   const cells = width * height;
   return {
     width,
@@ -10,6 +15,7 @@ export function grassMap(width: number, height: number, spawn: Point): TileMap {
     detail: new Array<number>(cells).fill(EMPTY),
     above: new Array<number>(cells).fill(EMPTY),
     spawn,
+    points,
     solid: new Array<boolean>(cells).fill(false),
   };
 }

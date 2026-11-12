@@ -44,6 +44,7 @@ const MAP: TileMap = {
   detail: [EMPTY, EMPTY, EMPTY, EMPTY, 4, EMPTY],
   above: [6, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   spawn: { x: 8, y: 8 },
+  points: [],
   solid: [false, false, false, true, true, true],
 };
 const CONTENT: SceneContent = {

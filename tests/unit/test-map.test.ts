@@ -59,4 +59,8 @@ describe('tests/fixtures/maps/test.tmj', () => {
       expect(map.ground[cell(column, 3)]).toBe(0);
     }
   });
+
+  it('has no named points', () => {
+    expect(map.points).toStrictEqual([]);
+  });
 });

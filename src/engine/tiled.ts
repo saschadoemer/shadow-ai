@@ -130,6 +130,11 @@ export interface Point {
   readonly y: number;
 }
 
+/** A point object of the `objects` layer other than the spawn (0008): what it is, is the game's business. */
+export interface NamedPoint extends Point {
+  readonly name: string;
+}
+
 export interface TileMap {
   /** In tiles. */
   readonly width: number;
@@ -141,6 +146,8 @@ export interface TileMap {
   readonly above: readonly number[];
   /** Pixels; 0004 uses it as the feet position. */
   readonly spawn: Point;
+  /** The named point objects besides the spawn, in file order; each inside the map on an open cell. */
+  readonly points: readonly NamedPoint[];
   /** Row-major, width × height: a solid tile on any of the three layers. */
   readonly solid: readonly boolean[];
 }
@@ -227,6 +234,24 @@ function readSpawn(layer: Json, file: string): Point {
   return { x: asNumber(spawn.x, file, 'spawn x'), y: asNumber(spawn.y, file, 'spawn y') };
 }
 
+/** Every point object that is not the spawn, in file order; each needs a name (0008). */
+function readPoints(layer: Json, file: string): NamedPoint[] {
+  const what = `layer "${OBJECT_LAYER_NAME}"`;
+  return asArray(layer.objects, file, `${what} objects`)
+    .map((value) => asRecord(value, file, 'object'))
+    .filter((object) => object.point === true && object.name !== 'spawn')
+    .map((object) => {
+      if (typeof object.name !== 'string' || object.name === '') {
+        fail(file, `${what} has a point object without a name`);
+      }
+      return {
+        name: object.name,
+        x: asNumber(object.x, file, `point "${object.name}" x`),
+        y: asNumber(object.y, file, `point "${object.name}" y`),
+      };
+    });
+}
+
 /** Rules 11, 7, 5 and 6: what the map as a whole must be, before any layer is read. */
 function checkMap(map: Json, file: string): { readonly width: number; readonly height: number } {
   const orientation = asString(map.orientation, file, 'orientation');
@@ -264,9 +289,10 @@ function checkLayer(layer: Json, file: string): TileLayerName | typeof OBJECT_LA
   return name;
 }
 
-/** Rule 13: the spawn lies inside the map, on a cell that is not solid. The cell, not a box. */
-function checkSpawn(
-  spawn: Point,
+/** Rule 13: a point lies inside the map, on a cell that is not solid. The cell, not a box. */
+function checkPosition(
+  what: string,
+  point: Point,
   width: number,
   height: number,
   solid: readonly boolean[],
@@ -274,13 +300,13 @@ function checkSpawn(
 ): void {
   const widthPx = width * TILE_SIZE;
   const heightPx = height * TILE_SIZE;
-  if (spawn.x < 0 || spawn.y < 0 || spawn.x >= widthPx || spawn.y >= heightPx) {
-    fail(file, `spawn (${spawn.x}, ${spawn.y}) is outside the map (${widthPx}x${heightPx} px)`);
+  if (point.x < 0 || point.y < 0 || point.x >= widthPx || point.y >= heightPx) {
+    fail(file, `${what} (${point.x}, ${point.y}) is outside the map (${widthPx}x${heightPx} px)`);
   }
-  const column = Math.floor(spawn.x / TILE_SIZE);
-  const row = Math.floor(spawn.y / TILE_SIZE);
+  const column = Math.floor(point.x / TILE_SIZE);
+  const row = Math.floor(point.y / TILE_SIZE);
   if (solid[row * width + column] === true) {
-    fail(file, `spawn (${spawn.x}, ${spawn.y}) is on a solid tile (${column}, ${row})`);
+    fail(file, `${what} (${point.x}, ${point.y}) is on a solid tile (${column}, ${row})`);
   }
 }
 
@@ -319,6 +345,7 @@ export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string
     fail(mapFile, `layer "${OBJECT_LAYER_NAME}" is missing`);
   }
   const spawn = readSpawn(objects, mapFile);
+  const points = readPoints(objects, mapFile);
   const empty = () => new Array<number>(width * height).fill(EMPTY);
   const detail = layers.detail ?? empty();
   const above = layers.above ?? empty();
@@ -326,6 +353,9 @@ export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string
   const solid = ground.map(
     (id, index) => isSolid(id) || isSolid(detail[index]) || isSolid(above[index]),
   );
-  checkSpawn(spawn, width, height, solid, mapFile);
-  return { width, height, ground, detail, above, spawn, solid };
+  checkPosition('spawn', spawn, width, height, solid, mapFile);
+  for (const point of points) {
+    checkPosition(`point "${point.name}"`, point, width, height, solid, mapFile);
+  }
+  return { width, height, ground, detail, above, spawn, points, solid };
 }
