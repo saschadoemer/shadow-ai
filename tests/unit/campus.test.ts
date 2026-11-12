@@ -10,7 +10,7 @@ import {
   parseTileset,
   type TileMap,
 } from '../../src/engine/tiled';
-import { BUILDINGS, DOOR, GRASS, PATH, SPAWN } from '../../tools/campus-layout.ts';
+import { BUILDINGS, DOOR, GRASS, PATH, SNIPPETS, SPAWN } from '../../tools/campus-layout.ts';
 import { encodeCampus } from '../../tools/gen-campus.ts';
 
 /**
@@ -137,5 +137,45 @@ describe('public/maps/campus.tmj (acceptance criterion 9)', () => {
     expect([camera.x % 16, camera.y % 16]).toStrictEqual([0, 0]);
     expect(campus.ground[cell(54, 40)]).toBe(GRASS);
     expect(campus.detail[cell(54, 40)]).toBe(EMPTY);
+  });
+
+  it('holds the three snippets of 0008, in order', () => {
+    expect(SNIPPETS).toStrictEqual([
+      { x: 1288, y: 760 },
+      { x: 1560, y: 760 },
+      { x: 1592, y: 540 },
+    ]);
+    expect(campus.points).toStrictEqual(SNIPPETS.map((feet) => ({ name: 'snippet', ...feet })));
+  });
+
+  it("every snippet's box is free and its cell is reachable from the spawn", () => {
+    const reached = reachableFrom(campus, SPAWN_CELL);
+    for (const { x, y } of campus.points) {
+      // The box [x − 6, x + 6) × [y − 8, y).
+      for (let row = Math.floor((y - 8) / 16); row <= Math.ceil(y / 16) - 1; row += 1) {
+        for (
+          let column = Math.floor((x - 6) / 16);
+          column <= Math.ceil((x + 6) / 16) - 1;
+          column += 1
+        ) {
+          expect(campus.solid[cell(column, row)], `(${column}, ${row})`).toBe(false);
+        }
+      }
+      expect(reached[cell(Math.floor(x / 16), Math.floor(y / 16))], `(${x}, ${y})`).toBe(true);
+    }
+  });
+
+  it('no snippet is in the first view or within 64 px of the spawn', () => {
+    // The first view is [864, 1184) × [640, 820); a sprite is [x − 8, x + 8) × [y − 16, y).
+    for (const { x, y } of campus.points) {
+      const inView = x + 8 > 864 && x - 8 < 1184 && y > 640 && y - 16 < 820;
+      expect(inView, `(${x}, ${y})`).toBe(false);
+      expect(Math.hypot(x - SPAWN.x, y - SPAWN.y)).toBeGreaterThanOrEqual(64);
+    }
+  });
+
+  it('the third snippet stands inside the meeting rooms fence, on tile (99, 33)', () => {
+    const closed = campus.solid.map((solid, at) => solid || at === cell(95, 34));
+    expect(reachableFrom({ ...campus, solid: closed }, SPAWN_CELL)[cell(99, 33)]).toBe(false);
   });
 });

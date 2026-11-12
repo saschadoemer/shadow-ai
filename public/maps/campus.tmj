@@ -43,6 +43,42 @@
           "width": 0,
           "x": 1024,
           "y": 734
+        },
+        {
+          "height": 0,
+          "id": 2,
+          "name": "snippet",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1288,
+          "y": 760
+        },
+        {
+          "height": 0,
+          "id": 3,
+          "name": "snippet",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1560,
+          "y": 760
+        },
+        {
+          "height": 0,
+          "id": 4,
+          "name": "snippet",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1592,
+          "y": 540
         }
       ],
       "opacity": 1,
@@ -53,7 +89,7 @@
     }
   ],
   "nextlayerid": 4,
-  "nextobjectid": 2,
+  "nextobjectid": 5,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",
