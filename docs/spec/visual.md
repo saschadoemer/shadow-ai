@@ -51,11 +51,14 @@ The colour of a transparent pixel is not checked. The palette is data in
 `src/render/palette.ts`.
 
 **The signature colour.** One violet of the palette, `#68386c`, is reserved for the shadow and
-for nothing else in the world; the asset test rejects it in every PNG under `public/` until the
-feature that introduces the shadow assets names the exception. Every trace of shadow AI glows in
+for nothing else in the world; the asset test rejects it in every PNG under `public/` except the
+shadow assets, a list in the test whose first entry is `sprites/snippet.png` (feature 0008).
+Every trace of shadow AI glows in
 it. The player learns in seconds what to look for, without a word of text. Because colour alone
 excludes colour-blind players, the signature colour is always accompanied by **form and
-motion** — flicker, dithering — so the shadow is unmistakable without it.
+motion** — flicker, dithering — so the shadow is unmistakable without it. The snippet carries
+the colour on its border and its lines of text, and it bobs while it is free — form and motion —
+and stands still in the light.
 
 **Shadowed and cleared.** A region under shadow renders desaturated with violet dithering; a
 cleared region renders in the full palette. The world shows progress by colour (`vision.md` §5).

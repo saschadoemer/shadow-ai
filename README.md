@@ -19,7 +19,8 @@ walk cycle. Walls, the pond and the fence stop it, and it slides along them (fea
 camera follows the figure over the campus (feature 0006): 128x96 tiles, every region of the
 world as a footprint in placeholder tiles, every building closed. M2, walking the campus, is
 complete. The lamp shines (feature 0007): hold `Space` and a cone of light appears in front of
-the figure; the direction keys turn it. The roadmap is in [docs/plan.md](docs/plan.md).
+the figure; the direction keys turn it. The first creature is on the campus (feature 0008):
+snippets come toward the figure, freeze in the light and are captured after one second. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 
@@ -31,8 +32,8 @@ npm run dev          # the dev server at http://localhost:5173
 npm run check        # typecheck, lint, build and the headless tests
 npm run test:e2e     # the smoke test against the dev server
 npm run gen-tiles    # regenerate the placeholder tiles under public/tiles/
-npm run gen-sprites  # regenerate the placeholder figure and the lamp sheet under public/sprites/
-npm run gen-campus   # regenerate the campus map under public/maps/
+npm run gen-sprites  # regenerate the placeholder figure, the lamp sheet and the snippet sheet under public/sprites/
+npm run gen-campus   # regenerate the campus map with its creatures under public/maps/
 ```
 
 Maps are edited in [Tiled](https://www.mapeditor.org/) 1.10 or newer. The campus,

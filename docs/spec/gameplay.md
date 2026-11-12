@@ -36,11 +36,18 @@ side, so it is as wide at its end as it is long; both numbers *tune*. It is draw
 checkerboard under the figure. Nothing is lit yet: strength and the density rule arrive with
 0010, the battery with M6.
 
+**As built** (feature 0008): a creature whose body is in the cone, with no solid tile between it
+and the figure, freezes. After one second of unbroken light — 60 steps, *tune* — it is captured
+and gone. A break starts the second again. Solid tiles block the light: walls, and fences and
+water too. The cone's picture is not cut at a wall.
+
 ## 3. Three layers of opposition
 
 Combat matters but is never the whole answer. Every piece of shadow belongs to one layer:
 
-1. **Small creatures** give way to the lamp.
+1. **Small creatures** give way to the lamp. The snippet (0008) is the first: it rests until the
+   figure is closer than four tiles, comes straight at it at half the figure's speed, and stops
+   at its feet. A wall or a fence holds it. Its touch costs nothing until overview exists (0009).
 2. **Medium creatures** need an action in the environment first — unplug the device, close the
    browser window — and then the lamp.
 3. **The source** of a case gives way only to the conversation with the person behind it.
