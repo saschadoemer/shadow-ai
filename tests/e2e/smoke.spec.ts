@@ -123,6 +123,18 @@ test('a held Space turns the lamp on and holds the figure in place', async ({ pa
   await page.keyboard.up('ArrowRight');
 });
 
+test('the campus starts with three snippets and nothing captured', async ({ page }) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.creatures.length), {
+      message: 'window.shadowAi.state.creatures holds the three snippets of the campus',
+    })
+    .toBe(3);
+  const state = await page.evaluate(() => window.shadowAi?.state);
+  expect(state?.creatures[0]).toStrictEqual({ species: 'snippet', x: 1288, y: 760, light: 0 });
+  expect(state?.captured).toStrictEqual({ snippet: 0 });
+});
+
 test.describe('served by the container', () => {
   test.skip(containerUrl === undefined, 'header checks run against the container (BASE_URL)');
 
