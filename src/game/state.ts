@@ -56,4 +56,8 @@ export interface GameState {
   readonly camera: Point;
   /** Derived from the input every step and kept here so the renderer knows what to draw. */
   readonly lamp: LampState;
+  /** The creatures still in the world, in the order of the map's points (0008). */
+  readonly creatures: readonly CreatureState[];
+  /** Captured creatures per species; the journal (M4) reads it. */
+  readonly captured: Captured;
 }

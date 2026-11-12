@@ -70,6 +70,8 @@ const state = (
   player: player(fields),
   camera,
   lamp: { on: lampOn },
+  creatures: [],
+  captured: { snippet: 0 },
 });
 
 describe('playerFrame', () => {

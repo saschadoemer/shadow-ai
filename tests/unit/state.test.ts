@@ -31,6 +31,8 @@ describe('GameState (INV-1)', () => {
       player: { x: 136, y: 120, facing: 'down', frame: 0, frameTimer: 0 },
       camera: { x: 0, y: 12 },
       lamp: { on: false },
+      creatures: [],
+      captured: { snippet: 0 },
     });
   });
 
@@ -65,7 +67,14 @@ describe('update', () => {
 
   it('advances tick by exactly one and steps the player', () => {
     const next = update(
-      { tick: 41, player, camera: { x: 0, y: 12 }, lamp: { on: false } },
+      {
+        tick: 41,
+        player,
+        camera: { x: 0, y: 12 },
+        lamp: { on: false },
+        creatures: [],
+        captured: { snippet: 0 },
+      },
       RIGHT,
       MAP,
     );
@@ -75,9 +84,23 @@ describe('update', () => {
   });
 
   it('leaves its input unchanged', () => {
-    const state: GameState = { tick: 7, player, camera: { x: 0, y: 12 }, lamp: { on: false } };
+    const state: GameState = {
+      tick: 7,
+      player,
+      camera: { x: 0, y: 12 },
+      lamp: { on: false },
+      creatures: [],
+      captured: { snippet: 0 },
+    };
     update(state, RIGHT, MAP);
-    expect(state).toStrictEqual({ tick: 7, player, camera: { x: 0, y: 12 }, lamp: { on: false } });
+    expect(state).toStrictEqual({
+      tick: 7,
+      player,
+      camera: { x: 0, y: 12 },
+      lamp: { on: false },
+      creatures: [],
+      captured: { snippet: 0 },
+    });
   });
 });
 
@@ -132,5 +155,66 @@ describe('the lamp in the state (0007)', () => {
   it('is off again in the first step without it', () => {
     const shone = update(createInitialState(MAP), SHINE, MAP);
     expect(update(shone, NONE, MAP).lamp).toStrictEqual({ on: false });
+  });
+});
+
+describe('the creatures in the state (0008)', () => {
+  /** The campus's size and spawn on open ground, one snippet 46 px right of the spawn. */
+  const point = (name: string, x: number, y: number) => ({ name, x, y });
+  const MAP_ONE = grassMap(128, 96, { x: 1024, y: 734 }, [point('snippet', 1070, 734)]);
+  const RIGHT_SHINE: GameInput = { ...NONE, right: true, lamp: true };
+  const DOWN_SHINE: GameInput = { ...NONE, down: true, lamp: true };
+  const run = (map: typeof MAP_ONE, ...legs: readonly (readonly [number, GameInput])[]) => {
+    let state = createInitialState(map);
+    for (const [steps, input] of legs) {
+      for (let i = 0; i < steps; i += 1) {
+        state = update(state, input, map);
+      }
+    }
+    return state;
+  };
+
+  it('starts with one creature per point, light 0, and nothing captured', () => {
+    const state = createInitialState(MAP_ONE);
+    expect(state.creatures).toStrictEqual([{ species: 'snippet', x: 1070, y: 734, light: 0 }]);
+    expect(state.captured).toStrictEqual({ snippet: 0 });
+  });
+
+  it('rejects a point whose name is no species', () => {
+    const map = grassMap(128, 96, { x: 1024, y: 734 }, [point('snipet', 1070, 734)]);
+    expect(() => createInitialState(map)).toThrow('unknown point object "snipet" at (1070, 734)');
+  });
+
+  it('a creature 46 px away comes 2/3 px closer in one step', () => {
+    const [creature] = run(MAP_ONE, [1, NONE]).creatures;
+    expect(creature?.x).toBeCloseTo(1069.3333, 3);
+    expect(creature?.light).toBe(0);
+  });
+
+  it('in the light from the first step it never moves, has light 59 after 59 steps, and is captured in the 60th', () => {
+    // The figure turns right in step 1: apex (1024, 722), body (1070, 726), d = 46, s = 4.
+    expect(run(MAP_ONE, [59, RIGHT_SHINE]).creatures).toStrictEqual([
+      { species: 'snippet', x: 1070, y: 734, light: 59 },
+    ]);
+    const done = run(MAP_ONE, [60, RIGHT_SHINE]);
+    expect(done.creatures).toStrictEqual([]);
+    expect(done.captured).toStrictEqual({ snippet: 1 });
+  });
+
+  it('survives a JSON round trip with a frozen creature and a count of 1 (INV-1)', () => {
+    // The second snippet, 30 px below the spawn, walks up to 8 px below the feet while the
+    // first is captured; then the figure turns down and holds the light on it for 30 steps.
+    const map = grassMap(128, 96, { x: 1024, y: 734 }, [
+      point('snippet', 1070, 734),
+      point('snippet', 1024, 764),
+    ]);
+    const state = run(map, [60, RIGHT_SHINE], [30, DOWN_SHINE]);
+    expect(state.captured).toStrictEqual({ snippet: 1 });
+    expect(state.creatures).toHaveLength(1);
+    expect(state.creatures[0]?.light).toBe(30);
+    expect(state.creatures[0]?.x).toBe(1024);
+    expect(state.creatures[0]?.y).toBeCloseTo(742, 6);
+    const copy: unknown = JSON.parse(JSON.stringify(state));
+    expect(copy).toStrictEqual(state);
   });
 });
