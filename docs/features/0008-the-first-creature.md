@@ -1,6 +1,6 @@
 # 0008 — The first creature
 
-**Status:** approved 2026-11-12
+**Status:** implemented 2026-11-12
 **Milestone:** M3
 **Drafted:** 2026-11-12
 

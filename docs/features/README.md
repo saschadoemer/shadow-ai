@@ -28,4 +28,4 @@ in two.
 | [0005](0005-collision.md) | Collision | M2 | implemented 2026-11-08 |
 | [0006](0006-camera-and-campus.md) | Camera and campus | M2 | implemented 2026-11-11 |
 | [0007](0007-the-lamp.md) | The lamp | M3 | implemented 2026-11-12 |
-| [0008](0008-the-first-creature.md) | The first creature | M3 | approved 2026-11-12 |
+| [0008](0008-the-first-creature.md) | The first creature | M3 | implemented 2026-11-12 |
