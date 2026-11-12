@@ -80,3 +80,21 @@ export function moveBox(box: Box, dx: number, dy: number, grid: SolidGrid): Poin
   }
   return { x, y };
 }
+
+/**
+ * Whether a solid cell lies on the straight line from a to b (feature 0008): the line is
+ * tested at n + 1 points a + (b − a) × i / n, n = max(1, ⌈|b − a|⌉), so the points are at most
+ * one pixel apart. A point is in the cell (⌊x / 16⌋, ⌊y / 16⌋); cells outside the grid are open.
+ * A line that cuts less than a pixel off a cell's corner may pass.
+ */
+export function sightBlocked(a: Point, b: Point, grid: SolidGrid): boolean {
+  const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y)));
+  for (let i = 0; i <= steps; i += 1) {
+    const x = a.x + ((b.x - a.x) * i) / steps;
+    const y = a.y + ((b.y - a.y) * i) / steps;
+    if (isSolid(grid, Math.floor(x / TILE_SIZE), Math.floor(y / TILE_SIZE))) {
+      return true;
+    }
+  }
+  return false;
+}

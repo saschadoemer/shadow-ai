@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { type Box, moveBox, type SolidGrid } from '../../src/engine/collision';
+import { type Box, moveBox, type SolidGrid, sightBlocked } from '../../src/engine/collision';
 import { parseTileMap, parseTileset } from '../../src/engine/tiled';
 import { CORRIDOR, pictureMap } from './picture-map';
 
@@ -125,5 +125,41 @@ describe('moveBox on the loaded corridor fixture', () => {
   it('reads the loaded grid: through the gap, stopped above it', () => {
     expect(throughTheGap(corridor)).toStrictEqual([188, 100]);
     expect(moved(box(148, 94), 2, 0, corridor)).toStrictEqual([148, 94]);
+  });
+});
+
+describe('sightBlocked (0008)', () => {
+  /** 4x3 cells; the only solid cell is (2, 1), the square [32, 48) × [16, 32). */
+  const ONE: SolidGrid = {
+    width: 4,
+    height: 3,
+    solid: [false, false, false, false, false, false, true, false, false, false, false, false],
+  };
+  const blocked = (ax: number, ay: number, bx: number, by: number): boolean =>
+    sightBlocked({ x: ax, y: ay }, { x: bx, y: by }, ONE);
+
+  it('is blocked by a solid cell on the line, in both directions', () => {
+    expect(blocked(24, 24, 56, 24)).toBe(true);
+    expect(blocked(56, 24, 24, 24)).toBe(true);
+    expect(blocked(40, 0, 40, 40)).toBe(true);
+  });
+
+  it('is clear above and below the cell', () => {
+    expect(blocked(24, 8, 56, 8)).toBe(false);
+    expect(blocked(24, 40, 56, 40)).toBe(false);
+  });
+
+  it("treats the cell as half-open: y = 32 is the next row, y = 31.5 is the cell's", () => {
+    expect(blocked(24, 32, 56, 32)).toBe(false);
+    expect(blocked(24, 31.5, 56, 31.5)).toBe(true);
+  });
+
+  it('tests a single point when both ends are the same', () => {
+    expect(blocked(24, 24, 24, 24)).toBe(false);
+    expect(blocked(40, 24, 40, 24)).toBe(true);
+  });
+
+  it('treats cells outside the grid as open', () => {
+    expect(blocked(24, 8, -20, 8)).toBe(false);
   });
 });
