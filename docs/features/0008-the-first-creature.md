@@ -323,7 +323,11 @@ nuisance? Does the frozen scrap read as held by the light without any further si
 capture is running? Does the scrap read as shadow — as something that does not belong on the
 path?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-12, steps 1–26. Feel: one second in the light is right; 40 px/s is
+a creature you can deal with; four tiles is the right notice distance; lining the scrap up in
+the cone is a small skill, fine; the frozen scrap does **not** read as held by the light on its
+own — a sign that the capture is running would help (a new draft, not this branch); the scrap
+reads as shadow.
 
 ## Open questions
 
