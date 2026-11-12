@@ -446,3 +446,51 @@ describe('parseTileMap rejects', () => {
     );
   });
 });
+
+describe('parseTileMap: named points (0008)', () => {
+  const tiles = fixture('fixture-tiles.tsj');
+  const tileset = parseTileset(tiles.json, tiles.file);
+  const parse = (name: string) => {
+    const { file, json } = fixture(name);
+    return parseTileMap(json, tileset, file);
+  };
+  const failure = (name: string): string => {
+    try {
+      parse(name);
+      return '(no error)';
+    } catch (error) {
+      return error instanceof Error ? error.message : String(error);
+    }
+  };
+
+  it('returns the named points besides the spawn in file order, and ignores other objects', () => {
+    const map = parse('points.tmj');
+    expect(map.spawn).toStrictEqual({ x: 40, y: 56 });
+    expect(map.points).toStrictEqual([
+      { name: 'snippet', x: 100, y: 60 },
+      { name: 'other', x: 200.5, y: 150 },
+    ]);
+  });
+
+  it('returns no points for a map that has only the spawn', () => {
+    expect(parse('corridor.tmj').points).toStrictEqual([]);
+  });
+
+  it('rejects a point without a name', () => {
+    expect(failure('point-without-name.tmj')).toBe(
+      'tests/fixtures/maps/point-without-name.tmj: layer "objects" has a point object without a name',
+    );
+  });
+
+  it('rejects a point outside the map', () => {
+    expect(failure('point-outside.tmj')).toBe(
+      'tests/fixtures/maps/point-outside.tmj: point "snippet" (330, 60) is outside the map (320x192 px)',
+    );
+  });
+
+  it('rejects a point on a solid tile', () => {
+    expect(failure('point-on-solid.tmj')).toBe(
+      'tests/fixtures/maps/point-on-solid.tmj: point "snippet" (24, 40) is on a solid tile (1, 2)',
+    );
+  });
+});

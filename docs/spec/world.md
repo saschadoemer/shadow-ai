@@ -97,6 +97,12 @@ species:
 
 Species names, looks and behaviours are defined in the feature spec that introduces them.
 
+**The snippet** (*Schnipsel*, feature 0008) is the species of the Sales case: a scrap of paper
+with lines of text, because it feeds on text pasted into a public chatbot. Small, layer 1. Three
+stand on the campus until Sales has an interior: two on the east avenue, one inside the meeting
+rooms' fence. Its displayed name and its journal text are fixed with the journal (M4), the name
+check of §5 included.
+
 ## 5. Names
 
 Every product, company and tool in the game is fictional. Before a name is fixed in the world data

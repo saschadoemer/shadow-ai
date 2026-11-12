@@ -6,7 +6,8 @@ import { describe, expect, it } from 'vitest';
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../../src/engine/sprite';
 import { FRAME_APEX, inCone } from '../../src/game/lamp';
 import { FACINGS, PHASES_PER_FACING } from '../../src/game/state';
-import { encodeLampPng, encodePng } from '../../tools/gen-sprites.ts';
+import { SHADOW_COLOUR } from '../../src/render/palette';
+import { encodeLampPng, encodePng, encodeSnippetPng } from '../../tools/gen-sprites.ts';
 import {
   LAMP_COLOUR,
   LAMP_FRAME_SIZE,
@@ -22,6 +23,15 @@ import {
   SHEET_HEIGHT,
   SHEET_WIDTH,
 } from '../../tools/placeholder-player.ts';
+import {
+  renderSnippet,
+  SNIPPET_FRAME_SIZE,
+  SNIPPET_FRAMES,
+  SNIPPET_LIT,
+  SNIPPET_PAPER,
+  SNIPPET_SHEET_HEIGHT,
+  SNIPPET_SHEET_WIDTH,
+} from '../../tools/placeholder-snippet.ts';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const PNG_FILE = join(ROOT, 'public/sprites/player.png');
@@ -204,5 +214,89 @@ describe('the placeholder lamp generator (0007)', () => {
     expect(LAMP[lampOffset(right, 47, 1) + 3]).toBe(255); // 47 + 1 is even
     expect(LAMP[lampOffset(right, 47, 47) + 3]).toBe(255);
     expect(LAMP[lampOffset(right, 47, 0) + 3]).toBe(0);
+  });
+});
+
+const SNIPPET_FILE = join(ROOT, 'public/sprites/snippet.png');
+const SNIPPET = renderSnippet();
+
+/** The colour of pixel (i, j) of frame `index` of the snippet sheet, or null when transparent. */
+function snippetPixel(index: number, i: number, j: number): string | null {
+  const o = (j * SNIPPET_SHEET_WIDTH + index * SNIPPET_FRAME_SIZE + i) * 4;
+  if (SNIPPET[o + 3] !== 255) {
+    return null;
+  }
+  return `#${[SNIPPET[o], SNIPPET[o + 1], SNIPPET[o + 2]]
+    .map((c) => (c ?? 0).toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+/** Frame `index` as 16 rows of 16 colours or nulls. */
+function snippetFrame(index: number): (string | null)[][] {
+  return Array.from({ length: SNIPPET_FRAME_SIZE }, (_, j) =>
+    Array.from({ length: SNIPPET_FRAME_SIZE }, (_, i) => snippetPixel(index, i, j)),
+  );
+}
+
+describe('the placeholder snippet generator (0008)', () => {
+  it('is deterministic: two runs give byte-identical files', () => {
+    expect(encodeSnippetPng().equals(encodeSnippetPng())).toBe(true);
+  });
+
+  it('matches the committed file', () => {
+    const committed = PNG.sync.read(readFileSync(SNIPPET_FILE));
+    expect([committed.width, committed.height]).toStrictEqual([48, 16]);
+    expect(Buffer.from(SNIPPET).equals(committed.data)).toBe(true);
+  });
+
+  it('is 48x16: three 16x16 frames in one row', () => {
+    expect([
+      SNIPPET_SHEET_WIDTH,
+      SNIPPET_SHEET_HEIGHT,
+      SNIPPET_FRAME_SIZE,
+      SNIPPET_FRAMES,
+    ]).toStrictEqual([48, 16, 16, 3]);
+    expect(SNIPPET).toHaveLength(48 * 16 * 4);
+  });
+
+  it('has 100 opaque pixels per frame, 52 of them the signature colour', () => {
+    for (let index = 0; index < SNIPPET_FRAMES; index += 1) {
+      const pixels = snippetFrame(index).flat();
+      expect(
+        pixels.filter((colour) => colour !== null),
+        `frame ${index}`,
+      ).toHaveLength(100);
+      expect(
+        pixels.filter((colour) => colour === SHADOW_COLOUR),
+        `frame ${index}`,
+      ).toHaveLength(52);
+    }
+  });
+
+  it('draws frame 0 as the spec says: the square 3–12 × 4–13, its border and three lines violet', () => {
+    expect(snippetPixel(0, 3, 4)).toBe(SHADOW_COLOUR);
+    expect(snippetPixel(0, 12, 13)).toBe(SHADOW_COLOUR);
+    expect(snippetPixel(0, 2, 4)).toBeNull();
+    expect(snippetPixel(0, 3, 14)).toBeNull();
+    expect(snippetPixel(0, 4, 5)).toBe(SNIPPET_PAPER);
+    expect(snippetPixel(0, 5, 7)).toBe(SHADOW_COLOUR);
+    expect(snippetPixel(0, 10, 9)).toBe(SHADOW_COLOUR);
+    expect(snippetPixel(0, 11, 9)).toBe(SNIPPET_PAPER);
+    expect(snippetPixel(0, 8, 11)).toBe(SHADOW_COLOUR);
+    expect(snippetPixel(0, 9, 11)).toBe(SNIPPET_PAPER);
+    expect(snippetPixel(0, 5, 8)).toBe(SNIPPET_PAPER);
+    expect([SNIPPET_PAPER, SNIPPET_LIT]).toStrictEqual(['#c0cbdc', '#ffffff']);
+  });
+
+  it('frame 1 is frame 0 moved up by 2 px', () => {
+    const blank = new Array<string | null>(SNIPPET_FRAME_SIZE).fill(null);
+    expect(snippetFrame(1)).toStrictEqual([...snippetFrame(0).slice(2), blank, blank]);
+  });
+
+  it('frame 2 is frame 0 with white paper', () => {
+    const lit = snippetFrame(0).map((row) =>
+      row.map((colour) => (colour === SNIPPET_PAPER ? SNIPPET_LIT : colour)),
+    );
+    expect(snippetFrame(2)).toStrictEqual(lit);
   });
 });

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { EMPTY, type TileMap } from '../../src/engine/tiled';
-import type { GameState, PlayerState } from '../../src/game/state';
+import type { CreatureState, GameState, PlayerState } from '../../src/game/state';
 import {
+  creatureFrame,
+  creatureOrigin,
   drawScene,
   lampFrame,
   lampFrameOrigin,
@@ -44,6 +46,7 @@ const MAP: TileMap = {
   detail: [EMPTY, EMPTY, EMPTY, EMPTY, 4, EMPTY],
   above: [6, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   spawn: { x: 8, y: 8 },
+  points: [],
   solid: [false, false, false, true, true, true],
 };
 const CONTENT: SceneContent = {
@@ -51,6 +54,7 @@ const CONTENT: SceneContent = {
   tileset: { image: {} as ImageBitmap, columns: 7 },
   playerSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 },
   lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
+  creatureSheets: { snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 } },
 };
 const player = (fields: Partial<PlayerState>): PlayerState => ({
   x: 0,
@@ -69,6 +73,8 @@ const state = (
   player: player(fields),
   camera,
   lamp: { on: lampOn },
+  creatures: [],
+  captured: { snippet: 0 },
 });
 
 describe('playerFrame', () => {
@@ -190,5 +196,60 @@ describe('the lamp in the scene (0007)', () => {
     expect(lampFrame(player({ facing: 'up' }))).toBe(1);
     expect(lampFrame(player({ facing: 'left' }))).toBe(2);
     expect(lampFrame(player({ facing: 'right' }))).toBe(3);
+  });
+});
+
+describe('the creatures in the scene (0008)', () => {
+  const camera = { x: 5, y: 7 };
+  const snippet = (x: number, y: number, light = 0): CreatureState => ({
+    species: 'snippet',
+    x,
+    y,
+    light,
+  });
+
+  it('draws them after the cone and before the player, in array order', () => {
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      {
+        ...state({ x: 20.4, y: 30.6, facing: 'left', frame: 3 }, camera, true),
+        tick: 15,
+        creatures: [snippet(40.4, 50.6), snippet(60, 40, 5)],
+      },
+      CONTENT,
+    );
+    expect(renderer.calls).toStrictEqual([
+      'clear #181425',
+      'drawTile 0 at -5,-7',
+      'drawTile 1 at 11,-7',
+      'drawTile 2 at -5,9',
+      'drawTile 2 at 11,9',
+      'drawTile 2 at 27,9',
+      'drawTile 4 at 11,9',
+      'drawSprite 2 at -32,-12', // the cone
+      'drawSprite 1 at 27,28', // free at tick 15: frame 1; round(40.4) − 8 − 5, round(50.6) − 16 − 7
+      'drawSprite 2 at 47,17', // frozen: frame 2; 60 − 8 − 5, 40 − 16 − 7
+      'drawSprite 13 at 7,0',
+      'drawTile 6 at -5,-7',
+    ]);
+    expect(renderer.sheets).toStrictEqual([
+      CONTENT.lampSheet,
+      CONTENT.creatureSheets.snippet,
+      CONTENT.creatureSheets.snippet,
+      CONTENT.playerSheet,
+    ]);
+  });
+
+  it('places the frame by the feet: (40.4, 50.6) with camera (5, 7) is (27, 28)', () => {
+    expect(creatureOrigin(snippet(40.4, 50.6), camera)).toStrictEqual({ x: 27, y: 28 });
+  });
+
+  it('bobs every 15 steps while free and shows frame 2 while frozen', () => {
+    expect([0, 14, 15, 29, 30].map((tick) => creatureFrame(snippet(0, 0), tick))).toStrictEqual([
+      0, 0, 1, 1, 0,
+    ]);
+    expect(creatureFrame(snippet(0, 0, 1), 0)).toBe(2);
+    expect(creatureFrame(snippet(0, 0, 59), 15)).toBe(2);
   });
 });

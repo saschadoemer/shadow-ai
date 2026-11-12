@@ -2,7 +2,7 @@ import { EMPTY, type Point, TILE_SIZE } from '../src/engine/tiled.ts';
 
 /**
  * The campus as data (feature 0006, world.md §1): rectangles of path and water on `ground`,
- * buildings and fences on `detail`, and the spawn. The tables of the feature spec are the
+ * buildings and fences on `detail`, the spawn and the creatures' points. The tables of the feature spec are the
  * layout; this file mirrors them, one entry per row, columns c0–c1 and rows r0–r1 inclusive.
  * Pure — it returns the layers and the .tmj object; tools/gen-campus.ts writes the file. Retired
  * when the art pass takes the map over by hand in Tiled (visual.md §5).
@@ -114,6 +114,17 @@ export const FENCES: readonly Fence[] = [
 /** The spawn in pixels: tile (64, 45), in the courtyard in front of the main building's entrance. */
 export const SPAWN: Point = { x: 1024, y: 734 };
 
+/**
+ * The snippets of feature 0008, feet in pixels: two on the east avenue — tile (80, 47) and
+ * tile (97, 47), in front of the Sales door — and one inside the meeting rooms' fence, tile
+ * (99, 33). Placeholders like the campus; they move inside when Sales has an interior (M5).
+ */
+export const SNIPPETS: readonly Point[] = [
+  { x: 1288, y: 760 },
+  { x: 1560, y: 760 },
+  { x: 1592, y: 540 },
+];
+
 function index(column: number, row: number): number {
   return row * CAMPUS_WIDTH + column;
 }
@@ -197,10 +208,10 @@ interface TileLayerJson {
   readonly y: 0;
 }
 
-interface SpawnJson {
+interface PointJson {
   readonly height: 0;
-  readonly id: 1;
-  readonly name: 'spawn';
+  readonly id: number;
+  readonly name: string;
   readonly point: true;
   readonly rotation: 0;
   readonly type: '';
@@ -214,7 +225,7 @@ interface ObjectLayerJson {
   readonly draworder: 'topdown';
   readonly id: number;
   readonly name: 'objects';
-  readonly objects: readonly SpawnJson[];
+  readonly objects: readonly PointJson[];
   readonly opacity: 1;
   readonly type: 'objectgroup';
   readonly visible: true;
@@ -261,6 +272,21 @@ function tileLayer(id: number, name: string, ids: readonly number[]): TileLayerJ
   };
 }
 
+function pointObject(id: number, name: string, at: Point): PointJson {
+  return {
+    height: 0,
+    id,
+    name,
+    point: true,
+    rotation: 0,
+    type: '',
+    visible: true,
+    width: 0,
+    x: at.x,
+    y: at.y,
+  };
+}
+
 export function campusJson(): MapJson {
   const { ground, detail } = buildLayers();
   return {
@@ -275,18 +301,8 @@ export function campusJson(): MapJson {
         id: 3,
         name: 'objects',
         objects: [
-          {
-            height: 0,
-            id: 1,
-            name: 'spawn',
-            point: true,
-            rotation: 0,
-            type: '',
-            visible: true,
-            width: 0,
-            x: SPAWN.x,
-            y: SPAWN.y,
-          },
+          pointObject(1, 'spawn', SPAWN),
+          ...SNIPPETS.map((feet, n) => pointObject(n + 2, 'snippet', feet)),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -296,7 +312,7 @@ export function campusJson(): MapJson {
       },
     ],
     nextlayerid: 4,
-    nextobjectid: 2,
+    nextobjectid: SNIPPETS.length + 2,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

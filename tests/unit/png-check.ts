@@ -3,8 +3,8 @@ import { PNG } from 'pngjs';
 export interface PngRules {
   /** Allowed colours as lowercase `#rrggbb`. */
   readonly palette: ReadonlySet<string>;
-  /** A palette colour that may appear nowhere in the file. */
-  readonly reserved: string;
+  /** A palette colour that may appear nowhere in the file; null for a shadow asset, which may use it. */
+  readonly reserved: string | null;
   /** Require width and height to be multiples of 16 (tilesets). */
   readonly multipleOf16?: boolean;
 }
