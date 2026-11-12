@@ -3,6 +3,7 @@ import { type Bindings, createKeyboard, listenToKeyboard, resolveActions } from 
 import { runLoop } from './engine/loop';
 import { FRAME_HEIGHT, FRAME_WIDTH } from './engine/sprite';
 import { parseTileMap, parseTileset, tilesetSource } from './engine/tiled';
+import { CREATURE_SIZE } from './game/creature';
 import { CONE_LENGTH } from './game/lamp';
 import type { GameInput } from './game/player';
 import type { GameState } from './game/state';
@@ -24,10 +25,11 @@ declare global {
 const MAP_URL = '/maps/campus.tmj';
 const PLAYER_SHEET_URL = '/sprites/player.png';
 const LAMP_SHEET_URL = '/sprites/lamp.png';
+const SNIPPET_SHEET_URL = '/sprites/snippet.png';
 
 /**
  * The map, its tileset and the tileset's image, each resolved against the file naming it, then
- * the player's sprite sheet and the lamp's.
+ * the player's sprite sheet, the lamp's and one sheet per creature species.
  */
 async function loadContent(): Promise<SceneContent> {
   const mapJson = await loadJson(MAP_URL);
@@ -47,6 +49,13 @@ async function loadContent(): Promise<SceneContent> {
       image: await loadImage(LAMP_SHEET_URL),
       frameWidth: CONE_LENGTH,
       frameHeight: CONE_LENGTH,
+    },
+    creatureSheets: {
+      snippet: {
+        image: await loadImage(SNIPPET_SHEET_URL),
+        frameWidth: CREATURE_SIZE,
+        frameHeight: CREATURE_SIZE,
+      },
     },
   };
 }
