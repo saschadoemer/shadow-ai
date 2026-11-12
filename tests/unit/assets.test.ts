@@ -9,6 +9,12 @@ import { checkTileset, type TilesetFacts } from './tileset-check';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const RULES = { palette: new Set<string>(ENDESGA_32), reserved: SHADOW_COLOUR };
+/** The shadow assets: the only files that may use the reserved colour (visual.md §4, 0008). */
+const SHADOW_ASSETS: ReadonlySet<string> = new Set(['public/sprites/snippet.png']);
+const rulesFor = (file: string) => ({
+  ...RULES,
+  reserved: SHADOW_ASSETS.has(file) ? null : SHADOW_COLOUR,
+});
 const FIXTURE = 'tests/fixtures/off-palette.png';
 
 function read(file: string): Buffer {
@@ -45,7 +51,7 @@ describe('Endesga 32 palette data', () => {
 describe('every PNG under public/ is a palette PNG (INV-6)', () => {
   it('finds no off-palette, semi-transparent or reserved pixel under public/', () => {
     const files = globSync('public/**/*.png', { cwd: ROOT }).sort();
-    const findings = files.flatMap((file) => checkPng(file, read(file), RULES));
+    const findings = files.flatMap((file) => checkPng(file, read(file), rulesFor(file)));
     expect(findings).toStrictEqual([]);
   });
 
@@ -57,10 +63,29 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
     expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/lamp.png');
   });
 
+  it('checks the snippet sheet under public/sprites/ with every other PNG', () => {
+    expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/snippet.png');
+  });
+
+  it('allows the reserved colour in a shadow asset and nowhere else', () => {
+    const violet = onePixel(0x68, 0x38, 0x6c, 255);
+    expect(checkPng('x.png', violet, rulesFor('public/sprites/snippet.png'))).toStrictEqual([]);
+    expect(checkPng('x.png', violet, rulesFor('public/sprites/player.png'))).toStrictEqual([
+      'x.png: pixel (0, 0) uses the reserved shadow colour #68386c',
+    ]);
+    expect([...SHADOW_ASSETS]).toStrictEqual(['public/sprites/snippet.png']);
+  });
+
+  it('holds a shadow asset to the palette all the same', () => {
+    expect(
+      checkPng('x.png', onePixel(0x12, 0x34, 0x56, 255), rulesFor('public/sprites/snippet.png')),
+    ).toStrictEqual(['x.png: pixel (0, 0) has colour #123456, which is not in Endesga 32']);
+  });
+
   it('finds every tileset under public/tiles/ sized in multiples of 16', () => {
     const files = globSync('public/tiles/**/*.png', { cwd: ROOT }).sort();
     const findings = files.flatMap((file) =>
-      checkPng(file, read(file), { ...RULES, multipleOf16: true }),
+      checkPng(file, read(file), { ...rulesFor(file), multipleOf16: true }),
     );
     expect(findings).toStrictEqual([]);
   });
