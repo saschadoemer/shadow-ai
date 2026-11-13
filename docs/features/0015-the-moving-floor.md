@@ -324,7 +324,11 @@ just loaded; the figure stands in the reception. Arrow keys walk, the lamp key i
 - Is one dog and one vacuum in every room too much anywhere?
 - Does a mover ever get in the way of catching a snippet in Sales?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-13, steps 1–30. Feel notes: the speeds are right (person 40, dog
+60, vacuum 20, drone 30 px/s); 20 px is the right distance, the movers stop at the right moment;
+the dog reads more like clockwork than a dog — a random route would be nicer (a new draft, not
+this feature); one dog and one vacuum per room is not too much anywhere; no mover gets in the way
+of catching a snippet in Sales.
 
 ## Open questions
 
