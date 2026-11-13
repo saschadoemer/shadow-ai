@@ -14,6 +14,7 @@ import {
 import { type CreatureState, type Facing, NO_RECOIL, type PlayerState } from '../../src/game/state';
 import { grassMap } from './grass-map';
 import { pictureMap } from './picture-map';
+import { solidsWith } from './solids';
 
 /** Open ground, 20x12 tiles: 320x192 px. */
 const OPEN = grassMap(20, 12, { x: 160, y: 100 });
@@ -180,6 +181,18 @@ describe('a wall in the light', () => {
   it('is lit when the cell lies beside the line', () => {
     const map = pictureMap(rows(3), { x: 40, y: 40 });
     expect(isLit(CREATURE, RIGHT, true, map)).toBe(true);
+  });
+
+  it('is not lit behind a 4 px left strip in the cone, and lit without it (0010)', () => {
+    // The strip [112, 116) × [80, 96) in cell (7, 5); the line crosses it at y ≈ 94.
+    const strip = {
+      ...OPEN,
+      solids: solidsWith(20, 12, [
+        { column: 7, row: 5, box: { x: 112, y: 80, width: 4, height: 16 } },
+      ]),
+    };
+    expect(isLit(CREATURE, RIGHT, true, strip)).toBe(false);
+    expect(isLit(CREATURE, RIGHT, true, OPEN)).toBe(true);
   });
 });
 

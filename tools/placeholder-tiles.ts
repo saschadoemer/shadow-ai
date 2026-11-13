@@ -1,10 +1,12 @@
-import { TILE_SIZE } from '../src/engine/tiled.ts';
+import { type Box, TILE_SIZE } from '../src/engine/tiled.ts';
 import type { PaletteColour } from '../src/render/palette.ts';
 
 /**
- * The placeholder tileset (visual.md §5): seven 16x16 tiles in one row, drawn from code in
- * Endesga 32. Pure — it returns pixels and the .tsj object; tools/gen-tiles.ts writes the files.
- * Pixel (0, 0) of every tile is its base colour.
+ * The placeholder tileset (visual.md §5, feature 0010): thirteen 16x16 office tiles in one row,
+ * drawn from code in Endesga 32. Pure — it returns pixels and the .tsj object; tools/gen-tiles.ts
+ * writes the files. A wall is a strip 4 px thick on the top or the left edge of a cell, drawn
+ * over the cell's floor; its pixels are exactly its collision boxes. Pixel (0, 0) of the two
+ * floor tiles is their base colour.
  */
 
 export { TILE_SIZE };
@@ -12,82 +14,160 @@ export { TILE_SIZE };
 export interface TileKind {
   readonly id: number;
   readonly name: string;
-  readonly base: PaletteColour;
-  readonly second: PaletteColour;
+  /** The whole tile is solid: the `solid` property in the .tsj. */
   readonly solid: boolean;
+  /** Collision rectangles in tile-local pixels, for a tile that is solid in part. */
+  readonly boxes: readonly Box[];
 }
 
-export const TILE_KINDS: readonly TileKind[] = [
-  { id: 0, name: 'grass', base: '#63c74d', second: '#3e8948', solid: false },
-  { id: 1, name: 'path', base: '#e8b796', second: '#c28569', solid: false },
-  { id: 2, name: 'wall', base: '#8b9bb4', second: '#5a6988', solid: true },
-  { id: 3, name: 'water', base: '#0099db', second: '#2ce8f5', solid: true },
-  { id: 4, name: 'fence', base: '#b86f50', second: '#733e39', solid: true },
-  { id: 5, name: 'door-closed', base: '#733e39', second: '#3e2731', solid: true },
-  { id: 6, name: 'roof', base: '#be4a2f', second: '#a22633', solid: true },
-];
+export const CARPET = 0;
+export const CORRIDOR = 1;
+export const OUTER_WALL = 2;
+export const WINDOW = 3;
+/** The wall tiles on carpet. */
+export const WALL_TOP = 4;
+export const WALL_LEFT = 5;
+export const WALL_CORNER = 6;
+export const WALL_POST = 7;
+/** The id of a wall tile on corridor is the id of the same wall on carpet plus this. */
+export const CORRIDOR_WALLS = 4;
+export const DOOR_CLOSED = 12;
 
-/** 7 × 16. */
-export const SHEET_WIDTH = 112;
+/** 13 × 16. */
+export const SHEET_WIDTH = 208;
 export const SHEET_HEIGHT = 16;
 
-/** Which colour a tile-local pixel gets; `clear` is transparent, alpha 0. */
-type Ink = 'base' | 'second' | 'clear';
+const TOP: Box = { x: 0, y: 0, width: TILE_SIZE, height: 4 };
+const LEFT: Box = { x: 0, y: 0, width: 4, height: TILE_SIZE };
+const POST: Box = { x: 0, y: 0, width: 4, height: 4 };
+
+export const TILE_KINDS: readonly TileKind[] = [
+  { id: CARPET, name: 'carpet', solid: false, boxes: [] },
+  { id: CORRIDOR, name: 'corridor', solid: false, boxes: [] },
+  { id: OUTER_WALL, name: 'outer-wall', solid: true, boxes: [] },
+  { id: WINDOW, name: 'window', solid: true, boxes: [] },
+  { id: WALL_TOP, name: 'wall-top-carpet', solid: false, boxes: [TOP] },
+  { id: WALL_LEFT, name: 'wall-left-carpet', solid: false, boxes: [LEFT] },
+  { id: WALL_CORNER, name: 'wall-corner-carpet', solid: false, boxes: [TOP, LEFT] },
+  { id: WALL_POST, name: 'wall-post-carpet', solid: false, boxes: [POST] },
+  { id: WALL_TOP + CORRIDOR_WALLS, name: 'wall-top-corridor', solid: false, boxes: [TOP] },
+  { id: WALL_LEFT + CORRIDOR_WALLS, name: 'wall-left-corridor', solid: false, boxes: [LEFT] },
+  {
+    id: WALL_CORNER + CORRIDOR_WALLS,
+    name: 'wall-corner-corridor',
+    solid: false,
+    boxes: [TOP, LEFT],
+  },
+  { id: WALL_POST + CORRIDOR_WALLS, name: 'wall-post-corridor', solid: false, boxes: [POST] },
+  { id: DOOR_CLOSED, name: 'door-closed', solid: false, boxes: [TOP] },
+];
+
+const WALL_DARK: PaletteColour = '#262b44';
+const WALL_LIGHT: PaletteColour = '#3a4466';
+const DOOR: PaletteColour = '#733e39';
+const DOOR_LINE: PaletteColour = '#3e2731';
 
 function within(value: number, from: number, to: number): boolean {
   return value >= from && value <= to;
 }
 
-function scatter(points: readonly (readonly [number, number])[]): (x: number, y: number) => Ink {
-  return (x, y) => (points.some(([px, py]) => px === x && py === y) ? 'second' : 'base');
+function scatter(
+  base: PaletteColour,
+  second: PaletteColour,
+  points: readonly (readonly [number, number])[],
+): (x: number, y: number) => PaletteColour {
+  return (x, y) => (points.some(([px, py]) => px === x && py === y) ? second : base);
 }
 
+const carpet = scatter('#8b9bb4', '#5a6988', [
+  [2, 3],
+  [9, 1],
+  [13, 6],
+  [5, 10],
+  [11, 12],
+  [1, 14],
+]);
+
+const corridor = scatter('#ead4aa', '#e4a672', [
+  [3, 2],
+  [10, 4],
+  [6, 8],
+  [13, 11],
+  [1, 13],
+  [8, 14],
+]);
+
 /** Brick joints: four mortar rows, the vertical joints offset from course to course. */
-function joints(x: number, y: number): Ink {
+function outerWall(x: number, y: number): PaletteColour {
   const row = y === 3 || y === 7 || y === 11 || y === 15;
   const upper = x === 7 && (within(y, 0, 2) || within(y, 8, 10));
   const lower = (x === 3 || x === 11) && (within(y, 4, 6) || within(y, 12, 14));
-  return row || upper || lower ? 'second' : 'base';
+  return row || upper || lower ? WALL_DARK : WALL_LIGHT;
 }
 
-/** The patterns in tile-local pixels (x, y), 0–15, by tile id. */
-const PATTERNS: readonly ((x: number, y: number) => Ink)[] = [
-  scatter([
-    [2, 3],
-    [9, 1],
-    [13, 6],
-    [5, 10],
-    [11, 12],
-    [1, 14],
-  ]),
-  scatter([
-    [3, 2],
-    [10, 4],
-    [6, 8],
-    [13, 11],
-    [1, 13],
-    [8, 14],
-  ]),
-  joints,
-  (x, y) =>
-    ((y === 3 || y === 9) && within(x, 2, 6)) || ((y === 6 || y === 12) && within(x, 9, 13))
-      ? 'second'
-      : 'base',
-  // Posts come last, in the base colour, over the rails; the rest is transparent.
-  (x, y) => {
-    if (x === 0 || x === 1 || x === 8 || x === 9) {
-      return 'base';
+/** A frame 2 px wide round the glass. */
+function window(x: number, y: number): PaletteColour {
+  const frame = [0, 1, 14, 15];
+  return frame.includes(x) || frame.includes(y) ? WALL_LIGHT : '#2ce8f5';
+}
+
+function inBox(box: Box, x: number, y: number): boolean {
+  return x >= box.x && x < box.x + box.width && y >= box.y && y < box.y + box.height;
+}
+
+/**
+ * A wall tile: the floor, unless the pixel lies in a strip. A strip is dark with its inner line
+ * — the row y = 3 of a top strip, the column x = 3 of a left strip — lighter; where two strips
+ * meet, and in a post, the square is dark.
+ */
+function wall(
+  floor: (x: number, y: number) => PaletteColour,
+  boxes: readonly Box[],
+): (x: number, y: number) => PaletteColour {
+  return (x, y) => {
+    const hits = boxes.filter((box) => inBox(box, x, y));
+    if (hits.length === 0) {
+      return floor(x, y);
     }
-    return y === 4 || y === 5 || y === 11 || y === 12 ? 'second' : 'clear';
-  },
-  (x, y) =>
-    ((x === 2 || x === 13) && within(y, 2, 15)) ||
-    (y === 2 && within(x, 2, 13)) ||
-    (x === 11 && y === 9)
-      ? 'second'
-      : 'base',
-  joints,
-];
+    const [hit] = hits;
+    if (hit === undefined || hits.length > 1) {
+      return WALL_DARK;
+    }
+    if (hit.width === TILE_SIZE) {
+      return y === 3 ? WALL_LIGHT : WALL_DARK;
+    }
+    if (hit.height === TILE_SIZE) {
+      return x === 3 ? WALL_LIGHT : WALL_DARK;
+    }
+    return WALL_DARK;
+  };
+}
+
+/** The closed door: corridor, the top strip in door colours, its row y = 3 darker. */
+function doorClosed(x: number, y: number): PaletteColour {
+  if (!inBox(TOP, x, y)) {
+    return corridor(x, y);
+  }
+  return y === 3 ? DOOR_LINE : DOOR;
+}
+
+/** The picture of a tile, by id. */
+function painter(kind: TileKind): (x: number, y: number) => PaletteColour {
+  switch (kind.id) {
+    case CARPET:
+      return carpet;
+    case CORRIDOR:
+      return corridor;
+    case OUTER_WALL:
+      return outerWall;
+    case WINDOW:
+      return window;
+    case DOOR_CLOSED:
+      return doorClosed;
+    default:
+      return wall(kind.id < WALL_TOP + CORRIDOR_WALLS ? carpet : corridor, kind.boxes);
+  }
+}
 
 export function rgb(colour: PaletteColour): readonly [number, number, number] {
   return [
@@ -97,22 +177,15 @@ export function rgb(colour: PaletteColour): readonly [number, number, number] {
   ];
 }
 
-/** RGBA, row-major, SHEET_WIDTH × SHEET_HEIGHT × 4 bytes; alpha 0 or 255. */
+/** RGBA, row-major, SHEET_WIDTH × SHEET_HEIGHT × 4 bytes; every pixel opaque. */
 export function renderTiles(): Uint8Array {
   const data = new Uint8Array(SHEET_WIDTH * SHEET_HEIGHT * 4);
   for (const kind of TILE_KINDS) {
-    const pattern = PATTERNS[kind.id];
-    if (pattern === undefined) {
-      throw new Error(`tile ${kind.id} (${kind.name}) has no pattern`);
-    }
+    const paint = painter(kind);
     for (let y = 0; y < TILE_SIZE; y += 1) {
       for (let x = 0; x < TILE_SIZE; x += 1) {
-        const ink = pattern(x, y);
-        if (ink === 'clear') {
-          continue;
-        }
         const offset = (y * SHEET_WIDTH + kind.id * TILE_SIZE + x) * 4;
-        data.set([...rgb(ink === 'base' ? kind.base : kind.second), 255], offset);
+        data.set([...rgb(paint(x, y)), 255], offset);
       }
     }
   }
@@ -123,6 +196,38 @@ interface SolidProperty {
   readonly name: 'solid';
   readonly type: 'bool';
   readonly value: true;
+}
+
+/** A collision rectangle as Tiled 1.11 writes it, keys in Tiled's order. */
+interface CollisionObject {
+  readonly height: number;
+  readonly id: number;
+  readonly name: '';
+  readonly rotation: 0;
+  readonly type: '';
+  readonly visible: true;
+  readonly width: number;
+  readonly x: number;
+  readonly y: number;
+}
+
+interface CollisionGroup {
+  readonly draworder: 'index';
+  readonly id: number;
+  readonly name: '';
+  readonly objects: readonly CollisionObject[];
+  readonly opacity: 1;
+  readonly type: 'objectgroup';
+  readonly visible: true;
+  readonly x: 0;
+  readonly y: 0;
+}
+
+/** A tile entry: a solid property, or a collision group. */
+export interface TileEntry {
+  readonly id: number;
+  readonly objectgroup?: CollisionGroup;
+  readonly properties?: readonly SolidProperty[];
 }
 
 /** The .tsj object, as Tiled reads it. */
@@ -136,14 +241,46 @@ export interface TilesetJson {
   readonly spacing: number;
   readonly tilecount: number;
   readonly tileheight: number;
-  readonly tiles: readonly { readonly id: number; readonly properties: readonly SolidProperty[] }[];
+  readonly tiles: readonly TileEntry[];
   readonly tilewidth: number;
   readonly type: 'tileset';
   readonly version: '1.10';
 }
 
+function collisionGroup(boxes: readonly Box[]): CollisionGroup {
+  return {
+    draworder: 'index',
+    id: 2,
+    name: '',
+    objects: boxes.map((box, n) => ({
+      height: box.height,
+      id: n + 1,
+      name: '',
+      rotation: 0,
+      type: '',
+      visible: true,
+      width: box.width,
+      x: box.x,
+      y: box.y,
+    })),
+    opacity: 1,
+    type: 'objectgroup',
+    visible: true,
+    x: 0,
+    y: 0,
+  };
+}
+
 /** Keys in Tiled's own order, so that a save in Tiled changes as little as possible. */
 export function tilesetJson(): TilesetJson {
+  const tiles: TileEntry[] = [];
+  for (const kind of TILE_KINDS) {
+    if (kind.solid) {
+      tiles.push({ id: kind.id, properties: [{ name: 'solid', type: 'bool', value: true }] });
+    } else if (kind.boxes.length > 0) {
+      tiles.push({ id: kind.id, objectgroup: collisionGroup(kind.boxes) });
+    }
+  }
   return {
     columns: SHEET_WIDTH / TILE_SIZE,
     image: 'placeholder.png',
@@ -154,10 +291,7 @@ export function tilesetJson(): TilesetJson {
     spacing: 0,
     tilecount: TILE_KINDS.length,
     tileheight: TILE_SIZE,
-    tiles: TILE_KINDS.filter((kind) => kind.solid).map((kind) => ({
-      id: kind.id,
-      properties: [{ name: 'solid', type: 'bool', value: true }],
-    })),
+    tiles,
     tilewidth: TILE_SIZE,
     type: 'tileset',
     version: '1.10',

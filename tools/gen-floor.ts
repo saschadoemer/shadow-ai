@@ -1,16 +1,16 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { campusJson } from './campus-layout.ts';
+import { floorJson } from './floor-layout.ts';
 
 /**
- * `npm run gen-campus`: writes public/maps/campus.tmj from tools/campus-layout.ts. Deterministic,
+ * `npm run gen-floor`: writes public/maps/floor.tmj from tools/floor-layout.ts. Deterministic,
  * and Node runs this TypeScript file directly. The layer data goes on one line per layer, as
- * Tiled writes it; JSON.stringify alone would write one cell per line, 12288 lines per layer.
+ * Tiled writes it; JSON.stringify alone would write one cell per line, 8640 lines per layer.
  */
 
-export function encodeCampus(): string {
+export function encodeFloor(): string {
   const dataLines: string[] = [];
   const text = JSON.stringify(
-    campusJson(),
+    floorJson(),
     (key, value: unknown) => {
       if (key === 'data' && Array.isArray(value)) {
         dataLines.push(`[${value.join(', ')}]`);
@@ -25,5 +25,5 @@ export function encodeCampus(): string {
 
 if (import.meta.main) {
   mkdirSync('public/maps', { recursive: true });
-  writeFileSync('public/maps/campus.tmj', encodeCampus());
+  writeFileSync('public/maps/floor.tmj', encodeFloor());
 }

@@ -129,8 +129,8 @@ describe('update', () => {
 });
 
 describe('the camera in the state (0006)', () => {
-  /** The campus's size and spawn on open ground: 128x96 tiles, the spawn at (1024, 734). */
-  const CAMPUS = grassMap(128, 96, { x: 1024, y: 734 });
+  /** A 128x96 map of open ground, the spawn at (1024, 734). */
+  const LARGE = grassMap(128, 96, { x: 1024, y: 734 });
   const feet = (x: number, y: number): PlayerState => ({
     x,
     y,
@@ -142,13 +142,13 @@ describe('the camera in the state (0006)', () => {
   });
 
   it('starts centred on the spawn: (864, 640)', () => {
-    expect(createInitialState(CAMPUS).camera).toStrictEqual({ x: 864, y: 640 });
+    expect(createInitialState(LARGE).camera).toStrictEqual({ x: 864, y: 640 });
   });
 
   it('follows the player: 60 steps right move the player and the camera 80 px', () => {
-    let state = createInitialState(CAMPUS);
+    let state = createInitialState(LARGE);
     for (let i = 0; i < 60; i += 1) {
-      state = update(state, RIGHT, CAMPUS);
+      state = update(state, RIGHT, LARGE);
     }
     expect(state.player.x).toBeCloseTo(1104, 6); // 60 × 1.3333… within floating-point noise
     expect(state.camera).toStrictEqual({ x: 944, y: 640 });
@@ -185,7 +185,7 @@ describe('the lamp in the state (0007)', () => {
 });
 
 describe('the creatures in the state (0008)', () => {
-  /** The campus's size and spawn on open ground, one snippet 46 px right of the spawn. */
+  /** A 128x96 map of open ground with the spawn at (1024, 734), one snippet 46 px right of the spawn. */
   const point = (name: string, x: number, y: number) => ({ name, x, y });
   const MAP_ONE = grassMap(128, 96, { x: 1024, y: 734 }, [point('snippet', 1070, 734)]);
   const RIGHT_SHINE: GameInput = { ...NONE, right: true, lamp: true };

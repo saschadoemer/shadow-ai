@@ -28,7 +28,8 @@ describe('tests/fixtures/maps/test.tmj', () => {
   it('references the hand-made seven-tile fixture tileset, never the real one', () => {
     expect(source).toBe('seven-tiles.tsj');
     expect(tileset.tileCount).toBe(7);
-    expect(tileset.solid).toStrictEqual([false, false, true, true, true, true, true]);
+    const full = [{ x: 0, y: 0, width: 16, height: 16 }];
+    expect(tileset.boxes).toStrictEqual([[], [], full, full, full, full, full]);
   });
 
   it('is 20x12 tiles, 320x192 px', () => {
@@ -38,7 +39,7 @@ describe('tests/fixtures/maps/test.tmj', () => {
   it('puts the spawn at pixel (136, 120), on grass in tile (8, 7)', () => {
     expect(map.spawn).toStrictEqual({ x: 136, y: 120 });
     expect(map.ground[cell(8, 7)]).toBe(0);
-    expect(map.solid[cell(8, 7)]).toBe(false);
+    expect(map.solids[cell(8, 7)]).toStrictEqual([]);
   });
 
   it('has grass with nothing above it at tile (0, 0), the smoke test reads it', () => {
@@ -48,8 +49,8 @@ describe('tests/fixtures/maps/test.tmj', () => {
   });
 
   it('closes the wall ring except for the doorway', () => {
-    expect(map.solid[cell(12, 1)]).toBe(true);
-    expect(map.solid[cell(14, 4)]).toBe(false);
+    expect(map.solids[cell(12, 1)]).toHaveLength(1);
+    expect(map.solids[cell(14, 4)]).toStrictEqual([]);
     expect(map.ground[cell(12, 2)], 'the closed door').toBe(5);
   });
 

@@ -3,6 +3,7 @@ import { EMPTY, type TileMap } from '../../src/engine/tiled';
 import { drawLayer } from '../../src/render/draw-map';
 import type { Renderer, TilesetImage } from '../../src/render/renderer';
 import { grassMap } from './grass-map';
+import { solidsOf } from './solids';
 
 /** A renderer that only records what it was asked to draw, one line per call. */
 function recordingRenderer(): Renderer & {
@@ -41,7 +42,7 @@ const MAP: TileMap = {
   above: [6, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   spawn: { x: 8, y: 8 },
   points: [],
-  solid: [false, false, false, true, true, true],
+  solids: solidsOf([false, false, false, true, true, true], 3),
 };
 
 /** 40x30 grass tiles, 640x480 px: larger than the view in both directions. */

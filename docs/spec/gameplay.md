@@ -56,15 +56,15 @@ Combat matters but is never the whole answer. Every piece of shadow belongs to o
 ## 4. Overview
 
 Health is called **overview**. Hits from creatures take it. At zero the player is in the dark and
-wakes up in the data protection officer's office on the courtyard. There is no death and no game
-over, only a way back. The maximum grows by one with every solved case.
+wakes up in the data protection officer's office beside the reception. There is no death and no
+game over, only a way back. The maximum grows by one with every solved case.
 
 **As built** (feature 0009): the figure starts with three points, shown as three small lights in
 the top-left corner. A hit takes one, pushes the figure a tile and a half straight away from the
 creature — a wall holds the push — and leaves it safe for a second and a half, blinking; all
 three numbers *tune*. A frozen creature never hits: the lamp is the defence. At zero the screen
-closes like an eye and opens again a second and a half later: the figure stands in front of the
-data protection officer's office with full overview, the creatures still in the world are back
+closes like an eye and opens again a second and a half later: the figure stands in the data
+protection officer's office (feature 0010) with full overview, the creatures still in the world are back
 at their places, and what was captured stays captured. **Open:** how overview is won back
 without falling into the dark — a conversation, a place, a find — is decided when there are
 figures to talk to and rooms to enter (M4, M5). The maximum grows with the first solved case
@@ -89,7 +89,7 @@ alternative):
 
 1. Traces found in the region are shadow residue on devices, visible in the lamp's light; each
    goes into the journal.
-2. Conversations in the department and the canteen lead to the source — the person where the
+2. Conversations in the department and the break room lead to the source — the person where the
    data flow begins.
 3. At the source the player **shows a matching trace** from the journal. It is a gesture, not an
    accusation: *I know what is going on, and I am not here to punish you.* The source speaks

@@ -38,7 +38,7 @@ export function bodyPoint(creature: CreatureState): Point {
 }
 
 /**
- * Lit: the lamp is on, the body point is in the cone, and no solid cell lies on the line from
+ * Lit: the lamp is on, the body point is in the cone, and no solid box lies on the line from
  * the centre of the figure's collision box to the body point. The line starts at the box and
  * not at the cone's apex, because the apex is inside a wall when the figure stands under one.
  */
@@ -65,7 +65,7 @@ function clamp(value: number, min: number, max: number): number {
 /**
  * Not lit: the count starts again, and the creature moves toward the figure's feet when they are
  * closer than NOTICE_RADIUS and farther than TOUCH_DISTANCE — by 2/3 px, or by what is left to
- * TOUCH_DISTANCE. The figure's box against the solid grid, X then Y, then the clamp to the map.
+ * TOUCH_DISTANCE. The figure's box against the solid boxes, X then Y, then the clamp to the map.
  */
 function approach(creature: CreatureState, player: PlayerState, map: TileMap): CreatureState {
   const dx = player.x - creature.x;

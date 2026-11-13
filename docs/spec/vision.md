@@ -10,7 +10,7 @@ Shadow AI is a browser game with pixel-art 2D graphics in the tradition of early
 adventures (The Legend of Zelda, Ocean's Heart). You are the head of IT at a mid-sized company.
 All over the building people use AI tools nobody approved — not out of malice, but because the
 tools fill gaps nobody else fills. Where data leaves the house unseen, a shadow remains. At first
-only you can see it. You walk the campus, find traces, talk to people, and bring the shadow into
+only you can see it. You walk the floor, find traces, talk to people, and bring the shadow into
 the light.
 
 ## 2. Why it exists
@@ -62,8 +62,8 @@ rules of the shadow:
 
 - *Act 1 — The call.* About fifteen minutes. The call, the walk to Sales, the first sight of the
   shadow. The data protection officer sees it too and gives you the lamp. The first small case in
-  Sales is solved, the region clears, the campus opens. This act is the trade-fair teaser.
-- *Act 2 — The cases.* About a hundred to a hundred and twenty minutes. The courtyard is the hub,
+  Sales is solved, the region clears, the floor opens. This act is the trade-fair teaser.
+- *Act 2 — The cases.* About a hundred to a hundred and twenty minutes. The reception is the hub,
   the departments are the spokes. Six cases of fifteen to twenty minutes each, half open: two or
   three departments are reachable at any time, more open through lamp upgrades and two keys. Every
   case follows the same rhythm — find traces, investigate, talk, find the source, resolve — and
@@ -75,7 +75,7 @@ rules of the shadow:
   of everything that was never resolved — the boss. When it is beaten it speaks, once, honestly:
   *"I was only there where you had nothing."* Then the epilogue in the all-hands meeting: the AI
   policy, assembled from the building blocks collected in the cases, is read out, and everybody
-  watches the shadow lift from the whole campus. Colour everywhere.
+  watches the shadow lift from the whole floor. Colour everywhere.
 
 **The vendor.** A sales representative of a fictional AI company, charming, recurring, always
 already there when you arrive in a department. Never an enemy. He sells what fills real gaps and

@@ -6,6 +6,8 @@ import { EMPTY, parseTileMap, parseTileset, tilesetSource } from '../../src/engi
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const FIXTURES = 'tests/fixtures/maps';
+/** The one box of a tile that is solid as a whole. */
+const FULL = { x: 0, y: 0, width: 16, height: 16 };
 
 /** A fixture's path as the error messages name it, and its parsed JSON. */
 function fixture(name: string): { readonly file: string; readonly json: unknown } {
@@ -14,13 +16,13 @@ function fixture(name: string): { readonly file: string; readonly json: unknown 
 }
 
 describe('parseTileset', () => {
-  it('reads image, columns, tile count and the solid property per tile', () => {
+  it('reads image, columns, tile count and the boxes per tile', () => {
     const { file, json } = fixture('fixture-tiles.tsj');
     expect(parseTileset(json, file)).toStrictEqual({
       image: 'fixture-tiles.png',
       columns: 2,
       tileCount: 2,
-      solid: [false, true],
+      boxes: [[], [FULL]],
     });
   });
 
@@ -55,7 +57,110 @@ describe('parseTileset', () => {
     for (const tile of still.tiles) {
       tile.animation = [];
     }
-    expect(parseTileset(still, file).solid).toStrictEqual([false, true]);
+    expect(parseTileset(still, file).boxes).toStrictEqual([[], [FULL]]);
+  });
+});
+
+describe('parseTileset: collision rectangles (0010)', () => {
+  /** boxes.tsj with tile 2's one collision object replaced by `object`. */
+  function withObject(object: Record<string, unknown>): unknown {
+    const { json } = fixture('boxes.tsj');
+    const copy = structuredClone(json) as {
+      tiles: { id: number; objectgroup?: { objects: Record<string, unknown>[] } }[];
+    };
+    const tile = copy.tiles.find((entry) => entry.id === 2);
+    if (tile?.objectgroup === undefined) {
+      throw new Error('boxes.tsj has no collision object on tile 2');
+    }
+    tile.objectgroup.objects = [
+      {
+        height: 4,
+        id: 1,
+        name: '',
+        rotation: 0,
+        type: '',
+        visible: true,
+        width: 16,
+        x: 0,
+        y: 0,
+        ...object,
+      },
+    ];
+    return copy;
+  }
+
+  it('reads boxes from `solid` and from collision rectangles', () => {
+    const { file, json } = fixture('boxes.tsj');
+    expect(parseTileset(json, file).boxes).toStrictEqual([
+      [],
+      [FULL],
+      [{ x: 0, y: 0, width: 16, height: 4 }],
+      [
+        { x: 0, y: 0, width: 16, height: 4 },
+        { x: 0, y: 0, width: 4, height: 16 },
+      ],
+    ]);
+  });
+
+  it.each([
+    ['shape-ellipse.tsj', 'tile 2 has a collision shape that is not a rectangle'],
+    ['shape-rotated.tsj', 'tile 2 has a rotated collision shape'],
+    [
+      'shape-outside.tsj',
+      'tile 2 has a collision shape (8, 0, 12, 4) that is not whole pixels inside the tile',
+    ],
+    [
+      'shape-fraction.tsj',
+      'tile 2 has a collision shape (0, 0.5, 16, 4) that is not whole pixels inside the tile',
+    ],
+    [
+      'solid-and-shape.tsj',
+      'tile 2 is solid and has collision shapes; only one of the two is allowed',
+    ],
+  ])('rejects %s', (name, problem) => {
+    const { file, json } = fixture(name);
+    expect(messageOf(() => parseTileset(json, file))).toBe(`${file}: ${problem}`);
+  });
+
+  it.each([
+    ['a point', { point: true }],
+    [
+      'a polygon',
+      {
+        polygon: [
+          { x: 0, y: 0 },
+          { x: 16, y: 0 },
+          { x: 0, y: 4 },
+        ],
+      },
+    ],
+    [
+      'a polyline',
+      {
+        polyline: [
+          { x: 0, y: 0 },
+          { x: 16, y: 0 },
+        ],
+      },
+    ],
+    ['a text', { text: { text: 'wall' } }],
+    ['a tile object', { gid: 1 }],
+  ])('rejects %s as not a rectangle', (_, object) => {
+    expect(messageOf(() => parseTileset(withObject(object), 'x.tsj'))).toBe(
+      'x.tsj: tile 2 has a collision shape that is not a rectangle',
+    );
+  });
+
+  it('rejects a zero width', () => {
+    expect(messageOf(() => parseTileset(withObject({ width: 0 }), 'x.tsj'))).toBe(
+      'x.tsj: tile 2 has a collision shape (0, 0, 0, 4) that is not whole pixels inside the tile',
+    );
+  });
+
+  it('rejects a negative x', () => {
+    expect(messageOf(() => parseTileset(withObject({ x: -1 }), 'x.tsj'))).toBe(
+      'x.tsj: tile 2 has a collision shape (-1, 0, 16, 4) that is not whole pixels inside the tile',
+    );
   });
 });
 
@@ -100,6 +205,19 @@ describe('tilesetSource', () => {
   });
 });
 
+describe('parseTileMap on thin walls (0010)', () => {
+  const boxes = fixture('boxes.tsj');
+  const tiles = parseTileset(boxes.json, boxes.file);
+  const thin = fixture('thin-walls.tmj');
+
+  it('moves a strip to map pixels and accepts a spawn in the open part of its cell', () => {
+    const map = parseTileMap(thin.json, tiles, thin.file);
+    expect(map.solids[2 * 20 + 1]).toStrictEqual([{ x: 16, y: 32, width: 16, height: 4 }]);
+    expect(map.spawn).toStrictEqual({ x: 24, y: 40 });
+    expect(map.solids.filter((cellBoxes) => cellBoxes.length > 0)).toHaveLength(1);
+  });
+});
+
 describe('parseTileMap on the corridor', () => {
   const tiles = fixture('fixture-tiles.tsj');
   const tileset = parseTileset(tiles.json, tiles.file);
@@ -130,14 +248,16 @@ describe('parseTileMap on the corridor', () => {
     expect(map.spawn).toStrictEqual({ x: 40, y: 56 });
   });
 
-  it('builds the solid grid as the union of the three tile layers (INV-7)', () => {
-    expect(map.solid).toHaveLength(240);
-    expect(map.solid[cell(4, 3)]).toBe(true);
-    expect(map.solid[cell(10, 6)]).toBe(false);
-    expect(map.solid[cell(10, 5)]).toBe(true);
-    expect(map.solid[cell(2, 2)], 'from above').toBe(true);
-    expect(map.solid[0]).toBe(false);
-    expect(map.solid.filter(Boolean)).toHaveLength(9);
+  it('builds the solid boxes as the union of the three tile layers, in map pixels (INV-7)', () => {
+    expect(map.solids).toHaveLength(240);
+    expect(map.solids[cell(4, 3)]).toStrictEqual([{ x: 64, y: 48, width: 16, height: 16 }]);
+    expect(map.solids[cell(10, 6)]).toStrictEqual([]);
+    expect(map.solids[cell(10, 5)]).toStrictEqual([{ x: 160, y: 80, width: 16, height: 16 }]);
+    expect(map.solids[cell(2, 2)], 'from above').toStrictEqual([
+      { x: 32, y: 32, width: 16, height: 16 },
+    ]);
+    expect(map.solids[0]).toStrictEqual([]);
+    expect(map.solids.filter((boxes) => boxes.length > 0)).toHaveLength(9);
   });
 
   it('fills absent detail and above layers with EMPTY', () => {
@@ -146,7 +266,7 @@ describe('parseTileMap on the corridor', () => {
     const bare = parseTileMap(json, tileset, corridor.file);
     expect(bare.detail).toStrictEqual(new Array(240).fill(EMPTY));
     expect(bare.above).toStrictEqual(new Array(240).fill(EMPTY));
-    expect(bare.solid.filter(Boolean)).toHaveLength(0);
+    expect(bare.solids.filter((boxes) => boxes.length > 0)).toHaveLength(0);
   });
 
   it('is plain data: it survives a JSON round trip unchanged', () => {
@@ -407,6 +527,15 @@ describe('parseTileMap rejects', () => {
   it('a spawn on a solid tile (rule 13)', () => {
     const { file, json } = fixture('spawn-on-solid.tmj');
     expect(rejection(json, file)).toBe(`${file}: spawn (24, 40) is on a solid tile (1, 2)`);
+  });
+
+  it('a spawn inside the strip of a wall cell (rule 13, 0010)', () => {
+    const boxes = fixture('boxes.tsj');
+    const tiles = parseTileset(boxes.json, boxes.file);
+    const { file, json } = fixture('thin-walls-spawn-in-strip.tmj');
+    expect(messageOf(() => parseTileMap(json, tiles, file))).toBe(
+      `${file}: spawn (24, 34) is on a solid tile (1, 2)`,
+    );
   });
 
   it('a spawn outside the map (rule 13)', () => {

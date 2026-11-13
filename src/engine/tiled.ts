@@ -12,13 +12,22 @@ export const TILE_LAYER_NAMES = ['ground', 'detail', 'above'] as const;
 export type TileLayerName = (typeof TILE_LAYER_NAMES)[number];
 export const OBJECT_LAYER_NAME = 'objects';
 
+/** Half-open: covers [x, x + width) × [y, y + height), in pixels. */
+export interface Box {
+  /** The top-left corner. */
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
 export interface Tileset {
   /** The image path as written in the .tsj, relative to it. */
   readonly image: string;
   readonly columns: number;
   readonly tileCount: number;
-  /** Index: tile id. */
-  readonly solid: readonly boolean[];
+  /** Index: tile id. The tile's solid boxes in tile-local pixels; [] is an open tile. */
+  readonly boxes: readonly (readonly Box[])[];
 }
 
 type Json = Record<string, unknown>;
@@ -69,13 +78,74 @@ function isSolidProperty(value: unknown, file: string): boolean {
   return property.name === 'solid' && property.type === 'bool' && property.value === true;
 }
 
+/** The box of a tile that is solid as a whole: the `solid` property. */
+const FULL_TILE: readonly Box[] = [{ x: 0, y: 0, width: TILE_SIZE, height: TILE_SIZE }];
+/** The boxes of an open tile, shared. */
+const NO_BOXES: readonly Box[] = [];
+
+/** Fields that make a Tiled object something other than a rectangle. */
+const NON_RECTANGLE_FIELDS = ['polygon', 'polyline', 'text', 'gid'] as const;
+
+function isWholePixelsInsideTile(box: Box): boolean {
+  const { x, y, width, height } = box;
+  return (
+    [x, y, width, height].every(Number.isInteger) &&
+    width >= 1 &&
+    height >= 1 &&
+    x >= 0 &&
+    y >= 0 &&
+    x + width <= TILE_SIZE &&
+    y + height <= TILE_SIZE
+  );
+}
+
+/**
+ * The collision rectangles of a tile, from Tiled's tile collision editor (the tile's
+ * `objectgroup`), in tile-local pixels. Anything but an unrotated rectangle of whole pixels
+ * inside the tile is rejected.
+ */
+function readCollisionShapes(tile: Json, id: number, file: string): Box[] {
+  if (tile.objectgroup === undefined) {
+    return [];
+  }
+  const group = asRecord(tile.objectgroup, file, `tile ${id} collision group`);
+  return asArray(group.objects, file, `tile ${id} collision objects`).map((value) => {
+    const object = asRecord(value, file, `tile ${id} collision object`);
+    if (
+      object.ellipse === true ||
+      object.point === true ||
+      NON_RECTANGLE_FIELDS.some((field) => object[field] !== undefined)
+    ) {
+      fail(file, `tile ${id} has a collision shape that is not a rectangle`);
+    }
+    const rotation =
+      object.rotation === undefined ? 0 : asNumber(object.rotation, file, 'rotation');
+    if (rotation !== 0) {
+      fail(file, `tile ${id} has a rotated collision shape`);
+    }
+    const box: Box = {
+      x: asNumber(object.x, file, `tile ${id} collision x`),
+      y: asNumber(object.y, file, `tile ${id} collision y`),
+      width: asNumber(object.width, file, `tile ${id} collision width`),
+      height: asNumber(object.height, file, `tile ${id} collision height`),
+    };
+    if (!isWholePixelsInsideTile(box)) {
+      fail(
+        file,
+        `tile ${id} has a collision shape (${box.x}, ${box.y}, ${box.width}, ${box.height}) that is not whole pixels inside the tile`,
+      );
+    }
+    return box;
+  });
+}
+
 export function parseTileset(json: unknown, file: string): Tileset {
   const tileset = asRecord(json, file, 'tileset');
   checkTileSize(tileset, file);
   const columns = asNumber(tileset.columns, file, 'columns');
   const tileCount = asNumber(tileset.tilecount, file, 'tilecount');
   const image = asString(tileset.image, file, 'image');
-  const solidIds = new Set<number>();
+  const boxesById = new Map<number, readonly Box[]>();
   const tiles = tileset.tiles === undefined ? [] : asArray(tileset.tiles, file, 'tiles');
   for (const entry of tiles) {
     const tile = asRecord(entry, file, 'tile');
@@ -86,17 +156,25 @@ export function parseTileset(json: unknown, file: string): Tileset {
         `tile ${asNumber(tile.id, file, 'tile id')} is animated; animated tiles are not supported`,
       );
     }
+    const id = asNumber(tile.id, file, 'tile id');
     const properties =
       tile.properties === undefined ? [] : asArray(tile.properties, file, 'tile properties');
-    if (properties.some((property) => isSolidProperty(property, file))) {
-      solidIds.add(asNumber(tile.id, file, 'tile id'));
+    const solid = properties.some((property) => isSolidProperty(property, file));
+    const shapes = readCollisionShapes(tile, id, file);
+    if (solid && shapes.length > 0) {
+      fail(file, `tile ${id} is solid and has collision shapes; only one of the two is allowed`);
+    }
+    if (solid) {
+      boxesById.set(id, FULL_TILE);
+    } else if (shapes.length > 0) {
+      boxesById.set(id, shapes);
     }
   }
   return {
     image,
     columns,
     tileCount,
-    solid: Array.from({ length: tileCount }, (_, id) => solidIds.has(id)),
+    boxes: Array.from({ length: tileCount }, (_, id) => boxesById.get(id) ?? NO_BOXES),
   };
 }
 
@@ -148,8 +226,8 @@ export interface TileMap {
   readonly spawn: Point;
   /** The named point objects besides the spawn, in file order; each inside the map on an open cell. */
   readonly points: readonly NamedPoint[];
-  /** Row-major, width × height: a solid tile on any of the three layers. */
-  readonly solid: readonly boolean[];
+  /** Row-major, width × height: the solid boxes of the cell's tiles on the three layers, in map pixels. */
+  readonly solids: readonly (readonly Box[])[];
 }
 
 function isTileLayerName(name: string): name is TileLayerName {
@@ -289,13 +367,13 @@ function checkLayer(layer: Json, file: string): TileLayerName | typeof OBJECT_LA
   return name;
 }
 
-/** Rule 13: a point lies inside the map, on a cell that is not solid. The cell, not a box. */
+/** Rule 13: a point lies inside the map and outside every solid box of its cell. */
 function checkPosition(
   what: string,
   point: Point,
   width: number,
   height: number,
-  solid: readonly boolean[],
+  solids: readonly (readonly Box[])[],
   file: string,
 ): void {
   const widthPx = width * TILE_SIZE;
@@ -305,7 +383,14 @@ function checkPosition(
   }
   const column = Math.floor(point.x / TILE_SIZE);
   const row = Math.floor(point.y / TILE_SIZE);
-  if (solid[row * width + column] === true) {
+  const inBox = (solids[row * width + column] ?? []).some(
+    (box) =>
+      point.x >= box.x &&
+      point.x < box.x + box.width &&
+      point.y >= box.y &&
+      point.y < box.y + box.height,
+  );
+  if (inBox) {
     fail(file, `${what} (${point.x}, ${point.y}) is on a solid tile (${column}, ${row})`);
   }
 }
@@ -349,13 +434,20 @@ export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string
   const empty = () => new Array<number>(width * height).fill(EMPTY);
   const detail = layers.detail ?? empty();
   const above = layers.above ?? empty();
-  const isSolid = (id: number | undefined) => id !== undefined && tileset.solid[id] === true;
-  const solid = ground.map(
-    (id, index) => isSolid(id) || isSolid(detail[index]) || isSolid(above[index]),
-  );
-  checkPosition('spawn', spawn, width, height, solid, mapFile);
+  const boxesOf = (id: number | undefined): readonly Box[] =>
+    id === undefined || id === EMPTY ? NO_BOXES : (tileset.boxes[id] ?? NO_BOXES);
+  const solids = ground.map((id, index): readonly Box[] => {
+    const local = [...boxesOf(id), ...boxesOf(detail[index]), ...boxesOf(above[index])];
+    if (local.length === 0) {
+      return NO_BOXES;
+    }
+    const left = (index % width) * TILE_SIZE;
+    const top = Math.floor(index / width) * TILE_SIZE;
+    return local.map((box) => ({ ...box, x: box.x + left, y: box.y + top }));
+  });
+  checkPosition('spawn', spawn, width, height, solids, mapFile);
   for (const point of points) {
-    checkPosition(`point "${point.name}"`, point, width, height, solid, mapFile);
+    checkPosition(`point "${point.name}"`, point, width, height, solids, mapFile);
   }
-  return { width, height, ground, detail, above, spawn, points, solid };
+  return { width, height, ground, detail, above, spawn, points, solids };
 }

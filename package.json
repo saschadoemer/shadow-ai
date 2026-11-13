@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "gen-tiles": "node tools/gen-tiles.ts",
     "gen-sprites": "node tools/gen-sprites.ts",
-    "gen-campus": "node tools/gen-campus.ts",
+    "gen-floor": "node tools/gen-floor.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "test": "vitest run",

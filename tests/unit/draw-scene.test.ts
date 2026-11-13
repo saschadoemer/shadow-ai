@@ -18,6 +18,7 @@ import {
   type SceneContent,
 } from '../../src/render/draw-scene';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
+import { solidsOf } from './solids';
 
 /** A renderer that only records what it was asked to draw, one line per call. */
 function recordingRenderer(): Renderer & {
@@ -54,7 +55,7 @@ const MAP: TileMap = {
   above: [6, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   spawn: { x: 8, y: 8 },
   points: [],
-  solid: [false, false, false, true, true, true],
+  solids: solidsOf([false, false, false, true, true, true], 3),
 };
 const CONTENT: SceneContent = {
   map: MAP,

@@ -3,14 +3,14 @@ import { cameraFor, VIEW_HEIGHT, VIEW_WIDTH } from '../../src/engine/camera';
 import type { Point } from '../../src/engine/tiled';
 import { SURFACE_HEIGHT, SURFACE_WIDTH } from '../../src/render/renderer';
 
-/** The campus: 128x96 tiles, 2048x1536 px; the camera ranges over [0, 1728] × [0, 1356]. */
-const CAMPUS = { width: 2048, height: 1536 };
+/** A 128x96 map, 2048x1536 px; the camera ranges over [0, 1728] × [0, 1356]. */
+const LARGE = { width: 2048, height: 1536 };
 
-function at(x: number, y: number, map = CAMPUS): Point {
+function at(x: number, y: number, map = LARGE): Point {
   return cameraFor({ x, y }, map);
 }
 
-describe('cameraFor on the campus', () => {
+describe('cameraFor on a 128x96 map', () => {
   it('centres the view on the target: (1024, 730) gives (864, 640)', () => {
     expect(at(1024, 730)).toStrictEqual({ x: 864, y: 640 });
   });

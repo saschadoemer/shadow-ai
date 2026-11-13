@@ -1,41 +1,40 @@
 # World — Shadow AI
 
-The campus, its regions, the cases, the cast and the creatures. The rules of the world are here;
+The floor, its regions, the cases, the cast and the creatures. The rules of the world are here;
 how a map file is built lives in `gameplay.md` and the feature specs.
 
-## 1. The campus
+## 1. The floor
 
-The overworld is the company's grounds, seen from above like a Zelda overworld: one large,
-connected outdoor map. Buildings are entered through transitions into their own maps (interiors
-are later features; in the first stage the buildings are closed). The campus is built coarsely
-first — paths, building footprints, fences, parking, green — and detailed region by region.
+The overworld is one floor of the company's office building, seen from above like a Zelda
+overworld: an outer wall with windows, a ring of four corridors round a core, and every department
+as a room behind thin walls with a doorway. Management on the top floor and the server room in the
+basement are their own maps, reached later through the lift and the stairwell in the core; both
+are closed today. The floor is built coarsely first — corridors, rooms, walls, doorways — and
+furnished and detailed region by region.
 
-**The map as built** (feature 0006): 128x96 tiles, 2048x1536 px, in placeholder tiles, generated
-from `tools/campus-layout.ts` until the art pass. The main building stands north of the
-courtyard with the entrance and the server-room door in its ground floor; the data protection
-officer's office west of the courtyard, Sales east of it; HR and Accounting along the west,
-Development in the north-east, the meeting rooms behind a fence with one gap between Development
-and Sales; the reception south of the courtyard; the canteen by the pond and Marketing and
-Support along the south avenue; the parking lot, fenced, in the south-west; a canal along the
-east, a fence all round. Every building is closed. The player starts in the courtyard in front of
-the entrance. The tables in `docs/features/0006-camera-and-campus.md` are the layout until the
-art pass. Until the data protection officer's office has an interior (M5), the figure wakes in
-front of its door, at the map's `wake` point, tile (49, 46) (feature 0009).
+**The map as built** (feature 0010): 108x80 tiles, 1728x1280 px, in placeholder tiles, generated
+from `tools/floor-layout.ts` until the art pass. Along the north wall lie HR, Accounting and
+Development, and past Development a side passage leads up to two meeting rooms. On the west side
+the data protection officer's office sits above the reception; the core between the west and the
+east corridor holds the break room, the closed lift and the closed stairwell, and Sales fills the
+east side. Marketing and Support share the south side. Walls are strips 4 px thick, doorways three
+tiles wide, corridors six. The player starts in the reception. The tables in
+`docs/features/0010-the-floor.md` are the layout until the art pass. The figure wakes in the data
+protection officer's office, at the map's `wake` point, tile (18, 31) (features 0009, 0010).
 
 | Region | Role |
 |---|---|
-| Courtyard | The hub. Reception, the data protection officer's office (where the player wakes up after losing overview), paths to every department. |
+| Reception | The hub. The player starts here; the data protection officer's office is next door, the ring of corridors leads to every department. |
 | Sales | Act 1. The first case, the first creature, the first cleared region. |
 | Marketing | Act 2, open from the start. |
 | Support | Act 2, open from the start. |
 | HR | Act 2, after the first lamp upgrade. |
 | Accounting | Act 2, after the first lamp upgrade. |
 | Development | Act 2, after the second lamp upgrade. |
-| Management (top floor) | Act 2, the last case. Needs the filter and the vendor as advisor. |
-| Meeting rooms | Side case: the meeting bot. Found, not on the way. |
-| Canteen | Rumours and hints. The intern sits here. |
-| Parking lot | Outdoor region, boundary and atmosphere. |
-| Server room (basement) | The dungeon. Entered with the keycard from Management. The core sits at its end. |
+| Management (top floor, through the lift) | Act 2, the last case. Needs the filter and the vendor as advisor. |
+| Meeting rooms | Side case: the meeting bot. Found, not on the way: off a side passage. |
+| Break room | Rumours and hints. The intern sits here. |
+| Server room (basement, through the stairwell) | The dungeon. Entered with the keycard from Management. The core sits at its end. |
 
 **Shadow density.** Every region has a density. Density against light strength is the one gating
 rule of the game (`gameplay.md` §5): a thin shadow wall gives way to the basic lamp, a dense one
@@ -68,15 +67,15 @@ last one.
 
 Kept as small as the story allows. About thirty figures in all.
 
-- **The data protection officer.** Mentor. Office on the courtyard, which is also where the player
-  wakes up after losing overview. The only person besides the player who sees the shadow from the
-  start. Gives the lamp and explains the rules of the world in three sentences.
+- **The data protection officer.** Mentor. Office beside the reception, which is also where the
+  player wakes up after losing overview. The only person besides the player who sees the shadow
+  from the start. Gives the lamp and explains the rules of the world in three sentences.
 - **The vendor.** See `vision.md` §4. Recurring in every department, never an enemy, changing
   over the game from seller to advisor. As advisor he supplies the approved alternatives that
   solve the later cases.
-- **The intern.** Sits in the canteen, knows everything, likes to say it. This is the hint system
-  in diegetic form: a player who is stuck goes to the canteen. For a game played at home without a
-  walkthrough, this matters more than it sounds.
+- **The intern.** Sits in the break room, knows everything, likes to say it. This is the hint
+  system in diegetic form: a player who is stuck goes to the break room. For a game played at home
+  without a walkthrough, this matters more than it sounds.
 - **The works council.** Not a global character but part of the HR case. Nothing moves there
   without him, and he is the one who asks about fairness. A German specific that gives the case
   depth.
@@ -100,8 +99,7 @@ Species names, looks and behaviours are defined in the feature spec that introdu
 
 **The snippet** (*Schnipsel*, feature 0008) is the species of the Sales case: a scrap of paper
 with lines of text, because it feeds on text pasted into a public chatbot. Small, layer 1. Three
-stand on the campus until Sales has an interior: two on the east avenue, one inside the meeting
-rooms' fence. Its displayed name and its journal text are fixed with the journal (M4), the name
+stand on the floor: one in the east corridor in front of the Sales doorway, two in Sales. Its displayed name and its journal text are fixed with the journal (M4), the name
 check of §5 included.
 
 ## 5. Names

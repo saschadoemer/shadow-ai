@@ -40,6 +40,7 @@ through the Fullscreen API, on `F`, for the booth.
 Tiles are **16x16**. Figures are **16x24**: one tile wide, one and a half high, as in A Link to
 the Past and Ocean's Heart. A 16x16 figure reads as squat for office people. The collision box of
 a figure is only its lower part — the feet — so a figure can walk "behind" desks and plants.
+Interior walls are strips 4 px thick on a tile's top or left edge (feature 0010).
 
 **The display.** The only thing drawn over the world is the row of overview lights in the
 top-left corner (feature 0009): 8x8, 4 px from the corner, one every 10 px, one per point of the
