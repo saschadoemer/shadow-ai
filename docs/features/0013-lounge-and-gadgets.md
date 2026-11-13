@@ -20,13 +20,13 @@ the author before the implementation starts.
 **In:**
 
 - Eighteen tiles in the placeholder tileset, ids 30–47; the sheet becomes 256x48, sixteen
-  columns, three rows, so ids 0–29 keep their place.
+  columns, three rows; every id keeps its value.
 - `tools/floor-layout.ts` gets the pieces and the placement table below; `public/maps/floor.tmj`
   is generated again. `detail` and `above` only — `ground`, the points and the walls are
   unchanged.
 - With the implementation: `world.md` §1 the rooms' sentences extended; `architecture.md` §7
   the eighteen tiles and the new pieces in the generator; `testing.md` §2; the README.
-  `visual.md` is unchanged: the rule for tall things is the one of 0011.
+  `visual.md` §3 names the five kinds of tall thing; the rule for them is the one of 0011.
 
 **Out, explicitly:** anything that can be used — no coffee, no game on the arcade cabinet, no
 sitting down (M4 at the earliest, with the first figures) · animated tiles: the arcade screen
