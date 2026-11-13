@@ -6,8 +6,8 @@ approved — because the tools fill gaps nobody else fills. Where data leaves th
 shadow remains that at first only you can see. Your weapon is a lamp. Creatures are captured and
 understood, never killed.
 
-The game is a conversation opener for customers and trade fairs, and afterwards a two-to-three
-hour game to play at home. German first, English second.
+The game is a two-to-three hour browser game to play at home, and afterwards a conversation
+opener for customers and trade fairs. German first, English second.
 
 ## Status
 

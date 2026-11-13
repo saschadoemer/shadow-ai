@@ -115,7 +115,7 @@ There is no map in the journal. The map itself shows by colour what has been cle
 
 ## 8. Controls and presentation
 
-Desktop browser with keyboard; a gamepad is a feature before the first trade fair; touch and
+Desktop browser with keyboard; a gamepad is deferred (`docs/plan.md` §5); touch and
 mobile are non-goals. Arrow keys or WASD walk, Space holds the lamp, F toggles fullscreen.
 Scrolling camera on a 320x180 internal resolution (`visual.md`). Movement,
 collision and camera behaviour are specified in the feature that introduces them.

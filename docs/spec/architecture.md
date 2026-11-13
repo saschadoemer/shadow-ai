@@ -193,8 +193,8 @@ key codes. The mapping from keys to actions lives in one table in `main.ts`: `up
 `fullscreen` ← F.
 Once per frame, before the steps (§3), `main.ts` resolves the held keys through the table with
 `resolveActions`, a pure function in `engine/input`: an action is on when any of its keys is
-down. The game gets the five actions as booleans and nothing else. A gamepad (plan M5)
-and remappable keys are additions to the table, not changes to the game.
+down. The game gets the five actions as booleans and nothing else. A gamepad (deferred,
+`docs/plan.md` §5) and remappable keys are additions to the table, not changes to the game.
 
 A bound key pressed without Ctrl, Alt or Cmd belongs to the game: `main.ts` prevents its default,
 so the arrow keys never scroll the page and Space neither scrolls nor clicks a focused control.
