@@ -1,17 +1,30 @@
 import { EMPTY, type Point, TILE_SIZE } from '../src/engine/tiled.ts';
 import {
+  ARCADE,
+  ARCADE_TOP,
+  ARMCHAIR,
+  BEANBAG,
   CABINET,
   CABINET_TOP,
   CARPET,
   CHAIR,
+  COAT_RACK,
+  COAT_RACK_TOP,
   CORRIDOR,
   CORRIDOR_WALLS,
   COUNTER,
+  COUNTER_COFFEE,
   DESK,
+  DESK_CUBE,
+  DESK_DUCK,
+  DESK_LAVA_LAMP,
   DESK_MONITOR,
   DESK_MONITOR_PARTITION,
   DESK_PARTITION,
+  DESK_ROBOT,
   DOOR_CLOSED,
+  FOOSBALL_LEFT,
+  FOOSBALL_RIGHT,
   OUTER_WALL,
   PARTITION_CORNER,
   PARTITION_LEFT,
@@ -21,11 +34,16 @@ import {
   PRINTER,
   SCREEN,
   SCREEN_SIDE,
+  SIDE_TABLE,
+  SOFA_LEFT,
+  SOFA_RIGHT,
   TABLE,
   WALL_CORNER,
   WALL_LEFT,
   WALL_POST,
   WALL_TOP,
+  WATER_DISPENSER,
+  WATER_DISPENSER_TOP,
   WINDOW,
 } from './placeholder-tiles.ts';
 
@@ -34,9 +52,11 @@ import {
  * floor, the walls as lines of strips with their openings, the closed doors, the spawn, the
  * creatures' points and the wake point. The tables of the feature spec are the layout; this file
  * mirrors them, one entry per row, columns c0–c1 and rows r0–r1 inclusive. Every wall lives on
- * `ground`: a wall tile is its floor with the strip drawn in. The furniture of feature 0011 is
- * placed in pieces from the room table, one tile per cell on `detail`; the tops of the tall
- * things — cabinets and plants — go on `above`, one row higher. Pure — it returns the layers and
+ * `ground`: a wall tile is its floor with the strip drawn in. The furniture of features 0011 and
+ * 0013 is placed in pieces from the room tables, one tile per cell on `detail`; the tops of the
+ * tall things — cabinets, plants, coat racks, water dispensers and the arcade cabinet — go on
+ * `above`, one row higher. A few pieces of 0013 replace a tile of 0011: a coffee machine on a
+ * counter, a gadget on a desk. Pure — it returns the layers and
  * the .tmj object; tools/gen-floor.ts writes the file. Retired when the art pass takes the map over
  * by hand in Tiled (visual.md §5).
  */
@@ -238,20 +258,35 @@ export function buildGround(): number[] {
   return ground;
 }
 
-/** One row of the spec's room table: a piece at its top-left cell (0011). */
+/** The pieces that stand at one cell (x, y), their top-left (0011, 0013). */
+type PieceAt =
+  | 'workplace'
+  | 'cubicle'
+  | 'island'
+  | 'cafe-table'
+  | 'chair'
+  | 'printer'
+  | 'plant'
+  | 'sofa'
+  | 'seating-corner'
+  | 'armchair-pair'
+  | 'beanbag-circle'
+  | 'beanbag'
+  | 'side-table'
+  | 'coffee-corner'
+  | 'coat-rack'
+  | 'water-dispenser'
+  | 'arcade'
+  | 'table-football'
+  | 'coffee-machine'
+  | 'desk-duck'
+  | 'desk-lava-lamp'
+  | 'desk-cube'
+  | 'desk-robot';
+
+/** One row of the spec's room table: a piece at its top-left cell (0011, 0013). */
 export type Placement =
-  | {
-      readonly piece:
-        | 'workplace'
-        | 'cubicle'
-        | 'island'
-        | 'cafe-table'
-        | 'chair'
-        | 'printer'
-        | 'plant';
-      readonly x: number;
-      readonly y: number;
-    }
+  | { readonly piece: PieceAt; readonly x: number; readonly y: number }
   | {
       readonly piece: 'bank' | 'screens-across' | 'screens-down';
       readonly x: number;
@@ -261,11 +296,7 @@ export type Placement =
   | { readonly piece: 'table' | 'counter'; readonly cells: CellRect }
   | { readonly piece: 'cabinets'; readonly c0: number; readonly c1: number; readonly row: number };
 
-const at = (
-  piece: 'workplace' | 'cubicle' | 'island' | 'cafe-table' | 'chair' | 'printer' | 'plant',
-  x: number,
-  y: number,
-): Placement => ({ piece, x, y });
+const at = (piece: PieceAt, x: number, y: number): Placement => ({ piece, x, y });
 const run = (
   piece: 'bank' | 'screens-across' | 'screens-down',
   x: number,
@@ -300,6 +331,11 @@ export const FURNITURE: readonly {
       run('bank', 82, 46, 4),
       cabinets(104, 106, 51),
       at('plant', 80, 50),
+      at('coffee-corner', 104, 26),
+      at('beanbag-circle', 104, 33),
+      at('coat-rack', 80, 35),
+      at('water-dispenser', 80, 42),
+      at('seating-corner', 84, 50),
     ],
   },
   {
@@ -313,6 +349,11 @@ export const FURNITURE: readonly {
       run('bank', 82, 73, 4),
       cabinets(105, 106, 78),
       at('printer', 76, 78),
+      at('coat-rack', 81, 60),
+      at('water-dispenser', 104, 60),
+      at('seating-corner', 86, 77),
+      at('beanbag-circle', 60, 77),
+      at('coffee-corner', 52, 78),
     ],
   },
   {
@@ -326,6 +367,21 @@ export const FURNITURE: readonly {
       run('bank', 67, 15, 3),
       cabinets(83, 84, 19),
       at('plant', 44, 19),
+      at('beanbag-circle', 62, 1),
+      at('sofa', 70, 19),
+      at('side-table', 72, 19),
+      at('beanbag', 74, 19),
+      at('beanbag', 75, 19),
+      at('coffee-corner', 52, 19),
+      at('coat-rack', 67, 19),
+      at('desk-duck', 48, 3),
+      at('desk-duck', 74, 9),
+      at('desk-lava-lamp', 58, 3),
+      at('desk-lava-lamp', 69, 15),
+      at('desk-cube', 53, 9),
+      at('desk-cube', 79, 3),
+      at('desk-robot', 48, 15),
+      at('desk-robot', 79, 15),
     ],
   },
   {
@@ -340,6 +396,8 @@ export const FURNITURE: readonly {
       at('chair', 15, 11),
       cabinets(16, 19, 19),
       at('plant', 1, 18),
+      at('seating-corner', 3, 15),
+      at('coat-rack', 8, 18),
     ],
   },
   {
@@ -354,6 +412,9 @@ export const FURNITURE: readonly {
       cabinets(22, 25, 19),
       cabinets(39, 43, 19),
       at('printer', 43, 7),
+      at('armchair-pair', 39, 14),
+      at('coffee-corner', 27, 19),
+      at('coat-rack', 35, 18),
     ],
   },
   {
@@ -366,6 +427,8 @@ export const FURNITURE: readonly {
       at('chair', 15, 32),
       cabinets(2, 7, 37),
       at('plant', 21, 36),
+      at('armchair-pair', 15, 35),
+      at('coat-rack', 20, 28),
     ],
   },
   {
@@ -376,6 +439,8 @@ export const FURNITURE: readonly {
       at('plant', 2, 41),
       at('plant', 21, 40),
       at('plant', 21, 50),
+      at('seating-corner', 12, 48),
+      at('coat-rack', 20, 48),
     ],
   },
   {
@@ -387,6 +452,14 @@ export const FURNITURE: readonly {
       at('cafe-table', 33, 42),
       at('cafe-table', 41, 42),
       at('plant', 47, 50),
+      at('coffee-machine', 35, 26),
+      at('coffee-machine', 42, 26),
+      at('water-dispenser', 47, 28),
+      at('coat-rack', 30, 35),
+      at('seating-corner', 36, 36),
+      at('beanbag-circle', 37, 47),
+      at('table-football', 31, 48),
+      at('arcade', 44, 49),
     ],
   },
   {
@@ -407,6 +480,11 @@ export const FURNITURE: readonly {
       cabinets(2, 9, 78),
       at('plant', 47, 78),
       at('printer', 27, 78),
+      at('coat-rack', 21, 60),
+      at('seating-corner', 20, 66),
+      at('beanbag-circle', 44, 66),
+      at('beanbag-circle', 25, 74),
+      at('coffee-corner', 12, 78),
     ],
   },
   {
@@ -417,6 +495,8 @@ export const FURNITURE: readonly {
       at('chair', 98, 3),
       at('chair', 95, 6),
       at('chair', 98, 6),
+      at('coat-rack', 91, 2),
+      at('coffee-corner', 104, 8),
     ],
   },
   {
@@ -428,19 +508,34 @@ export const FURNITURE: readonly {
       at('chair', 95, 16),
       at('chair', 98, 16),
       at('plant', 105, 19),
+      at('coat-rack', 91, 12),
     ],
   },
   {
     area: 'north corridor',
-    placements: [at('printer', 52, 20), at('plant', 34, 25), at('plant', 70, 25)],
+    placements: [
+      at('printer', 52, 20),
+      at('plant', 34, 25),
+      at('plant', 70, 25),
+      at('water-dispenser', 20, 25),
+    ],
   },
   {
     area: 'south corridor',
-    placements: [at('printer', 40, 57), at('plant', 10, 57), at('plant', 90, 57)],
+    placements: [
+      at('printer', 40, 57),
+      at('plant', 10, 57),
+      at('plant', 90, 57),
+      at('sofa', 60, 53),
+      at('side-table', 62, 53),
+      at('water-dispenser', 60, 57),
+    ],
   },
 ];
 
 type Put = (layer: 'detail' | 'above', column: number, row: number, id: number) => void;
+/** Replaces the tile `from` on `detail` by `to`; the cell must hold `from` (0013). */
+type Swap = (column: number, row: number, from: number, to: number) => void;
 
 /** One cubicle (x, y): five cells wide, three high, open to the south. */
 function cubicle(put: Put, x: number, y: number): void {
@@ -460,9 +555,71 @@ function tall(put: Put, x: number, y: number, body: number, top: number): void {
   put('above', x, y - 1, top);
 }
 
+function sofa(put: Put, x: number, y: number): void {
+  put('detail', x, y, SOFA_LEFT);
+  put('detail', x + 1, y, SOFA_RIGHT);
+}
+
 /** Every cell of a piece, as the spec's "The pieces" defines it. */
-function place(put: Put, placement: Placement): void {
+function place(put: Put, swap: Swap, placement: Placement): void {
   switch (placement.piece) {
+    case 'sofa':
+      sofa(put, placement.x, placement.y);
+      return;
+    case 'seating-corner':
+      sofa(put, placement.x, placement.y);
+      put('detail', placement.x + 2, placement.y, SIDE_TABLE);
+      put('detail', placement.x + 3, placement.y, ARMCHAIR);
+      return;
+    case 'armchair-pair':
+      put('detail', placement.x, placement.y, ARMCHAIR);
+      put('detail', placement.x + 1, placement.y, SIDE_TABLE);
+      put('detail', placement.x + 2, placement.y, ARMCHAIR);
+      return;
+    case 'beanbag-circle':
+      put('detail', placement.x + 1, placement.y, BEANBAG);
+      put('detail', placement.x, placement.y + 1, BEANBAG);
+      put('detail', placement.x + 1, placement.y + 1, SIDE_TABLE);
+      put('detail', placement.x + 2, placement.y + 1, BEANBAG);
+      return;
+    case 'beanbag':
+      put('detail', placement.x, placement.y, BEANBAG);
+      return;
+    case 'side-table':
+      put('detail', placement.x, placement.y, SIDE_TABLE);
+      return;
+    case 'coffee-corner':
+      put('detail', placement.x, placement.y, COUNTER_COFFEE);
+      put('detail', placement.x + 1, placement.y, COUNTER);
+      return;
+    case 'coat-rack':
+      tall(put, placement.x, placement.y, COAT_RACK, COAT_RACK_TOP);
+      return;
+    case 'water-dispenser':
+      tall(put, placement.x, placement.y, WATER_DISPENSER, WATER_DISPENSER_TOP);
+      return;
+    case 'arcade':
+      tall(put, placement.x, placement.y, ARCADE, ARCADE_TOP);
+      return;
+    case 'table-football':
+      put('detail', placement.x, placement.y, FOOSBALL_LEFT);
+      put('detail', placement.x + 1, placement.y, FOOSBALL_RIGHT);
+      return;
+    case 'coffee-machine':
+      swap(placement.x, placement.y, COUNTER, COUNTER_COFFEE);
+      return;
+    case 'desk-duck':
+      swap(placement.x, placement.y, DESK_PARTITION, DESK_DUCK);
+      return;
+    case 'desk-lava-lamp':
+      swap(placement.x, placement.y, DESK_PARTITION, DESK_LAVA_LAMP);
+      return;
+    case 'desk-cube':
+      swap(placement.x, placement.y, DESK_PARTITION, DESK_CUBE);
+      return;
+    case 'desk-robot':
+      swap(placement.x, placement.y, DESK_PARTITION, DESK_ROBOT);
+      return;
     case 'workplace':
       put('detail', placement.x, placement.y, DESK_MONITOR);
       put('detail', placement.x + 1, placement.y, DESK);
@@ -556,9 +713,16 @@ export function buildFurniture(): { readonly detail: number[]; readonly above: n
     }
     layers[layer][at] = id;
   };
+  const swap: Swap = (column, row, from, to) => {
+    const at = index(column, row);
+    if (layers.detail[at] !== from) {
+      throw new Error(`(${column}, ${row}) does not hold tile ${from} to replace`);
+    }
+    layers.detail[at] = to;
+  };
   for (const { placements } of FURNITURE) {
     for (const placement of placements) {
-      place(put, placement);
+      place(put, swap, placement);
     }
   }
   return layers;

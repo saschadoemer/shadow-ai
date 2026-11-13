@@ -34,6 +34,17 @@ Each wide corridor has a printer and two plants. The lift, the stairwell, the we
 corridors and the side passage stay empty. The tables in `docs/features/0011-the-furniture.md`
 are the placement until the art pass.
 
+**The lounge and the gadgets** (feature 0013) make the floor lived in. Every room has a coat rack
+near its entrance and somewhere to sit that is not a desk chair — a sofa with a small table and an
+armchair, a pair of armchairs, or beanbags round a small table. Accounting, Development, Sales,
+Support, Marketing and the north meeting room have a coffee machine on a short counter. The break
+room has two machines on its long counter, a water dispenser, a seating corner, beanbags, a table
+football and an arcade cabinet. Sales and Support have a water dispenser, and so has each of the
+two wide corridors; the south corridor also has a sofa between the lift and the stairwell. Eight
+desks in Development carry a gadget — a duck, a lava lamp, a colour cube, a toy robot. The lift,
+the stairwell, the west and east corridors and the side passage stay empty. The tables in
+`docs/features/0013-lounge-and-gadgets.md` are the placement until the art pass.
+
 | Region | Role |
 |---|---|
 | Reception | The hub. The player starts here; the data protection officer's office is next door, the ring of corridors leads to every department. |

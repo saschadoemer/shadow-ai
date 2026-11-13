@@ -1,12 +1,12 @@
 {
-  "columns": 15,
+  "columns": 16,
   "image": "placeholder.png",
-  "imageheight": 32,
-  "imagewidth": 240,
+  "imageheight": 48,
+  "imagewidth": 256,
   "margin": 0,
   "name": "placeholder",
   "spacing": 0,
-  "tilecount": 30,
+  "tilecount": 48,
   "tileheight": 16,
   "tiles": [
     {
@@ -635,6 +635,316 @@
         "y": 0
       },
       "properties": [
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 12,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 12,
+            "x": 2,
+            "y": 3
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 8,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 8,
+            "x": 4,
+            "y": 5
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 9,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 10,
+            "x": 3,
+            "y": 5
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 10,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 8,
+            "x": 4,
+            "y": 6
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 8,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 6,
+            "x": 5,
+            "y": 8
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "low",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "properties": [
+        {
+          "name": "solid",
+          "type": "bool",
+          "value": true
+        },
         {
           "name": "low",
           "type": "bool",

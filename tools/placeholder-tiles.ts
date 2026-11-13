@@ -2,13 +2,13 @@ import { type Box, TILE_SIZE } from '../src/engine/tiled.ts';
 import type { PaletteColour } from '../src/render/palette.ts';
 
 /**
- * The placeholder tileset (visual.md §5, features 0010 and 0011): thirty 16x16 office tiles in
- * fifteen columns and two rows, drawn from code in Endesga 32; the tile with id n sits at column
- * n mod 15, row ⌊n / 15⌋. Pure — it returns pixels and the .tsj object; tools/gen-tiles.ts
+ * The placeholder tileset (visual.md §5, features 0010, 0011 and 0013): forty-eight 16x16 office
+ * tiles in sixteen columns and three rows, drawn from code in Endesga 32; the tile with id n sits
+ * at column n mod 16, row ⌊n / 16⌋. Pure — it returns pixels and the .tsj object; tools/gen-tiles.ts
  * writes the files. A wall is a strip 4 px thick on the top or the left edge of a cell, drawn
  * over the cell's floor; its pixels are exactly its collision boxes. Pixel (0, 0) of the two
- * floor tiles is their base colour. The furniture of 0011 (ids 13–29) is transparent where
- * nothing is drawn, so it stands on whatever floor lies below it on `ground`.
+ * floor tiles is their base colour. The furniture of 0011 and 0013 (ids 13–47) is transparent
+ * where nothing is drawn, so it stands on whatever floor lies below it on `ground`.
  */
 
 export { TILE_SIZE };
@@ -54,11 +54,30 @@ export const COUNTER = 26;
 export const PRINTER = 27;
 export const SCREEN = 28;
 export const SCREEN_SIDE = 29;
+/** Lounge and gadgets (0013). */
+export const SOFA_LEFT = 30;
+export const SOFA_RIGHT = 31;
+export const ARMCHAIR = 32;
+export const SIDE_TABLE = 33;
+export const BEANBAG = 34;
+export const COUNTER_COFFEE = 35;
+export const WATER_DISPENSER = 36;
+export const WATER_DISPENSER_TOP = 37;
+export const COAT_RACK = 38;
+export const COAT_RACK_TOP = 39;
+export const ARCADE = 40;
+export const ARCADE_TOP = 41;
+export const FOOSBALL_LEFT = 42;
+export const FOOSBALL_RIGHT = 43;
+export const DESK_DUCK = 44;
+export const DESK_LAVA_LAMP = 45;
+export const DESK_CUBE = 46;
+export const DESK_ROBOT = 47;
 
-/** Fifteen columns, two rows: 15 × 16 by 2 × 16. */
-export const SHEET_COLUMNS = 15;
-export const SHEET_WIDTH = 240;
-export const SHEET_HEIGHT = 32;
+/** Sixteen columns, three rows: 16 × 16 by 3 × 16. */
+export const SHEET_COLUMNS = 16;
+export const SHEET_WIDTH = 256;
+export const SHEET_HEIGHT = 48;
 
 const TOP: Box = { x: 0, y: 0, width: TILE_SIZE, height: 4 };
 const LEFT: Box = { x: 0, y: 0, width: 4, height: TILE_SIZE };
@@ -158,6 +177,54 @@ export const TILE_KINDS: readonly TileKind[] = [
     boxes: [{ x: 6, y: 0, width: 4, height: TILE_SIZE }],
     low: true,
   },
+  { id: SOFA_LEFT, name: 'sofa-left', solid: true, boxes: [], low: true },
+  { id: SOFA_RIGHT, name: 'sofa-right', solid: true, boxes: [], low: true },
+  {
+    id: ARMCHAIR,
+    name: 'armchair',
+    solid: false,
+    boxes: [{ x: 2, y: 3, width: 12, height: 12 }],
+    low: true,
+  },
+  {
+    id: SIDE_TABLE,
+    name: 'side-table',
+    solid: false,
+    boxes: [{ x: 4, y: 5, width: 8, height: 8 }],
+    low: true,
+  },
+  {
+    id: BEANBAG,
+    name: 'beanbag',
+    solid: false,
+    boxes: [{ x: 3, y: 5, width: 10, height: 9 }],
+    low: true,
+  },
+  { id: COUNTER_COFFEE, name: 'counter-coffee', solid: true, boxes: [], low: true },
+  {
+    id: WATER_DISPENSER,
+    name: 'water-dispenser',
+    solid: false,
+    boxes: [{ x: 4, y: 6, width: 8, height: 10 }],
+    low: true,
+  },
+  { id: WATER_DISPENSER_TOP, name: 'water-dispenser-top', solid: false, boxes: [], low: false },
+  {
+    id: COAT_RACK,
+    name: 'coat-rack',
+    solid: false,
+    boxes: [{ x: 5, y: 8, width: 6, height: 8 }],
+    low: true,
+  },
+  { id: COAT_RACK_TOP, name: 'coat-rack-top', solid: false, boxes: [], low: false },
+  { id: ARCADE, name: 'arcade', solid: true, boxes: [], low: false },
+  { id: ARCADE_TOP, name: 'arcade-top', solid: false, boxes: [], low: false },
+  { id: FOOSBALL_LEFT, name: 'foosball-left', solid: true, boxes: [], low: true },
+  { id: FOOSBALL_RIGHT, name: 'foosball-right', solid: true, boxes: [], low: true },
+  { id: DESK_DUCK, name: 'desk-duck', solid: true, boxes: [], low: true },
+  { id: DESK_LAVA_LAMP, name: 'desk-lava-lamp', solid: true, boxes: [], low: true },
+  { id: DESK_CUBE, name: 'desk-cube', solid: true, boxes: [], low: true },
+  { id: DESK_ROBOT, name: 'desk-robot', solid: true, boxes: [], low: true },
 ];
 
 const WALL_DARK: PaletteColour = '#262b44';
@@ -363,6 +430,179 @@ function screenSide(x: number, y: number): PaletteColour | null {
   return within(x, 10, 11) && (y <= 1 || y >= 14) ? '#3a4466' : null;
 }
 
+/** A sofa half: the back in the upper 5 px, an arm 3 px wide on the outer side (0013). */
+function sofa(arm: 'left' | 'right'): Painter {
+  return (x, y) => {
+    const onArm = arm === 'left' ? x <= 2 : x >= 13;
+    return onArm || y <= 4 ? '#a22633' : '#e43b44';
+  };
+}
+
+function armchair(x: number, y: number): PaletteColour | null {
+  if (!within(x, 2, 13) || !within(y, 3, 14)) {
+    return null;
+  }
+  return x <= 3 || x >= 12 || y <= 6 ? '#a22633' : '#e43b44';
+}
+
+/** A small table: a rim 1 px wide round its top, a front edge 2 px high. */
+function sideTable(x: number, y: number): PaletteColour | null {
+  if (!within(x, 4, 11) || !within(y, 5, 12)) {
+    return null;
+  }
+  return x === 4 || x === 11 || y === 5 || y >= 11 ? '#b86f50' : '#ead4aa';
+}
+
+/** A beanbag: its box with three pixels cut from each corner, a highlight on the upper left. */
+function beanbag(x: number, y: number): PaletteColour | null {
+  if (!within(x, 3, 12) || !within(y, 5, 13)) {
+    return null;
+  }
+  if (Math.min(x - 3, 12 - x) + Math.min(y - 5, 13 - y) < 2) {
+    return null;
+  }
+  return within(x, 5, 8) && within(y, 6, 7) ? '#feae34' : '#f77622';
+}
+
+const counter = surface('#ffffff', '#c0cbdc');
+
+function counterCoffee(x: number, y: number): PaletteColour | null {
+  if (x === 10 && y === 3) {
+    return '#e43b44';
+  }
+  if (within(x, 7, 8) && within(y, 7, 9)) {
+    return '#ffffff';
+  }
+  return within(x, 4, 11) && within(y, 2, 10) ? '#262b44' : counter(x, y);
+}
+
+function waterDispenser(x: number, y: number): PaletteColour | null {
+  if (!within(x, 4, 11) || !within(y, 6, 15)) {
+    return null;
+  }
+  if (within(y, 9, 10) && (x === 6 || x === 9)) {
+    return x === 6 ? '#e43b44' : '#0099db';
+  }
+  return '#c0cbdc';
+}
+
+/** The bottle, neck down, in the lower 10 px. */
+function waterDispenserTop(x: number, y: number): PaletteColour | null {
+  const bottle = within(x, 5, 10) && within(y, 6, 13);
+  const neck = within(x, 7, 8) && within(y, 14, 15);
+  if (!bottle && !neck) {
+    return null;
+  }
+  return y === 8 ? '#0099db' : '#2ce8f5';
+}
+
+function coatRack(x: number, y: number): PaletteColour | null {
+  const pole = within(x, 7, 8) && y <= 13;
+  const foot = within(x, 5, 10) && y >= 14;
+  return pole || foot ? '#3e2731' : null;
+}
+
+/** The pole, a bar of hooks and a coat on each side, in the lower 12 px. */
+function coatRackTop(x: number, y: number): PaletteColour | null {
+  if (y < 4) {
+    return null;
+  }
+  if (within(x, 7, 8) || (y === 5 && within(x, 3, 12))) {
+    return '#3e2731';
+  }
+  if (y >= 6 && within(x, 2, 6)) {
+    return '#124e89';
+  }
+  return y >= 6 && within(x, 9, 13) ? '#feae34' : null;
+}
+
+function arcade(x: number, y: number): PaletteColour {
+  if (within(y, 3, 4) && within(x, 4, 5)) {
+    return '#e43b44';
+  }
+  if (within(y, 3, 4) && within(x, 10, 11)) {
+    return '#fee761';
+  }
+  return within(y, 2, 6) ? '#262b44' : '#124e89';
+}
+
+/** The cabinet's head in the lower 14 px: a marquee, and a screen with three blocks. */
+function arcadeTop(x: number, y: number): PaletteColour | null {
+  if (y < 2) {
+    return null;
+  }
+  if (within(x, 1, 14) && within(y, 3, 5)) {
+    return '#f77622';
+  }
+  if (!within(x, 2, 13) || !within(y, 7, 14)) {
+    return '#124e89';
+  }
+  if (within(x, 3, 4) && within(y, 11, 12)) {
+    return '#63c74d';
+  }
+  if (within(x, 7, 8) && within(y, 9, 10)) {
+    return '#fee761';
+  }
+  return within(x, 11, 12) && within(y, 11, 12) ? '#2ce8f5' : '#181425';
+}
+
+/** Half a table football: the frame on three sides, a rod down the middle with two players. */
+function foosball(side: 'left' | 'right'): Painter {
+  return (x, y) => {
+    if (within(x, 6, 9) && (within(y, 4, 5) || within(y, 10, 11))) {
+      return side === 'left' ? '#e43b44' : '#0099db';
+    }
+    if (within(x, 7, 8)) {
+      return '#c0cbdc';
+    }
+    const outer = side === 'left' ? x === 0 : x === 15;
+    return outer || y <= 1 || y >= 14 ? '#733e39' : '#3e8948';
+  };
+}
+
+/** A desk-partition (18) with a gadget drawn on its top (0013). */
+function gadgetDesk(gadget: (x: number, y: number) => PaletteColour | null): Painter {
+  const under = withPartition(desk);
+  return (x, y) => gadget(x, y) ?? under(x, y);
+}
+
+function duck(x: number, y: number): PaletteColour | null {
+  if (x === 11 && y === 5) {
+    return '#f77622';
+  }
+  const head = within(x, 8, 10) && within(y, 4, 6);
+  const body = within(x, 5, 9) && within(y, 7, 10);
+  return head || body ? '#fee761' : null;
+}
+
+function lavaLamp(x: number, y: number): PaletteColour | null {
+  if ((within(x, 7, 8) && y === 3) || (within(x, 6, 9) && within(y, 10, 11))) {
+    return '#5a6988';
+  }
+  if (!within(x, 6, 9) || !within(y, 4, 9)) {
+    return null;
+  }
+  const blob = (x === 7 && y === 5) || (x === 8 && y === 7) || (x === 7 && y === 8);
+  return blob ? '#e43b44' : '#f77622';
+}
+
+const CUBE: readonly (readonly PaletteColour[])[] = [
+  ['#e43b44', '#fee761', '#63c74d'],
+  ['#0099db', '#ffffff', '#f77622'],
+  ['#63c74d', '#e43b44', '#0099db'],
+];
+
+function cube(x: number, y: number): PaletteColour | null {
+  return CUBE[y - 6]?.[x - 7] ?? null;
+}
+
+function robot(x: number, y: number): PaletteColour | null {
+  if (!within(x, 5, 10) || !within(y, 4, 10)) {
+    return null;
+  }
+  return y === 6 && (x === 6 || x === 9) ? '#2ce8f5' : '#c0cbdc';
+}
+
 /** The picture of a tile, by id. */
 function painter(kind: TileKind): Painter {
   switch (kind.id) {
@@ -403,13 +643,49 @@ function painter(kind: TileKind): Painter {
     case TABLE:
       return surface('#b86f50', '#733e39');
     case COUNTER:
-      return surface('#ffffff', '#c0cbdc');
+      return counter;
     case PRINTER:
       return printer;
     case SCREEN:
       return screen;
     case SCREEN_SIDE:
       return screenSide;
+    case SOFA_LEFT:
+      return sofa('left');
+    case SOFA_RIGHT:
+      return sofa('right');
+    case ARMCHAIR:
+      return armchair;
+    case SIDE_TABLE:
+      return sideTable;
+    case BEANBAG:
+      return beanbag;
+    case COUNTER_COFFEE:
+      return counterCoffee;
+    case WATER_DISPENSER:
+      return waterDispenser;
+    case WATER_DISPENSER_TOP:
+      return waterDispenserTop;
+    case COAT_RACK:
+      return coatRack;
+    case COAT_RACK_TOP:
+      return coatRackTop;
+    case ARCADE:
+      return arcade;
+    case ARCADE_TOP:
+      return arcadeTop;
+    case FOOSBALL_LEFT:
+      return foosball('left');
+    case FOOSBALL_RIGHT:
+      return foosball('right');
+    case DESK_DUCK:
+      return gadgetDesk(duck);
+    case DESK_LAVA_LAMP:
+      return gadgetDesk(lavaLamp);
+    case DESK_CUBE:
+      return gadgetDesk(cube);
+    case DESK_ROBOT:
+      return gadgetDesk(robot);
     default:
       return wall(kind.id < WALL_TOP + CORRIDOR_WALLS ? carpet : corridor, kind.boxes);
   }

@@ -1,6 +1,6 @@
 # 0013 — Lounge and gadgets
 
-**Status:** approved 2026-11-13
+**Status:** implemented 2026-11-13
 **Milestone:** M3
 **Drafted:** 2026-11-13
 
@@ -20,13 +20,13 @@ the author before the implementation starts.
 **In:**
 
 - Eighteen tiles in the placeholder tileset, ids 30–47; the sheet becomes 256x48, sixteen
-  columns, three rows, so ids 0–29 keep their place.
+  columns, three rows; every id keeps its value.
 - `tools/floor-layout.ts` gets the pieces and the placement table below; `public/maps/floor.tmj`
   is generated again. `detail` and `above` only — `ground`, the points and the walls are
   unchanged.
 - With the implementation: `world.md` §1 the rooms' sentences extended; `architecture.md` §7
   the eighteen tiles and the new pieces in the generator; `testing.md` §2; the README.
-  `visual.md` is unchanged: the rule for tall things is the one of 0011.
+  `visual.md` §3 names the five kinds of tall thing; the rule for them is the one of 0011.
 
 **Out, explicitly:** anything that can be used — no coffee, no game on the arcade cabinet, no
 sitting down (M4 at the earliest, with the first figures) · animated tiles: the arcade screen
@@ -295,7 +295,9 @@ the long room at the top, entered from the north corridor.
 the gadgets read as what they are — which one does not? Is red right for the sofas, next to the
 blue screens of 0011? Is the row along the bottom of Development too tight to walk?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-13, steps 1–16. Feel: the floor looks lived in; no room is too empty
+or too full; every gadget reads as what it is; red is right for the sofas; the row along the
+bottom of Development is easy to walk.
 
 ## Open questions
 
