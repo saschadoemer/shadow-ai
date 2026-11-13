@@ -341,9 +341,10 @@ without a generation step and the asset tests (INV-6) check the committed files.
 deterministic: running it twice yields identical files, and a unit test fails when the committed
 files and the generator disagree.
 
-The placeholder tileset is 240x32, thirty 16x16 office tiles in fifteen columns and two rows
-(features 0010 and 0011): the tile with id n sits at column n mod 15, row ⌊n / 15⌋, so ids 0–12
-kept their place when the furniture came. Its ids are what maps depend on:
+The placeholder tileset is 256x48, forty-eight 16x16 office tiles in sixteen columns and three
+rows (features 0010, 0011 and 0013): the tile with id n sits at column n mod 16, row ⌊n / 16⌋.
+Every id kept its value when the sheet grew; a tile's place on the sheet follows from its id. Its
+ids are what maps depend on:
 
 | Id | Kind | Solid |
 |---|---|---|
@@ -377,6 +378,24 @@ kept their place when the furniture came. Its ids are what maps depend on:
 | 27 | printer | `solid`, low |
 | 28 | screen | (0, 6, 16, 4), low |
 | 29 | screen-side | (6, 0, 4, 16), low |
+| 30 | sofa-left | `solid`, low |
+| 31 | sofa-right | `solid`, low |
+| 32 | armchair | (2, 3, 12, 12), low |
+| 33 | side-table | (4, 5, 8, 8), low |
+| 34 | beanbag | (3, 5, 10, 9), low |
+| 35 | counter-coffee | `solid`, low |
+| 36 | water-dispenser | (4, 6, 8, 10), low |
+| 37 | water-dispenser-top | — |
+| 38 | coat-rack | (5, 8, 6, 8), low |
+| 39 | coat-rack-top | — |
+| 40 | arcade | `solid` |
+| 41 | arcade-top | — |
+| 42 | foosball-left | `solid`, low |
+| 43 | foosball-right | `solid`, low |
+| 44 | desk-duck | `solid`, low |
+| 45 | desk-lava-lamp | `solid`, low |
+| 46 | desk-cube | `solid`, low |
+| 47 | desk-robot | `solid`, low |
 
 An interior wall is a strip 4 px thick on the **top** or the **left** edge of a cell, so the
 cell's floor belongs to the room below or right of it and a room loses no cell to its walls. A
@@ -384,13 +403,14 @@ wall tile is its floor tile with the strip drawn over it, because `ground` holds
 and `detail` stays free for furniture; the corridor wall tiles are the carpet ones plus 4. A
 strip's pixels are exactly its box: `#262b44` with its inner line, the row y = 3 or the column
 x = 3, in `#3a4466`, the corner square dark; the door strip `#733e39` with its row y = 3 in
-`#3e2731`. Pixel (0, 0) of the two floor tiles is their base colour. The furniture tiles 13–29
-(feature 0011) are transparent where nothing is drawn; their colours and pixels are those of the
-feature spec's tile table, and none uses `#68386c`. A partition's pixels are exactly its boxes.
-The `.tsj` has `columns` 15, `tilecount` 30, `image` `placeholder.png`, a `solid` property of type
-`bool` on tiles 2, 3, 16–19, 21 and 25–27, a collision `objectgroup` on tiles 4–15, 20, 23, 28
-and 29, and a `low` property of type `bool` on every tile but 0–12, 21, 22 and 24. The two tops,
-22 and 24, have no entry.
+`#3e2731`. Pixel (0, 0) of the two floor tiles is their base colour. The furniture tiles 13–47
+(features 0011 and 0013) are transparent where nothing is drawn; their colours are those of the
+feature specs' tile tables, their pixels those of the specs and of the plan of 0013, and none uses
+`#68386c`. A partition's pixels are exactly its boxes. The `.tsj` has `columns` 16, `tilecount`
+48, `image` `placeholder.png`, a `solid` property of type `bool` on tiles 2, 3, 16–19, 21, 25–27,
+30, 31, 35, 40 and 42–47, a collision `objectgroup` on tiles 4–15, 20, 23, 28, 29, 32–34, 36 and
+38, and a `low` property of type `bool` on every tile but 0–12, 21, 22, 24, 37 and 39–41. The
+five tops — 22, 24, 37, 39 and 41 — have no entry.
 
 Every `.tsj` under `public/tiles/` is checked against its PNG: `imagewidth` and `imageheight`
 equal the PNG's size, `tilewidth` and `tileheight` are 16, `columns` equals `imagewidth / 16`, and
@@ -446,8 +466,13 @@ doors, the spawn, the three snippet points and the wake point, as the tables of 
 write them — and builds the `ground` layer and the `.tmj` object with Tiled's keys. The furniture
 (feature 0011) is `FURNITURE`, the room table as a list of placements per area — workplaces,
 cubicles in banks, islands, café tables, screens, tables, counters, chairs, printers, plants and
-cabinets — and `buildFurniture` turns it into the `detail` layer and, for the tops of cabinets and
-plants, the `above` layer; a second tile in a cell of one layer is an error, not an overwrite.
+cabinets — and, from feature 0013, sofas, seating corners, armchair pairs, beanbag circles, single
+beanbags and side-tables, coffee corners, coat racks, water dispensers, the arcade cabinet and the
+table football. `buildFurniture` turns it into the `detail` layer and, for the tops of the tall
+things — cabinets, plants, coat racks, water dispensers and the arcade cabinet — the `above`
+layer; a second tile in a cell of one layer is an error, not an overwrite. A replacement (feature
+0013) swaps a named tile of 0011 for another — a counter for a counter with a coffee machine, a
+desk-partition for a gadget desk — and is an error when the cell does not hold the tile it names.
 `floor.tmj` has the layers `ground` (id 1), `detail` (id 3), `above` (id 4) and `objects` (id 2),
 in that order. Posts are
 derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper
@@ -461,7 +486,10 @@ positions — every corridor and room but the lift and the stairwell, the meetin
 through the side passage — and for each snippet and the wake point a free box, a reached position
 and its place; and the furniture against the spec's picture, its tile counts, its pieces, the
 areas that stay empty, every tall thing's top above its body in the same area, every cubicle
-reached, the reception's counter in the first view, and which boxes are opaque. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
+reached, the reception's counter in the first view, and which boxes are opaque; and the lounge
+and the gadgets against the picture of 0013, their counts and pieces, that nothing of 0011 moved
+but the ten replaced cells, every cell without a solid box reached, and the reception's seating
+corner in the first view. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
 test, so until the art pass the layout changes in `floor-layout.ts`. When the art pass takes the
 floor over by hand (`visual.md` §5), the layout, the generator and the determinism test are
 removed and `floor.tmj` is authored in Tiled like every other map; the layout test's
