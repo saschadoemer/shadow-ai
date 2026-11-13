@@ -22,6 +22,18 @@ tiles wide, corridors six. The player starts in the reception. The tables in
 `docs/features/0010-the-floor.md` are the layout until the art pass. The figure wakes in the data
 protection officer's office, at the map's `wake` point, tile (18, 31) (features 0009, 0010).
 
+**The furniture** (feature 0011) tells the rooms apart. Sales, Support and Development are rows of
+cubicles, each a desk with a monitor and a chair behind low partitions, with aisles three tiles
+wide between the rows. HR, Accounting and the data protection officer's office have single desks
+with a chair, a mobile screen and a row of cabinets; HR and the office also have a small table,
+Accounting a printer. Marketing has desk islands of four, with a mobile screen between the two
+islands of each pair, cabinets and a printer. The reception has a white counter with a chair
+behind it and plants in its corners. The break room has a long counter along its north wall and
+four small tables with two chairs each. Each meeting room has one long table with four chairs.
+Each wide corridor has a printer and two plants. The lift, the stairwell, the west and east
+corridors and the side passage stay empty. The tables in `docs/features/0011-the-furniture.md`
+are the placement until the art pass.
+
 | Region | Role |
 |---|---|
 | Reception | The hub. The player starts here; the data protection officer's office is next door, the ring of corridors leads to every department. |

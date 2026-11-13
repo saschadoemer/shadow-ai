@@ -34,8 +34,8 @@ tools/
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
   placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames
   floor-layout.ts       the floor as pure data: the corridors and rooms, the walls and their
-                        openings, the closed doors, the spawn, the creatures' points and the
-                        wake point (world.md §1)
+                        openings, the closed doors, the spawn, the creatures' points, the
+                        wake point and the furniture (world.md §1)
   gen-floor.ts          writes it to public/maps/; `npm run gen-floor`
 tests/
   unit/          Vitest, headless: engine math, game rules, map loading, assets
@@ -78,7 +78,8 @@ solid boxes it would enter (`engine/collision`, features 0005 and 0010); then it
 to the map. Intervals are half-open, so touching a box is not overlapping it and a box flush
 against a wall slides along it. The solid boxes are the union of the three tile layers (§6);
 cells outside the map are open, and the clamp keeps the figure on it. The displacement is below
-4 px per call, the thinnest wall; the test is not swept.
+8 px per call, the smaller side of the figure's box: by less, a box cannot be carried across a
+strip. The thinnest box is the 2 px partition (feature 0011); the test is not swept.
 
 `camera` is the view's top-left corner in map pixels, two integers. `followPlayer` (`game/camera`,
 feature 0006) centres the 320x180 view on the collision box's centre, (x, y − 4), clamps it to
@@ -103,8 +104,9 @@ sprite; the collision box is the figure's, `[x − 6, x + 6) × [y − 8, y)`; t
 (x, y − 8). `light` counts the steps the creature has been lit without a break, 0–59. `captured`
 is one whole number per species. `update` steps the player, then each creature against the
 stepped player (`game/creature`). A creature is lit when the lamp is on, its body point is in the
-cone, and no solid box lies on the line from the figure's box centre (x, y − 4) to the body
-point (`engine/collision`, `sightBlocked`). Lit, it stands and `light` grows by 1; at 60 it
+cone, and no opaque box lies on the line from the figure's box centre (x, y − 4) to the body
+point (`engine/collision`, `sightBlocked`, given `map.opaque`, §6); low furniture lets the light
+pass but still stops the walk (feature 0011). Lit, it stands and `light` grows by 1; at 60 it
 leaves the array and its species' count grows by 1. Not lit, `light` becomes 0 and it moves
 toward the figure's feet when they are closer than 64 px and farther than 8 px — by 2/3 px, or by
 what is left to 8 px — through `moveBox`, then its feet are clamped so the sprite stays on the
@@ -257,7 +259,8 @@ is a property of the tile in the tileset (feature 0010): the boolean tile proper
 the whole tile solid, the box (0, 0, 16, 16); a tile without it may carry rectangles drawn in
 Tiled's tile collision editor, its `objectgroup` in the `.tsj`, each a box in tile-local pixels.
 A wall thinner than a tile is such a rectangle. The loader builds the solid boxes from both.
-
+The boolean tile property `low` (feature 0011) marks a tile whose boxes stop feet but not light,
+like a desk or a partition; a tile that is `low` and has no box is rejected.
 **Loading.** `main.ts` loads the map, its tileset and the tileset's image before the first frame;
 until then the page shows its background. Every path inside a file is resolved against that file
 — the map names `../tiles/placeholder.tsj`, the tileset names `placeholder.png` — and all three
@@ -268,7 +271,7 @@ come from the game's own origin (INV-5). `engine/assets` does the fetching; `res
 **Parsing.** `engine/tiled` holds three pure functions over parsed JSON. `tilesetSource` finds
 the map's one external tileset; `parseTileset` reads its tile size, columns, tile count, image
 and per tile its boxes — the full tile for `solid`, else its collision rectangles, else none —
-as `Tileset.boxes`; `parseTileMap` reads the map against the parsed tileset and
+as `Tileset.boxes`, and per tile whether it is `low` as `Tileset.low`; `parseTileMap` reads the map against the parsed tileset and
 returns a `TileMap`. It reads only what the game uses: of the map `orientation`, `infinite`,
 `width`, `height`, `tilewidth`, `tileheight`, `tilesets` and `layers`; of a layer `name`, `type`,
 `data`, `encoding`, `compression` and, for `objects`, the objects' `name`, `point`, `x` and `y`.
@@ -284,6 +287,10 @@ of tileset ids, where gid 0 becomes `EMPTY` (−1) and gid `g` becomes `g − fi
 `points`. `solids` is row-major, width × height: per cell the boxes of its tiles on the three
 layers, moved to map pixels, so collision has one list per cell to ask; a cell with no box is
 open. A box is half-open: (x, y, width, height) covers [x, x + width) × [y, y + height).
+`opaque` is built the same way from the tiles that are not low; a cell with no such box shares
+the empty array. `moveBox` reads `solids`, for the figure and the creatures alike; `isLit` hands
+`sightBlocked` a grid whose boxes are `opaque`, so the light stops at walls, closed doors and
+cabinets and passes over everything lower than a person (feature 0011).
 
 **What the loader accepts.** An orthogonal, finite map with 16x16 tiles, at least 20x12 tiles
 (320x180 px, the surface); exactly one external `.tsj` tileset with 16x16 tiles; layer data in
@@ -299,7 +306,8 @@ a source that does not end in `.tsj`, a `.tsj` that does not load, a tileset who
 is not a rectangle (an ellipse, a point, a polygon, a polyline, a text or a tile object), a
 rotated one, a rectangle that is not whole pixels inside the tile — a fractional number, a width
 or height below 1, any part outside [0, 16) × [0, 16) — and a tile that is `solid` and has
-collision rectangles. Then the map, in this order:
+collision rectangles, and a tile that is `low` and has no collision box (`tile N is low but
+has no collision box`). Then the map, in this order:
 
 - an orientation other than orthogonal, or an infinite map;
 - a tile size other than 16x16;
@@ -332,8 +340,9 @@ without a generation step and the asset tests (INV-6) check the committed files.
 deterministic: running it twice yields identical files, and a unit test fails when the committed
 files and the generator disagree.
 
-The placeholder tileset is 208x16, thirteen 16x16 office tiles in one row (feature 0010). Its ids
-are what maps depend on:
+The placeholder tileset is 240x32, thirty 16x16 office tiles in fifteen columns and two rows
+(features 0010 and 0011): the tile with id n sits at column n mod 15, row ⌊n / 15⌋, so ids 0–12
+kept their place when the furniture came. Its ids are what maps depend on:
 
 | Id | Kind | Solid |
 |---|---|---|
@@ -350,6 +359,23 @@ are what maps depend on:
 | 10 | wall, corner, on corridor | (0, 0, 16, 4) and (0, 0, 4, 16) |
 | 11 | wall, post, on corridor | (0, 0, 4, 4) |
 | 12 | door, closed | (0, 0, 16, 4) |
+| 13 | partition-top | (0, 0, 16, 2), low |
+| 14 | partition-left | (0, 0, 2, 16), low |
+| 15 | partition-corner | (0, 0, 16, 2) and (0, 0, 2, 16), low |
+| 16 | desk | `solid`, low |
+| 17 | desk-monitor | `solid`, low |
+| 18 | desk-partition | `solid`, low |
+| 19 | desk-monitor-partition | `solid`, low |
+| 20 | chair | (3, 3, 10, 10), low |
+| 21 | cabinet | `solid` |
+| 22 | cabinet-top | — |
+| 23 | plant | (4, 6, 8, 10), low |
+| 24 | plant-top | — |
+| 25 | table | `solid`, low |
+| 26 | counter | `solid`, low |
+| 27 | printer | `solid`, low |
+| 28 | screen | (0, 6, 16, 4), low |
+| 29 | screen-side | (6, 0, 4, 16), low |
 
 An interior wall is a strip 4 px thick on the **top** or the **left** edge of a cell, so the
 cell's floor belongs to the room below or right of it and a room loses no cell to its walls. A
@@ -357,9 +383,13 @@ wall tile is its floor tile with the strip drawn over it, because `ground` holds
 and `detail` stays free for furniture; the corridor wall tiles are the carpet ones plus 4. A
 strip's pixels are exactly its box: `#262b44` with its inner line, the row y = 3 or the column
 x = 3, in `#3a4466`, the corner square dark; the door strip `#733e39` with its row y = 3 in
-`#3e2731`. The `.tsj` has `columns` 13, `tilecount` 13, `image` `placeholder.png`, a `solid`
-property of type `bool` on tiles 2 and 3 and a collision `objectgroup` on tiles 4–12. Pixel
-(0, 0) of the two floor tiles is their base colour.
+`#3e2731`. Pixel (0, 0) of the two floor tiles is their base colour. The furniture tiles 13–29
+(feature 0011) are transparent where nothing is drawn; their colours and pixels are those of the
+feature spec's tile table, and none uses `#68386c`. A partition's pixels are exactly its boxes.
+The `.tsj` has `columns` 15, `tilecount` 30, `image` `placeholder.png`, a `solid` property of type
+`bool` on tiles 2, 3, 16–19, 21 and 25–27, a collision `objectgroup` on tiles 4–15, 20, 23, 28
+and 29, and a `low` property of type `bool` on every tile but 0–12, 21, 22 and 24. The two tops,
+22 and 24, have no entry.
 
 Every `.tsj` under `public/tiles/` is checked against its PNG: `imagewidth` and `imageheight`
 equal the PNG's size, `tilewidth` and `tileheight` are 16, `columns` equals `imagewidth / 16`, and
@@ -412,7 +442,13 @@ same name and frame order.
 `tools/floor-layout.ts` holds the floor as data (feature 0010) — the corridors and rooms as
 rectangles of floor, the walls as lines of top or left strips with their openings, the closed
 doors, the spawn, the three snippet points and the wake point, as the tables of the feature spec
-write them — and builds the one `ground` layer and the `.tmj` object with Tiled's keys. Posts are
+write them — and builds the `ground` layer and the `.tmj` object with Tiled's keys. The furniture
+(feature 0011) is `FURNITURE`, the room table as a list of placements per area — workplaces,
+cubicles in banks, islands, café tables, screens, tables, counters, chairs, printers, plants and
+cabinets — and `buildFurniture` turns it into the `detail` layer and, for the tops of cabinets and
+plants, the `above` layer; a second tile in a cell of one layer is an error, not an overwrite.
+`floor.tmj` has the layers `ground` (id 1), `detail` (id 3), `above` (id 4) and `objects` (id 2),
+in that order. Posts are
 derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper
 neighbour has a left strip gets the post tile. `tools/gen-floor.ts`, run with `npm run gen-floor`,
 writes `public/maps/floor.tmj`, deterministic, with the layer's data on one line as Tiled writes
@@ -422,7 +458,9 @@ every wall cell with its strip and every opening without, the posts, the closed 
 counts, a free spawn and its first view, reachability on foot over a 2 px lattice of feet
 positions — every corridor and room but the lift and the stairwell, the meeting rooms only
 through the side passage — and for each snippet and the wake point a free box, a reached position
-and its place. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
+and its place; and the furniture against the spec's picture, its tile counts, its pieces, the
+areas that stay empty, every tall thing's top above its body in the same area, every cubicle
+reached, the reception's counter in the first view, and which boxes are opaque. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
 test, so until the art pass the layout changes in `floor-layout.ts`. When the art pass takes the
 floor over by hand (`visual.md` §5), the layout, the generator and the determinism test are
 removed and `floor.tmj` is authored in Tiled like every other map; the layout test's

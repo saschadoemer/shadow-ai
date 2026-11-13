@@ -22,7 +22,9 @@ first creature is here (feature 0008): snippets come toward the figure, freeze i
 are captured after one second. A snippet's touch costs one of three points of overview and
 pushes the figure back; at zero the figure wakes in the data protection officer's office
 (feature 0009). The world is one office floor (feature 0010): 108x80 tiles, a ring of corridors
-round a core, every department a room behind walls 4 px thin, still unfurnished. The roadmap is in [docs/plan.md](docs/plan.md).
+round a core, every department a room behind walls 4 px thin. The floor is furnished (feature
+0011): cubicles, desks, cabinets, plants, tables, counters, printers and mobile screens; the
+lamp shines over everything lower than a person. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 
