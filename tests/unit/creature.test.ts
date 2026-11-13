@@ -1,4 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { parseTileMap, parseTileset } from '../../src/engine/tiled';
 import {
   bodyPoint,
   CAPTURE_STEPS,
@@ -216,6 +218,27 @@ describe('a wall in the light', () => {
     const box = { x: 112, y: 80, width: 16, height: 16 };
     const placed = solidsWith(20, 12, [{ column: 7, row: 5, box }]);
     expect(isLit(CREATURE, RIGHT, true, { ...OPEN, solids: placed, opaque: placed })).toBe(false);
+  });
+});
+
+describe('the arcade cabinet and a beanbag in the light (0013)', () => {
+  // The placeholder tileset on a 20x12 map: the arcade cabinet in cell (5, 5), [80, 96) × [80, 96),
+  // and a beanbag in cell (9, 5), its box [147, 157) × [85, 94). The sight line runs from 4 px
+  // above the figure's feet to 8 px above the snippet's: y = 92 to y = 90, through both boxes.
+  const json = (file: string): unknown =>
+    JSON.parse(readFileSync(new URL(`../../${file}`, import.meta.url), 'utf8'));
+  const tileset = parseTileset(json('public/tiles/placeholder.tsj'), 'placeholder.tsj');
+  const map = parseTileMap(json('tests/fixtures/maps/arcade.tmj'), tileset, 'arcade.tmj');
+
+  it('is not lit beyond the arcade cabinet', () => {
+    expect(isLit(snippet(106, 98), figure(70, 96, 'right'), true, map)).toBe(false);
+  });
+
+  it('is lit beyond the beanbag, whose box the line crosses', () => {
+    const behind = snippet(170, 98);
+    const before = figure(134, 96, 'right');
+    expect(isLit(behind, before, true, map)).toBe(true);
+    expect(isLit(behind, before, true, { ...map, opaque: map.solids })).toBe(false);
   });
 });
 
