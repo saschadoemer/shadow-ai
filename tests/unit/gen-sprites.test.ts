@@ -21,10 +21,10 @@ import {
   renderLamp,
 } from '../../tools/placeholder-lamp.ts';
 import {
+  OVERVIEW_EMPTY,
   OVERVIEW_FRAME_SIZE,
   OVERVIEW_FRAMES,
-  OVERVIEW_ON,
-  OVERVIEW_OUT,
+  OVERVIEW_FULL,
   OVERVIEW_RIM,
   OVERVIEW_SHEET_HEIGHT,
   OVERVIEW_SHEET_WIDTH,
@@ -337,7 +337,7 @@ function overviewFrame(index: number): (string | null)[][] {
   );
 }
 
-describe('the placeholder overview generator (0009)', () => {
+describe('the placeholder overview generator (0012)', () => {
   it('is deterministic: two runs give byte-identical files', () => {
     expect(encodeOverviewPng().equals(encodeOverviewPng())).toBe(true);
   });
@@ -358,10 +358,10 @@ describe('the placeholder overview generator (0009)', () => {
     expect(OVERVIEW).toHaveLength(16 * 8 * 4);
   });
 
-  it('has 32 opaque pixels per frame, 16 of them the rim', () => {
-    expect([OVERVIEW_RIM, OVERVIEW_ON, OVERVIEW_OUT]).toStrictEqual([
+  it('has 34 opaque pixels per frame, 16 of them the rim', () => {
+    expect([OVERVIEW_RIM, OVERVIEW_FULL, OVERVIEW_EMPTY]).toStrictEqual([
       '#181425',
-      '#fee761',
+      '#e43b44',
       '#3a4466',
     ]);
     for (let index = 0; index < OVERVIEW_FRAMES; index += 1) {
@@ -369,7 +369,7 @@ describe('the placeholder overview generator (0009)', () => {
       expect(
         pixels.filter((colour) => colour !== null),
         `frame ${index}`,
-      ).toHaveLength(32);
+      ).toHaveLength(34);
       expect(
         pixels.filter((colour) => colour === OVERVIEW_RIM),
         `frame ${index}`,
@@ -377,26 +377,26 @@ describe('the placeholder overview generator (0009)', () => {
     }
   });
 
-  it('draws frame 0 as the spec says: a disc with cut corners, a dark rim, yellow inside', () => {
+  it('draws frame 0 as the spec says: a heart with a dark rim, red inside', () => {
     const R = OVERVIEW_RIM;
-    const Y = OVERVIEW_ON;
+    const F = OVERVIEW_FULL;
     const N = null;
     expect(overviewFrame(0)).toStrictEqual([
-      [N, N, N, N, N, N, N, N],
-      [N, N, R, R, R, R, N, N],
-      [N, R, Y, Y, Y, Y, R, N],
-      [N, R, Y, Y, Y, Y, R, N],
-      [N, R, Y, Y, Y, Y, R, N],
-      [N, R, Y, Y, Y, Y, R, N],
-      [N, N, R, R, R, R, N, N],
+      [N, R, R, N, R, R, N, N],
+      [R, F, F, R, F, F, R, N],
+      [R, F, F, F, F, F, R, N],
+      [R, F, F, F, F, F, R, N],
+      [N, R, F, F, F, R, N, N],
+      [N, N, R, F, R, N, N, N],
+      [N, N, N, R, N, N, N, N],
       [N, N, N, N, N, N, N, N],
     ]);
   });
 
-  it('frame 1 is frame 0 with the light out', () => {
-    const out = overviewFrame(0).map((row) =>
-      row.map((colour) => (colour === OVERVIEW_ON ? OVERVIEW_OUT : colour)),
+  it('frame 1 is frame 0 with the heart empty', () => {
+    const empty = overviewFrame(0).map((row) =>
+      row.map((colour) => (colour === OVERVIEW_FULL ? OVERVIEW_EMPTY : colour)),
     );
-    expect(overviewFrame(1)).toStrictEqual(out);
+    expect(overviewFrame(1)).toStrictEqual(empty);
   });
 });

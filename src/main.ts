@@ -9,7 +9,7 @@ import type { GameInput } from './game/player';
 import type { GameState } from './game/state';
 import { createInitialState, update } from './game/update';
 import { createCanvas2dRenderer } from './render/canvas2d/canvas2d-renderer';
-import { drawScene, LIGHT_SIZE, type SceneContent } from './render/draw-scene';
+import { drawScene, HEART_SIZE, type SceneContent } from './render/draw-scene';
 import { computeLayout } from './render/scale';
 
 declare global {
@@ -60,8 +60,8 @@ async function loadContent(): Promise<SceneContent> {
     },
     overviewSheet: {
       image: await loadImage(OVERVIEW_SHEET_URL),
-      frameWidth: LIGHT_SIZE,
-      frameHeight: LIGHT_SIZE,
+      frameWidth: HEART_SIZE,
+      frameHeight: HEART_SIZE,
     },
   };
 }

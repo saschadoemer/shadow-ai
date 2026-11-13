@@ -59,10 +59,10 @@ Health is called **overview**. Hits from creatures take it. At zero the player i
 wakes up in the data protection officer's office beside the reception. There is no death and no
 game over, only a way back. The maximum grows by one with every solved case.
 
-**As built** (feature 0009): the figure starts with three points, shown as three small lights in
-the top-left corner. A hit takes one, pushes the figure a tile and a half straight away from the
-creature — a wall holds the push — and leaves it safe for a second and a half, blinking; all
-three numbers *tune*. A frozen creature never hits: the lamp is the defence. At zero the screen
+**As built** (features 0009, 0012): the figure starts with five points, shown as five small
+hearts in the top-left corner. A hit takes one, pushes the figure a tile and a half straight away
+from the creature — a wall holds the push — and leaves it safe for a second and a half, blinking;
+all three numbers *tune*. The start value tunes as well. A frozen creature never hits: the lamp is the defence. At zero the screen
 closes like an eye and opens again a second and a half later: the figure stands in the data
 protection officer's office (feature 0010) with full overview, the creatures still in the world are back
 at their places, and what was captured stays captured. **Open:** how overview is won back

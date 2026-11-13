@@ -32,7 +32,7 @@ Built on 0010 as merged; its walk left the rooms' sizes as they are.
 
 **Out, explicitly:** figures at the desks (M4, M5) · furniture that can be used, opened or
 moved · screens that show something, animated tiles · glass walls · a second tileset · sofas,
-armchairs, beanbags, coffee machines, water dispensers, coat racks and gadgets (0012) ·
+armchairs, beanbags, coffee machines, water dispensers, coat racks and gadgets (0013) ·
 whiteboards and other decoration (the art pass, `visual.md` §5) · furniture in the lift and the
 stairwell.
 

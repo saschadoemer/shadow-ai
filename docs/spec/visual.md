@@ -49,9 +49,10 @@ tiles: its body on `detail` and its top on `above`, one row higher. A figure in 
 drawn behind the top, a figure below the body in front of it. A tall thing never stands in the
 first row below a wall, so its top always lies in the same room as its body.
 
-**The display.** The only thing drawn over the world is the row of overview lights in the
-top-left corner (feature 0009): 8x8, 4 px from the corner, one every 10 px, one per point of the
-maximum; no text. The screen of the dark is two rectangles in `#181425` that close from the top
+**The display.** The only thing drawn over the world is the row of overview hearts in the
+top-left corner (features 0009, 0012): 8x8, 4 px from the corner, one every 10 px, one per point
+of the maximum; no text. A heart is 7x7 with a rim in `#181425`, red `#e43b44` when full and
+`#3a4466` when empty. The screen of the dark is two rectangles in `#181425` that close from the top
 and the bottom; nothing is blended, so no pixel leaves the palette.
 
 ## 4. Palette

@@ -32,7 +32,8 @@ tools/
   placeholder-lamp.ts   the placeholder lamp sheet as pure data: the cone of light, one 48x48
                         frame per facing, drawn from game/lamp
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
-  placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames
+  placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames,
+                        a full and an empty heart
   floor-layout.ts       the floor as pure data: the corridors and rooms, the walls and their
                         openings, the closed doors, the spawn, the creatures' points, the
                         wake point and the furniture (world.md §1)
@@ -113,7 +114,7 @@ what is left to 8 px — through `moveBox`, then its feet are clamped so the spr
 map. `createInitialState` makes the creatures from `map.points` and rejects a name that is no
 species.
 
-`overview` is `{ current, max }`, 3 of 3 at the start; `dark` is 0 while the game runs (feature
+`overview` is `{ current, max }`, 5 of 5 at the start (feature 0012); `dark` is 0 while the game runs (feature
 0009). The order of a step in `update`: the lamp is on when the input holds it and the figure is
 not being pushed; the figure is stepped — `grace` drops by 1, not below 0, and a pushed figure
 moves by its push through `moveBox` and the clamp, 3 px per step for 8 steps, without reading
@@ -222,7 +223,7 @@ sprite round the same value.
 `frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48 — with its
 top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
 `render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the lamp's
-cone when the lamp is on, the creatures in array order, the player, `above` (§6), the lights of
+cone when the lamp is on, the creatures in array order, the player, `above` (§6), the hearts of
 overview, the lids of the dark. The player's sprite has its top-left corner at
 (round(x) − 8 − camera.x, round(y) − 24 − camera.y): the feet are the bottom centre of the
 sprite, so they sit on the tile grid and the figure stands on its tile. Its frame in the sheet is
@@ -233,8 +234,8 @@ Cone and figure round the same values, so they agree pixel for pixel, and the co
 figure. A creature's frame has its top-left corner at (round(x) − 8 − camera.x, round(y) − 16 −
 camera.y); its frame is 2 while `light` is above 0, else ⌊tick / 15⌋ mod 2 (feature 0008).
 
-The lights of overview (feature 0009) are drawn on the surface, not shifted by the camera: light
-i, for i below `max`, has its top-left corner at (4 + 10i, 4), with frame 0 when i is below
+The hearts of overview (features 0009, 0012) are drawn on the surface, not shifted by the
+camera: heart i, for i below `max`, has its top-left corner at (4 + 10i, 4), with frame 0 when i is below
 `current`, else frame 1. With `dark` = d above 0 two rectangles in `#181425` are drawn last,
 (0, 0, 320, L) and (0, 180 − L, 320, L), with L = min(3 × min(d, 90 − d), 90): they close in 30
 steps, stay closed for 30 and open in 30. While `grace` is above 0 the player's sprite is left
@@ -432,10 +433,10 @@ data: `public/sprites/snippet.png`, 48x16, three 16x16 frames in one row — the
 `npm run gen-sprites` writes it beside the other two; it is committed, deterministic and tested
 against the generator. The art pass replaces it under the same name and frame order.
 
-`tools/placeholder-overview.ts` draws the overview sheet (feature 0009) and returns its pixels as
-data: `public/sprites/overview.png`, 16x8, two 8x8 frames in one row — a disc of 32 pixels with
-a rim of 16 in `#181425`, inside `#fee761` for the light that is on and `#3a4466` for the light
-that is out. `npm run gen-sprites` writes it beside the other three; it is committed,
+`tools/placeholder-overview.ts` draws the overview sheet (features 0009, 0012) and returns its
+pixels as data: `public/sprites/overview.png`, 16x8, two 8x8 frames in one row — a heart 7 wide
+and 7 high, 34 opaque pixels, with a rim of 16 in `#181425`, inside 18 in `#e43b44` for the full
+heart and `#3a4466` for the empty one. `npm run gen-sprites` writes it beside the other three; it is committed,
 deterministic and tested against the generator pixel by pixel. The art pass replaces it under the
 same name and frame order.
 

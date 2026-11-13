@@ -61,8 +61,8 @@ describe('the constants (0009)', () => {
       RECOIL_PX_PER_STEP,
       DARK_STEPS,
       WAKE_STEP,
-    ]).toStrictEqual([3, 10, 90, 8, 3, 90, 45]);
-    expect(initialOverview()).toStrictEqual({ current: 3, max: 3 });
+    ]).toStrictEqual([5, 10, 90, 8, 3, 90, 45]);
+    expect(initialOverview()).toStrictEqual({ current: 5, max: 5 });
   });
 });
 
@@ -239,7 +239,7 @@ describe('overview in update', () => {
 
   it('a creature at 10 px comes 2/3 px closer and hits in that step', () => {
     const next = update(game([snippet(150, 100)]), NONE, MAP);
-    expect(next.overview).toStrictEqual({ current: 2, max: 3 });
+    expect(next.overview).toStrictEqual({ current: 4, max: 5 });
     expect(next.player.grace).toBe(90);
     expect(next.player.recoil.dx).toBeCloseTo(3, 9);
     expect(next.player.recoil.dy).toBe(0);
@@ -251,9 +251,9 @@ describe('overview in update', () => {
 
   it('a creature at 11 px does not hit in the first step and hits in the second', () => {
     const first = update(game([snippet(149, 100)]), NONE, MAP);
-    expect(first.overview.current).toBe(3);
+    expect(first.overview.current).toBe(5);
     expect(first.creatures[0]?.x).toBeCloseTo(149.6667, 3);
-    expect(update(first, NONE, MAP).overview.current).toBe(2);
+    expect(update(first, NONE, MAP).overview.current).toBe(4);
   });
 
   it('the push ignores the keys and holds the lamp off for eight steps', () => {
@@ -277,30 +277,30 @@ describe('overview in update', () => {
   it('with grace 2 there is no hit; one step later there is', () => {
     const safe = game([snippet(151, 100)], { player: { ...AT, grace: 2 } });
     const first = update(safe, NONE, MAP);
-    expect([first.overview.current, first.player.grace]).toStrictEqual([3, 1]);
-    expect(update(first, NONE, MAP).overview.current).toBe(2);
+    expect([first.overview.current, first.player.grace]).toStrictEqual([5, 1]);
+    expect(update(first, NONE, MAP).overview.current).toBe(4);
   });
 
   it('a creature that stays at the figure hits again in the 90th step after a hit, not sooner', () => {
     let state = update(game([snippet(150, 100)]), NONE, MAP);
     for (let i = 1; i <= 89; i += 1) {
       state = update(state, NONE, MAP);
-      expect(state.overview.current, `step ${i} after the hit`).toBe(2);
+      expect(state.overview.current, `step ${i} after the hit`).toBe(4);
     }
-    expect(update(state, NONE, MAP).overview.current).toBe(1);
+    expect(update(state, NONE, MAP).overview.current).toBe(3);
   });
 
   it('the lamp is the defence: a lit creature at 10 px does not hit', () => {
     // Apex (160, 88), body (170, 92): d = 10, s = 4.
     const lit = update(game([snippet(170, 100)]), SHINE, MAP);
     expect(lit.creatures[0]?.light).toBe(1);
-    expect(lit.overview.current).toBe(3);
-    expect(update(game([snippet(170, 100)]), NONE, MAP).overview.current).toBe(2);
+    expect(lit.overview.current).toBe(5);
+    expect(update(game([snippet(170, 100)]), NONE, MAP).overview.current).toBe(4);
   });
 
   it('one step holds one hit, from the first creature in the array', () => {
     const next = update(game([snippet(150, 100), snippet(170, 100)]), NONE, MAP);
-    expect(next.overview.current).toBe(2);
+    expect(next.overview.current).toBe(4);
     expect(next.player.recoil.dx).toBeCloseTo(3, 9);
   });
 

@@ -41,7 +41,7 @@ describe('GameState (INV-1)', () => {
       lamp: { on: false },
       creatures: [],
       captured: { snippet: 0 },
-      overview: { current: 3, max: 3 },
+      overview: { current: 5, max: 5 },
       dark: 0,
     });
   });
@@ -275,7 +275,7 @@ describe('overview in the state (0009)', () => {
 
   it('survives a JSON round trip in the middle of a push (INV-1)', () => {
     const state = run(6); // the hit in step 1, five steps of the push
-    expect(state.overview).toStrictEqual({ current: 2, max: 3 });
+    expect(state.overview).toStrictEqual({ current: 4, max: 5 });
     expect(state.player.grace).toBe(85);
     expect(state.player.recoil.dx).toBeCloseTo(1.8, 3);
     expect(state.player.recoil.dy).toBeCloseTo(2.4, 3);
@@ -286,23 +286,25 @@ describe('overview in the state (0009)', () => {
     expect(copy).toStrictEqual(state);
   });
 
-  it('three hits, 90 steps apart, lead into the dark; it survives the round trip at step 30', () => {
-    expect(run(90).overview.current).toBe(2);
-    expect(run(91).overview.current).toBe(1);
-    expect(run(180).dark).toBe(0);
-    expect(run(181).dark).toBe(1);
-    const state = run(210);
-    expect(state.overview).toStrictEqual({ current: 0, max: 3 });
+  it('five hits, 90 steps apart, lead into the dark; it survives the round trip at step 30', () => {
+    expect([1, 91, 181, 271].map((steps) => run(steps).overview.current)).toStrictEqual([
+      4, 3, 2, 1,
+    ]);
+    expect(run(90).overview.current).toBe(4);
+    expect(run(360).dark).toBe(0);
+    expect(run(361).dark).toBe(1);
+    const state = run(390);
+    expect(state.overview).toStrictEqual({ current: 0, max: 5 });
     expect(state.dark).toBe(30);
     const copy: unknown = JSON.parse(JSON.stringify(state));
     expect(copy).toStrictEqual(state);
   });
 
   it('without a wake point the figure wakes at the spawn, the creature at its home', () => {
-    const state = run(225); // 181 + 44: dark is 45
+    const state = run(405); // 361 + 44: dark is 45
     expect(state.dark).toBe(45);
     expect([state.player.x, state.player.y]).toStrictEqual([1024, 734]);
-    expect(state.overview).toStrictEqual({ current: 3, max: 3 });
+    expect(state.overview).toStrictEqual({ current: 5, max: 5 });
     expect(state.creatures).toStrictEqual([
       { species: 'snippet', x: 1018, y: 726, light: 0, home: { x: 1018, y: 726 } },
     ]);

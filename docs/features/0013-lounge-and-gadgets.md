@@ -1,4 +1,4 @@
-# 0012 — Lounge and gadgets
+# 0013 — Lounge and gadgets
 
 **Status:** approved 2026-11-13
 **Milestone:** M3

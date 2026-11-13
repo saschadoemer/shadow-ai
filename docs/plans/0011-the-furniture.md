@@ -61,7 +61,7 @@ dependency.
   messages: imperative subject, a body with the why, and the `Co-Authored-By` trailer the
   session's own attribution reminder names. Commits are signed through 1Password, which fails
   inside the Bash sandbox: run `git commit` with the sandbox disabled.
-- Feature specs and plans 0001–0010 are history and are not edited. 0012 is approved and is
+- Feature specs and plans 0001–0010 are history and are not edited. 0013, lounge and gadgets, is approved and is
   not built here: no sofa, no coffee machine, no tile id above 29.
 
 ## Design notes
@@ -625,9 +625,9 @@ on the branch or ask, rerun Task 6, start again at step 1. After step 18 the fee
 one per message. Then write the `Result` line — `passed YYYY-MM-DD, steps 1–18`, followed by
 the feel notes — and commit it: `Record the acceptance walk of 0011`.
 
-The feel answers matter beyond this feature: 0012 places seating, coffee, water, coat racks
+The feel answers matter beyond this feature: 0013 places seating, coffee, water, coat racks
 and gadgets between this furniture. If the author would move, add or remove furniture, that
-is a revision of 0012's tables with the author before 0012 is implemented — and, when it
+is a revision of 0013's tables with the author before 0013 is implemented — and, when it
 changes what 0011 says, a change of this spec first, not a quiet change on the branch after a
 passed walk.
 
@@ -648,7 +648,7 @@ The author merges.
 - Scope "In": the seventeen tiles and the 240x32 sheet → T3; `low`, `parseTileset`,
   `TileMap.opaque` → T1; `sightBlocked` given `opaque` → T2; `detail`, `above` and the
   placement tables → T4; the documents → T5. Scope "Out": nothing here adds figures at desks,
-  usable furniture, animated tiles, glass, a second tileset, anything of 0012, or furniture in
+  usable furniture, animated tiles, glass, a second tileset, anything of 0013, or furniture in
   the lift and the stairwell.
 - Behaviour "Low and tall" → T1 (property, rejection, `opaque`), T2 (light), T4 (tall things
   and their rule). "The tiles" → T3. "The pieces", "The rooms", the counts, what stays true,

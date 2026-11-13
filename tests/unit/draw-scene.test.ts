@@ -10,6 +10,9 @@ import {
   creatureFrame,
   creatureOrigin,
   drawScene,
+  HEART_MARGIN,
+  HEART_PITCH,
+  HEART_SIZE,
   lampFrame,
   lampFrameOrigin,
   lidHeight,
@@ -87,7 +90,7 @@ const state = (
   lamp: { on: lampOn },
   creatures: [],
   captured: { snippet: 0 },
-  // No lights: the call lists of the earlier features stay as they were (0009).
+  // No hearts: the call lists of the earlier features stay as they were (0009).
   overview: { current: 0, max: 0 },
   dark: 0,
 });
@@ -271,7 +274,7 @@ describe('the creatures in the scene (0008)', () => {
   });
 });
 
-describe('overview in the scene (0009)', () => {
+describe('overview in the scene (0009, 0012)', () => {
   const scene = (fields: Partial<GameState>): GameState => ({
     ...state({ x: 20.4, y: 30.6, facing: 'left', frame: 3 }),
     ...fields,
@@ -286,7 +289,7 @@ describe('overview in the scene (0009)', () => {
     'drawTile 4 at 16,16',
   ];
 
-  it('draws one light per point of the maximum after above: on, on, out for 2 of 3', () => {
+  it('draws one heart per point of the maximum after above: full, full, empty for 2 of 3', () => {
     const renderer = recordingRenderer();
     drawScene(renderer, scene({ overview: { current: 2, max: 3 } }), CONTENT);
     expect(renderer.calls).toStrictEqual([
@@ -305,7 +308,7 @@ describe('overview in the scene (0009)', () => {
     ]);
   });
 
-  it('does not shift the lights with the camera', () => {
+  it('does not shift the hearts with the camera', () => {
     const renderer = recordingRenderer();
     drawScene(
       renderer,
@@ -313,6 +316,22 @@ describe('overview in the scene (0009)', () => {
       CONTENT,
     );
     expect(renderer.calls.at(-1)).toBe('drawSprite 0 at 4,4');
+  });
+
+  it('draws five hearts for 3 of 5: three full, two empty, 10 px apart', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene({ overview: { current: 3, max: 5 } }), CONTENT);
+    expect(renderer.calls.slice(-5)).toStrictEqual([
+      'drawSprite 0 at 4,4',
+      'drawSprite 0 at 14,4',
+      'drawSprite 0 at 24,4',
+      'drawSprite 1 at 34,4',
+      'drawSprite 1 at 44,4',
+    ]);
+  });
+
+  it('names the row by its picture', () => {
+    expect([HEART_SIZE, HEART_MARGIN, HEART_PITCH]).toStrictEqual([8, 4, 10]);
   });
 
   it('draws no lid while the game runs', () => {
