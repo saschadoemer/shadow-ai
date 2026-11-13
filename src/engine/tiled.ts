@@ -28,6 +28,8 @@ export interface Tileset {
   readonly tileCount: number;
   /** Index: tile id. The tile's solid boxes in tile-local pixels; [] is an open tile. */
   readonly boxes: readonly (readonly Box[])[];
+  /** Index: tile id. True for a tile whose boxes stop feet but not light (feature 0011). */
+  readonly low: readonly boolean[];
 }
 
 type Json = Record<string, unknown>;
@@ -76,6 +78,12 @@ function checkTileSize(json: Json, file: string): void {
 function isSolidProperty(value: unknown, file: string): boolean {
   const property = asRecord(value, file, 'tile property');
   return property.name === 'solid' && property.type === 'bool' && property.value === true;
+}
+
+/** The `low` property (0011): the tile's boxes stop feet but not light. */
+function isLowProperty(value: unknown, file: string): boolean {
+  const property = asRecord(value, file, 'tile property');
+  return property.name === 'low' && property.type === 'bool' && property.value === true;
 }
 
 /** The box of a tile that is solid as a whole: the `solid` property. */
@@ -146,6 +154,7 @@ export function parseTileset(json: unknown, file: string): Tileset {
   const tileCount = asNumber(tileset.tilecount, file, 'tilecount');
   const image = asString(tileset.image, file, 'image');
   const boxesById = new Map<number, readonly Box[]>();
+  const lowIds = new Set<number>();
   const tiles = tileset.tiles === undefined ? [] : asArray(tileset.tiles, file, 'tiles');
   for (const entry of tiles) {
     const tile = asRecord(entry, file, 'tile');
@@ -164,6 +173,13 @@ export function parseTileset(json: unknown, file: string): Tileset {
     if (solid && shapes.length > 0) {
       fail(file, `tile ${id} is solid and has collision shapes; only one of the two is allowed`);
     }
+    const low = properties.some((property) => isLowProperty(property, file));
+    if (low && !solid && shapes.length === 0) {
+      fail(file, `tile ${id} is low but has no collision box`);
+    }
+    if (low) {
+      lowIds.add(id);
+    }
     if (solid) {
       boxesById.set(id, FULL_TILE);
     } else if (shapes.length > 0) {
@@ -175,6 +191,7 @@ export function parseTileset(json: unknown, file: string): Tileset {
     columns,
     tileCount,
     boxes: Array.from({ length: tileCount }, (_, id) => boxesById.get(id) ?? NO_BOXES),
+    low: Array.from({ length: tileCount }, (_, id) => lowIds.has(id)),
   };
 }
 
@@ -228,6 +245,11 @@ export interface TileMap {
   readonly points: readonly NamedPoint[];
   /** Row-major, width × height: the solid boxes of the cell's tiles on the three layers, in map pixels. */
   readonly solids: readonly (readonly Box[])[];
+  /**
+   * Row-major, width × height: the boxes of the cell's tiles that are not low, in map pixels.
+   * Light stops at these (0011).
+   */
+  readonly opaque: readonly (readonly Box[])[];
 }
 
 function isTileLayerName(name: string): name is TileLayerName {
@@ -436,18 +458,24 @@ export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string
   const above = layers.above ?? empty();
   const boxesOf = (id: number | undefined): readonly Box[] =>
     id === undefined || id === EMPTY ? NO_BOXES : (tileset.boxes[id] ?? NO_BOXES);
-  const solids = ground.map((id, index): readonly Box[] => {
-    const local = [...boxesOf(id), ...boxesOf(detail[index]), ...boxesOf(above[index])];
-    if (local.length === 0) {
-      return NO_BOXES;
-    }
-    const left = (index % width) * TILE_SIZE;
-    const top = Math.floor(index / width) * TILE_SIZE;
-    return local.map((box) => ({ ...box, x: box.x + left, y: box.y + top }));
-  });
+  const opaqueOf = (id: number | undefined): readonly Box[] =>
+    id === undefined || id === EMPTY || tileset.low[id] === true ? NO_BOXES : boxesOf(id);
+  /** Per cell, the boxes the lookup gives for the three layers, in map pixels. */
+  const cellBoxes = (lookup: (id: number | undefined) => readonly Box[]) =>
+    ground.map((id, index): readonly Box[] => {
+      const local = [...lookup(id), ...lookup(detail[index]), ...lookup(above[index])];
+      if (local.length === 0) {
+        return NO_BOXES;
+      }
+      const left = (index % width) * TILE_SIZE;
+      const top = Math.floor(index / width) * TILE_SIZE;
+      return local.map((box) => ({ ...box, x: box.x + left, y: box.y + top }));
+    });
+  const solids = cellBoxes(boxesOf);
+  const opaque = cellBoxes(opaqueOf);
   checkPosition('spawn', spawn, width, height, solids, mapFile);
   for (const point of points) {
     checkPosition(`point "${point.name}"`, point, width, height, solids, mapFile);
   }
-  return { width, height, ground, detail, above, spawn, points, solids };
+  return { width, height, ground, detail, above, spawn, points, solids, opaque };
 }

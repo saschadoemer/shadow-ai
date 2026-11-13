@@ -23,6 +23,7 @@ describe('parseTileset', () => {
       columns: 2,
       tileCount: 2,
       boxes: [[], [FULL]],
+      low: [false, false],
     });
   });
 
@@ -164,6 +165,37 @@ describe('parseTileset: collision rectangles (0010)', () => {
   });
 });
 
+describe('low tiles (0011)', () => {
+  it('reads `low` per tile and keeps the boxes', () => {
+    const { file, json } = fixture('low.tsj');
+    const tileset = parseTileset(json, file);
+    expect(tileset.low).toStrictEqual([false, false, true, true]);
+    expect(tileset.boxes[2]).toStrictEqual([{ x: 0, y: 0, width: 16, height: 16 }]);
+    expect(tileset.boxes[3]).toStrictEqual([{ x: 0, y: 0, width: 16, height: 2 }]);
+  });
+
+  it('rejects a low tile without a collision box', () => {
+    const { file, json } = fixture('low-without-box.tsj');
+    expect(() => parseTileset(json, file)).toThrow(
+      `${file}: tile 3 is low but has no collision box`,
+    );
+  });
+
+  it('puts every box into `solids` and only the boxes of tiles that are not low into `opaque`', () => {
+    const tiles = fixture('low.tsj');
+    const tileset = parseTileset(tiles.json, tiles.file);
+    const low = fixture('low.tmj');
+    const map = parseTileMap(low.json, tileset, low.file);
+    const cell = (column: number, row: number): number => row * 20 + column;
+    expect(map.solids[cell(1, 2)]).toStrictEqual([{ x: 16, y: 32, width: 16, height: 16 }]);
+    expect(map.solids[cell(3, 2)]).toStrictEqual([{ x: 48, y: 32, width: 16, height: 16 }]);
+    expect(map.solids[cell(5, 2)]).toStrictEqual([{ x: 80, y: 32, width: 16, height: 2 }]);
+    expect(map.opaque[cell(1, 2)]).toStrictEqual([{ x: 16, y: 32, width: 16, height: 16 }]);
+    expect(map.opaque.filter((boxes) => boxes.length > 0)).toHaveLength(1);
+    expect(map.opaque).toHaveLength(240);
+  });
+});
+
 describe('tilesetSource', () => {
   const MAP = '/maps/test.tmj';
 
@@ -258,6 +290,8 @@ describe('parseTileMap on the corridor', () => {
     ]);
     expect(map.solids[0]).toStrictEqual([]);
     expect(map.solids.filter((boxes) => boxes.length > 0)).toHaveLength(9);
+    // No tile of the corridor's tileset is low (0011): light stops wherever feet do.
+    expect(map.opaque).toStrictEqual(map.solids);
   });
 
   it('fills absent detail and above layers with EMPTY', () => {

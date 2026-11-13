@@ -56,6 +56,7 @@ const MAP: TileMap = {
   spawn: { x: 8, y: 8 },
   points: [],
   solids: solidsOf([false, false, false, true, true, true], 3),
+  opaque: solidsOf([false, false, false, true, true, true], 3),
 };
 const CONTENT: SceneContent = {
   map: MAP,
