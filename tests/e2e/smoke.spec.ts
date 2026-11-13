@@ -141,6 +141,29 @@ test('the floor starts with three snippets and nothing captured', async ({ page 
   expect(state?.captured).toStrictEqual({ snippet: 0 });
 });
 
+test('the floor starts with its 22 movers and draws the person of the reception', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.movers.length), {
+      message: 'window.shadowAi.state.movers holds the 22 movers of the floor',
+    })
+    .toBe(22);
+  // The person stands at feet (200, 648) for its first five seconds: its frame's corner is at
+  // (96, 0) on the surface, its shirt at (7, 13) in the frame, and the factor is 4.
+  const canvas = page.locator('canvas#game');
+  await expect
+    .poll(
+      () =>
+        canvas.evaluate((element: HTMLCanvasElement) =>
+          Array.from(element.getContext('2d')?.getImageData((96 + 7) * 4, 13 * 4, 1, 1).data ?? []),
+        ),
+      { message: 'the pixel is the shirt #3e8948 of the person in the reception' },
+    )
+    .toStrictEqual([0x3e, 0x89, 0x48, 255]);
+});
+
 test('the game starts with full overview and outside the dark', async ({ page }) => {
   await page.goto('/');
   await expect
