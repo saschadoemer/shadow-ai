@@ -2,6 +2,7 @@ import { moveBox, sightBlocked } from '../engine/collision';
 import { STEPS_PER_SECOND } from '../engine/loop';
 import { type NamedPoint, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { inCone, lampCone } from './lamp';
+import { WAKE_POINT } from './overview';
 import { BOX_HEIGHT, BOX_WIDTH } from './player';
 import {
   type Captured,
@@ -134,16 +135,25 @@ function isSpecies(name: string): name is Species {
 }
 
 /**
- * The creatures a map starts with: one per named point, whose name is its species. Any other
- * name is an error, so a typing mistake in the map is not a silently missing creature.
+ * The creatures a map starts with: one per named point, whose name is its species. The `wake`
+ * point (0009) is the one name besides the species, and it makes no creature. Any other name is
+ * an error, so a typing mistake in the map is not a silently missing creature.
  */
 export function creaturesFrom(points: readonly NamedPoint[]): CreatureState[] {
-  return points.map((point) => {
-    if (!isSpecies(point.name)) {
-      throw new Error(`unknown point object "${point.name}" at (${point.x}, ${point.y})`);
-    }
-    return { species: point.name, x: point.x, y: point.y, light: 0 };
-  });
+  return points
+    .filter((point) => point.name !== WAKE_POINT)
+    .map((point) => {
+      if (!isSpecies(point.name)) {
+        throw new Error(`unknown point object "${point.name}" at (${point.x}, ${point.y})`);
+      }
+      return {
+        species: point.name,
+        x: point.x,
+        y: point.y,
+        light: 0,
+        home: { x: point.x, y: point.y },
+      };
+    });
 }
 
 /** Nothing captured yet. A literal, so a new species does not compile until it is listed. */

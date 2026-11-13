@@ -11,7 +11,7 @@ import {
   stepCreatures,
   TOUCH_DISTANCE,
 } from '../../src/game/creature';
-import type { CreatureState, Facing, PlayerState } from '../../src/game/state';
+import { type CreatureState, type Facing, NO_RECOIL, type PlayerState } from '../../src/game/state';
 import { grassMap } from './grass-map';
 import { pictureMap } from './picture-map';
 
@@ -24,12 +24,17 @@ const figure = (x: number, y: number, facing: Facing = 'down'): PlayerState => (
   facing,
   frame: 0,
   frameTimer: 0,
+  grace: 0,
+  recoil: NO_RECOIL,
 });
+/** Every test creature has the same home, so that two of them compare equal after a move. */
+const HOME = { x: 0, y: 0 };
 const snippet = (x: number, y: number, light = 0): CreatureState => ({
   species: 'snippet',
   x,
   y,
   light,
+  home: HOME,
 });
 /** One step with the lamp off; the creature is never captured that way. */
 function approached(creature: CreatureState, player: PlayerState, map = OPEN): CreatureState {
@@ -207,7 +212,39 @@ describe('creaturesFrom', () => {
         { name: 'snippet', x: 1288, y: 760 },
         { name: 'snippet', x: 1560, y: 760 },
       ]),
-    ).toStrictEqual([snippet(1288, 760), snippet(1560, 760)]);
+    ).toStrictEqual([
+      { species: 'snippet', x: 1288, y: 760, light: 0, home: { x: 1288, y: 760 } },
+      { species: 'snippet', x: 1560, y: 760, light: 0, home: { x: 1560, y: 760 } },
+    ]);
+  });
+
+  it("sets a creature's home to its point, and a step leaves the home unchanged (0009)", () => {
+    const [made] = creaturesFrom([{ name: 'snippet', x: 100, y: 100 }]);
+    expect(made).toStrictEqual({
+      species: 'snippet',
+      x: 100,
+      y: 100,
+      light: 0,
+      home: { x: 100, y: 100 },
+    });
+    if (made === undefined) {
+      throw new Error('no creature');
+    }
+    const moved = stepCreature(made, figure(160, 100), false, OPEN);
+    expect(moved?.x).toBeCloseTo(100.6667, 3);
+    expect(moved?.home).toStrictEqual({ x: 100, y: 100 });
+  });
+
+  it('makes no creature from the wake point (0009)', () => {
+    expect(
+      creaturesFrom([
+        { name: 'wake', x: 80, y: 60 },
+        { name: 'snippet', x: 100, y: 100 },
+      ]),
+    ).toHaveLength(1);
+    expect(() => creaturesFrom([{ name: 'wak', x: 80, y: 60 }])).toThrow(
+      'unknown point object "wak" at (80, 60)',
+    );
   });
 
   it('rejects a name that is no species', () => {

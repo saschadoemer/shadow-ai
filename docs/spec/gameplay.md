@@ -29,7 +29,7 @@ Three upgrades over the game, each changing what the player can do:
 | Colour filter | Reveals hidden traces and hidden paths; required for Management |
 | Longer battery | Longer holding, for the dense zones of the server room |
 
-**As built** (feature 0007): Space holds the lamp; there is no toggle. While it is held the
+**As built** (feature 0007): Space holds the lamp; there is no toggle. A figure that is being pushed cannot hold it (0009). While it is held the
 figure stands and the direction keys turn it, so a sweep is a deliberate act. The cone starts at
 the chest, 12 px above the feet, is 48 px long — three tiles — and opens with slope 1/2 to each
 side, so it is as wide at its end as it is long; both numbers *tune*. It is drawn as a yellow
@@ -47,7 +47,8 @@ Combat matters but is never the whole answer. Every piece of shadow belongs to o
 
 1. **Small creatures** give way to the lamp. The snippet (0008) is the first: it rests until the
    figure is closer than four tiles, comes straight at it at half the figure's speed, and stops
-   at its feet. A wall or a fence holds it. Its touch costs nothing until overview exists (0009).
+   at its feet. A wall or a fence holds it. Free and within 10 px of the figure's feet it takes
+   one point of overview (§4); frozen in the light it takes nothing.
 2. **Medium creatures** need an action in the environment first — unplug the device, close the
    browser window — and then the lamp.
 3. **The source** of a case gives way only to the conversation with the person behind it.
@@ -57,6 +58,17 @@ Combat matters but is never the whole answer. Every piece of shadow belongs to o
 Health is called **overview**. Hits from creatures take it. At zero the player is in the dark and
 wakes up in the data protection officer's office on the courtyard. There is no death and no game
 over, only a way back. The maximum grows by one with every solved case.
+
+**As built** (feature 0009): the figure starts with three points, shown as three small lights in
+the top-left corner. A hit takes one, pushes the figure a tile and a half straight away from the
+creature — a wall holds the push — and leaves it safe for a second and a half, blinking; all
+three numbers *tune*. A frozen creature never hits: the lamp is the defence. At zero the screen
+closes like an eye and opens again a second and a half later: the figure stands in front of the
+data protection officer's office with full overview, the creatures still in the world are back
+at their places, and what was captured stays captured. **Open:** how overview is won back
+without falling into the dark — a conversation, a place, a find — is decided when there are
+figures to talk to and rooms to enter (M4, M5). The maximum grows with the first solved case
+(M5).
 
 ## 5. Progression
 

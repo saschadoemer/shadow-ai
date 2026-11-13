@@ -131,8 +131,24 @@ test('the campus starts with three snippets and nothing captured', async ({ page
     })
     .toBe(3);
   const state = await page.evaluate(() => window.shadowAi?.state);
-  expect(state?.creatures[0]).toStrictEqual({ species: 'snippet', x: 1288, y: 760, light: 0 });
+  expect(state?.creatures[0]).toStrictEqual({
+    species: 'snippet',
+    x: 1288,
+    y: 760,
+    light: 0,
+    home: { x: 1288, y: 760 },
+  });
   expect(state?.captured).toStrictEqual({ snippet: 0 });
+});
+
+test('the game starts with full overview and outside the dark', async ({ page }) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.overview), {
+      message: 'window.shadowAi.state.overview is three of three',
+    })
+    .toStrictEqual({ current: 3, max: 3 });
+  expect(await page.evaluate(() => window.shadowAi?.state.dark)).toBe(0);
 });
 
 test.describe('served by the container', () => {

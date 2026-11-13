@@ -110,10 +110,12 @@ author can test by hand in a few minutes. Nothing is built that was not approved
    is committed on the branch. **The walk is the quality gate: no pull request is opened before
    it has passed.** The protocol is `docs/spec/testing.md` §5.
 5. **Pull request and merge.** Only after the walk: `main` is merged in (§4) and the checks are
-   rerun — if the merge changed code, the walk is run again — then the pull request is opened
-   against `main` with the walk's result in its description, and CI must be green. The author
-   merges the pull request; the merge closes the feature. Then `Status: implemented`. What is
-   durable has moved into `docs/spec/`; the feature spec stays as history.
+   rerun — if the merge changed code, the walk is run again — then `Status: implemented` with
+   the date is set in the spec and in the table of `docs/features/README.md`, committed on the
+   branch, and the pull request is opened against `main` with the walk's result in its
+   description; CI must be green. The status travels with the pull request, not in one of its
+   own. The author merges the pull request; the merge closes the feature. What is durable has
+   moved into `docs/spec/`; the feature spec stays as history.
 
 Harness changes approved in conversation may go directly to `main`.
 

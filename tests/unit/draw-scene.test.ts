@@ -1,13 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { EMPTY, type TileMap } from '../../src/engine/tiled';
-import type { CreatureState, GameState, PlayerState } from '../../src/game/state';
+import {
+  type CreatureState,
+  type GameState,
+  NO_RECOIL,
+  type PlayerState,
+} from '../../src/game/state';
 import {
   creatureFrame,
   creatureOrigin,
   drawScene,
   lampFrame,
   lampFrameOrigin,
+  lidHeight,
   playerFrame,
+  playerVisible,
   type SceneContent,
 } from '../../src/render/draw-scene';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
@@ -55,6 +62,7 @@ const CONTENT: SceneContent = {
   playerSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 },
   lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
   creatureSheets: { snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 } },
+  overviewSheet: { image: {} as ImageBitmap, frameWidth: 8, frameHeight: 8 },
 };
 const player = (fields: Partial<PlayerState>): PlayerState => ({
   x: 0,
@@ -62,6 +70,8 @@ const player = (fields: Partial<PlayerState>): PlayerState => ({
   facing: 'down',
   frame: 0,
   frameTimer: 0,
+  grace: 0,
+  recoil: NO_RECOIL,
   ...fields,
 });
 const state = (
@@ -75,6 +85,9 @@ const state = (
   lamp: { on: lampOn },
   creatures: [],
   captured: { snippet: 0 },
+  // No lights: the call lists of the earlier features stay as they were (0009).
+  overview: { current: 0, max: 0 },
+  dark: 0,
 });
 
 describe('playerFrame', () => {
@@ -206,6 +219,7 @@ describe('the creatures in the scene (0008)', () => {
     x,
     y,
     light,
+    home: { x: 0, y: 0 },
   });
 
   it('draws them after the cone and before the player, in array order', () => {
@@ -251,5 +265,95 @@ describe('the creatures in the scene (0008)', () => {
     ]);
     expect(creatureFrame(snippet(0, 0, 1), 0)).toBe(2);
     expect(creatureFrame(snippet(0, 0, 59), 15)).toBe(2);
+  });
+});
+
+describe('overview in the scene (0009)', () => {
+  const scene = (fields: Partial<GameState>): GameState => ({
+    ...state({ x: 20.4, y: 30.6, facing: 'left', frame: 3 }),
+    ...fields,
+  });
+  const MAP_CALLS = [
+    'clear #181425',
+    'drawTile 0 at 0,0',
+    'drawTile 1 at 16,0',
+    'drawTile 2 at 0,16',
+    'drawTile 2 at 16,16',
+    'drawTile 2 at 32,16',
+    'drawTile 4 at 16,16',
+  ];
+
+  it('draws one light per point of the maximum after above: on, on, out for 2 of 3', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene({ overview: { current: 2, max: 3 } }), CONTENT);
+    expect(renderer.calls).toStrictEqual([
+      ...MAP_CALLS,
+      'drawSprite 13 at 12,7',
+      'drawTile 6 at 0,0',
+      'drawSprite 0 at 4,4',
+      'drawSprite 0 at 14,4',
+      'drawSprite 1 at 24,4',
+    ]);
+    expect(renderer.sheets).toStrictEqual([
+      CONTENT.playerSheet,
+      CONTENT.overviewSheet,
+      CONTENT.overviewSheet,
+      CONTENT.overviewSheet,
+    ]);
+  });
+
+  it('does not shift the lights with the camera', () => {
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      { ...scene({ overview: { current: 1, max: 1 } }), camera: { x: 5, y: 7 } },
+      CONTENT,
+    );
+    expect(renderer.calls.at(-1)).toBe('drawSprite 0 at 4,4');
+  });
+
+  it('draws no lid while the game runs', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene({ overview: { current: 3, max: 3 } }), CONTENT);
+    expect(renderer.calls.filter((call) => call.startsWith('fillRect'))).toStrictEqual([]);
+  });
+
+  it('draws the two lids last, in the page colour', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene({ overview: { current: 0, max: 3 }, dark: 15 }), CONTENT);
+    expect(renderer.calls.slice(-3)).toStrictEqual([
+      'drawSprite 1 at 24,4',
+      'fillRect 0,0 320x45 #181425',
+      'fillRect 0,135 320x45 #181425',
+    ]);
+  });
+
+  it('the lids close in 30 steps, stay closed for 30 and open in 30', () => {
+    expect([0, 1, 15, 30, 45, 60, 75, 89].map(lidHeight)).toStrictEqual([
+      0, 3, 45, 90, 90, 90, 45, 3,
+    ]);
+  });
+
+  it('leaves the figure out in every second group of four steps while it is safe', () => {
+    const visible = (grace: number): boolean => playerVisible(player({ grace }));
+    expect([90, 88, 87, 84, 83, 4, 3, 0].map(visible)).toStrictEqual([
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+    ]);
+    const renderer = recordingRenderer();
+    drawScene(renderer, state({ x: 20.4, y: 30.6, grace: 87 }), CONTENT);
+    expect(renderer.calls).toStrictEqual([...MAP_CALLS, 'drawTile 6 at 0,0']);
+  });
+
+  it('still draws the cone while the figure blinks', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, state({ x: 20.4, y: 30.6, grace: 87 }, { x: 0, y: 0 }, true), CONTENT);
+    expect(renderer.sheets).toStrictEqual([CONTENT.lampSheet]);
   });
 });

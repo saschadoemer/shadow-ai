@@ -79,6 +79,18 @@
           "width": 0,
           "x": 1592,
           "y": 540
+        },
+        {
+          "height": 0,
+          "id": 5,
+          "name": "wake",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 792,
+          "y": 744
         }
       ],
       "opacity": 1,
@@ -89,7 +101,7 @@
     }
   ],
   "nextlayerid": 4,
-  "nextobjectid": 5,
+  "nextobjectid": 6,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",
