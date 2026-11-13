@@ -8,6 +8,16 @@ export type Facing = (typeof FACINGS)[number];
 export const WALK_PHASES = 4;
 export const PHASES_PER_FACING = WALK_PHASES + 1;
 
+/** The push a hit leaves (0009): the move per step in pixels and the steps it still lasts, 0–8. */
+export interface Recoil {
+  readonly dx: number;
+  readonly dy: number;
+  readonly steps: number;
+}
+
+/** No push. With `steps` 0, `dx` and `dy` are 0. */
+export const NO_RECOIL: Recoil = { dx: 0, dy: 0, steps: 0 };
+
 export interface PlayerState {
   /** The feet position in map pixels, floating point; rounded only for drawing. */
   readonly x: number;
@@ -17,6 +27,10 @@ export interface PlayerState {
   readonly frame: number;
   /** Steps spent in the current phase; a multiple of 0.5, which floating point holds exactly. */
   readonly frameTimer: number;
+  /** Steps the figure is still safe from a hit, 0–90 (0009). */
+  readonly grace: number;
+  /** The push the figure is still carrying out (0009). */
+  readonly recoil: Recoil;
 }
 
 /** The lamp (0007): on in every step whose input holds `lamp`. Later fields: strength (0010), charge (M6). */
@@ -36,10 +50,18 @@ export interface CreatureState {
   readonly y: number;
   /** Steps lit without a break, 0–59; above 0 the creature is frozen. */
   readonly light: number;
+  /** The map point it started at; it returns there when the figure wakes (0009). Never changes. */
+  readonly home: Point;
 }
 
 /** How many creatures of each species were captured. */
 export type Captured = Readonly<Record<Species, number>>;
+
+/** Overview is the game's health (gameplay.md §4): whole numbers, 0 ≤ current ≤ max. */
+export interface Overview {
+  readonly current: number;
+  readonly max: number;
+}
 
 /**
  * Everything that changes while playing (INV-1): plain data only — numbers, strings, booleans,
@@ -60,4 +82,7 @@ export interface GameState {
   readonly creatures: readonly CreatureState[];
   /** Captured creatures per species; the journal (M4) reads it. */
   readonly captured: Captured;
+  readonly overview: Overview;
+  /** The step of the dark sequence, 1–89; 0 while the game runs (0009). */
+  readonly dark: number;
 }

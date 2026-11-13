@@ -27,13 +27,14 @@ tools/
   placeholder-tiles.ts  the placeholder tiles as pure data: pixels and the .tsj (visual.md §5)
   gen-tiles.ts          writes them to public/tiles/; `npm run gen-tiles`
   placeholder-player.ts the placeholder figure as pure data: the pixels of its sprite sheet
-  gen-sprites.ts        writes the figure, the lamp and the snippet sheet to public/sprites/;
-                        `npm run gen-sprites`
+  gen-sprites.ts        writes the figure, the lamp, the snippet and the overview sheet to
+                        public/sprites/; `npm run gen-sprites`
   placeholder-lamp.ts   the placeholder lamp sheet as pure data: the cone of light, one 48x48
                         frame per facing, drawn from game/lamp
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
+  placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames
   campus-layout.ts      the campus as pure data: the rectangles of path, water, buildings and
-                        fences, the spawn and the creatures' points (world.md §1)
+                        fences, the spawn, the creatures' points and the wake point (world.md §1)
   gen-campus.ts         writes it to public/maps/; `npm run gen-campus`
 tests/
   unit/          Vitest, headless: engine math, game rules, map loading, assets
@@ -54,19 +55,21 @@ against the container alike. It is read-only by convention; nothing in the game 
 ## 2. The state model
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
-logic steps since the start, the player, the camera, the lamp, the creatures and the captured
-count; later the current map id, NPCs, cleared regions and the journal join them. It is plain data: numbers,
+logic steps since the start, the player, the camera, the lamp, the creatures, the captured
+count, overview and the step of the dark; later the current map id, NPCs, cleared regions and the journal join them. It is plain data: numbers,
 strings, booleans, arrays and plain objects. No functions, no class instances, no `Map` or `Set`,
 no `Date`. A JSON round trip reproduces it exactly, and a test proves that on a populated state.
 
-The player is `{ x, y, facing, frame, frameTimer }`. `x` and `y` are the feet position in map
+The player is `{ x, y, facing, frame, frameTimer, grace, recoil }`. `x` and `y` are the feet position in map
 pixels, floating point: at 80 px/s a step moves 1.333 px, and the position is rounded only for
 drawing (§5). `facing` is one of `'down'`, `'up'`, `'left'`, `'right'`. `frame` is the phase,
 0–4: 0 is standing, 1–4 are the walk cycle. `frameTimer` counts the steps spent in the current
 phase; when it reaches 7.5 the phase advances and 7.5 is subtracted, so the timer is always a
-multiple of 0.5, which floating point holds exactly. `createInitialState(map)` builds the state
+multiple of 0.5, which floating point holds exactly. `grace` counts the steps the figure is
+still safe from a hit, 0–90; `recoil` is `{ dx, dy, steps }`, the push per step in pixels and
+the steps it still lasts, all 0 when there is none (feature 0009). `createInitialState(map)` builds the state
 before the first step from the map: `tick` 0, the player at the map's `spawn`, facing down,
-phase 0, timer 0. How the player moves, turns and stays inside the map is specified in feature
+phase 0, timer 0, `grace` 0, no push. How the player moves, turns and stays inside the map is specified in feature
 0004 (`gameplay.md` §8). The player's collision box is the lowest 8 px of the sprite, 12 px wide,
 centred under the feet: `[x − 6, x + 6) × [y − 8, y)`. It is derived from the feet when a step
 needs it and never stored. A step moves the box on X, then on Y, and snaps each axis flush to the
@@ -92,8 +95,8 @@ half-open, opening with slope 1/2 to each side; `inCone(point, cone)` is the one
 makes on it, and `FRAME_APEX` names where the apex sits in a 48x48 frame of the lamp sheet, per
 facing.
 
-`creatures` is an array of `{ species, x, y, light }` in the order of the map's points (feature
-0008). `x` and `y` are the feet in map pixels, floating point, the bottom centre of a 16x16
+`creatures` is an array of `{ species, x, y, light, home }` in the order of the map's points
+(feature 0008). `home` is the point the creature was made from; it never changes (feature 0009). `x` and `y` are the feet in map pixels, floating point, the bottom centre of a 16x16
 sprite; the collision box is the figure's, `[x − 6, x + 6) × [y − 8, y)`; the body point is
 (x, y − 8). `light` counts the steps the creature has been lit without a break, 0–59. `captured`
 is one whole number per species. `update` steps the player, then each creature against the
@@ -105,6 +108,21 @@ toward the figure's feet when they are closer than 64 px and farther than 8 px �
 what is left to 8 px — through `moveBox`, then its feet are clamped so the sprite stays on the
 map. `createInitialState` makes the creatures from `map.points` and rejects a name that is no
 species.
+
+`overview` is `{ current, max }`, 3 of 3 at the start; `dark` is 0 while the game runs (feature
+0009). The order of a step in `update`: the lamp is on when the input holds it and the figure is
+not being pushed; the figure is stepped — `grace` drops by 1, not below 0, and a pushed figure
+moves by its push through `moveBox` and the clamp, 3 px per step for 8 steps, without reading
+the keys, keeping its facing, standing; the creatures are stepped; then the first free creature,
+in array order, within 10 px of the feet of a figure whose `grace` is 0 hits (`game/overview`):
+one point less, `grace` 90 and a push straight away from the creature — or, with the last point,
+`dark` 1, the figure left as it is. A frozen creature never hits. One step holds at most one hit.
+With `dark` above 0 a step is `stepDark` and nothing else: `dark` and `tick` grow by 1, the lamp
+is off, the input is not read; in the step `dark` becomes 45 the figure stands on the wake point
+facing down, standing, not safe and not pushed, overview is full and every creature still in the
+array is at its home with `light` 0, `captured` unchanged, the camera on the figure; in the step
+it would become 90 it is 0. The wake point is the map's point named `wake`, the spawn when there
+is none; two stop the game at the start (`createInitialState`).
 
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
@@ -182,8 +200,8 @@ Alt or Cmd; it never reaches the game.
 ## 5. The renderer interface
 
 `render/renderer.ts` declares what the game needs drawn, in game pixels on a 320x180 surface:
-tiles from a tileset, sprites from a sprite sheet, later text from a bitmap font and rectangles
-for UI. `render/canvas2d/` implements it with the Canvas 2D API, draws to an offscreen 320x180
+tiles from a tileset, sprites from a sprite sheet, rectangles in a palette colour (from feature
+0009 on, the lids of the dark), later text from a bitmap font. `render/canvas2d/` implements it with the Canvas 2D API, draws to an offscreen 320x180
 canvas, and blits that onto the visible canvas at the largest integer factor that fits, counted
 in device pixels (`visual.md` §2). `render/scale` computes that layout as a pure function of the
 page area and the device pixel ratio; `main.ts` reads both every frame, so resize, zoom,
@@ -200,7 +218,8 @@ sprite round the same value.
 `frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48 — with its
 top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
 `render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the lamp's
-cone when the lamp is on, the creatures in array order, the player, `above` (§6). The player's sprite has its top-left corner at
+cone when the lamp is on, the creatures in array order, the player, `above` (§6), the lights of
+overview, the lids of the dark. The player's sprite has its top-left corner at
 (round(x) − 8 − camera.x, round(y) − 24 − camera.y): the feet are the bottom centre of the
 sprite, so they sit on the tile grid and the figure stands on its tile. Its frame in the sheet is
 facing × 5 + phase (§7). The cone's frame is drawn with its top-left corner at the apex,
@@ -209,6 +228,13 @@ up (24, 47), left (47, 24), right (0, 24)), minus the camera; its frame is the f
 Cone and figure round the same values, so they agree pixel for pixel, and the cone lies under the
 figure. A creature's frame has its top-left corner at (round(x) − 8 − camera.x, round(y) − 16 −
 camera.y); its frame is 2 while `light` is above 0, else ⌊tick / 15⌋ mod 2 (feature 0008).
+
+The lights of overview (feature 0009) are drawn on the surface, not shifted by the camera: light
+i, for i below `max`, has its top-left corner at (4 + 10i, 4), with frame 0 when i is below
+`current`, else frame 1. With `dark` = d above 0 two rectangles in `#181425` are drawn last,
+(0, 0, 320, L) and (0, 180 − L, 320, L), with L = min(3 × min(d, 90 − d), 90): they close in 30
+steps, stay closed for 30 and open in 30. While `grace` is above 0 the player's sprite is left
+out in every frame in which ⌊grace / 4⌋ is odd; the cone is drawn as before.
 
 The interface exists so the implementation can change (ADR-0001 names PixiJS as the candidate)
 without touching `game/`. It is not an abstraction for its own sake: it has exactly one
@@ -241,7 +267,8 @@ returns a `TileMap`. It reads only what the game uses: of the map `orientation`,
 `width`, `height`, `tilewidth`, `tileheight`, `tilesets` and `layers`; of a layer `name`, `type`,
 `data`, `encoding`, `compression` and, for `objects`, the objects' `name`, `point`, `x` and `y`.
 `TileMap.points` are the point objects other than the spawn, as `{ name, x, y }` in file
-order; `engine/` does not know what a name means, `game/` does. Everything else Tiled writes is
+order; `engine/` does not know what a name means, `game/` does. The game knows the species'
+names and `wake` (feature 0009). Everything else Tiled writes is
 ignored — a layer hidden in Tiled is drawn by the game. It does
 not try to be a general Tiled importer.
 
@@ -351,15 +378,24 @@ data: `public/sprites/snippet.png`, 48x16, three 16x16 frames in one row — the
 `npm run gen-sprites` writes it beside the other two; it is committed, deterministic and tested
 against the generator. The art pass replaces it under the same name and frame order.
 
+`tools/placeholder-overview.ts` draws the overview sheet (feature 0009) and returns its pixels as
+data: `public/sprites/overview.png`, 16x8, two 8x8 frames in one row — a disc of 32 pixels with
+a rim of 16 in `#181425`, inside `#fee761` for the light that is on and `#3a4466` for the light
+that is out. `npm run gen-sprites` writes it beside the other three; it is committed,
+deterministic and tested against the generator pixel by pixel. The art pass replaces it under the
+same name and frame order.
+
 `tools/campus-layout.ts` holds the campus as data — the rectangles of path and water on
 `ground`, the buildings (roof rows, a wall row with its doors) and fence rings on `detail`, and
-the spawn, as the tables of feature 0006 write them, and the three snippet points of feature
-0008 — and builds the two layers and the `.tmj`
+the spawn, as the tables of feature 0006 write them, the three snippet points of feature 0008
+and the wake point of feature 0009 — and builds the two layers and the `.tmj`
 object with Tiled's keys. `tools/gen-campus.ts`, run with `npm run gen-campus`, writes
 `public/maps/campus.tmj`, deterministic, with each layer's data on one line as Tiled writes it. A
 unit test fails when the committed file and the generator disagree, and proves the layout: closed
 buildings, reachable doors, a solid outer ring, a free spawn; and for each snippet a free box,
-a cell reachable from the spawn and a place outside the first view. The file's whitespace is not
+a cell reachable from the spawn and a place outside the first view; for the wake point a free
+box, a cell reachable from the spawn, and above it the door of the data protection officer's
+office. The file's whitespace is not
 Tiled's; a save in Tiled reformats it and fails that test, so until the art pass the layout
 changes in `campus-layout.ts`. When the art pass takes the campus over by hand (`visual.md` §5),
 the layout, the generator and the determinism test are removed and `campus.tmj` is authored in

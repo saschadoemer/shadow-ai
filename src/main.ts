@@ -9,7 +9,7 @@ import type { GameInput } from './game/player';
 import type { GameState } from './game/state';
 import { createInitialState, update } from './game/update';
 import { createCanvas2dRenderer } from './render/canvas2d/canvas2d-renderer';
-import { drawScene, type SceneContent } from './render/draw-scene';
+import { drawScene, LIGHT_SIZE, type SceneContent } from './render/draw-scene';
 import { computeLayout } from './render/scale';
 
 declare global {
@@ -26,10 +26,11 @@ const MAP_URL = '/maps/campus.tmj';
 const PLAYER_SHEET_URL = '/sprites/player.png';
 const LAMP_SHEET_URL = '/sprites/lamp.png';
 const SNIPPET_SHEET_URL = '/sprites/snippet.png';
+const OVERVIEW_SHEET_URL = '/sprites/overview.png';
 
 /**
  * The map, its tileset and the tileset's image, each resolved against the file naming it, then
- * the player's sprite sheet, the lamp's and one sheet per creature species.
+ * the player's sprite sheet, the lamp's, one sheet per creature species and the overview sheet.
  */
 async function loadContent(): Promise<SceneContent> {
   const mapJson = await loadJson(MAP_URL);
@@ -56,6 +57,11 @@ async function loadContent(): Promise<SceneContent> {
         frameWidth: CREATURE_SIZE,
         frameHeight: CREATURE_SIZE,
       },
+    },
+    overviewSheet: {
+      image: await loadImage(OVERVIEW_SHEET_URL),
+      frameWidth: LIGHT_SIZE,
+      frameHeight: LIGHT_SIZE,
     },
   };
 }

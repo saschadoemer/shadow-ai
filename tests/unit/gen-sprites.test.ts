@@ -7,7 +7,12 @@ import { FRAME_HEIGHT, FRAME_WIDTH } from '../../src/engine/sprite';
 import { FRAME_APEX, inCone } from '../../src/game/lamp';
 import { FACINGS, PHASES_PER_FACING } from '../../src/game/state';
 import { SHADOW_COLOUR } from '../../src/render/palette';
-import { encodeLampPng, encodePng, encodeSnippetPng } from '../../tools/gen-sprites.ts';
+import {
+  encodeLampPng,
+  encodeOverviewPng,
+  encodePng,
+  encodeSnippetPng,
+} from '../../tools/gen-sprites.ts';
 import {
   LAMP_COLOUR,
   LAMP_FRAME_SIZE,
@@ -15,6 +20,16 @@ import {
   LAMP_SHEET_WIDTH,
   renderLamp,
 } from '../../tools/placeholder-lamp.ts';
+import {
+  OVERVIEW_FRAME_SIZE,
+  OVERVIEW_FRAMES,
+  OVERVIEW_ON,
+  OVERVIEW_OUT,
+  OVERVIEW_RIM,
+  OVERVIEW_SHEET_HEIGHT,
+  OVERVIEW_SHEET_WIDTH,
+  renderOverview,
+} from '../../tools/placeholder-overview.ts';
 import {
   FRAME_COUNT,
   frameRows,
@@ -298,5 +313,90 @@ describe('the placeholder snippet generator (0008)', () => {
       row.map((colour) => (colour === SNIPPET_PAPER ? SNIPPET_LIT : colour)),
     );
     expect(snippetFrame(2)).toStrictEqual(lit);
+  });
+});
+
+const OVERVIEW_FILE = join(ROOT, 'public/sprites/overview.png');
+const OVERVIEW = renderOverview();
+
+/** The colour of pixel (i, j) of frame `index` of the overview sheet, or null when transparent. */
+function overviewPixel(index: number, i: number, j: number): string | null {
+  const o = (j * OVERVIEW_SHEET_WIDTH + index * OVERVIEW_FRAME_SIZE + i) * 4;
+  if (OVERVIEW[o + 3] !== 255) {
+    return null;
+  }
+  return `#${[OVERVIEW[o], OVERVIEW[o + 1], OVERVIEW[o + 2]]
+    .map((c) => (c ?? 0).toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+/** Frame `index` as 8 rows of 8 colours or nulls. */
+function overviewFrame(index: number): (string | null)[][] {
+  return Array.from({ length: OVERVIEW_FRAME_SIZE }, (_, j) =>
+    Array.from({ length: OVERVIEW_FRAME_SIZE }, (_, i) => overviewPixel(index, i, j)),
+  );
+}
+
+describe('the placeholder overview generator (0009)', () => {
+  it('is deterministic: two runs give byte-identical files', () => {
+    expect(encodeOverviewPng().equals(encodeOverviewPng())).toBe(true);
+  });
+
+  it('matches the committed file', () => {
+    const committed = PNG.sync.read(readFileSync(OVERVIEW_FILE));
+    expect([committed.width, committed.height]).toStrictEqual([16, 8]);
+    expect(Buffer.from(OVERVIEW).equals(committed.data)).toBe(true);
+  });
+
+  it('is 16x8: two 8x8 frames in one row', () => {
+    expect([
+      OVERVIEW_SHEET_WIDTH,
+      OVERVIEW_SHEET_HEIGHT,
+      OVERVIEW_FRAME_SIZE,
+      OVERVIEW_FRAMES,
+    ]).toStrictEqual([16, 8, 8, 2]);
+    expect(OVERVIEW).toHaveLength(16 * 8 * 4);
+  });
+
+  it('has 32 opaque pixels per frame, 16 of them the rim', () => {
+    expect([OVERVIEW_RIM, OVERVIEW_ON, OVERVIEW_OUT]).toStrictEqual([
+      '#181425',
+      '#fee761',
+      '#3a4466',
+    ]);
+    for (let index = 0; index < OVERVIEW_FRAMES; index += 1) {
+      const pixels = overviewFrame(index).flat();
+      expect(
+        pixels.filter((colour) => colour !== null),
+        `frame ${index}`,
+      ).toHaveLength(32);
+      expect(
+        pixels.filter((colour) => colour === OVERVIEW_RIM),
+        `frame ${index}`,
+      ).toHaveLength(16);
+    }
+  });
+
+  it('draws frame 0 as the spec says: a disc with cut corners, a dark rim, yellow inside', () => {
+    const R = OVERVIEW_RIM;
+    const Y = OVERVIEW_ON;
+    const N = null;
+    expect(overviewFrame(0)).toStrictEqual([
+      [N, N, N, N, N, N, N, N],
+      [N, N, R, R, R, R, N, N],
+      [N, R, Y, Y, Y, Y, R, N],
+      [N, R, Y, Y, Y, Y, R, N],
+      [N, R, Y, Y, Y, Y, R, N],
+      [N, R, Y, Y, Y, Y, R, N],
+      [N, N, R, R, R, R, N, N],
+      [N, N, N, N, N, N, N, N],
+    ]);
+  });
+
+  it('frame 1 is frame 0 with the light out', () => {
+    const out = overviewFrame(0).map((row) =>
+      row.map((colour) => (colour === OVERVIEW_ON ? OVERVIEW_OUT : colour)),
+    );
+    expect(overviewFrame(1)).toStrictEqual(out);
   });
 });

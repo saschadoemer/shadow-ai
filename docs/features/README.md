@@ -7,7 +7,8 @@ workflow that moves it is `CLAUDE.md` §3 and is repeated here in one line each:
 - `approved` — the author said so in conversation; the agent recorded the date. Code may now be
   written, and only what the spec says.
 - `implemented` — tests green, spec files updated, the author has walked the acceptance plan
-  with the agent, and merged the pull request that was opened only after that walk.
+  with the agent. Set on the branch after the walk, in the feature's own pull request, which the
+  author merges.
 
 A feature spec refines the specification in `docs/spec/`; it never contradicts it. Where it
 would, the spec is changed first. Once a feature is implemented, what is durable about it lives in
@@ -29,3 +30,4 @@ in two.
 | [0006](0006-camera-and-campus.md) | Camera and campus | M2 | implemented 2026-11-11 |
 | [0007](0007-the-lamp.md) | The lamp | M3 | implemented 2026-11-12 |
 | [0008](0008-the-first-creature.md) | The first creature | M3 | implemented 2026-11-12 |
+| [0009](0009-overview.md) | Overview | M3 | implemented 2026-11-13 |
