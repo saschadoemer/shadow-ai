@@ -19,9 +19,9 @@ walk cycle. Walls stop it, and it slides along them (feature 0005). The camera f
 figure over the map (feature 0006), and M2 is complete. The lamp shines (feature 0007): hold
 `Space` and a cone of light appears in front of the figure; the direction keys turn it. The
 first creature is here (feature 0008): snippets come toward the figure, freeze in the light and
-are captured after one second. A snippet's touch costs one of three points of overview and
-pushes the figure back; at zero the figure wakes in the data protection officer's office
-(feature 0009). The world is one office floor (feature 0010): 108x80 tiles, a ring of corridors
+are captured after one second. A snippet's touch costs one point of overview and pushes the
+figure back; at zero the figure wakes in the data protection officer's office (feature 0009).
+The figure starts with five points, shown as five hearts in the corner (feature 0012). The world is one office floor (feature 0010): 108x80 tiles, a ring of corridors
 round a core, every department a room behind walls 4 px thin, still unfurnished. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it

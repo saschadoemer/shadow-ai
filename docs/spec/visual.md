@@ -42,9 +42,10 @@ the Past and Ocean's Heart. A 16x16 figure reads as squat for office people. The
 a figure is only its lower part — the feet — so a figure can walk "behind" desks and plants.
 Interior walls are strips 4 px thick on a tile's top or left edge (feature 0010).
 
-**The display.** The only thing drawn over the world is the row of overview lights in the
-top-left corner (feature 0009): 8x8, 4 px from the corner, one every 10 px, one per point of the
-maximum; no text. The screen of the dark is two rectangles in `#181425` that close from the top
+**The display.** The only thing drawn over the world is the row of overview hearts in the
+top-left corner (features 0009, 0012): 8x8, 4 px from the corner, one every 10 px, one per point
+of the maximum; no text. A heart is 7x7 with a rim in `#181425`, red `#e43b44` when full and
+`#3a4466` when empty. The screen of the dark is two rectangles in `#181425` that close from the top
 and the bottom; nothing is blended, so no pixel leaves the palette.
 
 ## 4. Palette

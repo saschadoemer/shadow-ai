@@ -30,7 +30,7 @@ export interface SceneContent {
   readonly lampSheet: SpriteSheet;
   /** One sheet per species: three 16x16 frames — two free, one frozen (0008). */
   readonly creatureSheets: Readonly<Record<Species, SpriteSheet>>;
-  /** Two 8x8 frames: a light that is on, a light that is out (0009). */
+  /** Two 8x8 frames: a full heart, an empty heart (0009, 0012). */
   readonly overviewSheet: SpriteSheet;
 }
 
@@ -74,12 +74,12 @@ export function creatureOrigin(creature: CreatureState, camera: Point): Point {
   };
 }
 
-/** The lights of overview (0009): 8x8, 4 px from the corner, one every 10 px. */
-export const LIGHT_SIZE = 8;
-export const LIGHT_MARGIN = 4;
-export const LIGHT_PITCH = 10;
-const LIGHT_ON_FRAME = 0;
-const LIGHT_OUT_FRAME = 1;
+/** The hearts of overview (0009, 0012): 8x8, 4 px from the corner, one every 10 px. */
+export const HEART_SIZE = 8;
+export const HEART_MARGIN = 4;
+export const HEART_PITCH = 10;
+const HEART_FULL_FRAME = 0;
+const HEART_EMPTY_FRAME = 1;
 
 /** A safe figure is left out in every second group of four steps. */
 export const BLINK_STEPS = 4;
@@ -102,7 +102,7 @@ export function lidHeight(dark: number): number {
  * player, above, all shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x, round(y) − 24 −
  * camera.y): the feet are its bottom centre, and the camera is already whole pixels
  * (engine/camera). The cone lies under the figure, so the body hides the apex. After `above`
- * come the lights of overview, on the surface and not shifted by the camera, and the two lids of
+ * come the hearts of overview, on the surface and not shifted by the camera, and the two lids of
  * the dark (0009). A safe figure blinks; its cone does not.
  */
 export function drawScene(renderer: Renderer, state: GameState, content: SceneContent): void {
@@ -135,9 +135,9 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
   for (let i = 0; i < state.overview.max; i += 1) {
     renderer.drawSprite(
       content.overviewSheet,
-      i < state.overview.current ? LIGHT_ON_FRAME : LIGHT_OUT_FRAME,
-      LIGHT_MARGIN + i * LIGHT_PITCH,
-      LIGHT_MARGIN,
+      i < state.overview.current ? HEART_FULL_FRAME : HEART_EMPTY_FRAME,
+      HEART_MARGIN + i * HEART_PITCH,
+      HEART_MARGIN,
     );
   }
   const lid = lidHeight(state.dark);

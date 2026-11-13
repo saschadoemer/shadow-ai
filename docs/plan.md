@@ -66,9 +66,10 @@ done: 0006 was the last of the six.
 
 ### M3 — The lamp and the first creature
 
-Six features, each its own pull request with its own acceptance plan, in this order: 0007 the
+Seven features, each its own pull request with its own acceptance plan, in this order: 0007 the
 lamp · 0008 the first creature · 0009 overview · 0010 the floor · 0011 the furniture · 0012
-shadow walls and density. The lamp before the creature, so there is something to freeze with;
+overview hearts · 0013 shadow walls and density. The hearts follow the feel note of 0009's walk
+and come before the density rule because they are small. The lamp before the creature, so there is something to freeze with;
 overview after the creature, because a hit needs something that hits. Then the world is
 rebuilt before more is placed in it: the campus of M2 becomes one office floor with thin
 walls (0010) and its furniture (0011), because an interim state shown to others has to read
