@@ -295,7 +295,9 @@ the long room at the top, entered from the north corridor.
 the gadgets read as what they are — which one does not? Is red right for the sofas, next to the
 blue screens of 0011? Is the row along the bottom of Development too tight to walk?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-13, steps 1–16. Feel: the floor looks lived in; no room is too empty
+or too full; every gadget reads as what it is; red is right for the sofas; the row along the
+bottom of Development is easy to walk.
 
 ## Open questions
 
