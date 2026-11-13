@@ -67,12 +67,12 @@ done: 0006 was the last of the six.
 ### M3 — The lamp and the first creature
 
 Six features, each its own pull request with its own acceptance plan, in this order: 0007 the
-lamp · 0008 the first creature · 0009 the floor · 0010 the furniture · 0011 overview · 0012
-shadow walls and density. The lamp before the creature, so there is something to freeze with.
-Then the world is rebuilt before more is placed in it: the campus of M2 becomes one office
-floor with thin walls (0009) and its furniture (0010), because an interim state shown to
-others has to read as an office. Overview after the creature, because a hit needs something
-that hits; the density rule last, together with the first thing it gates — the shadow walls,
+lamp · 0008 the first creature · 0009 overview · 0010 the floor · 0011 the furniture · 0012
+shadow walls and density. The lamp before the creature, so there is something to freeze with;
+overview after the creature, because a hit needs something that hits. Then the world is
+rebuilt before more is placed in it: the campus of M2 becomes one office floor with thin
+walls (0010) and its furniture (0011), because an interim state shown to others has to read
+as an office. The density rule last, together with the first thing it gates — the shadow walls,
 which stand in the doorways of the floor — because 0006 left the density data to M3. The shadow as a region's colour —
 desaturation, the violet dithering, the clearing — arrives with the first cleared region in M5.
 

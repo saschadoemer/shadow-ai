@@ -1,6 +1,6 @@
-# 0009 — Implementation plan: the floor
+# 0010 — Implementation plan: the floor
 
-**Spec:** [`docs/features/0009-the-floor.md`](../features/0009-the-floor.md) (approved
+**Spec:** [`docs/features/0010-the-floor.md`](../features/0010-the-floor.md) (approved
 2026-11-13). The plan argues from the spec; where they differ, the spec wins. Read the spec
 first, then `CLAUDE.md`, then `docs/spec/architecture.md` §1, §6 and §7, `docs/spec/testing.md`
 §1–§3, §5 and §6, and `docs/spec/world.md` §1. **Written:** 2026-11-13 on the planning model. A
@@ -55,12 +55,13 @@ dependency.
 - `npm run check` is typecheck, Biome, build, Vitest. `npm run test:e2e` runs the smoke spec
   against the dev server; with `BASE_URL` set it runs against that URL.
 - Fixtures are hand-made and committed, never generated (`testing.md` §6).
-- Branch `feature/0009-the-floor`, this worktree; it carries the spec, its approval and this
-  plan. Before Task 1, merge `main` into it (`CLAUDE.md` §4). Commit messages: imperative
+- Branch `feature/0010-the-floor`, this worktree; it carries the spec, its approval and this
+  plan. The planning session merged `main` at 44f02d4 (feature 0009, overview) into it on
+  2026-11-13; before Task 1, merge `main` again if it has moved (`CLAUDE.md` §4). Commit messages: imperative
   subject, a body with the why, and the `Co-Authored-By` trailer the session's own attribution
   reminder names. Commits are signed through 1Password, which fails inside the Bash sandbox:
   run `git commit` with the sandbox disabled.
-- Feature specs and plans 0001–0008 are history and are not edited, whatever they say about
+- Feature specs and plans 0001–0009 are history and are not edited, whatever they say about
   the campus.
 
 ## Design notes
@@ -81,6 +82,10 @@ dependency.
   `above` are absent from the map. That is why the floor has eight wall tiles instead of four.
 - **Posts are derived, not listed.** The generator places a post where the rule of the spec
   says; the test asserts the three cells.
+- **Overview (0009) rides along.** Its code reads the map only through `moveBox`,
+  `sightBlocked` and `TileMap.points`, so it needs no change beyond the tests' maps taking
+  `solids`. The floor carries its `wake` point, now inside the data protection officer's
+  office; creatures carry `home`.
 - **The flood is a test helper.** Reachability over a 2 px lattice of feet positions lives in
   `tests/unit/flood.ts`; the engine gets nothing it does not use at run time.
 
@@ -103,7 +108,8 @@ dependency.
 | `CLAUDE.md`, `docs/spec/*.md`, `README.md`, `docs/features/README.md` | as built (T5) |
 
 Tests: `tiled.test.ts` (T1, T2), `test-map.test.ts` (T1, T2), `collision.test.ts`,
-`creature.test.ts`, `draw-map.test.ts`, `draw-scene.test.ts` (T2), `gen-tiles.test.ts`,
+`creature.test.ts`, `player.test.ts`, `overview.test.ts`, `state.test.ts`, `draw-map.test.ts`,
+`draw-scene.test.ts` (T2), `gen-tiles.test.ts`,
 `floor.test.ts` (T3).
 
 ---
@@ -244,7 +250,7 @@ export function solidsOf(flags: readonly boolean[], width: number): Box[][];
 - [ ] **Step 2: the failing tests.**
   - `collision.test.ts`: the literal `solid: [...]` grids become `solids: solidsOf([...], w)`;
     `corridor.solid` against `GRID.solid` becomes `solids` against `solids`. Append a
-    `describe('boxes thinner than a cell (0009)')` with exactly the cases of the spec's test
+    `describe('boxes thinner than a cell (0010)')` with exactly the cases of the spec's test
     plan, first bullet — the 10x10 grid with (80, 48, 4, 16) in cell (5, 3) and
     (32, 96, 16, 4) in cell (2, 6); a second grid for the post (48, 48, 4, 4) in cell (3, 3); a
     third for the doorway, (16, 128, 16, 4) in cell (1, 8) and (64, 128, 16, 4) in cell (4, 8).
@@ -258,7 +264,11 @@ export function solidsOf(flags: readonly boolean[], width: number): Box[][];
     (x, y, 4, 16) of a left strip on the line from the figure's box centre is not lit; without
     the box it is. Take the positions of the existing wall-in-the-light test and replace its
     solid cell by a strip inside that cell.
-  - `draw-map.test.ts`, `draw-scene.test.ts`: their `TileMap` literals take `solids`.
+  - `player.test.ts`: beside 0009's "a wall holds the push", the spec's case: feet (144, 92),
+    `recoil: { dx: 3, dy: 0, steps: 8 }`, a grass map with the box (160, 80, 4, 16) put into
+    `solids` at cell (10, 5); after 8 steps the feet are at (154, 92).
+  - `draw-map.test.ts`, `draw-scene.test.ts`, `overview.test.ts`, `state.test.ts` and every
+    other `TileMap` or `SolidGrid` literal `tsc` names take `solids`.
 - [ ] **Step 3: run** `npx vitest run` — fails to compile on `solids`.
 - [ ] **Step 4: implement.**
 
@@ -431,6 +441,9 @@ export const SNIPPETS: readonly Point[] = [
   { x: 1416, y: 526 },
   { x: 1576, y: 718 },
 ];
+
+/** Where the figure wakes (0009): the middle of tile (18, 31), in the data protection officer's office. */
+export const WAKE: Point = { x: 296, y: 504 };
 ```
 
 `buildGround(): number[]` builds the one tile layer, in this order: every cell carpet; the
@@ -439,8 +452,8 @@ cell: both → corner, `top` → top, `left` → left, neither but `top` at (c �
 (c, r − 1) → post, each on the cell's own floor (carpet id, or carpet id + 4 on corridor); the
 closed doors over their wall tiles — throw if one is not a top wall on corridor; last the
 ring: `WINDOW` where the spec's rule says, else `OUTER_WALL`. `floorJson()` returns the map
-with two layers, `ground` (id 1) and `objects` (id 2), `nextlayerid` 3, the spawn and the
-three snippets as in the campus file.
+with two layers, `ground` (id 1) and `objects` (id 2), `nextlayerid` 3, and the points as in the campus file: the spawn (id 1), the three snippets
+(ids 2–4), `wake` (id 5), `nextobjectid` 6.
 
 - [ ] **Step 1: the tileset test first.** `gen-tiles.test.ts`: deterministic and equal to the
   committed files, as today; 208x16, thirteen tiles; `tilesetJson()` has `columns` 13,
@@ -468,7 +481,11 @@ three snippets as in the campus file.
   spec's test plan for `floor.test.ts`, in its order, the map loaded from
   `public/maps/floor.tmj` through `parseTileset` and `parseTileMap`. The eleven tile counts
   come from counting `map.ground`. For "with strips added" build a copy of the map's `solids`
-  with the box (16c, 320, 16, 4) appended at the cells (85, 20)–(88, 20) and flood that. "None
+  with the box (16c, 320, 16, 4) appended at the cells (85, 20)–(88, 20) and flood that. The wake
+  point: `map.points` is the three snippets then `{ name: 'wake', x: 296, y: 504 }`; the box
+  [290, 302) × [496, 504) is free; the feet point is reached; cell (18, 31) lies in the
+  office's rectangle; `cameraFor({ x: 296, y: 500 }, { width: 1728, height: 1280 })` is
+  (136, 410). "None
   in the first view": no snippet inside [96, 416) × [624, 804), and none within 64 px of the
   spawn. Run it: fails, there is no floor.
 - [ ] **Step 5: the layout and the generator.** As above; `npm run gen-floor`; remove the
@@ -493,7 +510,8 @@ three snippets as in the campus file.
   `{ x: 96, y: 624 }`; after one second right `x ≥ 326` and camera `x ≥ 166`, the comment
   saying row 44 is free to x = 458; the lamp test holds x = 256; the last test is "the floor
   starts with three snippets and nothing captured", its first creature
-  `{ species: 'snippet', x: 1224, y: 622, light: 0 }`. No comment says "campus".
+  `{ species: 'snippet', x: 1224, y: 622, light: 0, home: { x: 1224, y: 622 } }`. The overview
+  test of 0009 stays as it is. No comment says "campus".
 - [ ] **Step 2:** `npm run test:e2e` — green.
 - [ ] **Step 3: commit** — `Point the smoke spec at the floor`; why: the spawn, the camera and
   the first creature moved with the map.
@@ -513,9 +531,11 @@ built, in the present tense, in the documents' own style.
   outer wall with windows, a ring of four corridors round a core, the departments as rooms
   behind thin walls with doorways; Management on the top floor and the server room in the
   basement are their own maps, reached later through the lift and the stairwell in the core,
-  both closed today. "The map as built (feature 0009)": 108x80 tiles, 1728x1280 px, generated
+  both closed today. "The map as built (feature 0010)": 108x80 tiles, 1728x1280 px, generated
   from `tools/floor-layout.ts` until the art pass; where each room lies, in three sentences;
-  the tables in `docs/features/0009-the-floor.md` are the layout until the art pass. The
+  the tables in `docs/features/0010-the-floor.md` are the layout until the art pass; the
+  sentence about waking reads: "The figure wakes in the data protection officer's office, at
+  the map's `wake` point, tile (18, 31) (features 0009, 0010)." The
   region table: Courtyard becomes **Reception** ("The hub. The player starts here; the data
   protection officer's office is next door, the ring of corridors leads to every
   department."); Canteen becomes **Break room**; **Parking lot** is removed; Management reads
@@ -540,7 +560,8 @@ built, in the present tense, in the documents' own style.
 - [ ] `docs/spec/visual.md` — only if a sentence names the campus tiles; §3 gains one
   sentence: interior walls are strips 4 px thick on a tile's top or left edge.
 - [ ] `docs/plan.md` §4 M3 — no change needed; check that it still agrees.
-- [ ] `README.md` — the status paragraph, `npm run gen-floor`, the Tiled paragraph.
+- [ ] `README.md` — the status paragraph (the figure wakes "in the data protection officer's
+  office"), `npm run gen-floor`, the Tiled paragraph.
 - [ ] `grep -rni "campus\|courtyard\|canteen\|parking" CLAUDE.md README.md docs/spec` returns
   nothing. `docs/plan.md`, `docs/features/` and `docs/plans/` are not swept.
 - [ ] `npm run check`; **commit** — `Describe the floor in the specification`; why: the spec
@@ -562,26 +583,27 @@ built, in the present tense, in the documents' own style.
 
 `CLAUDE.md` §3.4 and `docs/spec/testing.md` §5. Start `npm run dev`, state the preconditions
 of the spec's acceptance plan in one message, wait for the author. Then one action step with
-its expected step per message, 1–22, in the spec's words; record each answer as given. A
+its expected step per message, 1–24, in the spec's words; record each answer as given. A
 `fail` ends the walk: fix on the branch or ask, rerun Task 6, start again at step 1. After
-step 22 the five feel questions, one per message. Then write the `Result` line —
-`passed YYYY-MM-DD, steps 1–22`, followed by the feel notes — and commit it:
-`Record the acceptance walk of 0009`.
+step 24 the five feel questions, one per message. Then write the `Result` line —
+`passed YYYY-MM-DD, steps 1–24`, followed by the feel notes — and commit it:
+`Record the acceptance walk of 0010`.
 
-The feel answers matter beyond this feature: 0010 furnishes these rooms. If the author would
+The feel answers matter beyond this feature: 0011 furnishes these rooms. If the author would
 change a room's size, a corridor's width or a doorway, that is a new draft or a revision of
-0010's tables before its approval — not a change on this branch after a passed walk.
+0011's tables before its approval — not a change on this branch after a passed walk.
 
 ---
 
 ### Task 8: The pull request
 
 `CLAUDE.md` §3.5. Merge `main` into the branch; rerun Task 6; if the merge changed code, run
-Task 7 again. Open the pull request against `main`: title `Feature 0009: the floor`; the
+Task 7 again. Set `Status: implemented` with the date in the spec and in the table of
+`docs/features/README.md` and commit that on the branch — the status travels with the pull
+request. Open the pull request against `main`: title `Feature 0010: the floor`; the
 description says what was built, quotes the `Result` line, and ends with the attribution line
 the session's reminder names. Bind it with the app's PR tools and read CI; CI must be green.
-The author merges. After the merge, on a branch of its own: `Status: implemented` with the
-date in the spec and in `docs/features/README.md`.
+The author merges.
 
 ## Self-review against the spec
 
@@ -594,7 +616,7 @@ date in the spec and in `docs/features/README.md`.
   closed doors, counts, spawn, first view, snippets, reachability → T3 step 4.
 - Acceptance criteria: 1 → T3, T4, walk 1–2; 2 → T2, walk 3–12; 3 and 4 → T3 floor test, walk
   5–6 and 13–16; 5 → T3 floor test, walk 13–14; 6 → T3, walk 17–18; 7 → walk 19–20; 8 → T2
-  creature test, T3, walk 21–22; 9 → T1, T2; 10 → T3 step 6, T5; 11 → T8.
+  creature and player tests, T3 wake point, walk 21–24; 9 → T1, T2; 10 → T3 step 6, T5; 11 → T8.
 - Test plan: `collision.test.ts` → T2; `tiled.test.ts` → T1, T2; `player`, `creature`,
   `state`, the helpers → T2; `gen-tiles.test.ts` → T3; `floor.test.ts` → T3; `camera`,
   `state` comments → T3; smoke → T4.

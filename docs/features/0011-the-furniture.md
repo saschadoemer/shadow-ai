@@ -1,4 +1,4 @@
-# 0010 — The furniture
+# 0011 — The furniture
 
 **Status:** draft
 **Milestone:** M3
@@ -6,7 +6,7 @@
 
 ## Goal
 
-The floor of 0009 is furnished: cubicles in Sales, Support and Development, desks and cabinets
+The floor of 0010 is furnished: cubicles in Sales, Support and Development, desks and cabinets
 in the offices, desk islands in Marketing, tables in the meeting rooms and the break room, a
 counter in the reception, printers and plants in the corridors. After this feature every room
 is recognized by what stands in it, the figure walks round furniture and behind tall things,
@@ -14,7 +14,7 @@ and the lamp shines over everything that is lower than a person.
 
 ## Scope
 
-Built on 0009 as merged. If the walk of 0009 changes a room's size, the tables here are revised
+Built on 0010 as merged. If the walk of 0010 changes a room's size, the tables here are revised
 before this spec is approved.
 
 **In:**
@@ -120,17 +120,17 @@ partition-corner 61, desk 24, desk-monitor 24, desk-partition 61, desk-monitor-p
 chair 122, cabinet 34, plant 14, table 58, counter 19, printer 5 — 775 cells; on `above`:
 cabinet-top 34, plant-top 14.
 
-**What stays true from 0009.** The spawn (256, 718) and its box are free; row 44 is free from
+**What stays true from 0010.** The spawn (256, 718) and its box are free; row 44 is free from
 x = 256 to x = 458; the view's top-left cell at the spawn, (6, 39), has nothing on `detail` or
-`above`, so the corner pixel stays carpet; the three snippets' boxes are free. Every corridor
-and every room except the lift and the stairwell is reachable by the flood of 0009, and so is
+`above`, so the corner pixel stays carpet; the three snippets' boxes and the wake point's box are free. Every corridor
+and every room except the lift and the stairwell is reachable by the flood of 0010, and so is
 every cubicle: its cells (x + 2, y + 1) and (x, y + 2).
 
 **The first view** shows the reception's counter with the chair behind it, two of its plants,
 and the opening to the corridor.
 
 The picture is the furnished floor, for orientation only — the tables are the truth. As in
-0009, and on top: `~` partition top, `!` partition left, `*` both, `m` desk with monitor, `d`
+0010, and on top: `~` partition top, `!` partition left, `*` both, `m` desk with monitor, `d`
 desk, `c` chair, `C` cabinet, `P` plant, `T` table, `K` counter, `R` printer. Tops are not
 drawn.
 
@@ -230,7 +230,7 @@ o................................................|.!....!....!....!....!....!...
    or a printer, and does not light one beyond a cabinet or a wall.
 7. `parseTileset` reads `low` and rejects a low tile without a box; `TileMap.opaque` holds the
    boxes of the tiles that are not low.
-8. Everything 0009 proved about the floor still holds: spawn, first cell, snippets,
+8. Everything 0010 proved about the floor still holds: spawn, first cell, snippets,
    reachability, the closed rooms.
 9. CI is green, both smoke runs.
 
@@ -255,9 +255,9 @@ o................................................|.!....!....!....!....!....!...
   on `detail` and the two on `above`; every piece of the room table stands where the table
   says, and `detail` is empty elsewhere; no furniture on the outer ring, in the lift or in the
   stairwell; every top lies one row above its body, in the same area, on a cell with no
-  furniture but a tall thing's body; the clauses of 0009 that "stay true"; every cubicle's two
+  furniture but a tall thing's body; the clauses of 0010 that "stay true"; every cubicle's two
   cells are reached by the flood; the cells (8, 41)–(12, 41) lie in the first view.
-- Smoke spec — unchanged from 0009: the corner pixel, the spawn, the walk right, the lamp, the
+- Smoke spec — unchanged from 0010: the corner pixel, the spawn, the walk right, the lamp, the
   first snippet.
 
 ## Acceptance plan (manual test)

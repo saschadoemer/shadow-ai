@@ -1,4 +1,4 @@
-# 0009 — The floor
+# 0010 — The floor
 
 **Status:** approved 2026-11-13
 **Milestone:** M3
@@ -9,7 +9,7 @@
 The world is no longer the company's grounds but one floor of its office building: an outer wall
 with windows, a ring of corridors round a core, and every department as a room behind a thin
 wall with a doorway. After this feature the figure walks an empty office floor that reads as
-one, and walls are 4 px thin instead of a whole tile. The furniture is feature 0010.
+one, and walls are 4 px thin instead of a whole tile. The furniture is feature 0011.
 
 ## Scope
 
@@ -29,7 +29,8 @@ one, and walls are 4 px thin instead of a whole tile. The furniture is feature 0
   campus generator; `main.ts` loads it. `public/maps/campus.tmj`, `tools/campus-layout.ts`,
   `tools/gen-campus.ts`, `npm run gen-campus` and `tests/unit/campus.test.ts` are removed.
 - The three snippets of 0008 move: one into the east corridor in front of the Sales doorway,
-  two into Sales.
+  two into Sales. The wake point of 0009 moves into the data protection officer's office: the
+  office is a room now, so the figure wakes in it, as `gameplay.md` §4 always said.
 - The smoke spec on the floor: the new spawn, camera, corner pixel and first snippet.
 - **The specification, changed in the open** — this feature replaces the campus of
   `world.md` §1, so these change with the implementation:
@@ -45,10 +46,10 @@ one, and walls are 4 px thin instead of a whole tile. The furniture is feature 0
     `plan.md` §4; the README.
 
 **Out, explicitly:** desks, chairs, cubicle partitions, cabinets, plants and the `above` layer
-(0010) · light through glass or over low things (0010 for furniture; glass walls are not
+(0011) · light through glass or over low things (0011 for furniture; glass walls are not
 planned) · doors that open, the lift and the stairs working, the top floor and the basement as
 maps, a map id in `GameState` (M6, M7) · shadow walls in the doorways and density data (0012) ·
-overview (0011) · figures in the rooms, region names on screen (M4, M5) · a swept collision
+figures in the rooms, region names on screen (M4, M5) · a swept collision
 test — the displacement stays below 4 px per call.
 
 ## Behaviour
@@ -77,7 +78,8 @@ test — the displacement stays below 4 px per call.
   positive displacement its far edge goes to the smallest near edge among the boxes it
   overlaps, for a negative one its near edge to the largest far edge. Half-open intervals: a
   box flush against a wall does not overlap it and slides. The displacement is assumed below
-  4 px per call — the figure moves 1.333 px, the snippet 0.667 px.
+  4 px per call — the figure walks 1.333 px, a push of 0009 moves it 3 px, the snippet
+  0.667 px.
 - **`sightBlocked`.** The sample points of 0008, at most 1 px apart; the line is blocked when
   a point lies in a box of its cell. A 4 px wall cannot be stepped over.
 - **Rule 13.** The spawn and every named point must lie inside the map and outside every box:
@@ -209,6 +211,11 @@ camera ranges over [0, 1408] × [0, 1100].
 corridor in front of the Sales doorway; (1416, 526) — tile (88, 32), in Sales; (1576, 718) —
 tile (98, 44), in Sales.
 
+**The wake point** of 0009: the point `wake` at feet (296, 504) — the middle of tile (18, 31),
+in the data protection officer's office, level with its doorway. Its box is
+[290, 302) × [496, 504); the camera there is (136, 410). The `objects` layer holds the spawn,
+the three snippets and `wake`, in this order, with the ids 1 to 5.
+
 **Reachability.** On foot means: the feet on a 2 px lattice, four-connected from the spawn,
 the box of 0005 free at every position. Reachable are all five corridors and every room except
 the lift and the stairwell. The meeting rooms are found, not on the way: with the side
@@ -316,12 +323,14 @@ o................................................|..............................
    [0, 1408] × [0, 1100] and nothing outside the map is ever visible.
 7. No seams between tiles and no shimmering edges while scrolling, at factors 3 and 6.
 8. The three snippets stand where the spec says, and the lamp freezes and captures one as in
-   0008; a wall strip between the figure and a snippet blocks the light.
+   0008; a wall strip between the figure and a snippet blocks the light. A snippet's touch
+   costs overview as in 0009; a wall strip holds the push; at zero the figure wakes in the
+   data protection officer's office, at (296, 504).
 9. `parseTileset` reads boxes from `solid` and from collision rectangles and rejects the four
    cases with their messages; rule 13 accepts a point in the open part of a wall cell.
 10. Nothing of the campus is left: no campus file, script, test or word in `src/`, `tools/`,
     `tests/`, `public/`, `CLAUDE.md`, `docs/spec/` or the README. Feature specs and plans of
-    0001–0008 stay as written.
+    0001–0009 stay as written.
 11. CI is green, both smoke runs.
 
 ## Test plan
@@ -357,6 +366,10 @@ Every number is a pixel unless it says tile or cell.
 - `tests/unit/player.test.ts`, `creature.test.ts`, `state.test.ts`, `picture-map.ts`,
   `grass-map.ts` — follow `solids`; their numbers do not change. `creature.test.ts` adds: a
   snippet behind a 4 px strip in the cone is not lit; the same snippet without the strip is.
+  `player.test.ts` adds, beside 0009's "a wall holds the push": the figure at feet
+  (144, 92) with a push of (3, 0) for 8 steps and a left strip, the box (160, 80, 4, 16),
+  10 px right of its box: after 8 steps the feet are at (154, 92).
+  `overview.test.ts` follows `solids`; its numbers do not change.
 - `tests/unit/gen-tiles.test.ts` — the generator against the committed files: 208x16, thirteen
   tiles, the boxes of the table, each strip's opaque wall pixels exactly its box, `solid` on
   ids 2 and 3 only.
@@ -375,14 +388,17 @@ Every number is a pixel unless it says tile or cell.
   north corridor (2, 21), south corridor (105, 56), west corridor (24, 27), east corridor
   (77, 50), and the corners (1, 1), (106, 78), (1, 78) — are reached, lift (55, 38) and
   stairwell (67, 38) are not; with strips added at (85, 20)–(88, 20) neither meeting room is
-  reached; the three snippets in order, each box free, each reached, none in the first view
-  or within 64 px of the spawn.
+  reached; the map's points are the three snippets and `wake`, in this order; each snippet's box is
+  free, each is reached, none is in the first view or within 64 px of the spawn; the wake
+  point is (296, 504), its box is free, it is reached, its cell (18, 31) lies in the data
+  protection officer's office, and the camera there is (136, 410).
 - `tests/unit/camera.test.ts`, `state.test.ts` — keep their 2048x1536 maps; they test the
   camera, not the content. Comments that say "the campus" say "a 128x96 map".
 - Smoke spec — the top-left pixel is carpet, `#8b9bb4`; the player starts at x = 256 with the
   camera at (96, 624); one second of ArrowRight leaves x ≥ 326, the camera's x ≥ 166 and the
   facing right; the lamp test holds the figure at x = 256; the floor starts with three
-  snippets, the first `{ species: 'snippet', x: 1224, y: 622, light: 0 }`, nothing captured.
+  snippets, the first `{ species: 'snippet', x: 1224, y: 622, light: 0, home: { x: 1224,
+  y: 622 } }`, nothing captured; the overview test of 0009 is unchanged.
 
 ## Acceptance plan (manual test)
 
@@ -427,6 +443,11 @@ is the west corridor, and the corridors form a ring round the block in the middl
 21. Walk to the corridor on the right side of the block, to the scrap of paper in front of the
     doorway of the large room; face it and hold `Space`.
 22. Expected: the scrap freezes in the light and is captured after one second, as before.
+23. Walk into the large room behind that doorway and let its scraps touch the figure, without
+    the lamp, until the third light in the corner of the screen has gone out.
+24. Expected: each touch pushes the figure back, and a wall behind it stops the push; after
+    the third the screen closes and opens, and the figure stands in the room above the
+    reception with three lights on.
 
 **Feel:** Does the floor read as an office floor, even empty? Are the 4 px walls clear enough
 at factor 3? Are a 96 px corridor and a 48 px doorway comfortable to walk — does the figure
