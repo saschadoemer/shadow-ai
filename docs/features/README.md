@@ -35,4 +35,4 @@ in two.
 | [0011](0011-the-furniture.md) | The furniture | M3 | implemented 2026-11-13 |
 | [0012](0012-overview-hearts.md) | Overview hearts | M3 | implemented 2026-11-13 |
 | [0013](0013-lounge-and-gadgets.md) | Lounge and gadgets | M3 | implemented 2026-11-13 |
-| [0015](0015-the-moving-floor.md) | The moving floor | M3 | draft |
+| [0015](0015-the-moving-floor.md) | The moving floor | M3 | approved 2026-11-13 |
