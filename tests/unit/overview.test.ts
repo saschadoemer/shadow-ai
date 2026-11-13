@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { followPlayer } from '../../src/game/camera';
 import {
   applyHit,
   DARK_STEPS,
@@ -10,9 +11,19 @@ import {
   RECOIL_PX_PER_STEP,
   RECOIL_STEPS,
   recoilFrom,
+  stepDark,
+  WAKE_POINT,
   WAKE_STEP,
+  wakePoint,
 } from '../../src/game/overview';
-import { type CreatureState, type Facing, NO_RECOIL, type PlayerState } from '../../src/game/state';
+import {
+  type CreatureState,
+  type Facing,
+  type GameState,
+  NO_RECOIL,
+  type PlayerState,
+} from '../../src/game/state';
+import { grassMap } from './grass-map';
 
 const figure = (
   x: number,
@@ -116,5 +127,85 @@ describe('applyHit', () => {
       overview: { current: 0, max: 3 },
       dark: 1,
     });
+  });
+});
+
+describe('wakePoint', () => {
+  const spawn = { x: 160, y: 100 };
+
+  it("is the map's point named wake", () => {
+    expect(WAKE_POINT).toBe('wake');
+    const map = grassMap(20, 12, spawn, [
+      { name: 'snippet', x: 30, y: 30 },
+      { name: 'wake', x: 80, y: 60 },
+    ]);
+    expect(wakePoint(map)).toStrictEqual({ x: 80, y: 60 });
+  });
+
+  it('is the spawn on a map without one', () => {
+    expect(wakePoint(grassMap(20, 12, spawn))).toStrictEqual(spawn);
+  });
+
+  it('rejects a second one', () => {
+    const map = grassMap(20, 12, spawn, [
+      { name: 'wake', x: 80, y: 60 },
+      { name: 'wake', x: 90, y: 60 },
+    ]);
+    expect(() => wakePoint(map)).toThrow('more than one point object "wake"');
+  });
+});
+
+describe('stepDark', () => {
+  /** 40x30 tiles, 640x480 px, with the wake point at (80, 60). */
+  const MAP = grassMap(40, 30, { x: 320, y: 240 }, [{ name: 'wake', x: 80, y: 60 }]);
+  const FALLEN: GameState = {
+    tick: 500,
+    player: figure(300, 200, 'left', { frame: 2, frameTimer: 3.5 }),
+    camera: { x: 140, y: 106 },
+    lamp: { on: true },
+    creatures: [snippet(310, 200)],
+    captured: { snippet: 2 },
+    overview: { current: 0, max: 3 },
+    dark: 1,
+  };
+  const darkSteps = (steps: number): GameState => {
+    let state = FALLEN;
+    for (let i = 0; i < steps; i += 1) {
+      state = stepDark(state, MAP);
+    }
+    return state;
+  };
+
+  it('for 43 steps only dark and tick grow, and the lamp is off', () => {
+    expect(darkSteps(43)).toStrictEqual({ ...FALLEN, tick: 543, lamp: { on: false }, dark: 44 });
+  });
+
+  it('the 44th step, dark 45, sets the world right', () => {
+    const woken = darkSteps(44);
+    const player = figure(80, 60, 'down');
+    expect(woken).toStrictEqual({
+      tick: 544,
+      player,
+      camera: followPlayer(player, MAP),
+      lamp: { on: false },
+      creatures: [{ ...snippet(40, 40), home: { x: 40, y: 40 } }],
+      captured: { snippet: 2 },
+      overview: { current: 3, max: 3 },
+      dark: 45,
+    });
+    expect(woken.camera).toStrictEqual({ x: 0, y: 0 });
+  });
+
+  it('a frozen creature comes home free', () => {
+    const state = stepDark({ ...FALLEN, creatures: [snippet(310, 200, 30)], dark: 44 }, MAP);
+    expect(state.creatures).toStrictEqual([snippet(40, 40)]);
+  });
+
+  it('after 88 steps dark is 89, and the 89th ends it', () => {
+    expect(darkSteps(88).dark).toBe(89);
+    const ended = darkSteps(89);
+    expect(ended.dark).toBe(0);
+    expect(ended.tick).toBe(589);
+    expect(ended.player).toStrictEqual(figure(80, 60, 'down'));
   });
 });

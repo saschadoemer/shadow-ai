@@ -1,5 +1,14 @@
+import type { Point, TileMap } from '../engine/tiled';
+import { followPlayer } from './camera';
 import { DIRECTIONS } from './lamp';
-import type { CreatureState, Overview, PlayerState, Recoil } from './state';
+import {
+  type CreatureState,
+  type GameState,
+  NO_RECOIL,
+  type Overview,
+  type PlayerState,
+  type Recoil,
+} from './state';
 
 /**
  * Overview (gameplay.md §4, feature 0009): the hit of a free creature, the push and the safe
@@ -88,4 +97,65 @@ export function applyHit(
     overview: left,
     dark: 0,
   };
+}
+
+/** The name of the map point the figure wakes at. */
+export const WAKE_POINT = 'wake';
+
+/**
+ * Where the figure wakes: the map's point named `wake`, or its spawn when it has none. Two are
+ * an error, so that a copied point in the map is not a silently ignored one.
+ */
+export function wakePoint(map: TileMap): Point {
+  const wakes = map.points.filter((point) => point.name === WAKE_POINT);
+  if (wakes.length > 1) {
+    throw new Error(`more than one point object "${WAKE_POINT}"`);
+  }
+  const [wake] = wakes;
+  return wake === undefined ? map.spawn : { x: wake.x, y: wake.y };
+}
+
+/** The world set right: the figure at the wake point, overview full, every creature at home. */
+function woken(state: GameState, map: TileMap): GameState {
+  const wake = wakePoint(map);
+  const player: PlayerState = {
+    x: wake.x,
+    y: wake.y,
+    facing: 'down',
+    frame: 0,
+    frameTimer: 0,
+    grace: 0,
+    recoil: NO_RECOIL,
+  };
+  return {
+    tick: state.tick,
+    player,
+    camera: followPlayer(player, map),
+    lamp: { on: false },
+    creatures: state.creatures.map((creature) => ({
+      ...creature,
+      x: creature.home.x,
+      y: creature.home.y,
+      light: 0,
+    })),
+    captured: state.captured,
+    overview: { current: state.overview.max, max: state.overview.max },
+    dark: state.dark,
+  };
+}
+
+/**
+ * One step of the dark (state.dark above 0): `dark` and `tick` grow by 1, the lamp is off and
+ * nothing else moves. In the step `dark` becomes WAKE_STEP the world is set right, unseen behind
+ * the closed screen; in the step it would become DARK_STEPS it is 0 and the game runs again.
+ */
+export function stepDark(state: GameState, map: TileMap): GameState {
+  const dark = state.dark + 1;
+  const next: GameState = {
+    ...state,
+    tick: state.tick + 1,
+    lamp: { on: false },
+    dark: dark >= DARK_STEPS ? 0 : dark,
+  };
+  return dark === WAKE_STEP ? woken(next, map) : next;
 }

@@ -235,6 +235,18 @@ describe('creaturesFrom', () => {
     expect(moved?.home).toStrictEqual({ x: 100, y: 100 });
   });
 
+  it('makes no creature from the wake point (0009)', () => {
+    expect(
+      creaturesFrom([
+        { name: 'wake', x: 80, y: 60 },
+        { name: 'snippet', x: 100, y: 100 },
+      ]),
+    ).toHaveLength(1);
+    expect(() => creaturesFrom([{ name: 'wak', x: 80, y: 60 }])).toThrow(
+      'unknown point object "wak" at (80, 60)',
+    );
+  });
+
   it('rejects a name that is no species', () => {
     expect(() => creaturesFrom([{ name: 'snipet', x: 1070, y: 734 }])).toThrow(
       'unknown point object "snipet" at (1070, 734)',
