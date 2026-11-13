@@ -2,7 +2,7 @@ import { EMPTY, type Point, TILE_SIZE } from '../src/engine/tiled.ts';
 
 /**
  * The campus as data (feature 0006, world.md §1): rectangles of path and water on `ground`,
- * buildings and fences on `detail`, the spawn and the creatures' points. The tables of the feature spec are the
+ * buildings and fences on `detail`, the spawn, the creatures' points and the wake point. The tables of the feature spec are the
  * layout; this file mirrors them, one entry per row, columns c0–c1 and rows r0–r1 inclusive.
  * Pure — it returns the layers and the .tmj object; tools/gen-campus.ts writes the file. Retired
  * when the art pass takes the map over by hand in Tiled (visual.md §5).
@@ -124,6 +124,12 @@ export const SNIPPETS: readonly Point[] = [
   { x: 1560, y: 760 },
   { x: 1592, y: 540 },
 ];
+
+/**
+ * Where the figure wakes after losing overview (feature 0009), feet in pixels: the middle of
+ * tile (49, 46), straight under the door of the data protection officer's office.
+ */
+export const WAKE: Point = { x: 792, y: 744 };
 
 function index(column: number, row: number): number {
   return row * CAMPUS_WIDTH + column;
@@ -303,6 +309,7 @@ export function campusJson(): MapJson {
         objects: [
           pointObject(1, 'spawn', SPAWN),
           ...SNIPPETS.map((feet, n) => pointObject(n + 2, 'snippet', feet)),
+          pointObject(SNIPPETS.length + 2, 'wake', WAKE),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -312,7 +319,7 @@ export function campusJson(): MapJson {
       },
     ],
     nextlayerid: 4,
-    nextobjectid: SNIPPETS.length + 2,
+    nextobjectid: SNIPPETS.length + 3,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

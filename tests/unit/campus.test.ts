@@ -10,7 +10,7 @@ import {
   parseTileset,
   type TileMap,
 } from '../../src/engine/tiled';
-import { BUILDINGS, DOOR, GRASS, PATH, SNIPPETS, SPAWN } from '../../tools/campus-layout.ts';
+import { BUILDINGS, DOOR, GRASS, PATH, SNIPPETS, SPAWN, WAKE } from '../../tools/campus-layout.ts';
 import { encodeCampus } from '../../tools/gen-campus.ts';
 
 /**
@@ -145,7 +145,25 @@ describe('public/maps/campus.tmj (acceptance criterion 9)', () => {
       { x: 1560, y: 760 },
       { x: 1592, y: 540 },
     ]);
-    expect(campus.points).toStrictEqual(SNIPPETS.map((feet) => ({ name: 'snippet', ...feet })));
+    expect(campus.points).toStrictEqual([
+      ...SNIPPETS.map((feet) => ({ name: 'snippet', ...feet })),
+      { name: 'wake', ...WAKE },
+    ]);
+  });
+
+  it('holds the wake point of 0009 in front of the door of the data protection office', () => {
+    expect(WAKE).toStrictEqual({ x: 792, y: 744 });
+    // The box [786, 798) × [736, 744) lies in cell (49, 46), flush under the door (49, 45).
+    expect([Math.floor(WAKE.x / 16), Math.floor((WAKE.y - 1) / 16)]).toStrictEqual([49, 46]);
+    const office = BUILDINGS.find((building) => building.name.startsWith('data protection'));
+    expect(office?.doors).toStrictEqual([{ x: 49, y: 45 }]);
+    expect(campus.detail[cell(49, 45)]).toBe(DOOR);
+    expect(campus.solid[cell(49, 46)]).toBe(false);
+    expect(reachableFrom(campus, SPAWN_CELL)[cell(49, 46)]).toBe(true);
+    expect(cameraFor({ x: WAKE.x, y: WAKE.y - 4 }, { width: 2048, height: 1536 })).toStrictEqual({
+      x: 632,
+      y: 650,
+    });
   });
 
   it("every snippet's box is free and its cell is reachable from the spawn", () => {
