@@ -16,6 +16,7 @@ import {
   WAKE_STEP,
   wakePoint,
 } from '../../src/game/overview';
+import type { GameInput } from '../../src/game/player';
 import {
   type CreatureState,
   type Facing,
@@ -23,6 +24,7 @@ import {
   NO_RECOIL,
   type PlayerState,
 } from '../../src/game/state';
+import { createInitialState, update } from '../../src/game/update';
 import { grassMap } from './grass-map';
 
 const figure = (
@@ -207,5 +209,126 @@ describe('stepDark', () => {
     expect(ended.dark).toBe(0);
     expect(ended.tick).toBe(589);
     expect(ended.player).toStrictEqual(figure(80, 60, 'down'));
+  });
+});
+
+describe('overview in update', () => {
+  /** Open ground, 20x12 tiles, with the wake point at (80, 60). */
+  const MAP = grassMap(20, 12, { x: 160, y: 100 }, [{ name: 'wake', x: 80, y: 60 }]);
+  const NONE: GameInput = { up: false, down: false, left: false, right: false, lamp: false };
+  const SHINE: GameInput = { ...NONE, lamp: true };
+  const LEFT_SHINE: GameInput = { ...NONE, left: true, lamp: true };
+  const ALL: GameInput = { up: true, down: true, left: true, right: true, lamp: true };
+  /** The figure at (160, 100) facing right, with these creatures. */
+  const game = (
+    creatures: readonly CreatureState[],
+    fields: Partial<GameState> = {},
+  ): GameState => ({
+    ...createInitialState(MAP),
+    player: AT,
+    creatures,
+    ...fields,
+  });
+  const run = (state: GameState, steps: number, input: GameInput): GameState => {
+    let current = state;
+    for (let i = 0; i < steps; i += 1) {
+      current = update(current, input, MAP);
+    }
+    return current;
+  };
+
+  it('a creature at 10 px comes 2/3 px closer and hits in that step', () => {
+    const next = update(game([snippet(150, 100)]), NONE, MAP);
+    expect(next.overview).toStrictEqual({ current: 2, max: 3 });
+    expect(next.player.grace).toBe(90);
+    expect(next.player.recoil.dx).toBeCloseTo(3, 9);
+    expect(next.player.recoil.dy).toBe(0);
+    expect(next.player.recoil.steps).toBe(8);
+    expect(next.player.x).toBe(160);
+    expect(next.creatures[0]?.x).toBeCloseTo(150.6667, 3);
+    expect(next.dark).toBe(0);
+  });
+
+  it('a creature at 11 px does not hit in the first step and hits in the second', () => {
+    const first = update(game([snippet(149, 100)]), NONE, MAP);
+    expect(first.overview.current).toBe(3);
+    expect(first.creatures[0]?.x).toBeCloseTo(149.6667, 3);
+    expect(update(first, NONE, MAP).overview.current).toBe(2);
+  });
+
+  it('the push ignores the keys and holds the lamp off for eight steps', () => {
+    let state = update(game([snippet(150, 100)]), NONE, MAP);
+    const xs: number[] = [];
+    for (let i = 0; i < 8; i += 1) {
+      state = update(state, LEFT_SHINE, MAP);
+      xs.push(Math.round(state.player.x * 1000) / 1000);
+      expect(state.lamp.on, `step ${i + 1}`).toBe(false);
+      expect(state.player.facing).toBe('right');
+      expect(state.player.frame).toBe(0);
+    }
+    expect(xs).toStrictEqual([163, 166, 169, 172, 175, 178, 181, 184]);
+    expect(state.player.recoil).toStrictEqual({ dx: 0, dy: 0, steps: 0 });
+    const ninth = update(state, LEFT_SHINE, MAP);
+    expect(ninth.lamp.on).toBe(true);
+    expect(ninth.player.facing).toBe('left');
+    expect(ninth.player.x).toBeCloseTo(184, 6);
+  });
+
+  it('with grace 2 there is no hit; one step later there is', () => {
+    const safe = game([snippet(151, 100)], { player: { ...AT, grace: 2 } });
+    const first = update(safe, NONE, MAP);
+    expect([first.overview.current, first.player.grace]).toStrictEqual([3, 1]);
+    expect(update(first, NONE, MAP).overview.current).toBe(2);
+  });
+
+  it('a creature that stays at the figure hits again in the 90th step after a hit, not sooner', () => {
+    let state = update(game([snippet(150, 100)]), NONE, MAP);
+    for (let i = 1; i <= 89; i += 1) {
+      state = update(state, NONE, MAP);
+      expect(state.overview.current, `step ${i} after the hit`).toBe(2);
+    }
+    expect(update(state, NONE, MAP).overview.current).toBe(1);
+  });
+
+  it('the lamp is the defence: a lit creature at 10 px does not hit', () => {
+    // Apex (160, 88), body (170, 92): d = 10, s = 4.
+    const lit = update(game([snippet(170, 100)]), SHINE, MAP);
+    expect(lit.creatures[0]?.light).toBe(1);
+    expect(lit.overview.current).toBe(3);
+    expect(update(game([snippet(170, 100)]), NONE, MAP).overview.current).toBe(2);
+  });
+
+  it('one step holds one hit, from the first creature in the array', () => {
+    const next = update(game([snippet(150, 100), snippet(170, 100)]), NONE, MAP);
+    expect(next.overview.current).toBe(2);
+    expect(next.player.recoil.dx).toBeCloseTo(3, 9);
+  });
+
+  it('the last point starts the dark', () => {
+    const next = update(game([snippet(150, 100)], { overview: { current: 1, max: 3 } }), NONE, MAP);
+    expect(next.overview).toStrictEqual({ current: 0, max: 3 });
+    expect(next.dark).toBe(1);
+    expect(next.player.grace).toBe(0);
+    expect(next.player.recoil).toStrictEqual({ dx: 0, dy: 0, steps: 0 });
+  });
+
+  it('in the dark the keys do nothing; 89 steps later the figure is awake at the wake point', () => {
+    const fallen = update(
+      game([snippet(150, 100)], { overview: { current: 1, max: 3 } }),
+      NONE,
+      MAP,
+    );
+    const middle = run(fallen, 43, ALL);
+    expect(middle.dark).toBe(44);
+    expect(middle.player).toStrictEqual(fallen.player);
+    expect(middle.creatures).toStrictEqual(fallen.creatures);
+    expect(middle.lamp.on).toBe(false);
+    const ended = run(middle, 46, ALL);
+    expect(ended.dark).toBe(0);
+    expect(ended.overview).toStrictEqual({ current: 3, max: 3 });
+    expect([ended.player.x, ended.player.y, ended.player.facing]).toStrictEqual([80, 60, 'down']);
+    expect(ended.creatures).toStrictEqual([snippet(40, 40)]);
+    const moved = update(ended, { ...NONE, right: true }, MAP);
+    expect(moved.player.x).toBeCloseTo(81.3333, 3);
   });
 });

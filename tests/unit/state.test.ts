@@ -230,19 +230,81 @@ describe('the creatures in the state (0008)', () => {
   });
 
   it('survives a JSON round trip with a frozen creature and a count of 1 (INV-1)', () => {
-    // The second snippet, 30 px below the spawn, walks up to 8 px below the feet while the
-    // first is captured; then the figure turns down and holds the light on it for 30 steps.
+    // The second snippet rests 101 px below the spawn while the first is captured. Then the
+    // figure walks 60 px down; from its 28th step the snippet comes 2/3 px closer per step, 12 px
+    // in all. Then the figure holds the light on it for 30 steps, 29 px away. (101 and not 100:
+    // at 100 the 27th step puts the snippet exactly 64 px away, where rounding decides.)
     const map = grassMap(128, 96, { x: 1024, y: 734 }, [
       point('snippet', 1070, 734),
-      point('snippet', 1024, 764),
+      point('snippet', 1024, 835),
     ]);
-    const state = run(map, [60, RIGHT_SHINE], [30, DOWN_SHINE]);
+    const DOWN: GameInput = { ...NONE, down: true };
+    const state = run(map, [60, RIGHT_SHINE], [45, DOWN], [30, DOWN_SHINE]);
     expect(state.captured).toStrictEqual({ snippet: 1 });
     expect(state.creatures).toHaveLength(1);
     expect(state.creatures[0]?.light).toBe(30);
     expect(state.creatures[0]?.x).toBe(1024);
-    expect(state.creatures[0]?.y).toBeCloseTo(742, 6);
+    expect(state.creatures[0]?.y).toBeCloseTo(823, 6);
     const copy: unknown = JSON.parse(JSON.stringify(state));
     expect(copy).toStrictEqual(state);
+  });
+});
+
+describe('overview in the state (0009)', () => {
+  const point = (name: string, x: number, y: number) => ({ name, x, y });
+  const SPAWN = { x: 1024, y: 734 };
+  /** A snippet at 6-8-10 from the spawn: it hits in step 1 and pushes along (0.6, 0.8). */
+  const MAP_HIT = grassMap(128, 96, SPAWN, [point('snippet', 1018, 726)]);
+  const run = (steps: number): GameState => {
+    let state = createInitialState(MAP_HIT);
+    for (let i = 0; i < steps; i += 1) {
+      state = update(state, NONE, MAP_HIT);
+    }
+    return state;
+  };
+
+  it('a map with one wake point starts, and the point makes no creature', () => {
+    const map = grassMap(128, 96, SPAWN, [point('wake', 792, 744)]);
+    expect(createInitialState(map).creatures).toStrictEqual([]);
+  });
+
+  it('a map with two wake points does not start', () => {
+    const map = grassMap(128, 96, SPAWN, [point('wake', 792, 744), point('wake', 800, 744)]);
+    expect(() => createInitialState(map)).toThrow('more than one point object "wake"');
+  });
+
+  it('survives a JSON round trip in the middle of a push (INV-1)', () => {
+    const state = run(6); // the hit in step 1, five steps of the push
+    expect(state.overview).toStrictEqual({ current: 2, max: 3 });
+    expect(state.player.grace).toBe(85);
+    expect(state.player.recoil.dx).toBeCloseTo(1.8, 3);
+    expect(state.player.recoil.dy).toBeCloseTo(2.4, 3);
+    expect(state.player.recoil.steps).toBe(3);
+    expect(state.creatures[0]?.x).not.toBe(1018);
+    expect(state.creatures[0]?.home).toStrictEqual({ x: 1018, y: 726 });
+    const copy: unknown = JSON.parse(JSON.stringify(state));
+    expect(copy).toStrictEqual(state);
+  });
+
+  it('three hits, 90 steps apart, lead into the dark; it survives the round trip at step 30', () => {
+    expect(run(90).overview.current).toBe(2);
+    expect(run(91).overview.current).toBe(1);
+    expect(run(180).dark).toBe(0);
+    expect(run(181).dark).toBe(1);
+    const state = run(210);
+    expect(state.overview).toStrictEqual({ current: 0, max: 3 });
+    expect(state.dark).toBe(30);
+    const copy: unknown = JSON.parse(JSON.stringify(state));
+    expect(copy).toStrictEqual(state);
+  });
+
+  it('without a wake point the figure wakes at the spawn, the creature at its home', () => {
+    const state = run(225); // 181 + 44: dark is 45
+    expect(state.dark).toBe(45);
+    expect([state.player.x, state.player.y]).toStrictEqual([1024, 734]);
+    expect(state.overview).toStrictEqual({ current: 3, max: 3 });
+    expect(state.creatures).toStrictEqual([
+      { species: 'snippet', x: 1018, y: 726, light: 0, home: { x: 1018, y: 726 } },
+    ]);
   });
 });
