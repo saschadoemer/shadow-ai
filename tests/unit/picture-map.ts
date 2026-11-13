@@ -1,4 +1,5 @@
 import { EMPTY, type Point, type TileMap } from '../../src/engine/tiled';
+import { solidsOf } from './solids';
 
 /**
  * The solid grid of tests/fixtures/maps/corridor.tmj as a picture: a wall in column 10 with a
@@ -22,7 +23,7 @@ export const CORRIDOR: readonly string[] = [
 
 /**
  * An in-memory map from a picture, one string per row: `#` is a solid cell, `.` an open one.
- * `ground` is all grass (id 0) and `detail` and `above` are empty, so only `solid` carries the
+ * `ground` is all grass (id 0) and `detail` and `above` are empty, so only `solids` carries the
  * picture — a test that needs walls shows them.
  */
 export function pictureMap(rows: readonly string[], spawn: Point): TileMap {
@@ -52,6 +53,6 @@ export function pictureMap(rows: readonly string[], spawn: Point): TileMap {
     above: new Array<number>(cells).fill(EMPTY),
     spawn,
     points: [],
-    solid,
+    solids: solidsOf(solid, width),
   };
 }

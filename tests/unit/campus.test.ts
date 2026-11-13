@@ -30,6 +30,7 @@ function read(file: string): string {
 const tileset = parseTileset(JSON.parse(read(TILESET_FILE)), TILESET_FILE);
 const campus = parseTileMap(JSON.parse(read(MAP_FILE)), tileset, MAP_FILE);
 const cell = (column: number, row: number): number => row * campus.width + column;
+const solidAt = (at: number): boolean => (campus.solids[at]?.length ?? 0) > 0;
 
 /** The four neighbours of a cell: right, left, down, up. */
 const DIRECTIONS: readonly (readonly [number, number])[] = [
@@ -38,6 +39,9 @@ const DIRECTIONS: readonly (readonly [number, number])[] = [
   [0, 1],
   [0, -1],
 ];
+
+/** A whole tile, for closing a cell by hand. */
+const FULL = { x: 0, y: 0, width: 16, height: 16 };
 
 /** Which cells a figure reaches from `from` over open cells, four-connected; index → reached. */
 function reachableFrom(map: TileMap, from: Point): boolean[] {
@@ -54,7 +58,7 @@ function reachableFrom(map: TileMap, from: Point): boolean[] {
         continue;
       }
       const at = r * map.width + c;
-      if (!reached[at] && map.solid[at] !== true) {
+      if (!reached[at] && (map.solids[at]?.length ?? 0) === 0) {
         reached[at] = true;
         queue.push(at);
       }
@@ -83,13 +87,13 @@ describe('public/maps/campus.tmj (acceptance criterion 9)', () => {
     for (const { name, footprint, doors } of BUILDINGS) {
       for (let row = footprint.r0; row <= footprint.r1; row += 1) {
         for (let column = footprint.c0; column <= footprint.c1; column += 1) {
-          expect(campus.solid[cell(column, row)], `${name} (${column}, ${row})`).toBe(true);
+          expect(solidAt(cell(column, row)), `${name} (${column}, ${row})`).toBe(true);
         }
       }
       expect(doors.length, name).toBeGreaterThan(0);
       for (const door of doors) {
         expect(campus.detail[cell(door.x, door.y)], `${name} door`).toBe(DOOR);
-        expect(campus.solid[cell(front(door).x, front(door).y)], `${name} door front`).toBe(false);
+        expect(solidAt(cell(front(door).x, front(door).y)), `${name} door front`).toBe(false);
       }
     }
   });
@@ -106,25 +110,25 @@ describe('public/maps/campus.tmj (acceptance criterion 9)', () => {
 
   it('the meeting rooms are found, not on the way: their front is reached only through the gap (95, 34)', () => {
     expect(reachableFrom(campus, SPAWN_CELL)[cell(95, 32)]).toBe(true);
-    const closed = campus.solid.map((solid, at) => solid || at === cell(95, 34));
-    expect(reachableFrom({ ...campus, solid: closed }, SPAWN_CELL)[cell(95, 32)]).toBe(false);
+    const closed = campus.solids.map((boxes, at) => (at === cell(95, 34) ? [FULL] : boxes));
+    expect(reachableFrom({ ...campus, solids: closed }, SPAWN_CELL)[cell(95, 32)]).toBe(false);
   });
 
   it('the outer ring is solid', () => {
     for (let column = 0; column < campus.width; column += 1) {
-      expect(campus.solid[cell(column, 0)], `(${column}, 0)`).toBe(true);
-      expect(campus.solid[cell(column, 95)], `(${column}, 95)`).toBe(true);
+      expect(solidAt(cell(column, 0)), `(${column}, 0)`).toBe(true);
+      expect(solidAt(cell(column, 95)), `(${column}, 95)`).toBe(true);
     }
     for (let row = 0; row < campus.height; row += 1) {
-      expect(campus.solid[cell(0, row)], `(0, ${row})`).toBe(true);
-      expect(campus.solid[cell(127, row)], `(127, ${row})`).toBe(true);
+      expect(solidAt(cell(0, row)), `(0, ${row})`).toBe(true);
+      expect(solidAt(cell(127, row)), `(127, ${row})`).toBe(true);
     }
   });
 
   it("the spawn's box is free and row 45 is path from column 64 to 71", () => {
     // The box [1018, 1030) × [726, 734) covers cells (63, 45) and (64, 45).
-    expect(campus.solid[cell(63, 45)]).toBe(false);
-    expect(campus.solid[cell(64, 45)]).toBe(false);
+    expect(solidAt(cell(63, 45))).toBe(false);
+    expect(solidAt(cell(64, 45))).toBe(false);
     for (let column = 64; column <= 71; column += 1) {
       expect(campus.ground[cell(column, 45)], `(${column}, 45)`).toBe(PATH);
     }
@@ -158,7 +162,7 @@ describe('public/maps/campus.tmj (acceptance criterion 9)', () => {
     const office = BUILDINGS.find((building) => building.name.startsWith('data protection'));
     expect(office?.doors).toStrictEqual([{ x: 49, y: 45 }]);
     expect(campus.detail[cell(49, 45)]).toBe(DOOR);
-    expect(campus.solid[cell(49, 46)]).toBe(false);
+    expect(solidAt(cell(49, 46))).toBe(false);
     expect(reachableFrom(campus, SPAWN_CELL)[cell(49, 46)]).toBe(true);
     expect(cameraFor({ x: WAKE.x, y: WAKE.y - 4 }, { width: 2048, height: 1536 })).toStrictEqual({
       x: 632,
@@ -176,7 +180,7 @@ describe('public/maps/campus.tmj (acceptance criterion 9)', () => {
           column <= Math.ceil((x + 6) / 16) - 1;
           column += 1
         ) {
-          expect(campus.solid[cell(column, row)], `(${column}, ${row})`).toBe(false);
+          expect(solidAt(cell(column, row)), `(${column}, ${row})`).toBe(false);
         }
       }
       expect(reached[cell(Math.floor(x / 16), Math.floor(y / 16))], `(${x}, ${y})`).toBe(true);
@@ -193,7 +197,7 @@ describe('public/maps/campus.tmj (acceptance criterion 9)', () => {
   });
 
   it('the third snippet stands inside the meeting rooms fence, on tile (99, 33)', () => {
-    const closed = campus.solid.map((solid, at) => solid || at === cell(95, 34));
-    expect(reachableFrom({ ...campus, solid: closed }, SPAWN_CELL)[cell(99, 33)]).toBe(false);
+    const closed = campus.solids.map((boxes, at) => (at === cell(95, 34) ? [FULL] : boxes));
+    expect(reachableFrom({ ...campus, solids: closed }, SPAWN_CELL)[cell(99, 33)]).toBe(false);
   });
 });

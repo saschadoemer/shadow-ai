@@ -16,6 +16,6 @@ export function grassMap(
     above: new Array<number>(cells).fill(EMPTY),
     spawn,
     points,
-    solid: new Array<boolean>(cells).fill(false),
+    solids: Array.from({ length: cells }, () => []),
   };
 }

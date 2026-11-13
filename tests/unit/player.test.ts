@@ -10,6 +10,7 @@ import { type Facing, NO_RECOIL, type PlayerState } from '../../src/game/state';
 import { createInitialState } from '../../src/game/update';
 import { grassMap } from './grass-map';
 import { CORRIDOR, pictureMap } from './picture-map';
+import { solidsWith } from './solids';
 
 /** 20x12 tiles, 320x192 px, like the test map; the player starts mid-map. */
 const MAP = grassMap(20, 12, { x: 160, y: 96 });
@@ -402,6 +403,23 @@ describe('grace and the push (0009)', () => {
     );
     expect(pushed.x).toBe(106); // the box's right edge at 112
     expect(pushed.y).toBe(100);
+  });
+
+  it('a wall strip holds the push: a left strip 10 px right of the box stops it flush (0010)', () => {
+    // The box of feet (144, 92) is [138, 150) × [84, 92); the strip [160, 164) × [80, 96).
+    const strip = {
+      ...MAP,
+      solids: solidsWith(20, 12, [
+        { column: 10, row: 5, box: { x: 160, y: 80, width: 4, height: 16 } },
+      ]),
+    };
+    const pushed = walk(
+      { ...standing(144, 92, 'left'), recoil: { dx: 3, dy: 0, steps: 8 } },
+      NONE,
+      8,
+      strip,
+    );
+    expect([pushed.x, pushed.y]).toStrictEqual([154, 92]);
   });
 
   it("the map's edge holds the push: the clamp keeps x at 8", () => {

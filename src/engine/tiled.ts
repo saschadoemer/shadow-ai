@@ -226,8 +226,8 @@ export interface TileMap {
   readonly spawn: Point;
   /** The named point objects besides the spawn, in file order; each inside the map on an open cell. */
   readonly points: readonly NamedPoint[];
-  /** Row-major, width × height: a solid tile on any of the three layers. */
-  readonly solid: readonly boolean[];
+  /** Row-major, width × height: the solid boxes of the cell's tiles on the three layers, in map pixels. */
+  readonly solids: readonly (readonly Box[])[];
 }
 
 function isTileLayerName(name: string): name is TileLayerName {
@@ -367,13 +367,13 @@ function checkLayer(layer: Json, file: string): TileLayerName | typeof OBJECT_LA
   return name;
 }
 
-/** Rule 13: a point lies inside the map, on a cell that is not solid. The cell, not a box. */
+/** Rule 13: a point lies inside the map and outside every solid box of its cell. */
 function checkPosition(
   what: string,
   point: Point,
   width: number,
   height: number,
-  solid: readonly boolean[],
+  solids: readonly (readonly Box[])[],
   file: string,
 ): void {
   const widthPx = width * TILE_SIZE;
@@ -383,7 +383,14 @@ function checkPosition(
   }
   const column = Math.floor(point.x / TILE_SIZE);
   const row = Math.floor(point.y / TILE_SIZE);
-  if (solid[row * width + column] === true) {
+  const inBox = (solids[row * width + column] ?? []).some(
+    (box) =>
+      point.x >= box.x &&
+      point.x < box.x + box.width &&
+      point.y >= box.y &&
+      point.y < box.y + box.height,
+  );
+  if (inBox) {
     fail(file, `${what} (${point.x}, ${point.y}) is on a solid tile (${column}, ${row})`);
   }
 }
@@ -427,14 +434,20 @@ export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string
   const empty = () => new Array<number>(width * height).fill(EMPTY);
   const detail = layers.detail ?? empty();
   const above = layers.above ?? empty();
-  const isSolid = (id: number | undefined) =>
-    id !== undefined && (tileset.boxes[id]?.length ?? 0) > 0;
-  const solid = ground.map(
-    (id, index) => isSolid(id) || isSolid(detail[index]) || isSolid(above[index]),
-  );
-  checkPosition('spawn', spawn, width, height, solid, mapFile);
+  const boxesOf = (id: number | undefined): readonly Box[] =>
+    id === undefined || id === EMPTY ? NO_BOXES : (tileset.boxes[id] ?? NO_BOXES);
+  const solids = ground.map((id, index): readonly Box[] => {
+    const local = [...boxesOf(id), ...boxesOf(detail[index]), ...boxesOf(above[index])];
+    if (local.length === 0) {
+      return NO_BOXES;
+    }
+    const left = (index % width) * TILE_SIZE;
+    const top = Math.floor(index / width) * TILE_SIZE;
+    return local.map((box) => ({ ...box, x: box.x + left, y: box.y + top }));
+  });
+  checkPosition('spawn', spawn, width, height, solids, mapFile);
   for (const point of points) {
-    checkPosition(`point "${point.name}"`, point, width, height, solid, mapFile);
+    checkPosition(`point "${point.name}"`, point, width, height, solids, mapFile);
   }
-  return { width, height, ground, detail, above, spawn, points, solid };
+  return { width, height, ground, detail, above, spawn, points, solids };
 }

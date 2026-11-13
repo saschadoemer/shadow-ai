@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { type Box, moveBox, type SolidGrid, sightBlocked } from '../../src/engine/collision';
 import { parseTileMap, parseTileset } from '../../src/engine/tiled';
 import { CORRIDOR, pictureMap } from './picture-map';
+import { solidsOf, solidsWith } from './solids';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -119,7 +120,7 @@ describe('moveBox on the loaded corridor fixture', () => {
   const corridor = parseTileMap(read('corridor.tmj'), tileset, `${FIXTURES}/corridor.tmj`);
 
   it('has the solid grid the picture draws', () => {
-    expect(corridor.solid).toStrictEqual(GRID.solid);
+    expect(corridor.solids).toStrictEqual(GRID.solids);
   });
 
   it('reads the loaded grid: through the gap, stopped above it', () => {
@@ -133,7 +134,10 @@ describe('sightBlocked (0008)', () => {
   const ONE: SolidGrid = {
     width: 4,
     height: 3,
-    solid: [false, false, false, false, false, false, true, false, false, false, false, false],
+    solids: solidsOf(
+      [false, false, false, false, false, false, true, false, false, false, false, false],
+      4,
+    ),
   };
   const blocked = (ax: number, ay: number, bx: number, by: number): boolean =>
     sightBlocked({ x: ax, y: ay }, { x: bx, y: by }, ONE);
@@ -161,5 +165,79 @@ describe('sightBlocked (0008)', () => {
 
   it('treats cells outside the grid as open', () => {
     expect(blocked(24, 8, -20, 8)).toBe(false);
+  });
+});
+
+describe('boxes thinner than a cell (0010)', () => {
+  /** 10x10 cells: a left strip in cell (5, 3) and a top strip in cell (2, 6). */
+  const STRIPS: SolidGrid = {
+    width: 10,
+    height: 10,
+    solids: solidsWith(10, 10, [
+      { column: 5, row: 3, box: { x: 80, y: 48, width: 4, height: 16 } },
+      { column: 2, row: 6, box: { x: 32, y: 96, width: 16, height: 4 } },
+    ]),
+  };
+  /** 10x10 cells: a post in cell (3, 3). */
+  const POST: SolidGrid = {
+    width: 10,
+    height: 10,
+    solids: solidsWith(10, 10, [{ column: 3, row: 3, box: { x: 48, y: 48, width: 4, height: 4 } }]),
+  };
+  /** 10x10 cells: top strips in cells (1, 8) and (4, 8), a doorway at (2, 8) and (3, 8). */
+  const DOORWAY: SolidGrid = {
+    width: 10,
+    height: 10,
+    solids: solidsWith(10, 10, [
+      { column: 1, row: 8, box: { x: 16, y: 128, width: 16, height: 4 } },
+      { column: 4, row: 8, box: { x: 64, y: 128, width: 16, height: 4 } },
+    ]),
+  };
+  const blocked = (ax: number, ay: number, bx: number, by: number): boolean =>
+    sightBlocked({ x: ax, y: ay }, { x: bx, y: by }, STRIPS);
+
+  it('stops flush at a left strip from either side', () => {
+    expect(moved(box(60, 52), 10, 0, STRIPS)).toStrictEqual([68, 52]);
+    expect(moved(box(90, 52), -8, 0, STRIPS)).toStrictEqual([84, 52]);
+    expect(moved(box(86, 52), -1.5, 0, STRIPS)).toStrictEqual([84.5, 52]);
+    expect(moved(box(84, 52), -1, 0, STRIPS)).toStrictEqual([84, 52]);
+  });
+
+  it('slides along a strip it is flush against', () => {
+    expect(moved(box(68, 52), 1, 1, STRIPS)).toStrictEqual([68, 53]);
+  });
+
+  it('stops flush at a top strip from either side', () => {
+    expect(moved(box(34, 104), 0, -6, STRIPS)).toStrictEqual([34, 100]);
+    expect(moved(box(34, 86), 0, 4, STRIPS)).toStrictEqual([34, 88]);
+  });
+
+  it('moves freely inside a wall cell below its strip', () => {
+    expect(moved(box(34, 102), 2, 0, STRIPS)).toStrictEqual([36, 102]);
+    expect(moved(box(34, 102), -2, 0, STRIPS)).toStrictEqual([32, 102]);
+  });
+
+  it('stops at a post from below and from the right', () => {
+    expect(moved(box(40, 53), 0, -3, POST)).toStrictEqual([40, 52]);
+    expect(moved(box(52, 44), -3, 0, POST)).toStrictEqual([52, 44]);
+  });
+
+  it('passes a doorway between two top strips and is stopped beside it', () => {
+    const up = (x: number): number => {
+      let current = box(x, 140);
+      for (let i = 0; i < 20; i += 1) {
+        current = { ...current, ...moveBox(current, 0, -1, DOORWAY) };
+      }
+      return current.y;
+    };
+    expect(up(42)).toBe(120);
+    expect(up(20)).toBe(132);
+  });
+
+  it('blocks the sight line only where it crosses a strip', () => {
+    expect(blocked(70, 56, 95, 56)).toBe(true);
+    expect(blocked(70, 56, 79, 56)).toBe(false);
+    expect(blocked(20, 110, 60, 110)).toBe(false);
+    expect(blocked(40, 90, 40, 104)).toBe(true);
   });
 });

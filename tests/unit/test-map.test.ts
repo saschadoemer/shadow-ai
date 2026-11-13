@@ -39,7 +39,7 @@ describe('tests/fixtures/maps/test.tmj', () => {
   it('puts the spawn at pixel (136, 120), on grass in tile (8, 7)', () => {
     expect(map.spawn).toStrictEqual({ x: 136, y: 120 });
     expect(map.ground[cell(8, 7)]).toBe(0);
-    expect(map.solid[cell(8, 7)]).toBe(false);
+    expect(map.solids[cell(8, 7)]).toStrictEqual([]);
   });
 
   it('has grass with nothing above it at tile (0, 0), the smoke test reads it', () => {
@@ -49,8 +49,8 @@ describe('tests/fixtures/maps/test.tmj', () => {
   });
 
   it('closes the wall ring except for the doorway', () => {
-    expect(map.solid[cell(12, 1)]).toBe(true);
-    expect(map.solid[cell(14, 4)]).toBe(false);
+    expect(map.solids[cell(12, 1)]).toHaveLength(1);
+    expect(map.solids[cell(14, 4)]).toStrictEqual([]);
     expect(map.ground[cell(12, 2)], 'the closed door').toBe(5);
   });
 

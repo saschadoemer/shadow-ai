@@ -98,7 +98,7 @@ function feetOf(box: Point, map: TileMap): { readonly x: number; readonly y: num
 }
 
 /**
- * One step of a push (0009): the box moves by the push against the solid grid and the clamp,
+ * One step of a push (0009): the box moves by the push against the solid boxes and the clamp,
  * like a walking step. The keys are not read, the facing stays, the walk cycle is standing.
  */
 function pushed(player: PlayerState, grace: number, map: TileMap): PlayerState {
@@ -117,7 +117,7 @@ function pushed(player: PlayerState, grace: number, map: TileMap): PlayerState {
  * One step. `grace` drops by 1, not below 0 (0009). A figure that is being pushed is moved by
  * the push and nothing else. With the lamp on (0007) the figure stands where it is and the
  * direction keys only turn it, by the same rule as walking; the walk cycle is standing.
- * Otherwise: move the box along the vector against the solid grid, X then Y (engine/collision),
+ * Otherwise: move the box along the vector against the solid boxes, X then Y (engine/collision),
  * clamp the feet so the whole 16x24 sprite stays inside the map, turn. "Moving" is the vector
  * before collision and clamp, so a figure held by a wall or an edge keeps its facing and its
  * walk cycle.

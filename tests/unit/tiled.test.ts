@@ -205,6 +205,19 @@ describe('tilesetSource', () => {
   });
 });
 
+describe('parseTileMap on thin walls (0010)', () => {
+  const boxes = fixture('boxes.tsj');
+  const tiles = parseTileset(boxes.json, boxes.file);
+  const thin = fixture('thin-walls.tmj');
+
+  it('moves a strip to map pixels and accepts a spawn in the open part of its cell', () => {
+    const map = parseTileMap(thin.json, tiles, thin.file);
+    expect(map.solids[2 * 20 + 1]).toStrictEqual([{ x: 16, y: 32, width: 16, height: 4 }]);
+    expect(map.spawn).toStrictEqual({ x: 24, y: 40 });
+    expect(map.solids.filter((cellBoxes) => cellBoxes.length > 0)).toHaveLength(1);
+  });
+});
+
 describe('parseTileMap on the corridor', () => {
   const tiles = fixture('fixture-tiles.tsj');
   const tileset = parseTileset(tiles.json, tiles.file);
@@ -235,14 +248,16 @@ describe('parseTileMap on the corridor', () => {
     expect(map.spawn).toStrictEqual({ x: 40, y: 56 });
   });
 
-  it('builds the solid grid as the union of the three tile layers (INV-7)', () => {
-    expect(map.solid).toHaveLength(240);
-    expect(map.solid[cell(4, 3)]).toBe(true);
-    expect(map.solid[cell(10, 6)]).toBe(false);
-    expect(map.solid[cell(10, 5)]).toBe(true);
-    expect(map.solid[cell(2, 2)], 'from above').toBe(true);
-    expect(map.solid[0]).toBe(false);
-    expect(map.solid.filter(Boolean)).toHaveLength(9);
+  it('builds the solid boxes as the union of the three tile layers, in map pixels (INV-7)', () => {
+    expect(map.solids).toHaveLength(240);
+    expect(map.solids[cell(4, 3)]).toStrictEqual([{ x: 64, y: 48, width: 16, height: 16 }]);
+    expect(map.solids[cell(10, 6)]).toStrictEqual([]);
+    expect(map.solids[cell(10, 5)]).toStrictEqual([{ x: 160, y: 80, width: 16, height: 16 }]);
+    expect(map.solids[cell(2, 2)], 'from above').toStrictEqual([
+      { x: 32, y: 32, width: 16, height: 16 },
+    ]);
+    expect(map.solids[0]).toStrictEqual([]);
+    expect(map.solids.filter((boxes) => boxes.length > 0)).toHaveLength(9);
   });
 
   it('fills absent detail and above layers with EMPTY', () => {
@@ -251,7 +266,7 @@ describe('parseTileMap on the corridor', () => {
     const bare = parseTileMap(json, tileset, corridor.file);
     expect(bare.detail).toStrictEqual(new Array(240).fill(EMPTY));
     expect(bare.above).toStrictEqual(new Array(240).fill(EMPTY));
-    expect(bare.solid.filter(Boolean)).toHaveLength(0);
+    expect(bare.solids.filter((boxes) => boxes.length > 0)).toHaveLength(0);
   });
 
   it('is plain data: it survives a JSON round trip unchanged', () => {
@@ -512,6 +527,15 @@ describe('parseTileMap rejects', () => {
   it('a spawn on a solid tile (rule 13)', () => {
     const { file, json } = fixture('spawn-on-solid.tmj');
     expect(rejection(json, file)).toBe(`${file}: spawn (24, 40) is on a solid tile (1, 2)`);
+  });
+
+  it('a spawn inside the strip of a wall cell (rule 13, 0010)', () => {
+    const boxes = fixture('boxes.tsj');
+    const tiles = parseTileset(boxes.json, boxes.file);
+    const { file, json } = fixture('thin-walls-spawn-in-strip.tmj');
+    expect(messageOf(() => parseTileMap(json, tiles, file))).toBe(
+      `${file}: spawn (24, 34) is on a solid tile (1, 2)`,
+    );
   });
 
   it('a spawn outside the map (rule 13)', () => {
