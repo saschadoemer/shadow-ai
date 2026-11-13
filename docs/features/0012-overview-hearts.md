@@ -159,7 +159,10 @@ carpet, corridor and wall, and is the empty heart clearly empty? Is the row the 
 too small, too large, too tight? Are five points the right number against the scraps — is the
 dark still a threat?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-13, steps 1–19 (dev server on port 5174, as 5173 was taken by
+another project). Feel: the hearts read as hearts at a glance, also at factor 3; the red fits
+carpet, corridor and wall, and the empty heart is clearly empty; the size of the row and the
+gap between hearts are right; five points are the right number, and the dark stays a threat.
 
 ## Open questions
 
