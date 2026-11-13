@@ -41,6 +41,7 @@ Upper limits. Whoever wants more changes the number here first, then the content
 | Department cases | 7, plus 1 side case (meeting rooms) |
 | Dungeons | 1 (server room) |
 | Figures | about 30 |
+| Movers without a role (dogs, robot vacuums, drones) | 18 |
 | Creature species | 8–10 (one per case, two or three for the server room) |
 | Lamp upgrades | 3 |
 | Keys | 2 |
@@ -66,15 +67,20 @@ done: 0006 was the last of the six.
 
 ### M3 — The lamp and the first creature
 
-Eight features, each its own pull request with its own acceptance plan, in this order: 0007 the
+Nine features, each its own pull request with its own acceptance plan, in this order: 0007 the
 lamp · 0008 the first creature · 0009 overview · 0010 the floor · 0011 the furniture · 0012
-overview hearts · 0013 lounge and gadgets · 0014 shadow walls and density. The lamp before the
+overview hearts · 0013 lounge and gadgets · 0015 the moving floor · 0014 shadow walls and
+density. The lamp before the
 creature, so there is something to freeze with; overview after the creature, because a hit needs
 something that hits. The hearts follow the feel note of 0009's walk and come early because they
 are small. Then the world is rebuilt before more is placed in it: the campus of M2 becomes one
 office floor with thin walls (0010), its furniture (0011) and what makes it lived in — seating,
 coffee, coat racks and a few gadgets (0013) — because an interim state shown to others has to
-read as an office. The density rule last, together with the first thing it gates — the shadow
+read as an office. Then the floor moves (0015): four colleagues,
+a dog and a robot vacuum in every room and two drones, on fixed routes. The four colleagues are
+the first of the cast and come before M4 without a line of text, for the same reason — an
+office in which nothing moves does not read as one — and before 0014, because its walk enters
+every room. The density rule last, together with the first thing it gates — the shadow
 walls, which stand in the doorways of the floor — because 0006 left the density data to M3. The
 shadow as a region's colour — desaturation, the violet dithering, the clearing — arrives with the
 first cleared region in M5.
