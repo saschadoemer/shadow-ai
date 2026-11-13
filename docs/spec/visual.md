@@ -42,6 +42,13 @@ the Past and Ocean's Heart. A 16x16 figure reads as squat for office people. The
 a figure is only its lower part — the feet — so a figure can walk "behind" desks and plants.
 Interior walls are strips 4 px thick on a tile's top or left edge (feature 0010).
 
+**Furniture** (feature 0011) stands on `detail` and is transparent where nothing is drawn.
+Partitions are strips 2 px thick, lighter than walls; a mobile screen is a panel 4 px thick
+through the middle of its cell, on two feet. A **tall thing** — a cabinet or a plant — is two
+tiles: its body on `detail` and its top on `above`, one row higher. A figure in the top's row is
+drawn behind the top, a figure below the body in front of it. A tall thing never stands in the
+first row below a wall, so its top always lies in the same room as its body.
+
 **The display.** The only thing drawn over the world is the row of overview hearts in the
 top-left corner (features 0009, 0012): 8x8, 4 px from the corner, one every 10 px, one per point
 of the maximum; no text. A heart is 7x7 with a rim in `#181425`, red `#e43b44` when full and

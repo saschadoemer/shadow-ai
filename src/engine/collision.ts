@@ -5,7 +5,9 @@
  * solid boxes it would enter. Intervals are half-open, so a box whose edge lies exactly on a
  * solid box's edge does not overlap it: a box flush against a wall slides along it. Cells
  * outside the grid are open; the map edge is the caller's business. The displacement is assumed
- * to be below 4 px per call, the thinnest wall — this is not a swept test.
+ * to be below 8 px per call, the smaller side of the figure's box: by less, a box cannot be
+ * carried across a strip. The thinnest box is the 2 px partition of 0011. This is not a swept
+ * test.
  */
 import { type Box, type Point, TILE_SIZE } from './tiled';
 

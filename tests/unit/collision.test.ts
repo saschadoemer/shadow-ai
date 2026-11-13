@@ -241,3 +241,41 @@ describe('boxes thinner than a cell (0010)', () => {
     expect(blocked(40, 90, 40, 104)).toBe(true);
   });
 });
+
+describe('furniture boxes (0011)', () => {
+  /** A 20x12 grid of open cells with one box placed at its cell. */
+  const gridWith = (column: number, row: number, placed: Box): SolidGrid => ({
+    width: 20,
+    height: 12,
+    solids: solidsWith(20, 12, [{ column, row, box: placed }]),
+  });
+  const STRIP = gridWith(2, 6, { x: 32, y: 96, width: 16, height: 2 });
+
+  /** Six moves of (0, −1) from `from`; where the box's top ends. */
+  const sixUp = (from: Box, grid: SolidGrid): number => {
+    let current = from;
+    for (let step = 0; step < 6; step += 1) {
+      current = { ...current, ...moveBox(current, 0, -1, grid) };
+    }
+    return current.y;
+  };
+
+  it('stops flush under a 2 px strip', () => {
+    expect(sixUp(box(34, 102), STRIP)).toBe(98);
+  });
+
+  it('holds a 3 px push at a 2 px strip', () => {
+    expect(moveBox(box(34, 99), 0, -3, STRIP).y).toBe(98);
+    expect(moveBox(box(34, 98), 0, -3, STRIP).y).toBe(98);
+  });
+
+  it("stops at a chair's box, smaller than its cell", () => {
+    const chair = gridWith(4, 4, { x: 67, y: 67, width: 10, height: 10 });
+    expect(moveBox(box(50, 68), 8, 0, chair).x).toBe(55);
+  });
+
+  it('stops flush under a screen, a 4 px panel through the middle of its cell', () => {
+    const screen = gridWith(2, 6, { x: 32, y: 102, width: 16, height: 4 });
+    expect(sixUp(box(34, 110), screen)).toBe(106);
+  });
+});

@@ -185,14 +185,37 @@ describe('a wall in the light', () => {
 
   it('is not lit behind a 4 px left strip in the cone, and lit without it (0010)', () => {
     // The strip [112, 116) × [80, 96) in cell (7, 5); the line crosses it at y ≈ 94.
-    const strip = {
-      ...OPEN,
-      solids: solidsWith(20, 12, [
-        { column: 7, row: 5, box: { x: 112, y: 80, width: 4, height: 16 } },
-      ]),
-    };
+    // A wall stops light as well as feet: its boxes are opaque too (0011).
+    const boxes = solidsWith(20, 12, [
+      { column: 7, row: 5, box: { x: 112, y: 80, width: 4, height: 16 } },
+    ]);
+    const strip = { ...OPEN, solids: boxes, opaque: boxes };
     expect(isLit(CREATURE, RIGHT, true, strip)).toBe(false);
     expect(isLit(CREATURE, RIGHT, true, OPEN)).toBe(true);
+  });
+
+  it('is lit across a low box, and the same box still stops its walk (0011)', () => {
+    // The box [112, 128) × [80, 96) in cell (7, 5) lies on the creature's way to the figure on
+    // its left. Its own box starts at x = 130, 2 px from the cell: one step of 2/3 px does not
+    // reach it, so the walk runs six steps — with the box it stops flush at x = 128 + 6 = 134,
+    // without it it reaches 136 − 4 = 132.
+    const box = { x: 112, y: 80, width: 16, height: 16 };
+    const low = { ...OPEN, solids: solidsWith(20, 12, [{ column: 7, row: 5, box }]) };
+    expect(isLit(CREATURE, RIGHT, true, low)).toBe(true);
+    const walked = (map: typeof OPEN): number => {
+      let current = CREATURE;
+      for (let step = 0; step < 6; step += 1) {
+        current = approached(current, RIGHT, map);
+      }
+      return current.x;
+    };
+    expect(walked(low)).toBeGreaterThan(walked(OPEN));
+  });
+
+  it('is not lit behind an opaque box (0011)', () => {
+    const box = { x: 112, y: 80, width: 16, height: 16 };
+    const placed = solidsWith(20, 12, [{ column: 7, row: 5, box }]);
+    expect(isLit(CREATURE, RIGHT, true, { ...OPEN, solids: placed, opaque: placed })).toBe(false);
   });
 });
 

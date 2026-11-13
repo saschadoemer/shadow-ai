@@ -38,9 +38,10 @@ export function bodyPoint(creature: CreatureState): Point {
 }
 
 /**
- * Lit: the lamp is on, the body point is in the cone, and no solid box lies on the line from
+ * Lit: the lamp is on, the body point is in the cone, and no opaque box lies on the line from
  * the centre of the figure's collision box to the body point. The line starts at the box and
  * not at the cone's apex, because the apex is inside a wall when the figure stands under one.
+ * Furniture that is low does not block the light; it still stops the walk (feature 0011).
  */
 export function isLit(
   creature: CreatureState,
@@ -54,7 +55,11 @@ export function isLit(
   const body = bodyPoint(creature);
   return (
     inCone(body, lampCone(player)) &&
-    !sightBlocked({ x: player.x, y: player.y - BOX_HEIGHT / 2 }, body, map)
+    !sightBlocked({ x: player.x, y: player.y - BOX_HEIGHT / 2 }, body, {
+      width: map.width,
+      height: map.height,
+      solids: map.opaque,
+    })
   );
 }
 

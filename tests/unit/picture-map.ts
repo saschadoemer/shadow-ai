@@ -45,6 +45,8 @@ export function pictureMap(rows: readonly string[], spawn: Point): TileMap {
     }
   }
   const cells = width * rows.length;
+  // A `#` is a wall, and a wall stops light as well as feet (0011).
+  const solids = solidsOf(solid, width);
   return {
     width,
     height: rows.length,
@@ -53,6 +55,7 @@ export function pictureMap(rows: readonly string[], spawn: Point): TileMap {
     above: new Array<number>(cells).fill(EMPTY),
     spawn,
     points: [],
-    solids: solidsOf(solid, width),
+    solids,
+    opaque: solids,
   };
 }

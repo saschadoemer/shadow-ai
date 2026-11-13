@@ -43,6 +43,7 @@ const MAP: TileMap = {
   spawn: { x: 8, y: 8 },
   points: [],
   solids: solidsOf([false, false, false, true, true, true], 3),
+  opaque: solidsOf([false, false, false, true, true, true], 3),
 };
 
 /** 40x30 grass tiles, 640x480 px: larger than the view in both directions. */

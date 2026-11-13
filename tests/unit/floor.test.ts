@@ -4,13 +4,14 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { cameraFor } from '../../src/engine/camera';
 import { moveBox } from '../../src/engine/collision';
-import { type Box, type Point, parseTileMap, parseTileset } from '../../src/engine/tiled';
+import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../src/engine/tiled';
 import {
   type CellRect,
   CLOSED_DOORS,
   CORRIDORS,
   FLOOR_HEIGHT,
   FLOOR_WIDTH,
+  FURNITURE,
   HORIZONTAL_WALLS,
   POSTS,
   ROOMS,
@@ -21,11 +22,31 @@ import {
 } from '../../tools/floor-layout.ts';
 import { encodeFloor } from '../../tools/gen-floor.ts';
 import {
+  CABINET,
+  CABINET_TOP,
   CARPET,
+  CHAIR,
   CORRIDOR,
+  CORRIDOR_WALLS,
+  COUNTER,
+  DESK,
+  DESK_MONITOR,
+  DESK_MONITOR_PARTITION,
+  DESK_PARTITION,
   DOOR_CLOSED,
   OUTER_WALL,
+  PARTITION_CORNER,
+  PARTITION_LEFT,
+  PARTITION_TOP,
+  PLANT,
+  PLANT_TOP,
+  PRINTER,
+  SCREEN,
+  SCREEN_SIDE,
+  TABLE,
   TILE_KINDS,
+  WALL_CORNER,
+  WALL_TOP,
   WINDOW,
 } from '../../tools/placeholder-tiles.ts';
 import { feetIn, reachableFeet } from './flood';
@@ -115,10 +136,15 @@ describe('public/maps/floor.tmj (feature 0010)', () => {
     expect(read(MAP_FILE)).toBe(encodeFloor());
   });
 
-  it('is 108x80 tiles with `ground` and `objects` only and the spawn at (256, 718)', () => {
+  it('is 108x80 tiles with `ground`, `detail`, `above` and `objects` and the spawn at (256, 718)', () => {
     expect([floor.width, floor.height]).toStrictEqual([108, 80]);
     const layers = (JSON.parse(read(MAP_FILE)) as { layers: { name: string }[] }).layers;
-    expect(layers.map((layer) => layer.name)).toStrictEqual(['ground', 'objects']);
+    expect(layers.map((layer) => layer.name)).toStrictEqual([
+      'ground',
+      'detail',
+      'above',
+      'objects',
+    ]);
     expect(floor.spawn).toStrictEqual({ x: 256, y: 718 });
     expect(SPAWN).toStrictEqual(floor.spawn);
   });
@@ -291,7 +317,8 @@ describe('public/maps/floor.tmj (feature 0010)', () => {
       ['west corridor', 24, 27],
       ['east corridor', 77, 50],
       ['top-left corner', 1, 1],
-      ['bottom-right corner', 106, 78],
+      // (106, 78) holds Support's cabinet since 0011.
+      ['bottom-right corner', 106, 76],
       ['bottom-left corner', 1, 78],
     ];
     for (const [name, column, row] of probes) {
@@ -342,5 +369,219 @@ describe('public/maps/floor.tmj (feature 0010)', () => {
     expect(office?.cells).toStrictEqual({ c0: 1, c1: 22, r0: 26, r1: 37 });
     expect([Math.floor(WAKE.x / 16), Math.floor((WAKE.y - 1) / 16)]).toStrictEqual([18, 31]);
     expect(cameraFor({ x: 296, y: 500 }, MAP_PX)).toStrictEqual({ x: 136, y: 410 });
+  });
+});
+
+/** The spec's picture of the furnished floor, character → the ids it allows on `detail`. */
+const PICTURE_IDS: Readonly<Record<string, readonly number[]>> = {
+  '~': [PARTITION_TOP],
+  '!': [PARTITION_LEFT],
+  '*': [PARTITION_CORNER],
+  m: [DESK_MONITOR, DESK_MONITOR_PARTITION],
+  d: [DESK, DESK_PARTITION],
+  c: [CHAIR],
+  C: [CABINET],
+  P: [PLANT],
+  T: [TABLE],
+  K: [COUNTER],
+  R: [PRINTER],
+  _: [SCREEN],
+  i: [SCREEN_SIDE],
+};
+
+const detailAt = (column: number, row: number): number | undefined =>
+  floor.detail[cell(column, row)];
+const aboveAt = (column: number, row: number): number | undefined => floor.above[cell(column, row)];
+
+const AREAS = [...ROOMS, ...CORRIDORS];
+const areaOf = (column: number, row: number): string | undefined =>
+  AREAS.find(({ cells: r }) => column >= r.c0 && column <= r.c1 && row >= r.r0 && row <= r.r1)
+    ?.name;
+
+describe('the furniture (0011)', () => {
+  it('stands where the spec draws it, and nowhere else on `detail`', () => {
+    const rows = read('tests/fixtures/maps/floor-furniture.txt').trimEnd().split('\n');
+    expect(rows).toHaveLength(80);
+    rows.forEach((line, row) => {
+      expect(line, `row ${row}`).toHaveLength(108);
+      [...line].forEach((character, column) => {
+        const allowed = PICTURE_IDS[character] ?? [EMPTY];
+        expect(allowed, `(${column}, ${row}) "${character}"`).toContain(detailAt(column, row));
+      });
+    });
+  });
+
+  it('has the fifteen tile counts on `detail` and the two on `above`', () => {
+    const count = (layer: readonly number[], id: number): number =>
+      layer.filter((value) => value === id).length;
+    expect(
+      [
+        PARTITION_TOP,
+        PARTITION_LEFT,
+        PARTITION_CORNER,
+        DESK,
+        DESK_MONITOR,
+        DESK_PARTITION,
+        DESK_MONITOR_PARTITION,
+        CHAIR,
+        CABINET,
+        PLANT,
+        TABLE,
+        COUNTER,
+        PRINTER,
+        SCREEN,
+        SCREEN_SIDE,
+      ].map((id) => count(floor.detail, id)),
+    ).toStrictEqual([122, 170, 61, 24, 24, 61, 61, 122, 34, 14, 58, 19, 5, 6, 14]);
+    expect(floor.detail.filter((id) => id !== EMPTY)).toHaveLength(795);
+    expect([count(floor.above, CABINET_TOP), count(floor.above, PLANT_TOP)]).toStrictEqual([
+      34, 14,
+    ]);
+    expect(floor.above.filter((id) => id !== EMPTY)).toHaveLength(48);
+  });
+
+  it('builds the pieces as the spec defines them', () => {
+    const placements = FURNITURE.flatMap((entry) => entry.placements);
+    expect(placements).toContainEqual({ piece: 'bank', x: 82, y: 28, n: 4 });
+    expect(placements).toContainEqual({ piece: 'island', x: 5, y: 62 });
+    expect(placements).toContainEqual({ piece: 'workplace', x: 4, y: 28 });
+    // The first cubicle of Sales' first bank, (82, 28).
+    expect([
+      detailAt(82, 28),
+      detailAt(83, 28),
+      detailAt(84, 28),
+      detailAt(85, 28),
+      detailAt(86, 28),
+      detailAt(82, 29),
+      detailAt(82, 30),
+      detailAt(83, 29),
+    ]).toStrictEqual([15, 19, 18, 13, 13, 14, 14, 20]);
+    // The island of Marketing at (5, 62).
+    expect([
+      detailAt(5, 62),
+      detailAt(6, 62),
+      detailAt(5, 63),
+      detailAt(6, 63),
+      detailAt(4, 62),
+      detailAt(7, 62),
+      detailAt(4, 63),
+      detailAt(7, 63),
+    ]).toStrictEqual([17, 17, 16, 16, 20, 20, 20, 20]);
+    // The data protection officer's workplace at (4, 28).
+    expect([detailAt(4, 28), detailAt(5, 28), detailAt(4, 29)]).toStrictEqual([17, 16, 20]);
+    expect([30, 31, 32, 33].map((row) => detailAt(9, row))).toStrictEqual([29, 29, 29, 29]);
+    expect([25, 26, 27].map((column) => detailAt(column, 7))).toStrictEqual([28, 28, 28]);
+  });
+
+  it('leaves the outer ring, the lift, the stairwell, the west and east corridors and the side passage empty', () => {
+    for (let row = 0; row < 80; row += 1) {
+      for (let column = 0; column < 108; column += 1) {
+        const onRing = row === 0 || row === 79 || column === 0 || column === 107;
+        if (onRing) {
+          expect(
+            [detailAt(column, row), aboveAt(column, row)],
+            `(${column}, ${row})`,
+          ).toStrictEqual([EMPTY, EMPTY]);
+        }
+      }
+    }
+    const empty = ['lift', 'stairwell', 'west corridor', 'east corridor', 'side passage'];
+    for (const area of AREAS.filter(({ name }) => empty.includes(name))) {
+      for (const at of cellsOf(area.cells)) {
+        expect(
+          [detailAt(at.x, at.y), aboveAt(at.x, at.y)],
+          `${area.name} (${at.x}, ${at.y})`,
+        ).toStrictEqual([EMPTY, EMPTY]);
+      }
+    }
+  });
+
+  it('puts every top one row above its body, in the same area, never below a wall', () => {
+    const topStripIds = [
+      WALL_TOP,
+      WALL_CORNER,
+      WALL_TOP + CORRIDOR_WALLS,
+      WALL_CORNER + CORRIDOR_WALLS,
+      DOOR_CLOSED,
+    ];
+    for (let row = 0; row < 80; row += 1) {
+      for (let column = 0; column < 108; column += 1) {
+        const top = aboveAt(column, row);
+        const where = `(${column}, ${row})`;
+        if (top === CABINET_TOP || top === PLANT_TOP) {
+          expect(detailAt(column, row + 1), where).toBe(top === CABINET_TOP ? CABINET : PLANT);
+          expect(areaOf(column, row), where).toBeDefined();
+          expect(areaOf(column, row), where).toBe(areaOf(column, row + 1));
+          expect(topStripIds, where).not.toContain(tileAt(column, row + 1));
+          expect([EMPTY, CABINET, PLANT], where).toContain(detailAt(column, row));
+        } else {
+          expect(top, where).toBe(EMPTY);
+        }
+        const body = detailAt(column, row);
+        if (body === CABINET || body === PLANT) {
+          expect(aboveAt(column, row - 1), `top of ${where}`).toBe(
+            body === CABINET ? CABINET_TOP : PLANT_TOP,
+          );
+        }
+      }
+    }
+  });
+
+  it("keeps the view's top-left cell at the spawn, (6, 39), free of furniture", () => {
+    expect([detailAt(6, 39), aboveAt(6, 39)]).toStrictEqual([EMPTY, EMPTY]);
+  });
+
+  it('reaches both open cells of every cubicle on foot', () => {
+    let cubicles = 0;
+    for (const { placements } of FURNITURE) {
+      for (const placement of placements) {
+        if (placement.piece !== 'bank') {
+          continue;
+        }
+        for (let k = 0; k < placement.n; k += 1) {
+          const x = placement.x + 5 * k;
+          const { y } = placement;
+          expect(reached(feetIn(x + 2, y + 1)), `cubicle (${x}, ${y}) beside the chair`).toBe(true);
+          expect(reached(feetIn(x, y + 2)), `cubicle (${x}, ${y}) at its open side`).toBe(true);
+          cubicles += 1;
+        }
+      }
+    }
+    expect(cubicles).toBe(61);
+  });
+
+  it("shows the reception's counter in the first view: cells (8, 41)–(12, 41) inside camera (96, 624)", () => {
+    const camera = cameraFor({ x: 256, y: 714 }, MAP_PX);
+    expect(camera).toStrictEqual({ x: 96, y: 624 });
+    for (let column = 8; column <= 12; column += 1) {
+      expect(detailAt(column, 41)).toBe(COUNTER);
+      const left = column * 16;
+      const top = 41 * 16;
+      for (const [x, y] of [
+        [left, top],
+        [left + 15, top],
+        [left, top + 15],
+        [left + 15, top + 15],
+      ] as const) {
+        const inView = x >= camera.x && x < camera.x + 320 && y >= camera.y && y < camera.y + 180;
+        expect(inView, `(${column}, 41) corner (${x}, ${y})`).toBe(true);
+      }
+    }
+  });
+
+  it('lets light pass the low furniture and stops it at the cabinets', () => {
+    expect(floor.opaque[cell(104, 51)]).toStrictEqual([
+      { x: 104 * 16, y: 51 * 16, width: 16, height: 16 },
+    ]);
+    for (const [name, column, row] of [
+      ['desk', 83, 28],
+      ['chair', 83, 29],
+      ['partition', 82, 29],
+      ['plant', 80, 50],
+      ['screen', 10, 62],
+    ] as const) {
+      expect(floor.opaque[cell(column, row)], name).toStrictEqual([]);
+      expect(floor.solids[cell(column, row)]?.length ?? 0, name).toBeGreaterThan(0);
+    }
   });
 });

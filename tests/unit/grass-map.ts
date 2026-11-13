@@ -17,5 +17,6 @@ export function grassMap(
     spawn,
     points,
     solids: Array.from({ length: cells }, () => []),
+    opaque: Array.from({ length: cells }, () => []),
   };
 }
