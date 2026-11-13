@@ -312,7 +312,11 @@ others? Is walking between the cubicles comfortable — are the three-tile aisle
 the partitions read as lower than the walls, and the screens as something that could be rolled
 away? Is any room too full or too empty?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-13, steps 1–18. Feel: the floor reads as an office; every room is
+told apart without trouble; walking between the cubicles is comfortable, the three-tile aisles
+are wide enough; the partitions read as lower than the walls and the screens as something that
+could be rolled away; no room is too full or too empty. Walked on port 5180, because 5173 was
+taken by another project.
 
 ## Open questions
 
