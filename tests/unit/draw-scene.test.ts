@@ -103,6 +103,7 @@ describe('playerFrame', () => {
 });
 
 describe('drawScene', () => {
+  // Criterion 5 of 0011 (a figure is drawn behind the top of a tall thing) rests on this case.
   it('clears, then draws ground, detail, the player, above', () => {
     const renderer = recordingRenderer();
     drawScene(renderer, state({ x: 20.4, y: 30.6, facing: 'left', frame: 3 }), CONTENT);
