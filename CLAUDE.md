@@ -20,9 +20,9 @@ company. All over the building people use AI tools nobody approved — because t
 nobody else fills. Where data leaves the house unseen, a shadow remains that at first only the
 player can see. The weapon is a lamp. Creatures are captured and understood, never killed.
 
-Two purposes, in this order: a **conversation opener** for customers and trade fairs — the first
-act is a fifteen-minute teaser — and a **game people play at home** afterwards, two to three
-hours, distributed as a public URL. German first, English second.
+Two purposes, in this order: a **game people play at home**, two to three hours, distributed as
+a public URL — and a **conversation opener** for customers and trade fairs afterwards, where the
+first act is a fifteen-minute teaser. German first, English second.
 
 The message everything is checked against: **the enemy is not the colleague who uses a tool. The
 enemy is the shadow — the absence of safe, approved ways. You win by making the shadow
