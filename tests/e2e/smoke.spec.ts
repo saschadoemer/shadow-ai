@@ -131,7 +131,13 @@ test('the campus starts with three snippets and nothing captured', async ({ page
     })
     .toBe(3);
   const state = await page.evaluate(() => window.shadowAi?.state);
-  expect(state?.creatures[0]).toStrictEqual({ species: 'snippet', x: 1288, y: 760, light: 0 });
+  expect(state?.creatures[0]).toStrictEqual({
+    species: 'snippet',
+    x: 1288,
+    y: 760,
+    light: 0,
+    home: { x: 1288, y: 760 },
+  });
   expect(state?.captured).toStrictEqual({ snippet: 0 });
 });
 

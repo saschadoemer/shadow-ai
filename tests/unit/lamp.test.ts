@@ -9,7 +9,7 @@ import {
   LAMP_HEIGHT,
   lampCone,
 } from '../../src/game/lamp';
-import { FACINGS, type Facing, type PlayerState } from '../../src/game/state';
+import { FACINGS, type Facing, NO_RECOIL, type PlayerState } from '../../src/game/state';
 
 const APEX: Point = { x: 100, y: 100 };
 
@@ -21,7 +21,15 @@ function at(facing: Facing, along: number, aside: number): Point {
 
 describe('lampCone', () => {
   it('puts the apex 12 px above the feet, in the facing', () => {
-    const player: PlayerState = { x: 20.4, y: 30.6, facing: 'left', frame: 0, frameTimer: 0 };
+    const player: PlayerState = {
+      x: 20.4,
+      y: 30.6,
+      facing: 'left',
+      frame: 0,
+      frameTimer: 0,
+      grace: 0,
+      recoil: NO_RECOIL,
+    };
     expect(lampCone(player)).toStrictEqual({ apex: { x: 20.4, y: 18.6 }, facing: 'left' });
     expect(LAMP_HEIGHT).toBe(12);
   });

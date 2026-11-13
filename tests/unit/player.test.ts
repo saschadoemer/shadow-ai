@@ -6,7 +6,7 @@ import {
   movementVector,
   stepPlayer,
 } from '../../src/game/player';
-import type { Facing, PlayerState } from '../../src/game/state';
+import { type Facing, NO_RECOIL, type PlayerState } from '../../src/game/state';
 import { createInitialState } from '../../src/game/update';
 import { grassMap } from './grass-map';
 import { CORRIDOR, pictureMap } from './picture-map';
@@ -31,7 +31,7 @@ function shining(...actions: readonly (keyof MovementInput)[]): GameInput {
 }
 
 function standing(x: number, y: number, facing: Facing = 'down'): PlayerState {
-  return { x, y, facing, frame: 0, frameTimer: 0 };
+  return { x, y, facing, frame: 0, frameTimer: 0, grace: 0, recoil: NO_RECOIL };
 }
 
 function walk(
@@ -250,6 +250,8 @@ describe('createInitialState', () => {
       facing: 'down',
       frame: 0,
       frameTimer: 0,
+      grace: 0,
+      recoil: NO_RECOIL,
     });
   });
 });

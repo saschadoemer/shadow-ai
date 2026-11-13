@@ -113,5 +113,7 @@ export function stepPlayer(player: PlayerState, input: GameInput, map: TileMap):
     y: clamp(box.y + BOX_HEIGHT, FRAME_HEIGHT, map.height * TILE_SIZE),
     facing: facingOf(vector, player.facing),
     ...walkCycle(player, moving),
+    grace: player.grace,
+    recoil: player.recoil,
   };
 }

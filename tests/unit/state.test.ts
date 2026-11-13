@@ -28,11 +28,21 @@ describe('GameState (INV-1)', () => {
   it('starts at tick 0 with the player at the spawn, facing down, standing, the camera on it', () => {
     expect(createInitialState(MAP)).toStrictEqual({
       tick: 0,
-      player: { x: 136, y: 120, facing: 'down', frame: 0, frameTimer: 0 },
+      player: {
+        x: 136,
+        y: 120,
+        facing: 'down',
+        frame: 0,
+        frameTimer: 0,
+        grace: 0,
+        recoil: { dx: 0, dy: 0, steps: 0 },
+      },
       camera: { x: 0, y: 12 },
       lamp: { on: false },
       creatures: [],
       captured: { snippet: 0 },
+      overview: { current: 3, max: 3 },
+      dark: 0,
     });
   });
 
@@ -63,7 +73,15 @@ describe('GameState (INV-1)', () => {
 });
 
 describe('update', () => {
-  const player = { x: 136, y: 120, facing: 'down', frame: 0, frameTimer: 0 } as const;
+  const player = {
+    x: 136,
+    y: 120,
+    facing: 'down',
+    frame: 0,
+    frameTimer: 0,
+    grace: 0,
+    recoil: { dx: 0, dy: 0, steps: 0 },
+  } as const;
 
   it('advances tick by exactly one and steps the player', () => {
     const next = update(
@@ -74,6 +92,8 @@ describe('update', () => {
         lamp: { on: false },
         creatures: [],
         captured: { snippet: 0 },
+        overview: { current: 3, max: 3 },
+        dark: 0,
       },
       RIGHT,
       MAP,
@@ -91,6 +111,8 @@ describe('update', () => {
       lamp: { on: false },
       creatures: [],
       captured: { snippet: 0 },
+      overview: { current: 3, max: 3 },
+      dark: 0,
     };
     update(state, RIGHT, MAP);
     expect(state).toStrictEqual({
@@ -100,6 +122,8 @@ describe('update', () => {
       lamp: { on: false },
       creatures: [],
       captured: { snippet: 0 },
+      overview: { current: 3, max: 3 },
+      dark: 0,
     });
   });
 });
@@ -113,6 +137,8 @@ describe('the camera in the state (0006)', () => {
     facing: 'down',
     frame: 0,
     frameTimer: 0,
+    grace: 0,
+    recoil: { dx: 0, dy: 0, steps: 0 },
   });
 
   it('starts centred on the spawn: (864, 640)', () => {
@@ -176,7 +202,9 @@ describe('the creatures in the state (0008)', () => {
 
   it('starts with one creature per point, light 0, and nothing captured', () => {
     const state = createInitialState(MAP_ONE);
-    expect(state.creatures).toStrictEqual([{ species: 'snippet', x: 1070, y: 734, light: 0 }]);
+    expect(state.creatures).toStrictEqual([
+      { species: 'snippet', x: 1070, y: 734, light: 0, home: { x: 1070, y: 734 } },
+    ]);
     expect(state.captured).toStrictEqual({ snippet: 0 });
   });
 
@@ -194,7 +222,7 @@ describe('the creatures in the state (0008)', () => {
   it('in the light from the first step it never moves, has light 59 after 59 steps, and is captured in the 60th', () => {
     // The figure turns right in step 1: apex (1024, 722), body (1070, 726), d = 46, s = 4.
     expect(run(MAP_ONE, [59, RIGHT_SHINE]).creatures).toStrictEqual([
-      { species: 'snippet', x: 1070, y: 734, light: 59 },
+      { species: 'snippet', x: 1070, y: 734, light: 59, home: { x: 1070, y: 734 } },
     ]);
     const done = run(MAP_ONE, [60, RIGHT_SHINE]);
     expect(done.creatures).toStrictEqual([]);

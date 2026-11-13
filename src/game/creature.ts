@@ -142,7 +142,13 @@ export function creaturesFrom(points: readonly NamedPoint[]): CreatureState[] {
     if (!isSpecies(point.name)) {
       throw new Error(`unknown point object "${point.name}" at (${point.x}, ${point.y})`);
     }
-    return { species: point.name, x: point.x, y: point.y, light: 0 };
+    return {
+      species: point.name,
+      x: point.x,
+      y: point.y,
+      light: 0,
+      home: { x: point.x, y: point.y },
+    };
   });
 }
 

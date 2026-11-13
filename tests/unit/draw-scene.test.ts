@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { EMPTY, type TileMap } from '../../src/engine/tiled';
-import type { CreatureState, GameState, PlayerState } from '../../src/game/state';
+import {
+  type CreatureState,
+  type GameState,
+  NO_RECOIL,
+  type PlayerState,
+} from '../../src/game/state';
 import {
   creatureFrame,
   creatureOrigin,
@@ -62,6 +67,8 @@ const player = (fields: Partial<PlayerState>): PlayerState => ({
   facing: 'down',
   frame: 0,
   frameTimer: 0,
+  grace: 0,
+  recoil: NO_RECOIL,
   ...fields,
 });
 const state = (
@@ -75,6 +82,9 @@ const state = (
   lamp: { on: lampOn },
   creatures: [],
   captured: { snippet: 0 },
+  // No lights: the call lists of the earlier features stay as they were (0009).
+  overview: { current: 0, max: 0 },
+  dark: 0,
 });
 
 describe('playerFrame', () => {
@@ -206,6 +216,7 @@ describe('the creatures in the scene (0008)', () => {
     x,
     y,
     light,
+    home: { x: 0, y: 0 },
   });
 
   it('draws them after the cone and before the player, in array order', () => {
