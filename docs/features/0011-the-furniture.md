@@ -1,6 +1,6 @@
 # 0011 — The furniture
 
-**Status:** approved 2026-11-13
+**Status:** implemented 2026-11-13
 **Milestone:** M3
 **Drafted:** 2026-11-13
 
