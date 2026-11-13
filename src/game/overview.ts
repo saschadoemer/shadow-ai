@@ -16,7 +16,7 @@ import {
  */
 
 /** The points of overview the game starts with; the maximum grows with solved cases (M5). */
-export const INITIAL_OVERVIEW = 3;
+export const INITIAL_OVERVIEW = 5;
 /** Tune: a free creature this close to the figure's feet hits; 2 px more than its stop at 8. */
 export const HIT_DISTANCE = 10;
 /** Tune: 1.5 s safe after a hit. */
