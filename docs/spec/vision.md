@@ -17,13 +17,14 @@ the light.
 
 Two purposes, in this order:
 
-1. **A conversation opener for customers and trade fairs.** At a booth the game is a teaser: the
-   first act, about fifteen minutes, played standing up by somebody who has never seen it. It has
-   to be readable without a word of tutorial text, look polished at first sight, and show a
-   situation the visitor recognizes from their own company within the first minutes.
-2. **A game people play at home afterwards.** Two to three hours in total, distributed as a
-   public URL after the fair. It has to carry a real story arc, reward exploration, and let the
-   player stop and come back.
+1. **A game people play at home.** Two to three hours in total, distributed as a public URL and
+   played in a desktop browser with a keyboard. It has to carry a real story arc, reward
+   exploration, and let the player stop and come back. This is the first use, and where a
+   decision serves only one of the two purposes, this one wins.
+2. **A conversation opener for customers and trade fairs, afterwards.** At a booth the game is a
+   teaser: the first act, about fifteen minutes, played standing up by somebody who has never
+   seen it. It has to be readable without a word of tutorial text, look polished at first sight,
+   and show a situation the visitor recognizes from their own company within the first minutes.
 
 And a third, quietly: a project the author enjoys building. That is allowed to show.
 

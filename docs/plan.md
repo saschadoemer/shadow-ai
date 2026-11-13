@@ -29,7 +29,7 @@ specification.
 | M8 | **Save states, title screen, polish, English complete, the Cloud Run pipeline** | **Distribution** |
 
 Audio arrives after M5 and before M8. A silent booth is normal; a silent distributed game is
-not. A gamepad arrives before M5. Until M8 the game runs locally from its container
+not. A gamepad is deferred (§5). Until M8 the game runs locally from its container
 (`docs/spec/ops.md` §3); the Dockerfile and CI exist from M2.
 
 ## 3. Content budget
@@ -102,6 +102,12 @@ from scratch and not forgotten.
   case count at seven; the humility it adds is wanted. Revisit when Act 2 is being filled.
 - **Environmental puzzles as resolution.** Rerouting data flows, switches, light beams. Kept as a
   *way* to the source in dense regions and the server room, not as the resolution of a case.
+- **Gamepad.** The directional pad or the left stick walks, one button holds the lamp, beside
+  the keyboard. Deferred because the first use of the game is the public URL, played at a desk
+  with a keyboard, not the booth; a pad earns its place only where people play standing up.
+  The game reads named actions, so a pad stays an addition to the input table
+  (`architecture.md` §4). Fullscreen cannot be started from a pad — browsers grant it only on a
+  key press or a click. Revisit before the first trade fair.
 - **Camera lerp and dead zone.** Centred and clamped first; softened only if play demands it.
 - **Audio source.** Chiptune and effects — generated, licence-free or home-made — decided when
   audio becomes a feature.
