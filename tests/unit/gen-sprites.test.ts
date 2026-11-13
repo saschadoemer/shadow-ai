@@ -6,13 +6,19 @@ import { describe, expect, it } from 'vitest';
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../../src/engine/sprite';
 import { FRAME_APEX, inCone } from '../../src/game/lamp';
 import { FACINGS, PHASES_PER_FACING } from '../../src/game/state';
-import { SHADOW_COLOUR } from '../../src/render/palette';
+import { type PaletteColour, SHADOW_COLOUR } from '../../src/render/palette';
 import {
+  encodeDogPng,
+  encodeDronePng,
   encodeLampPng,
   encodeOverviewPng,
+  encodePersonPng,
   encodePng,
   encodeSnippetPng,
+  encodeVacuumPng,
 } from '../../tools/gen-sprites.ts';
+import { renderDog } from '../../tools/placeholder-dog.ts';
+import { droneInk, renderDrone } from '../../tools/placeholder-drone.ts';
 import {
   LAMP_COLOUR,
   LAMP_FRAME_SIZE,
@@ -30,6 +36,7 @@ import {
   OVERVIEW_SHEET_WIDTH,
   renderOverview,
 } from '../../tools/placeholder-overview.ts';
+import { PERSON_SHIRTS, renderPerson } from '../../tools/placeholder-person.ts';
 import {
   FRAME_COUNT,
   frameRows,
@@ -47,6 +54,8 @@ import {
   SNIPPET_SHEET_HEIGHT,
   SNIPPET_SHEET_WIDTH,
 } from '../../tools/placeholder-snippet.ts';
+import { rgb } from '../../tools/placeholder-tiles.ts';
+import { renderVacuum, vacuumInk } from '../../tools/placeholder-vacuum.ts';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const PNG_FILE = join(ROOT, 'public/sprites/player.png');
@@ -398,5 +407,138 @@ describe('the placeholder overview generator (0012)', () => {
       row.map((colour) => (colour === OVERVIEW_FULL ? OVERVIEW_EMPTY : colour)),
     );
     expect(overviewFrame(1)).toStrictEqual(empty);
+  });
+});
+
+describe('the movers’ sheets (0015)', () => {
+  const file = (name: string) => readFileSync(join(ROOT, 'public/sprites', name));
+  const read = (name: string) => PNG.sync.read(file(name));
+  const pixel = (data: Uint8Array, width: number, x: number, y: number) => [
+    ...data.slice((y * width + x) * 4, (y * width + x) * 4 + 4),
+  ];
+
+  it.each([0, 1, 2, 3])(
+    'person %i equals its generator and is the figure in another shirt',
+    (look) => {
+      const png = read(`person-${look + 1}.png`);
+      expect([png.width, png.height]).toStrictEqual([SHEET_WIDTH, SHEET_HEIGHT]);
+      expect(encodePersonPng(look).equals(file(`person-${look + 1}.png`))).toBe(true);
+      const person = renderPerson(look);
+      const player = renderPlayer();
+      const shirt = [...rgb(PERSON_SHIRTS[look] as PaletteColour), 255].join();
+      const figureShirt = [...rgb(INKS.T), 255].join();
+      const lanyard = [...rgb(INKS.L), 255].join();
+      for (let i = 0; i < player.length; i += 4) {
+        const was = [...player.slice(i, i + 4)].join();
+        const is = [...person.slice(i, i + 4)].join();
+        expect(is).toBe(was === figureShirt || was === lanyard ? shirt : was);
+      }
+    },
+  );
+
+  it('the shirts are green, red, orange and pink, none the figure’s', () => {
+    expect(PERSON_SHIRTS).toStrictEqual(['#3e8948', '#e43b44', '#f77622', '#b55088']);
+  });
+
+  it('the down-facing standing frame has shirt at (7, 13): the smoke test reads it', () => {
+    expect(['T', 'L']).toContain(frameRows('down', 0)[13]?.[7]);
+  });
+
+  it('dog.png is 384x16, equals its generator, and holds two coats of twelve frames', () => {
+    const png = read('dog.png');
+    expect([png.width, png.height]).toStrictEqual([384, 16]);
+    expect(encodeDogPng().equals(file('dog.png'))).toBe(true);
+    const data = renderDog();
+    const colours = (from: number) => {
+      const seen = new Set<string>();
+      for (let x = from; x < from + 192; x += 1) {
+        for (let y = 0; y < 16; y += 1) {
+          const [r, g, b, a] = pixel(data, 384, x, y);
+          if (a === 255) {
+            seen.add(`${r},${g},${b}`);
+          }
+        }
+      }
+      return seen;
+    };
+    expect(colours(0)).toStrictEqual(new Set([rgb('#b86f50').join(), rgb('#3e2731').join()]));
+    expect(colours(192)).toStrictEqual(new Set([rgb('#ead4aa').join(), rgb('#3e2731').join()]));
+    for (let frame = 0; frame < 24; frame += 1) {
+      const alphas = Array.from(
+        { length: 256 },
+        (_, n) => pixel(data, 384, frame * 16 + (n % 16), Math.floor(n / 16))[3],
+      );
+      expect(alphas.includes(255), `frame ${frame} has pixels`).toBe(true);
+    }
+    // Facing left (index 2) is facing right (index 3) mirrored, in both coats.
+    for (const look of [0, 1]) {
+      for (let phase = 0; phase < 3; phase += 1) {
+        for (let y = 0; y < 16; y += 1) {
+          for (let x = 0; x < 16; x += 1) {
+            expect(pixel(data, 384, (look * 12 + 2 * 3 + phase) * 16 + x, y)).toStrictEqual(
+              pixel(data, 384, (look * 12 + 3 * 3 + phase) * 16 + (15 - x), y),
+            );
+          }
+        }
+      }
+    }
+  });
+
+  it('vacuum.png is 32x16: a disc 12 px wide in the lower 12 px, the light on and off', () => {
+    const png = read('vacuum.png');
+    expect([png.width, png.height]).toStrictEqual([32, 16]);
+    expect(encodeVacuumPng().equals(file('vacuum.png'))).toBe(true);
+    const data = renderVacuum();
+    const colour = { rim: '#262b44', body: '#3a4466' } as const;
+    for (let frame = 0; frame < 2; frame += 1) {
+      for (let j = 0; j < 16; j += 1) {
+        for (let i = 0; i < 16; i += 1) {
+          const ink = vacuumInk(i, j);
+          const expected =
+            ink === null
+              ? [0, 0, 0, 0]
+              : [
+                  ...rgb(ink === 'light' ? (frame === 0 ? '#63c74d' : '#265c42') : colour[ink]),
+                  255,
+                ];
+          expect(pixel(data, 32, frame * 16 + i, j)).toStrictEqual(expected);
+        }
+      }
+    }
+    const span = Array.from({ length: 16 }, (_, n) => n);
+    const columns = span.filter((i) => span.some((j) => vacuumInk(i, j) !== null));
+    const rows = span.filter((j) => span.some((i) => vacuumInk(i, j) !== null));
+    expect([columns[0], columns.at(-1), rows[0], rows.at(-1)]).toStrictEqual([2, 13, 4, 15]);
+    expect([7, 8].flatMap((i) => [8, 9].map((j) => vacuumInk(i, j)))).toStrictEqual([
+      'light',
+      'light',
+      'light',
+      'light',
+    ]);
+  });
+
+  it('drone.png is 32x16: a 6x4 body, a light, rotors as bars and as dots', () => {
+    const png = read('drone.png');
+    expect([png.width, png.height]).toStrictEqual([32, 16]);
+    expect(encodeDronePng().equals(file('drone.png'))).toBe(true);
+    const data = renderDrone();
+    const colour = { body: '#5a6988', rotor: '#c0cbdc', light: '#e43b44' } as const;
+    for (let frame = 0; frame < 2; frame += 1) {
+      for (let j = 0; j < 16; j += 1) {
+        for (let i = 0; i < 16; i += 1) {
+          const ink = droneInk(frame, i, j);
+          expect(pixel(data, 32, frame * 16 + i, j)).toStrictEqual(
+            ink === null ? [0, 0, 0, 0] : [...rgb(colour[ink]), 255],
+          );
+        }
+      }
+    }
+    const count = (frame: number, ink: string) =>
+      Array.from({ length: 256 }, (_, n) => droneInk(frame, n % 16, Math.floor(n / 16))).filter(
+        (found) => found === ink,
+      ).length;
+    expect([count(0, 'rotor'), count(1, 'rotor')]).toStrictEqual([20, 4]);
+    expect(count(0, 'light')).toBe(2);
+    expect(count(0, 'body')).toBe(6 * 4 - 2 + 4);
   });
 });
