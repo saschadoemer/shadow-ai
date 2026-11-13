@@ -145,9 +145,9 @@ test('the game starts with full overview and outside the dark', async ({ page })
   await page.goto('/');
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.overview), {
-      message: 'window.shadowAi.state.overview is three of three',
+      message: 'window.shadowAi.state.overview is five of five',
     })
-    .toStrictEqual({ current: 3, max: 3 });
+    .toStrictEqual({ current: 5, max: 5 });
   expect(await page.evaluate(() => window.shadowAi?.state.dark)).toBe(0);
 });
 
