@@ -67,6 +67,13 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
     expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/snippet.png');
   });
 
+  it('checks the seven sheets of the movers under public/sprites/ with every other PNG (0015)', () => {
+    const files = globSync('public/**/*.png', { cwd: ROOT });
+    for (const name of ['person-1', 'person-2', 'person-3', 'person-4', 'dog', 'vacuum', 'drone']) {
+      expect(files).toContain(`public/sprites/${name}.png`);
+    }
+  });
+
   it('allows the reserved colour in a shadow asset and nowhere else', () => {
     const violet = onePixel(0x68, 0x38, 0x6c, 255);
     expect(checkPng('x.png', violet, rulesFor('public/sprites/snippet.png'))).toStrictEqual([]);

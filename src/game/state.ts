@@ -54,6 +54,31 @@ export interface CreatureState {
   readonly home: Point;
 }
 
+/** What moves on the floor without a role in a case (0015), in the order of the spec's tables. */
+export const MOVER_KINDS = ['person', 'dog', 'vacuum', 'drone'] as const;
+export type MoverKind = (typeof MOVER_KINDS)[number];
+
+/** A mover on its route (0015). The route's points stay in the map. */
+export interface MoverState {
+  readonly kind: MoverKind;
+  /** Which picture: a person's number among the persons, a dog's among the dogs modulo 2, else 0. */
+  readonly look: number;
+  /** The index of its route in `routesOf(map.points)`. */
+  readonly route: number;
+  /** The feet in map pixels, floating point: the bottom centre of its sprite. */
+  readonly x: number;
+  readonly y: number;
+  readonly facing: Facing;
+  /** A person: 0 stands, 1–4 walk. A dog: 0 stands, 1 steps, 2 sits. Others: 0. */
+  readonly frame: number;
+  /** Steps spent in the current phase. */
+  readonly frameTimer: number;
+  /** The index of the route point it is heading for. */
+  readonly target: number;
+  /** Steps it still waits on the point it stands on. */
+  readonly wait: number;
+}
+
 /** How many creatures of each species were captured. */
 export type Captured = Readonly<Record<Species, number>>;
 
@@ -80,6 +105,8 @@ export interface GameState {
   readonly lamp: LampState;
   /** The creatures still in the world, in the order of the map's points (0008). */
   readonly creatures: readonly CreatureState[];
+  /** The movers on their routes, in route order (0015). */
+  readonly movers: readonly MoverState[];
   /** Captured creatures per species; the journal (M4) reads it. */
   readonly captured: Captured;
   readonly overview: Overview;

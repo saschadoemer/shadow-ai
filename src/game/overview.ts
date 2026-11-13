@@ -115,7 +115,7 @@ export function wakePoint(map: TileMap): Point {
   return wake === undefined ? map.spawn : { x: wake.x, y: wake.y };
 }
 
-/** The world set right: the figure at the wake point, overview full, every creature at home. */
+/** The world set right: the figure at the wake point, overview full, every creature at home; the movers stay where they are (0015). */
 function woken(state: GameState, map: TileMap): GameState {
   const wake = wakePoint(map);
   const player: PlayerState = {
@@ -138,6 +138,7 @@ function woken(state: GameState, map: TileMap): GameState {
       y: creature.home.y,
       light: 0,
     })),
+    movers: state.movers,
     captured: state.captured,
     overview: { current: state.overview.max, max: state.overview.max },
     dark: state.dark,

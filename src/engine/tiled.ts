@@ -228,6 +228,8 @@ export interface Point {
 /** A point object of the `objects` layer other than the spawn (0008): what it is, is the game's business. */
 export interface NamedPoint extends Point {
   readonly name: string;
+  /** The custom property `pause` (0015), in steps; absent when the object has none. */
+  readonly pause?: number;
 }
 
 export interface TileMap {
@@ -344,12 +346,30 @@ function readPoints(layer: Json, file: string): NamedPoint[] {
       if (typeof object.name !== 'string' || object.name === '') {
         fail(file, `${what} has a point object without a name`);
       }
-      return {
-        name: object.name,
-        x: asNumber(object.x, file, `point "${object.name}" x`),
-        y: asNumber(object.y, file, `point "${object.name}" y`),
-      };
+      const name = object.name;
+      const x = asNumber(object.x, file, `point "${name}" x`);
+      const y = asNumber(object.y, file, `point "${name}" y`);
+      const pause = readPause(object, name, file);
+      return pause === undefined ? { name, x, y } : { name, x, y, pause };
     });
+}
+
+/** The `pause` of a point object: an int property, or nothing (0015). No other property is read. */
+function readPause(object: Json, name: string, file: string): number | undefined {
+  if (object.properties === undefined) {
+    return undefined;
+  }
+  for (const entry of asArray(object.properties, file, `point "${name}" properties`)) {
+    const property = asRecord(entry, file, `point "${name}" property`);
+    if (property.name !== 'pause') {
+      continue;
+    }
+    if (property.type !== 'int' || typeof property.value !== 'number') {
+      fail(file, `point "${name}" has a pause that is not an int property`);
+    }
+    return property.value;
+  }
+  return undefined;
 }
 
 /** Rules 11, 7, 5 and 6: what the map as a whole must be, before any layer is read. */

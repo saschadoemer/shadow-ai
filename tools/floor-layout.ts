@@ -176,6 +176,227 @@ export const SNIPPETS: readonly Point[] = [
 /** Where the figure wakes (0009), feet in pixels: the middle of tile (18, 31), in the data protection officer's office. */
 export const WAKE: Point = { x: 296, y: 504 };
 
+/**
+ * The routes of the movers (0015): per route its points as [column, row, pause in steps]; a
+ * cell stands for its middle, (16c + 8, 16r + 8). The order is the order in the file.
+ */
+export const ROUTES: readonly {
+  readonly name: string;
+  readonly cells: readonly (readonly [number, number, number])[];
+}[] = [
+  {
+    name: 'person:reception',
+    cells: [
+      [12, 40, 300],
+      [19, 40, 0],
+      [19, 47, 180],
+      [19, 40, 0],
+    ],
+  },
+  {
+    name: 'person:marketing',
+    cells: [
+      [8, 64, 300],
+      [28, 64, 0],
+      [28, 78, 180],
+      [28, 64, 0],
+    ],
+  },
+  {
+    name: 'person:support',
+    cells: [
+      [70, 64, 300],
+      [77, 64, 0],
+      [77, 78, 180],
+      [77, 64, 0],
+    ],
+  },
+  {
+    name: 'person:sales',
+    cells: [
+      [86, 31, 300],
+      [104, 31, 0],
+      [104, 27, 180],
+      [104, 31, 0],
+    ],
+  },
+  {
+    name: 'dog:hr',
+    cells: [
+      [2, 14, 300],
+      [7, 14, 180],
+      [7, 16, 420],
+      [2, 16, 240],
+    ],
+  },
+  {
+    name: 'dog:accounting',
+    cells: [
+      [38, 13, 300],
+      [42, 13, 180],
+      [42, 15, 420],
+      [38, 15, 240],
+    ],
+  },
+  {
+    name: 'dog:development',
+    cells: [
+      [68, 18, 300],
+      [76, 18, 420],
+    ],
+  },
+  {
+    name: 'dog:reception',
+    cells: [
+      [11, 47, 300],
+      [16, 47, 180],
+      [16, 49, 420],
+      [11, 49, 240],
+    ],
+  },
+  {
+    name: 'dog:break-room',
+    cells: [
+      [35, 35, 300],
+      [40, 35, 180],
+      [40, 37, 420],
+      [35, 37, 240],
+    ],
+  },
+  {
+    name: 'dog:sales',
+    cells: [
+      [83, 49, 300],
+      [88, 49, 180],
+      [88, 51, 420],
+      [83, 51, 240],
+    ],
+  },
+  {
+    name: 'dog:marketing',
+    cells: [
+      [19, 65, 300],
+      [24, 65, 180],
+      [24, 67, 420],
+      [19, 67, 240],
+    ],
+  },
+  {
+    name: 'dog:support',
+    cells: [
+      [85, 76, 300],
+      [90, 76, 180],
+      [90, 78, 420],
+      [85, 78, 240],
+    ],
+  },
+  {
+    name: 'vacuum:hr',
+    cells: [
+      [2, 7, 60],
+      [20, 7, 60],
+      [20, 8, 60],
+      [2, 8, 60],
+    ],
+  },
+  {
+    name: 'vacuum:accounting',
+    cells: [
+      [24, 5, 60],
+      [42, 5, 60],
+      [42, 6, 60],
+      [24, 6, 60],
+    ],
+  },
+  {
+    name: 'vacuum:development',
+    cells: [
+      [46, 7, 60],
+      [83, 7, 60],
+      [83, 8, 60],
+      [46, 8, 60],
+    ],
+  },
+  {
+    name: 'vacuum:reception',
+    cells: [
+      [2, 45, 60],
+      [21, 45, 60],
+      [21, 46, 60],
+      [2, 46, 60],
+    ],
+  },
+  {
+    name: 'vacuum:break-room',
+    cells: [
+      [31, 44, 60],
+      [47, 44, 60],
+      [47, 45, 60],
+      [31, 45, 60],
+    ],
+  },
+  {
+    name: 'vacuum:sales',
+    cells: [
+      [81, 44, 60],
+      [105, 44, 60],
+      [105, 45, 60],
+      [81, 45, 60],
+    ],
+  },
+  {
+    name: 'vacuum:marketing',
+    cells: [
+      [2, 72, 60],
+      [47, 72, 60],
+      [47, 73, 60],
+      [2, 73, 60],
+    ],
+  },
+  {
+    name: 'vacuum:support',
+    cells: [
+      [51, 71, 60],
+      [105, 71, 60],
+      [105, 72, 60],
+      [51, 72, 60],
+    ],
+  },
+  {
+    name: 'drone:development',
+    cells: [
+      [48, 6, 120],
+      [58, 6, 120],
+      [58, 12, 120],
+      [48, 12, 120],
+    ],
+  },
+  {
+    name: 'drone:marketing',
+    cells: [
+      [5, 61, 120],
+      [15, 61, 120],
+      [15, 72, 120],
+      [5, 72, 120],
+    ],
+  },
+];
+
+/** The route points in file order, ids following the five points of 0010. */
+function routePoints(): readonly {
+  readonly name: string;
+  readonly at: Point;
+  readonly pause: number;
+}[] {
+  return ROUTES.flatMap((route) =>
+    route.cells.map(([column, row, pause], n) => ({
+      name: `${route.name}:${n + 1}`,
+      at: { x: column * TILE_SIZE + TILE_SIZE / 2, y: row * TILE_SIZE + TILE_SIZE / 2 },
+      pause,
+    })),
+  );
+}
+
 function index(column: number, row: number): number {
   return row * FLOOR_WIDTH + column;
 }
@@ -752,6 +973,12 @@ interface PointJson {
   readonly width: 0;
   readonly x: number;
   readonly y: number;
+  /** Tiled's custom properties; the route points' `pause` (0015). */
+  readonly properties?: readonly {
+    readonly name: 'pause';
+    readonly type: 'int';
+    readonly value: number;
+  }[];
 }
 
 interface ObjectLayerJson {
@@ -805,8 +1032,9 @@ function tileLayer(id: number, name: string, ids: readonly number[]): TileLayerJ
   };
 }
 
-function pointObject(id: number, name: string, at: Point): PointJson {
-  return {
+/** A point object; `pause` becomes the custom property only when it is above 0 (0015). */
+function pointObject(id: number, name: string, at: Point, pause = 0): PointJson {
+  const point: PointJson = {
     height: 0,
     id,
     name,
@@ -818,10 +1046,14 @@ function pointObject(id: number, name: string, at: Point): PointJson {
     x: at.x,
     y: at.y,
   };
+  return pause > 0
+    ? { ...point, properties: [{ name: 'pause', type: 'int', value: pause }] }
+    : point;
 }
 
 export function floorJson(): MapJson {
   const { detail, above } = buildFurniture();
+  const routes = routePoints();
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -838,6 +1070,9 @@ export function floorJson(): MapJson {
           pointObject(1, 'spawn', SPAWN),
           ...SNIPPETS.map((feet, n) => pointObject(n + 2, 'snippet', feet)),
           pointObject(SNIPPETS.length + 2, 'wake', WAKE),
+          ...routes.map((point, i) =>
+            pointObject(SNIPPETS.length + 3 + i, point.name, point.at, point.pause),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -847,7 +1082,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: SNIPPETS.length + 3,
+    nextobjectid: SNIPPETS.length + 3 + routes.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

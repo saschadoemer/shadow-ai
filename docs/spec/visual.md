@@ -50,6 +50,11 @@ on `detail` and its top on `above`, one row higher. A figure in the top's row is
 top, a figure below the body in front of it. A tall thing never stands in the first row below a
 wall, so its top always lies in the same room as its body.
 
+**The movers** (feature 0015). A colleague is 16x24 like the figure, drawn from the figure's
+frames in another shirt. An office dog, a robot vacuum and a drone are 16x16, one tile. The
+vacuum is a plain disc and the drone a body with four rotors, so neither shows a real product.
+The drone has no drop shadow: a dark patch on the floor would read as the shadow of the game.
+
 **The display.** The only thing drawn over the world is the row of overview hearts in the
 top-left corner (features 0009, 0012): 8x8, 4 px from the corner, one every 10 px, one per point
 of the maximum; no text. A heart is 7x7 with a rim in `#181425`, red `#e43b44` when full and

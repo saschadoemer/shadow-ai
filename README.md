@@ -26,7 +26,9 @@ round a core, every department a room behind walls 4 px thin. The floor is furni
 0011): cubicles, desks, cabinets, plants, tables, counters, printers and mobile screens; the
 lamp shines over everything lower than a person. The floor is lived in (feature 0013): sofas,
 armchairs, beanbags, coffee machines, water dispensers, coat racks, a table football, an arcade
-cabinet and a few gadgets on desks. The roadmap is in [docs/plan.md](docs/plan.md).
+cabinet and a few gadgets on desks. The floor moves (feature 0015): four colleagues, a dog and a
+robot vacuum in every room and two drones follow fixed routes; they block nothing, and the ones
+on the ground stand while the figure is close. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 

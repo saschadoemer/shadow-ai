@@ -14,7 +14,8 @@ src/
   engine/        generic and game-agnostic: the fixed-step loop, keyboard state, image loading,
                  Tiled JSON → TileMap, camera math, collision of a box against solid boxes
   game/          Shadow AI itself: the GameState type and update(state, input, content) – plain
-                 data, pure functions, no DOM, no Canvas, no window (INV-1, INV-2)
+                 data, pure functions, no DOM, no Canvas, no window (INV-1, INV-2); game/mover.ts
+                 holds the movers' routes, their checks and their step (0015)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene)
   text/          the language table and the TextKey type (INV-4)
@@ -27,16 +28,20 @@ tools/
   placeholder-tiles.ts  the placeholder tiles as pure data: pixels and the .tsj (visual.md §5)
   gen-tiles.ts          writes them to public/tiles/; `npm run gen-tiles`
   placeholder-player.ts the placeholder figure as pure data: the pixels of its sprite sheet
-  gen-sprites.ts        writes the figure, the lamp, the snippet and the overview sheet to
-                        public/sprites/; `npm run gen-sprites`
+  gen-sprites.ts        writes the figure, the lamp, the snippet, the overview sheet and the
+                        movers' seven sheets to public/sprites/; `npm run gen-sprites`
   placeholder-lamp.ts   the placeholder lamp sheet as pure data: the cone of light, one 48x48
                         frame per facing, drawn from game/lamp
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
   placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames,
                         a full and an empty heart
+  placeholder-person.ts the placeholder colleagues: the figure's frames in four other shirts
+  placeholder-dog.ts    the placeholder office dog: one row of 24 16x16 frames, two coats
+  placeholder-vacuum.ts the placeholder robot vacuum: two 16x16 frames, the light on and off
+  placeholder-drone.ts  the placeholder drone: two 16x16 frames, the rotors as bars and dots
   floor-layout.ts       the floor as pure data: the corridors and rooms, the walls and their
                         openings, the closed doors, the spawn, the creatures' points, the
-                        wake point and the furniture (world.md §1)
+                        wake point, the furniture and the movers' routes (world.md §1)
   gen-floor.ts          writes it to public/maps/; `npm run gen-floor`
 tests/
   unit/          Vitest, headless: engine math, game rules, map loading, assets
@@ -57,8 +62,8 @@ against the container alike. It is read-only by convention; nothing in the game 
 ## 2. The state model
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
-logic steps since the start, the player, the camera, the lamp, the creatures, the captured
-count, overview and the step of the dark; later the current map id, NPCs, cleared regions and the journal join them. It is plain data: numbers,
+logic steps since the start, the player, the camera, the lamp, the creatures, the movers, the
+captured count, overview and the step of the dark; later the current map id, NPCs, cleared regions and the journal join them. It is plain data: numbers,
 strings, booleans, arrays and plain objects. No functions, no class instances, no `Map` or `Set`,
 no `Date`. A JSON round trip reproduces it exactly, and a test proves that on a populated state.
 
@@ -128,6 +133,27 @@ facing down, standing, not safe and not pushed, overview is full and every creat
 array is at its home with `light` 0, `captured` unchanged, the camera on the figure; in the step
 it would become 90 it is 0. The wake point is the map's point named `wake`, the spawn when there
 is none; two stop the game at the start (`createInitialState`).
+
+`movers` is an array of `{ kind, look, route, x, y, facing, frame, frameTimer, target, wait }`,
+one per route in route order (feature 0015, `game/mover`). `kind` is `person`, `dog`, `vacuum` or
+`drone`; `look` picks the picture — a person's number among the persons, a dog's among the dogs
+modulo 2, else 0. `route` is the index of the route; the route's points stay in the map and are
+not in the state: `update` rebuilds the routes from `map.points` with `routesOf` in every step and
+keeps them nowhere — no cache, no module-level map, no field on `TileMap` (INV-1). `x` and `y` are
+the feet in map pixels, floating point; `target` is the index of the point the mover heads for;
+`wait` the steps it still stands on its point. `createInitialState` builds the routes, checks them
+(§6) and puts each mover on its point 1, facing down, `frame` 0, `target` 1, `wait` the pause of
+point 1. `update` steps the movers last, each against the figure after the hit, in three rules:
+**yield** — a person, a dog or a vacuum whose feet are closer than 20 px to the figure's stands,
+`frame` and `frameTimer` 0, and nothing else changes; **wait** — otherwise a `wait` above 0
+falls by 1, a person shows frame 0 and a dog frame 2 (it sits); **move** — otherwise the mover
+goes toward its target by its speed per step (person 2/3 px, dog 1, vacuum 1/3, drone 1/2) or by
+what is left, faces along the leg (a vacuum and a drone always face down), and on arrival stands
+exactly on the point, takes its pause and turns to the next point, the first after the last. An
+arrival slack of 10⁻⁶ px absorbs the error of summed thirds. While it moves a person's `frame`
+runs 1–4 at 15 steps per phase and a dog's changes between 0 and 1 every 8 steps. In the dark no
+mover is stepped (`stepDark` and the wake leave the array as it is). Nothing about a mover is
+solid or opaque: the figure, the creatures and the light pass, and no creature sees one.
 
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
@@ -223,8 +249,11 @@ sprite round the same value.
 `frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48 — with its
 top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
 `render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the lamp's
-cone when the lamp is on, the creatures in array order, the player, `above` (§6), the hearts of
-overview, the lids of the dark. The player's sprite has its top-left corner at
+cone when the lamp is on, the ground movers whose feet y is at most the figure's in array order,
+the creatures in array order, the player, the other ground movers in array order, `above` (§6),
+the drones, the hearts of overview, the lids of the dark (feature 0015). A ground mover is a
+person, a dog or a vacuum; comparing the feet makes walking past a colleague read as depth, and a
+drone flies over the tops of `above`. The player's sprite has its top-left corner at
 (round(x) − 8 − camera.x, round(y) − 24 − camera.y): the feet are the bottom centre of the
 sprite, so they sit on the tile grid and the figure stands on its tile. Its frame in the sheet is
 facing × 5 + phase (§7). The cone's frame is drawn with its top-left corner at the apex,
@@ -233,6 +262,14 @@ up (24, 47), left (47, 24), right (0, 24)), minus the camera; its frame is the f
 Cone and figure round the same values, so they agree pixel for pixel, and the cone lies under the
 figure. A creature's frame has its top-left corner at (round(x) − 8 − camera.x, round(y) − 16 −
 camera.y); its frame is 2 while `light` is above 0, else ⌊tick / 15⌋ mod 2 (feature 0008).
+
+The movers (feature 0015): a person's frame has its top-left corner at (round(x) − 8 − camera.x,
+round(y) − 24 − camera.y) and is facing × 5 + `frame`, as the figure's, in its own sheet
+`person-(look + 1)`. A dog's, a vacuum's and a drone's frame has its top-left corner at
+(round(x) − 8 − camera.x, round(y) − 16 − camera.y). A dog's frame is `look` × 12 + facing × 3 +
+`frame`; a vacuum's is ⌊tick / 30⌋ mod 2, its light on and off; a drone's is ⌊tick / 4⌋ mod 2,
+its rotors turning, and the drone is drawn 1 px higher while ⌊tick / 30⌋ mod 2 is 1. The blink of
+a safe figure does not touch the movers.
 
 The hearts of overview (features 0009, 0012) are drawn on the surface, not shifted by the
 camera: heart i, for i below `max`, has its top-left corner at (4 + 10i, 4), with frame 0 when i is below
@@ -275,10 +312,11 @@ and per tile its boxes — the full tile for `solid`, else its collision rectang
 as `Tileset.boxes`, and per tile whether it is `low` as `Tileset.low`; `parseTileMap` reads the map against the parsed tileset and
 returns a `TileMap`. It reads only what the game uses: of the map `orientation`, `infinite`,
 `width`, `height`, `tilewidth`, `tileheight`, `tilesets` and `layers`; of a layer `name`, `type`,
-`data`, `encoding`, `compression` and, for `objects`, the objects' `name`, `point`, `x` and `y`.
-`TileMap.points` are the point objects other than the spawn, as `{ name, x, y }` in file
-order; `engine/` does not know what a name means, `game/` does. The game knows the species'
-names and `wake` (feature 0009). Everything else Tiled writes is
+`data`, `encoding`, `compression` and, for `objects`, the objects' `name`, `point`, `x`, `y`
+and the one custom property `pause` (feature 0015). `TileMap.points` are the point objects other
+than the spawn, as `{ name, x, y }` in file order, with `pause` added when the object carries
+the property; `engine/` does not know what a name means, `game/` does. The game knows the
+species' names, `wake` (feature 0009) and the route points of the movers (feature 0015). Everything else Tiled writes is
 ignored — a layer hidden in Tiled is drawn by the game. It does
 not try to be a general Tiled importer.
 
@@ -321,9 +359,28 @@ has no collision box`). Then the map, in this order:
 - no point object named `spawn` in `objects`, or more than one;
 - a spawn outside the map, or inside a solid box of its cell;
 - a point object without a name;
-- a named point outside the map, or inside a solid box of its cell.
+- a named point outside the map, or inside a solid box of its cell;
+- a point whose `pause` property is not of type `int` (`point "dog:hr:1" has a pause that is not
+  an int property`).
 
 Last, the tileset's image must load.
+
+**Route points** (feature 0015). A point whose name has a `:` is a route point of a mover:
+`<kind>:<room>:<n>`, with `<kind>` one of `person`, `dog`, `vacuum`, `drone`, `<room>` one of
+`hr`, `accounting`, `development`, `reception`, `break-room`, `sales`, `marketing`, `support`, and
+`n` from 1 without a gap. A route is the two to four points of one `<kind>:<room>`; its `pause`,
+0 to 600 steps, is the custom `int` property `pause`, 0 when absent. `game/mover` builds the
+routes in the order of each route's first point in the file and, in `createInitialState`,
+refuses the map — each with its message — for a name with a kind but no room or number (`point
+dog:hr is not a route point`), an unknown room (`point dog:cellar:1 names no room`), a pause
+outside 0–600 or not whole (`point dog:hr:1 has pause 700, 0 to 600 are allowed`), a number used
+twice (`route dog:hr has two points 2`), fewer than two or more than four points (`route dog:hr
+has 1 point, 2 to 4 are allowed`), a gap (`route dog:hr has no point 2`), a leg that is neither
+horizontal nor vertical, the closing leg from the last point to the first included (`route
+dog:hr leg 2 is not straight`), and, for every kind but `drone`, a leg on which the figure's box
+`[x − 6, x + 6) × [y − 8, y)` meets a solid box (`route dog:hr leg 2 crosses a solid tile (c,
+r)`, the first such cell row by row). A drone's legs may cross anything; its points, like every
+named point, lie outside every solid box. `creaturesFrom` skips route points.
 
 Flipped and rotated tiles, more than one tileset per map, embedded tilesets, encoded or
 compressed data and infinite maps stay rejected until a feature needs one and lifts its rule. A
@@ -460,6 +517,21 @@ heart and `#3a4466` for the empty one. `npm run gen-sprites` writes it beside th
 deterministic and tested against the generator pixel by pixel. The art pass replaces it under the
 same name and frame order.
 
+The movers' seven sheets (feature 0015), all in Endesga 32 and none using `#68386c`, written by
+`npm run gen-sprites` beside the others, committed, deterministic and tested against their
+generators. `tools/placeholder-person.ts`: `person-1.png` to `person-4.png`, each the size and
+frame order of `player.png` — the figure's twenty frames with the shirt in `#3e8948`, `#e43b44`,
+`#f77622` or `#b55088` and the lanyard's pixels in the shirt's colour; a person of `look` n uses
+`person-(n + 1)`. `tools/placeholder-dog.ts`: `dog.png`, 384x16, one row of 24 frames of 16x16,
+frame = `look` × 12 + facing × 3 + phase, facings in `FACINGS` order, phase 0 stands, 1 steps,
+2 sits; `look` 0 has the coat `#b86f50`, `look` 1 `#ead4aa`, ears, nose and eyes `#3e2731`; left
+is right mirrored. The sheet is one row because a sprite sheet is one row (§5).
+`tools/placeholder-vacuum.ts`: `vacuum.png`, 32x16, two frames — a plain disc 12 px wide in the
+lower 12 px, body `#3a4466`, rim `#262b44`, a 2x2 light `#63c74d` in frame 0 and `#265c42` in
+frame 1. `tools/placeholder-drone.ts`: `drone.png`, 32x16, two frames — a 6x4 body `#5a6988`
+with a light `#e43b44`, four arms and four rotors `#c0cbdc`, bars of 5 px in frame 0 and dots in
+frame 1. The art pass replaces them under the same names and frame orders.
+
 `tools/floor-layout.ts` holds the floor as data (feature 0010) — the corridors and rooms as
 rectangles of floor, the walls as lines of top or left strips with their openings, the closed
 doors, the spawn, the three snippet points and the wake point, as the tables of the feature spec
@@ -473,6 +545,9 @@ things — cabinets, plants, coat racks, water dispensers and the arcade cabinet
 layer; a second tile in a cell of one layer is an error, not an overwrite. A replacement (feature
 0013) swaps a named tile of 0011 for another — a counter for a counter with a coffee machine, a
 desk-partition for a gadget desk — and is an error when the cell does not hold the tile it names.
+The movers' routes (feature 0015) are `ROUTES`, per route its name and its points as [column,
+row, pause], a cell standing for its middle; they become point objects after the spawn, the
+snippets and `wake`, ids following theirs, with the `int` property `pause` when it is above 0.
 `floor.tmj` has the layers `ground` (id 1), `detail` (id 3), `above` (id 4) and `objects` (id 2),
 in that order. Posts are
 derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper

@@ -656,4 +656,59 @@ describe('parseTileMap: named points (0008)', () => {
       'tests/fixtures/maps/point-on-solid.tmj: point "snippet" (24, 40) is on a solid tile (1, 2)',
     );
   });
+
+  /** points.tmj with its objects replaced by the spawn and `extra` (0015). */
+  const parseWithObjects = (extra: readonly Record<string, unknown>[]) => {
+    const { file, json } = fixture('points.tmj');
+    const copy = structuredClone(json) as MapJson;
+    const objects = copy.layers.find((layer) => layer.name === 'objects');
+    if (objects?.objects === undefined) {
+      throw new Error('points.tmj has no objects layer');
+    }
+    objects.objects = [objects.objects[0] ?? {}, ...extra];
+    return parseTileMap(copy, tileset, file);
+  };
+
+  it('reads the pause of a point object from its int property (0015)', () => {
+    const map = parseWithObjects([
+      {
+        id: 2,
+        name: 'dog:hr:1',
+        point: true,
+        x: 40,
+        y: 40,
+        properties: [{ name: 'pause', type: 'int', value: 300 }],
+      },
+    ]);
+    expect(map.points).toStrictEqual([{ name: 'dog:hr:1', x: 40, y: 40, pause: 300 }]);
+  });
+
+  it('leaves pause out when the object has no such property, and ignores other properties (0015)', () => {
+    const map = parseWithObjects([
+      {
+        id: 2,
+        name: 'snippet',
+        point: true,
+        x: 40,
+        y: 40,
+        properties: [{ name: 'colour', type: 'string', value: 'red' }],
+      },
+    ]);
+    expect(map.points).toStrictEqual([{ name: 'snippet', x: 40, y: 40 }]);
+  });
+
+  it('rejects a pause that is not an int property (0015)', () => {
+    expect(() =>
+      parseWithObjects([
+        {
+          id: 2,
+          name: 'dog:hr:1',
+          point: true,
+          x: 40,
+          y: 40,
+          properties: [{ name: 'pause', type: 'string', value: '300' }],
+        },
+      ]),
+    ).toThrow('point "dog:hr:1" has a pause that is not an int property');
+  });
 });

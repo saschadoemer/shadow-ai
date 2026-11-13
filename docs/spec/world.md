@@ -45,6 +45,17 @@ desks in Development carry a gadget — a duck, a lava lamp, a colour cube, a to
 the stairwell, the west and east corridors and the side passage stay empty. The tables in
 `docs/features/0013-lounge-and-gadgets.md` are the placement until the art pass.
 
+**What moves** (feature 0015). The floor is not empty between the cases. Four colleagues walk
+between their desk and a printer, a coat rack or the coffee — in the reception, Marketing, Support
+and Sales. Each of the eight rooms has an office dog that circles its seating corner (in
+Development it walks along the sofa) and a robot vacuum that drives two lanes. Two drones fly
+rectangles over the desks of Development and Marketing. Every mover follows a fixed route of two
+to four points and waits a pause at each; there is no random wandering and no path finding, and no
+mover leaves its room. Nothing that moves is solid: the figure, the creatures and the light pass
+through it. A colleague, a dog or a vacuum stands while the figure's feet are closer than 20 px;
+a drone flies on. The routes live in the map's `objects` layer; the tables in
+`docs/features/0015-the-moving-floor.md` are the routes until the art pass.
+
 | Region | Role |
 |---|---|
 | Reception | The hub. The player starts here; the data protection officer's office is next door, the ring of corridors leads to every department. |
@@ -104,6 +115,8 @@ Kept as small as the story allows. About thirty figures in all.
   depth.
 - **Per department, three to five figures.** The source, the head of department, two or three
   colleagues with hints and everyday lines.
+  The colleagues of the reception, Marketing, Support and Sales walk the floor since feature
+  0015, without a name and without a line; their lines come with M4.
 - **The managing director.** The last case.
 - **The customer.** A voice on the phone at the start. One line in the epilogue: he called again.
 

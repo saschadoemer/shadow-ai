@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { cameraFor } from '../../src/engine/camera';
 import { moveBox } from '../../src/engine/collision';
 import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../src/engine/tiled';
+import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
+import { createInitialState } from '../../src/game/update';
 import {
   type CellRect,
   CLOSED_DOORS,
@@ -12,9 +14,11 @@ import {
   FLOOR_HEIGHT,
   FLOOR_WIDTH,
   FURNITURE,
+  floorJson,
   HORIZONTAL_WALLS,
   POSTS,
   ROOMS,
+  ROUTES,
   SNIPPETS,
   SPAWN,
   VERTICAL_WALLS,
@@ -376,7 +380,7 @@ describe('public/maps/floor.tmj (feature 0010)', () => {
   });
 
   it("places the wake point in the data protection officer's office, after the snippets", () => {
-    expect(floor.points).toStrictEqual([
+    expect(floor.points.slice(0, 4)).toStrictEqual([
       ...SNIPPETS.map((feet) => ({ name: 'snippet', ...feet })),
       { name: 'wake', x: 296, y: 504 },
     ]);
@@ -387,6 +391,107 @@ describe('public/maps/floor.tmj (feature 0010)', () => {
     expect(office?.cells).toStrictEqual({ c0: 1, c1: 22, r0: 26, r1: 37 });
     expect([Math.floor(WAKE.x / 16), Math.floor((WAKE.y - 1) / 16)]).toStrictEqual([18, 31]);
     expect(cameraFor({ x: 296, y: 500 }, MAP_PX)).toStrictEqual({ x: 136, y: 410 });
+  });
+});
+
+describe('the routes of the floor (0015)', () => {
+  const routes = routesOf(floor.points);
+  const cellsOf = (points: readonly { x: number; y: number; pause: number }[]) =>
+    points.map((p) => [(p.x - 8) / 16, (p.y - 8) / 16, p.pause]);
+
+  it('holds 86 route points in 22 routes: 4 persons, 8 dogs, 8 vacuums, 2 drones, in table order', () => {
+    expect(floor.points.filter((point) => isRoutePoint(point.name))).toHaveLength(86);
+    expect(routes.map((route) => route.name)).toStrictEqual([
+      'person:reception',
+      'person:marketing',
+      'person:support',
+      'person:sales',
+      'dog:hr',
+      'dog:accounting',
+      'dog:development',
+      'dog:reception',
+      'dog:break-room',
+      'dog:sales',
+      'dog:marketing',
+      'dog:support',
+      'vacuum:hr',
+      'vacuum:accounting',
+      'vacuum:development',
+      'vacuum:reception',
+      'vacuum:break-room',
+      'vacuum:sales',
+      'vacuum:marketing',
+      'vacuum:support',
+      'drone:development',
+      'drone:marketing',
+    ]);
+  });
+
+  it('has the cells and pauses of the spec', () => {
+    const cells = (name: string) => {
+      const route = routes.find((candidate) => candidate.name === name);
+      return route === undefined ? undefined : cellsOf(route.points);
+    };
+    expect(cells('person:reception')).toStrictEqual([
+      [12, 40, 300],
+      [19, 40, 0],
+      [19, 47, 180],
+      [19, 40, 0],
+    ]);
+    expect(cells('dog:development')).toStrictEqual([
+      [68, 18, 300],
+      [76, 18, 420],
+    ]);
+    expect(cells('dog:reception')).toStrictEqual([
+      [11, 47, 300],
+      [16, 47, 180],
+      [16, 49, 420],
+      [11, 49, 240],
+    ]);
+    expect(cells('vacuum:support')).toStrictEqual([
+      [51, 71, 60],
+      [105, 71, 60],
+      [105, 72, 60],
+      [51, 72, 60],
+    ]);
+    expect(cells('drone:marketing')).toStrictEqual([
+      [5, 61, 120],
+      [15, 61, 120],
+      [15, 72, 120],
+      [5, 72, 120],
+    ]);
+    expect(routes.map((route) => cellsOf(route.points))).toStrictEqual(
+      ROUTES.map((route) => route.cells.map((cell) => [...cell])),
+    );
+    expect(routes.map((route) => route.name)).toStrictEqual(ROUTES.map((route) => route.name));
+  });
+
+  it('keeps every ground leg clear of every solid box and every leg straight (criterion 10)', () => {
+    expect(() => checkRoutes(routes, floor)).not.toThrow();
+  });
+
+  it('keeps the five points of 0010 first, with their ids', () => {
+    expect(floor.points.slice(0, 4).map((point) => point.name)).toStrictEqual([
+      'snippet',
+      'snippet',
+      'snippet',
+      'wake',
+    ]);
+    const json = floorJson();
+    expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
+      Array.from({ length: 91 }, (_, i) => i + 1),
+    );
+    expect(json.nextobjectid).toBe(92);
+  });
+
+  it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
+    const movers = createInitialState(floor).movers;
+    const inView = (m: { x: number; y: number }) =>
+      m.x >= 96 && m.x < 96 + 320 && m.y >= 624 && m.y < 624 + 180;
+    expect(movers.filter(inView).map((m) => [m.kind, m.x, m.y])).toStrictEqual([
+      ['person', 200, 648],
+      ['dog', 184, 760],
+    ]);
   });
 });
 
