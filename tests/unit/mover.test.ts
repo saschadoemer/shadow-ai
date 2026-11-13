@@ -2,7 +2,16 @@ import { describe, expect, it } from 'vitest';
 import type { SolidGrid } from '../../src/engine/collision';
 import type { NamedPoint } from '../../src/engine/tiled';
 import { creaturesFrom } from '../../src/game/creature';
-import { checkRoutes, isRoutePoint, moversFrom, routesOf } from '../../src/game/mover';
+import {
+  checkRoutes,
+  isRoutePoint,
+  moversFrom,
+  type Route,
+  routesOf,
+  stepMover,
+  YIELD_DISTANCE,
+} from '../../src/game/mover';
+import { type MoverKind, type MoverState, NO_RECOIL, type PlayerState } from '../../src/game/state';
 import { solidsOf } from './solids';
 
 /** Cell (c, r) as the spec writes it: the middle of the cell. */
@@ -160,5 +169,116 @@ describe('route points and creatures', () => {
   it('creaturesFrom skips route points and still rejects an unknown name', () => {
     expect(creaturesFrom([at('dog:hr:1', 1, 1), at('snippet', 2, 2)])).toHaveLength(1);
     expect(() => creaturesFrom([at('ghost', 1, 1)])).toThrow('unknown point object "ghost"');
+  });
+});
+
+function playerAt(x: number, y: number): PlayerState {
+  return { x, y, facing: 'down', frame: 0, frameTimer: 0, grace: 0, recoil: NO_RECOIL };
+}
+const FAR = playerAt(1000, 1000);
+
+/** A route of `kind` from (24, 24) right to (136, 24): 112 px, pauses 3 and 2. */
+function line(kind: MoverKind): Route {
+  return routesOf([at(`${kind}:hr:1`, 1, 1, 3), at(`${kind}:hr:2`, 8, 1, 2)])[0] as Route;
+}
+function start(route: Route): MoverState {
+  return moversFrom([route])[0] as MoverState;
+}
+function run(mover: MoverState, route: Route, steps: number, player = FAR): MoverState {
+  let current = mover;
+  for (let i = 0; i < steps; i += 1) {
+    current = stepMover(current, route, player);
+  }
+  return current;
+}
+
+describe('stepMover', () => {
+  it('waits the pause of its point, then moves by its speed', () => {
+    const route = line('dog');
+    const waited = run(start(route), route, 3);
+    expect(waited).toMatchObject({ x: 24, y: 24, wait: 0, frame: 2 });
+    expect(run(waited, route, 1)).toMatchObject({ x: 25, y: 24, facing: 'right', frame: 0 });
+  });
+
+  it.each([
+    ['person', 168],
+    ['dog', 112],
+    ['vacuum', 336],
+    ['drone', 224],
+  ] as const)('a %s covers 112 px in %i steps and stands exactly on the point', (kind, steps) => {
+    const route = line(kind);
+    const before = run(start(route), route, 3 + steps - 1);
+    expect(before.x).toBeLessThan(136);
+    expect(before.target).toBe(1);
+    const arrived = run(before, route, 1);
+    expect(arrived).toMatchObject({ x: 136, y: 24, target: 0, wait: 2 });
+  });
+
+  it('goes back to the first point after the last', () => {
+    const route = line('dog');
+    const back = run(start(route), route, 3 + 112 + 2 + 112);
+    expect(back).toMatchObject({ x: 24, y: 24, target: 1, wait: 3, facing: 'left' });
+  });
+
+  it('faces along each leg of a square', () => {
+    const route = routesOf([
+      at('dog:hr:1', 1, 1),
+      at('dog:hr:2', 2, 1),
+      at('dog:hr:3', 2, 2),
+      at('dog:hr:4', 1, 2),
+    ])[0] as Route;
+    const facings = [1, 17, 33, 49].map((steps) => run(start(route), route, steps).facing);
+    expect(facings).toStrictEqual(['right', 'down', 'left', 'up']);
+  });
+
+  it('a person stands while it waits and walks 1, 2, 3, 4, 1 at 15 steps per phase', () => {
+    const route = line('person');
+    const waited = run(start(route), route, 3);
+    expect(waited.frame).toBe(0);
+    const frames = [1, 15, 16, 31, 46, 61].map((steps) => run(waited, route, steps).frame);
+    expect(frames).toStrictEqual([1, 1, 2, 3, 4, 1]);
+  });
+
+  it('a dog sits while it waits and steps 0, 1 in turn every 8 steps', () => {
+    const route = line('dog');
+    const waited = run(start(route), route, 3);
+    const frames = [1, 8, 9, 17].map((steps) => run(waited, route, steps).frame);
+    expect(frames).toStrictEqual([0, 0, 1, 0]);
+  });
+
+  it('a vacuum and a drone keep frame 0 and face down', () => {
+    for (const kind of ['vacuum', 'drone'] as const) {
+      const route = line(kind);
+      expect(run(start(route), route, 20)).toMatchObject({ frame: 0, facing: 'down' });
+    }
+  });
+
+  it('yields under 20 px: only frame and frameTimer change, and wait is not counted', () => {
+    const route = line('dog');
+    const walking = run(start(route), route, 3 + 12);
+    const near = playerAt(walking.x + 19.9, walking.y);
+    const held = run(walking, route, 30, near);
+    expect(held).toStrictEqual({ ...walking, frame: 0, frameTimer: 0 });
+    const waiting = start(route);
+    expect(run(waiting, route, 30, playerAt(24, 24))).toStrictEqual({
+      ...waiting,
+      frame: 0,
+      frameTimer: 0,
+    });
+  });
+
+  it('goes on at exactly 20 px and beyond', () => {
+    const route = line('dog');
+    const walking = run(start(route), route, 3 + 12);
+    for (const distance of [YIELD_DISTANCE, 20.1]) {
+      const moved = stepMover(walking, route, playerAt(walking.x, walking.y + distance));
+      expect(moved.x).toBe(walking.x + 1);
+    }
+  });
+
+  it('a drone does not yield', () => {
+    const route = line('drone');
+    const flying = run(start(route), route, 3 + 12);
+    expect(stepMover(flying, route, playerAt(flying.x, flying.y)).x).toBe(flying.x + 0.5);
   });
 });

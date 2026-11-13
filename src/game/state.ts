@@ -105,6 +105,8 @@ export interface GameState {
   readonly lamp: LampState;
   /** The creatures still in the world, in the order of the map's points (0008). */
   readonly creatures: readonly CreatureState[];
+  /** The movers on their routes, in route order (0015). */
+  readonly movers: readonly MoverState[];
   /** Captured creatures per species; the journal (M4) reads it. */
   readonly captured: Captured;
   readonly overview: Overview;

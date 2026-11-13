@@ -1,7 +1,14 @@
 import type { Box, SolidGrid } from '../engine/collision';
+import { STEPS_PER_SECOND } from '../engine/loop';
 import { type NamedPoint, type Point, TILE_SIZE } from '../engine/tiled';
 import { BOX_HEIGHT, BOX_WIDTH } from './player';
-import { MOVER_KINDS, type MoverKind, type MoverState } from './state';
+import {
+  type Facing,
+  MOVER_KINDS,
+  type MoverKind,
+  type MoverState,
+  type PlayerState,
+} from './state';
 
 /**
  * The movers (world.md §1, feature 0015): colleagues, dogs, robot vacuums and drones on fixed
@@ -29,6 +36,26 @@ export const MAX_ROUTE_POINTS = 4;
 export const MAX_PAUSE = 600;
 /** Dogs come in two coats. */
 export const DOG_LOOKS = 2;
+
+/** Tune: half the figure's speed for a person; a dog trots, a vacuum crawls. */
+export const SPEED_PX_PER_SECOND: Readonly<Record<MoverKind, number>> = {
+  person: 40,
+  dog: 60,
+  vacuum: 20,
+  drone: 30,
+};
+/** Tune: closer than this to the figure's feet, a ground mover stands. */
+export const YIELD_DISTANCE = 20;
+/** Tune: four phases per second, half the figure's rate at half its speed. */
+export const PERSON_STEPS_PER_PHASE = 15;
+export const PERSON_WALK_PHASES = 4;
+export const DOG_STEPS_PER_PHASE = 8;
+export const DOG_SIT_FRAME = 2;
+/** A dog's, a vacuum's and a drone's sprite is one tile; a person's is the figure's 16x24. */
+export const MOVER_SIZE = 16;
+
+/** Sums of thirds do not land exactly; this is far below a pixel and far above the error. */
+const ARRIVAL_SLACK = 1e-6;
 
 export interface RoutePoint extends Point {
   /** Steps a mover waits here. */
@@ -193,5 +220,98 @@ export function moversFrom(routes: readonly Route[]): MoverState[] {
         wait: first.pause,
       },
     ];
+  });
+}
+
+/** The frame of a mover that moves in this step. */
+function walkFrame(mover: MoverState): { readonly frame: number; readonly frameTimer: number } {
+  if (mover.kind === 'person') {
+    if (mover.frame === 0) {
+      return { frame: 1, frameTimer: 0 };
+    }
+    return mover.frameTimer + 1 < PERSON_STEPS_PER_PHASE
+      ? { frame: mover.frame, frameTimer: mover.frameTimer + 1 }
+      : { frame: (mover.frame % PERSON_WALK_PHASES) + 1, frameTimer: 0 };
+  }
+  if (mover.kind === 'dog') {
+    if (mover.frame === DOG_SIT_FRAME) {
+      return { frame: 0, frameTimer: 0 };
+    }
+    return mover.frameTimer + 1 < DOG_STEPS_PER_PHASE
+      ? { frame: mover.frame, frameTimer: mover.frameTimer + 1 }
+      : { frame: 1 - mover.frame, frameTimer: 0 };
+  }
+  return { frame: 0, frameTimer: 0 };
+}
+
+function legFacing(mover: MoverState, dx: number, dy: number): Facing {
+  if (mover.kind === 'vacuum' || mover.kind === 'drone') {
+    return 'down';
+  }
+  if (dx !== 0) {
+    return dx > 0 ? 'right' : 'left';
+  }
+  if (dy !== 0) {
+    return dy > 0 ? 'down' : 'up';
+  }
+  return mover.facing;
+}
+
+/**
+ * One mover, one step (0015). A ground mover closer than YIELD_DISTANCE to the figure's feet
+ * stands, and nothing else changes. Otherwise it waits, or moves toward its target by its speed
+ * or by what is left; on arrival it stands on the point, takes the point's pause and turns to
+ * the next point, the first after the last. A leg is straight (`checkRoutes`), so |dx| + |dy|
+ * is its length and only one of the two signs is not 0.
+ */
+export function stepMover(mover: MoverState, route: Route, player: PlayerState): MoverState {
+  if (
+    mover.kind !== 'drone' &&
+    Math.hypot(player.x - mover.x, player.y - mover.y) < YIELD_DISTANCE
+  ) {
+    return { ...mover, frame: 0, frameTimer: 0 };
+  }
+  if (mover.wait > 0) {
+    return {
+      ...mover,
+      wait: mover.wait - 1,
+      frame: mover.kind === 'dog' ? DOG_SIT_FRAME : 0,
+      frameTimer: 0,
+    };
+  }
+  const target = route.points[mover.target];
+  if (target === undefined) {
+    return mover;
+  }
+  const dx = target.x - mover.x;
+  const dy = target.y - mover.y;
+  const left = Math.abs(dx) + Math.abs(dy);
+  const distance = SPEED_PX_PER_SECOND[mover.kind] / STEPS_PER_SECOND;
+  const moving = { ...mover, ...walkFrame(mover), facing: legFacing(mover, dx, dy) };
+  if (left <= distance + ARRIVAL_SLACK) {
+    return {
+      ...moving,
+      x: target.x,
+      y: target.y,
+      target: (mover.target + 1) % route.points.length,
+      wait: target.pause,
+    };
+  }
+  return {
+    ...moving,
+    x: mover.x + Math.sign(dx) * distance,
+    y: mover.y + Math.sign(dy) * distance,
+  };
+}
+
+/** Every mover against the figure, in array order. */
+export function stepMovers(
+  movers: readonly MoverState[],
+  routes: readonly Route[],
+  player: PlayerState,
+): MoverState[] {
+  return movers.map((mover) => {
+    const route = routes[mover.route];
+    return route === undefined ? mover : stepMover(mover, route, player);
   });
 }

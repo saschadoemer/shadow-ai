@@ -1,4 +1,8 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { parseTileMap, parseTileset, type TileMap } from '../../src/engine/tiled';
 import { followPlayer } from '../../src/game/camera';
 import type { GameInput } from '../../src/game/player';
 import { FACINGS, type GameState, PHASES_PER_FACING, type PlayerState } from '../../src/game/state';
@@ -7,6 +11,22 @@ import { grassMap } from './grass-map';
 
 /** The test map's size and spawn, in memory: 20x12 tiles, spawn at (136, 120). */
 const MAP = grassMap(20, 12, { x: 136, y: 120 });
+
+const ROOT = fileURLToPath(new URL('../../', import.meta.url));
+
+/** A map file and its tileset, read and parsed as the game does. */
+function loadMap(mapFile: string, tilesetFile: string): TileMap {
+  const read = (file: string): unknown => JSON.parse(readFileSync(join(ROOT, file), 'utf8'));
+  return parseTileMap(read(mapFile), parseTileset(read(tilesetFile), tilesetFile), mapFile);
+}
+
+/** One route of each kind on open floor (0015). */
+const ROUTES_MAP = loadMap(
+  'tests/fixtures/maps/routes.tmj',
+  'tests/fixtures/maps/fixture-tiles.tsj',
+);
+/** The floor the game loads. */
+const FLOOR_MAP = loadMap('public/maps/floor.tmj', 'public/tiles/placeholder.tsj');
 
 const NONE: GameInput = { up: false, down: false, left: false, right: false, lamp: false };
 const RIGHT: GameInput = { ...NONE, right: true };
@@ -40,6 +60,7 @@ describe('GameState (INV-1)', () => {
       camera: { x: 0, y: 12 },
       lamp: { on: false },
       creatures: [],
+      movers: [],
       captured: { snippet: 0 },
       overview: { current: 5, max: 5 },
       dark: 0,
@@ -91,6 +112,7 @@ describe('update', () => {
         camera: { x: 0, y: 12 },
         lamp: { on: false },
         creatures: [],
+        movers: [],
         captured: { snippet: 0 },
         overview: { current: 3, max: 3 },
         dark: 0,
@@ -110,6 +132,7 @@ describe('update', () => {
       camera: { x: 0, y: 12 },
       lamp: { on: false },
       creatures: [],
+      movers: [],
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -121,6 +144,7 @@ describe('update', () => {
       camera: { x: 0, y: 12 },
       lamp: { on: false },
       creatures: [],
+      movers: [],
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -308,5 +332,63 @@ describe('overview in the state (0009)', () => {
     expect(state.creatures).toStrictEqual([
       { species: 'snippet', x: 1018, y: 726, light: 0, home: { x: 1018, y: 726 } },
     ]);
+  });
+});
+
+describe('movers in the state (0015)', () => {
+  it('starts with one mover per route, in route order, on point 1', () => {
+    const state = createInitialState(ROUTES_MAP);
+    expect(state.movers.map((m) => [m.kind, m.x, m.y, m.wait, m.target])).toStrictEqual([
+      ['person', 40, 40, 3, 1],
+      ['dog', 40, 72, 3, 1],
+      ['vacuum', 40, 104, 0, 1],
+      ['drone', 40, 136, 0, 1],
+    ]);
+    expect(state.creatures).toStrictEqual([]);
+  });
+
+  it('refuses a map whose route crosses a solid tile before the game starts', () => {
+    const blocked = {
+      ...ROUTES_MAP,
+      solids: ROUTES_MAP.solids.map((boxes, i) =>
+        i === 4 * ROUTES_MAP.width + 4 ? [{ x: 64, y: 64, width: 16, height: 16 }] : boxes,
+      ),
+    };
+    expect(() => createInitialState(blocked)).toThrow(
+      'route dog:hr leg 1 crosses a solid tile (4, 4)',
+    );
+  });
+
+  it('steps the movers and survives a JSON round trip at the start and after 600 steps', () => {
+    let state = createInitialState(ROUTES_MAP);
+    expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
+    for (let i = 0; i < 600; i += 1) {
+      state = update(state, NONE, ROUTES_MAP);
+    }
+    expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
+    expect(state.movers.some((m) => m.x !== 40)).toBe(true);
+  });
+
+  it('moves no mover in the dark', () => {
+    const running = createInitialState(ROUTES_MAP);
+    const dark = { ...running, dark: 1 };
+    expect(update(dark, NONE, ROUTES_MAP).movers).toStrictEqual(dark.movers);
+  });
+
+  it('leaves the figure and the creatures as they are without movers (criterion 8)', () => {
+    const inputs = Array.from({ length: 600 }, (_, i) => ({
+      up: i % 240 >= 180,
+      down: i % 240 >= 60 && i % 240 < 120,
+      left: i % 240 >= 120 && i % 240 < 180,
+      right: i % 240 < 60,
+      lamp: i % 97 < 20,
+    }));
+    let withMovers = createInitialState(FLOOR_MAP);
+    let without: GameState = { ...withMovers, movers: [] };
+    for (const input of inputs) {
+      withMovers = update(withMovers, input, FLOOR_MAP);
+      without = update(without, input, FLOOR_MAP);
+    }
+    expect({ ...withMovers, movers: [] }).toStrictEqual(without);
   });
 });
