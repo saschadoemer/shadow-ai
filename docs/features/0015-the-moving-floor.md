@@ -93,7 +93,7 @@ unchanged. A point whose name has no `:` is not a route point and is handled as 
 `{ kind, look, route, x, y, facing, frame, frameTimer, target, wait }`.
 
 - `route` is the index of the route; the points stay in the map, not in the state.
-- `look` picks the sheet or the row: for a person its number among the persons, 0–3; for a dog
+- `look` picks the sheet or the coat: for a person its number among the persons, 0–3; for a dog
   its number among the dogs modulo 2; 0 for the others.
 - At the start a mover stands on point 1, facing down, `frame` 0, `frameTimer` 0, `target` 1
   (the index of point 2) and `wait` the pause of point 1.
@@ -181,7 +181,7 @@ is a plain disc, the drone a body with four rotors.
 | Sheet | Size | Frames | Picture |
 |---|---|---|---|
 | `person-1.png` … `person-4.png` | as `player.png` | the figure's 20 frames in the figure's order, without the lanyard | shirt `#3e8948`, `#e43b44`, `#f77622`, `#b55088`; hair, skin, trousers and shoes as the figure |
-| `dog.png` | 192x32 | two rows of twelve 16x16 frames: facing × 3 + phase, facings in `FACINGS` order; phase 0 stands, 1 steps, 2 sits; row = `look` | row 0 coat `#b86f50`, row 1 coat `#ead4aa`; ears, nose and eyes `#3e2731` |
+| `dog.png` | 384x16 | one row of 24 frames of 16x16, as a sprite sheet is one row: `look` × 12 + facing × 3 + phase, facings in `FACINGS` order; phase 0 stands, 1 steps, 2 sits | `look` 0 coat `#b86f50`, `look` 1 coat `#ead4aa`; ears, nose and eyes `#3e2731` |
 | `vacuum.png` | 32x16 | two 16x16 frames | a disc 12 px wide in the lower 12 px, body `#3a4466`, rim `#262b44`, a light of 2x2 px: `#63c74d` in frame 0, `#265c42` in frame 1 |
 | `drone.png` | 32x16 | two 16x16 frames | body `#5a6988` 6x4 px, four rotors `#c0cbdc`, drawn as bars in frame 0 and as dots in frame 1, a light `#e43b44` |
 
@@ -198,7 +198,7 @@ vacuum.
   camera.y); its frame is facing × 5 + `frame`, as the figure's.
 - A dog's, a vacuum's and a drone's frame has its top-left corner at (round(x) − 8 − camera.x,
   round(y) − 16 − camera.y).
-- A dog's frame is facing × 3 + `frame` in the row of its `look`.
+- A dog's frame is `look` × 12 + facing × 3 + `frame`.
 - A vacuum's frame is floor(tick / 30) mod 2.
 - A drone's frame is floor(tick / 4) mod 2, and the drone is drawn 1 px higher while
   floor(tick / 30) mod 2 is 1.
@@ -257,8 +257,8 @@ The blink of a safe figure (0009) does not touch the movers.
 - **Architecture:** unchanged, now covering `src/game/mover.ts`.
 - **Smoke:** after loading, the pixel of the reception person's shirt at its place in the first
   view has the colour `#3e8948`.
-- **Fixtures:** `tests/fixtures/maps/routes.tmj`, a small map with one route of each kind, and
-  one faulty copy per rejection.
+- **Fixtures:** `tests/fixtures/maps/routes.tmj`, a small map with one route of each kind. The
+  rejections are tested on points built in the test.
 
 ## Acceptance plan (manual test)
 
