@@ -22,18 +22,31 @@ import {
 } from '../../tools/floor-layout.ts';
 import { encodeFloor } from '../../tools/gen-floor.ts';
 import {
+  ARCADE,
+  ARCADE_TOP,
+  ARMCHAIR,
+  BEANBAG,
   CABINET,
   CABINET_TOP,
   CARPET,
   CHAIR,
+  COAT_RACK,
+  COAT_RACK_TOP,
   CORRIDOR,
   CORRIDOR_WALLS,
   COUNTER,
+  COUNTER_COFFEE,
   DESK,
+  DESK_CUBE,
+  DESK_DUCK,
+  DESK_LAVA_LAMP,
   DESK_MONITOR,
   DESK_MONITOR_PARTITION,
   DESK_PARTITION,
+  DESK_ROBOT,
   DOOR_CLOSED,
+  FOOSBALL_LEFT,
+  FOOSBALL_RIGHT,
   OUTER_WALL,
   PARTITION_CORNER,
   PARTITION_LEFT,
@@ -43,10 +56,15 @@ import {
   PRINTER,
   SCREEN,
   SCREEN_SIDE,
+  SIDE_TABLE,
+  SOFA_LEFT,
+  SOFA_RIGHT,
   TABLE,
   TILE_KINDS,
   WALL_CORNER,
   WALL_TOP,
+  WATER_DISPENSER,
+  WATER_DISPENSER_TOP,
   WINDOW,
 } from '../../tools/placeholder-tiles.ts';
 import { feetIn, reachableFeet } from './flood';
@@ -372,7 +390,7 @@ describe('public/maps/floor.tmj (feature 0010)', () => {
   });
 });
 
-/** The spec's picture of the furnished floor, character → the ids it allows on `detail`. */
+/** The picture of 0011's spec, character → the ids it allows on `detail`. */
 const PICTURE_IDS: Readonly<Record<string, readonly number[]>> = {
   '~': [PARTITION_TOP],
   '!': [PARTITION_LEFT],
@@ -393,24 +411,79 @@ const detailAt = (column: number, row: number): number | undefined =>
   floor.detail[cell(column, row)];
 const aboveAt = (column: number, row: number): number | undefined => floor.above[cell(column, row)];
 
+/** The cells of 0011 that 0013 replaces, "column,row" → the id that stands there now. */
+const REPLACED: Readonly<Record<string, number>> = {
+  '35,26': COUNTER_COFFEE,
+  '42,26': COUNTER_COFFEE,
+  '48,3': DESK_DUCK,
+  '74,9': DESK_DUCK,
+  '58,3': DESK_LAVA_LAMP,
+  '69,15': DESK_LAVA_LAMP,
+  '53,9': DESK_CUBE,
+  '79,3': DESK_CUBE,
+  '48,15': DESK_ROBOT,
+  '79,15': DESK_ROBOT,
+};
+
+/** The picture of 0013's spec: the characters of 0011 and the ten new ones. */
+const LOUNGE_IDS: Readonly<Record<string, readonly number[]>> = {
+  ...PICTURE_IDS,
+  S: [SOFA_LEFT, SOFA_RIGHT],
+  a: [ARMCHAIR],
+  t: [SIDE_TABLE],
+  b: [BEANBAG],
+  k: [COUNTER_COFFEE],
+  W: [WATER_DISPENSER],
+  G: [COAT_RACK],
+  A: [ARCADE],
+  F: [FOOSBALL_LEFT, FOOSBALL_RIGHT],
+  g: [DESK_DUCK, DESK_LAVA_LAMP, DESK_CUBE, DESK_ROBOT],
+};
+
+/** A tall thing's top → its body (0011, 0013). */
+const BODY_OF: ReadonlyMap<number, number> = new Map([
+  [CABINET_TOP, CABINET],
+  [PLANT_TOP, PLANT],
+  [WATER_DISPENSER_TOP, WATER_DISPENSER],
+  [COAT_RACK_TOP, COAT_RACK],
+  [ARCADE_TOP, ARCADE],
+]);
+const TOP_OF: ReadonlyMap<number, number> = new Map([...BODY_OF].map(([top, body]) => [body, top]));
+
+const pictureRows = (file: string): string[] => {
+  const rows = read(file).trimEnd().split('\n');
+  expect(rows).toHaveLength(80);
+  for (const line of rows) {
+    expect(line).toHaveLength(108);
+  }
+  return rows;
+};
+
 const AREAS = [...ROOMS, ...CORRIDORS];
 const areaOf = (column: number, row: number): string | undefined =>
   AREAS.find(({ cells: r }) => column >= r.c0 && column <= r.c1 && row >= r.r0 && row <= r.r1)
     ?.name;
 
 describe('the furniture (0011)', () => {
-  it('stands where the spec draws it, and nowhere else on `detail`', () => {
-    const rows = read('tests/fixtures/maps/floor-furniture.txt').trimEnd().split('\n');
-    expect(rows).toHaveLength(80);
-    rows.forEach((line, row) => {
-      expect(line, `row ${row}`).toHaveLength(108);
+  it('still stands where its spec draws it, but for the ten cells 0013 replaces', () => {
+    pictureRows('tests/fixtures/maps/floor-furniture.txt').forEach((line, row) => {
       [...line].forEach((character, column) => {
-        const allowed = PICTURE_IDS[character] ?? [EMPTY];
-        expect(allowed, `(${column}, ${row}) "${character}"`).toContain(detailAt(column, row));
+        const allowed = PICTURE_IDS[character];
+        if (allowed === undefined) {
+          return;
+        }
+        const replaced = REPLACED[`${column},${row}`];
+        const where = `(${column}, ${row}) "${character}"`;
+        if (replaced === undefined) {
+          expect(allowed, where).toContain(detailAt(column, row));
+        } else {
+          expect(detailAt(column, row), where).toBe(replaced);
+        }
       });
     });
   });
 
+  // 0013 turned eight desk-partitions into gadget desks and added four counters.
   it('has the fifteen tile counts on `detail` and the two on `above`', () => {
     const count = (layer: readonly number[], id: number): number =>
       layer.filter((value) => value === id).length;
@@ -432,12 +505,10 @@ describe('the furniture (0011)', () => {
         SCREEN,
         SCREEN_SIDE,
       ].map((id) => count(floor.detail, id)),
-    ).toStrictEqual([122, 170, 61, 24, 24, 61, 61, 122, 34, 14, 58, 19, 5, 6, 14]);
-    expect(floor.detail.filter((id) => id !== EMPTY)).toHaveLength(795);
+    ).toStrictEqual([122, 170, 61, 24, 24, 53, 61, 122, 34, 14, 58, 23, 5, 6, 14]);
     expect([count(floor.above, CABINET_TOP), count(floor.above, PLANT_TOP)]).toStrictEqual([
       34, 14,
     ]);
-    expect(floor.above.filter((id) => id !== EMPTY)).toHaveLength(48);
   });
 
   it('builds the pieces as the spec defines them', () => {
@@ -506,22 +577,19 @@ describe('the furniture (0011)', () => {
     ];
     for (let row = 0; row < 80; row += 1) {
       for (let column = 0; column < 108; column += 1) {
-        const top = aboveAt(column, row);
+        const top = aboveAt(column, row) ?? EMPTY;
         const where = `(${column}, ${row})`;
-        if (top === CABINET_TOP || top === PLANT_TOP) {
-          expect(detailAt(column, row + 1), where).toBe(top === CABINET_TOP ? CABINET : PLANT);
+        if (top !== EMPTY) {
+          expect(BODY_OF.has(top), `${where} holds ${top}`).toBe(true);
+          expect(detailAt(column, row + 1), where).toBe(BODY_OF.get(top));
           expect(areaOf(column, row), where).toBeDefined();
           expect(areaOf(column, row), where).toBe(areaOf(column, row + 1));
           expect(topStripIds, where).not.toContain(tileAt(column, row + 1));
-          expect([EMPTY, CABINET, PLANT], where).toContain(detailAt(column, row));
-        } else {
-          expect(top, where).toBe(EMPTY);
+          expect([EMPTY, ...TOP_OF.keys()], where).toContain(detailAt(column, row));
         }
-        const body = detailAt(column, row);
-        if (body === CABINET || body === PLANT) {
-          expect(aboveAt(column, row - 1), `top of ${where}`).toBe(
-            body === CABINET ? CABINET_TOP : PLANT_TOP,
-          );
+        const body = TOP_OF.get(detailAt(column, row) ?? EMPTY);
+        if (body !== undefined) {
+          expect(aboveAt(column, row - 1), `top of ${where}`).toBe(body);
         }
       }
     }
@@ -579,6 +647,147 @@ describe('the furniture (0011)', () => {
       ['partition', 82, 29],
       ['plant', 80, 50],
       ['screen', 10, 62],
+    ] as const) {
+      expect(floor.opaque[cell(column, row)], name).toStrictEqual([]);
+      expect(floor.solids[cell(column, row)]?.length ?? 0, name).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('lounge and gadgets (0013)', () => {
+  const count = (layer: readonly number[], id: number): number =>
+    layer.filter((value) => value === id).length;
+
+  it('stands where the spec draws it, and nowhere else on `detail`', () => {
+    pictureRows('tests/fixtures/maps/floor-lounge.txt').forEach((line, row) => {
+      [...line].forEach((character, column) => {
+        const allowed = LOUNGE_IDS[character] ?? [EMPTY];
+        expect(allowed, `(${column}, ${row}) "${character}"`).toContain(detailAt(column, row));
+      });
+    });
+  });
+
+  it('has the fifteen new tile counts on `detail` and the three on `above`', () => {
+    expect(
+      [
+        SOFA_LEFT,
+        SOFA_RIGHT,
+        ARMCHAIR,
+        SIDE_TABLE,
+        BEANBAG,
+        COUNTER_COFFEE,
+        WATER_DISPENSER,
+        COAT_RACK,
+        ARCADE,
+        FOOSBALL_LEFT,
+        FOOSBALL_RIGHT,
+        DESK_DUCK,
+        DESK_LAVA_LAMP,
+        DESK_CUBE,
+        DESK_ROBOT,
+      ].map((id) => count(floor.detail, id)),
+    ).toStrictEqual([8, 8, 10, 16, 20, 8, 5, 11, 1, 1, 1, 2, 2, 2, 2]);
+    expect(floor.detail.filter((id) => id !== EMPTY)).toHaveLength(888);
+    expect(
+      [WATER_DISPENSER_TOP, COAT_RACK_TOP, ARCADE_TOP].map((id) => count(floor.above, id)),
+    ).toStrictEqual([5, 11, 1]);
+    expect(floor.above.filter((id) => id !== EMPTY)).toHaveLength(65);
+  });
+
+  it('builds the pieces as the spec defines them', () => {
+    const placements = FURNITURE.flatMap((entry) => entry.placements);
+    expect(placements).toContainEqual({ piece: 'seating-corner', x: 12, y: 48 });
+    expect(placements).toContainEqual({ piece: 'beanbag-circle', x: 37, y: 47 });
+    expect(placements).toContainEqual({ piece: 'coffee-machine', x: 35, y: 26 });
+    const row = (y: number, from: number, to: number): (number | undefined)[] =>
+      Array.from({ length: to - from + 1 }, (_, k) => detailAt(from + k, y));
+    // The reception's seating corner at (12, 48): sofa, side-table, armchair.
+    expect(row(48, 12, 15)).toStrictEqual([30, 31, 33, 32]);
+    // HR's armchair pair is Accounting's, at (39, 14): armchair, side-table, armchair.
+    expect(row(14, 39, 41)).toStrictEqual([32, 33, 32]);
+    // The break room's beanbag circle at (37, 47).
+    expect(row(47, 37, 39)).toStrictEqual([EMPTY, 34, EMPTY]);
+    expect(row(48, 37, 39)).toStrictEqual([34, 33, 34]);
+    // Accounting's coffee corner at (27, 19) and the break room's two machines in its counter.
+    expect(row(19, 27, 28)).toStrictEqual([35, 26]);
+    expect(row(26, 32, 45)).toStrictEqual([26, 26, 26, 35, 26, 26, 26, 26, 26, 26, 35, 26, 26, 26]);
+    // The table football at (31, 48) and the arcade at (44, 49) with its top.
+    expect(row(48, 31, 32)).toStrictEqual([42, 43]);
+    expect([detailAt(44, 49), aboveAt(44, 48)]).toStrictEqual([40, 41]);
+    // Development's bottom row: sofa, side-table, a free cell, two beanbags.
+    expect(row(19, 70, 75)).toStrictEqual([30, 31, 33, EMPTY, 34, 34]);
+    // The south corridor's sofa between the lift's and the stairwell's doors.
+    expect(row(53, 60, 62)).toStrictEqual([30, 31, 33]);
+    // A coat rack and a water dispenser with their tops.
+    expect([detailAt(20, 48), aboveAt(20, 47)]).toStrictEqual([38, 39]);
+    expect([detailAt(20, 25), aboveAt(20, 24)]).toStrictEqual([36, 37]);
+  });
+
+  it('puts a gadget on eight desks of Development, in the place of a desk-partition', () => {
+    for (const [key, id] of Object.entries(REPLACED)) {
+      const [column, row] = key.split(',').map(Number) as [number, number];
+      expect(detailAt(column, row), key).toBe(id);
+      if (id !== COUNTER_COFFEE) {
+        expect(areaOf(column, row), key).toBe('development');
+        expect(detailAt(column - 1, row), key).toBe(DESK_MONITOR_PARTITION);
+      }
+    }
+  });
+
+  it('leaves row 18 of Development empty on `detail`, columns 45–84', () => {
+    for (let column = 45; column <= 84; column += 1) {
+      expect(detailAt(column, 18), `(${column}, 18)`).toBe(EMPTY);
+    }
+  });
+
+  it('reaches every cell without a solid box outside the lift and the stairwell', () => {
+    let cells = 0;
+    for (const area of AREAS.filter(({ name }) => name !== 'lift' && name !== 'stairwell')) {
+      for (const at of cellsOf(area.cells)) {
+        if ((floor.solids[cell(at.x, at.y)] ?? []).length === 0) {
+          expect(reached(feetIn(at.x, at.y)), `${area.name} (${at.x}, ${at.y})`).toBe(true);
+          cells += 1;
+        }
+      }
+    }
+    expect(cells).toBe(6198);
+  });
+
+  it("shows the reception's seating corner and coat rack in the first view", () => {
+    const camera = cameraFor({ x: 256, y: 714 }, MAP_PX);
+    expect(camera).toStrictEqual({ x: 96, y: 624 });
+    for (const [column, row] of [
+      [12, 48],
+      [13, 48],
+      [14, 48],
+      [15, 48],
+      [20, 47],
+      [20, 48],
+    ] as const) {
+      const inView =
+        column * 16 >= camera.x &&
+        column * 16 + 16 <= camera.x + 320 &&
+        row * 16 >= camera.y &&
+        row * 16 + 16 <= camera.y + 180;
+      expect(inView, `(${column}, ${row})`).toBe(true);
+    }
+  });
+
+  it('lets light pass everything new but the arcade cabinet', () => {
+    expect(floor.opaque[cell(44, 49)]).toStrictEqual([
+      { x: 44 * 16, y: 49 * 16, width: 16, height: 16 },
+    ]);
+    for (const [name, column, row] of [
+      ['sofa', 12, 48],
+      ['armchair', 15, 48],
+      ['side-table', 14, 48],
+      ['beanbag', 38, 47],
+      // Not the break room's: its counter stands in the wall's row, and the wall is opaque.
+      ['counter-coffee', 27, 19],
+      ['water dispenser', 47, 28],
+      ['coat rack', 20, 48],
+      ['table football', 31, 48],
+      ['gadget desk', 48, 3],
     ] as const) {
       expect(floor.opaque[cell(column, row)], name).toStrictEqual([]);
       expect(floor.solids[cell(column, row)]?.length ?? 0, name).toBeGreaterThan(0);
