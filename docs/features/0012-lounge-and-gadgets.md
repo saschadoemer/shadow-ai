@@ -1,6 +1,6 @@
 # 0012 — Lounge and gadgets
 
-**Status:** draft
+**Status:** approved 2026-11-13
 **Milestone:** M3
 **Drafted:** 2026-11-13
 
@@ -14,8 +14,8 @@ in Development. After this feature no room and no wide corridor looks empty.
 
 ## Scope
 
-Built on 0011 as merged. If the walk of 0011 moves furniture, the tables here are revised
-before this spec is approved.
+Built on 0011 as merged. If the walk of 0011 moves furniture, the tables here are revised with
+the author before the implementation starts.
 
 **In:**
 

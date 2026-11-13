@@ -32,5 +32,5 @@ in two.
 | [0008](0008-the-first-creature.md) | The first creature | M3 | implemented 2026-11-12 |
 | [0009](0009-overview.md) | Overview | M3 | implemented 2026-11-13 |
 | [0010](0010-the-floor.md) | The floor | M3 | implemented 2026-11-13 |
-| [0011](0011-the-furniture.md) | The furniture | M3 | draft |
-| [0012](0012-lounge-and-gadgets.md) | Lounge and gadgets | M3 | draft |
+| [0011](0011-the-furniture.md) | The furniture | M3 | approved 2026-11-13 |
+| [0012](0012-lounge-and-gadgets.md) | Lounge and gadgets | M3 | approved 2026-11-13 |
