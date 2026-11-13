@@ -6,15 +6,9 @@
  * map edge is the caller's business. The displacement is assumed to be below one cell per call
  * — this is not a swept test.
  */
-import { type Point, TILE_SIZE } from './tiled';
+import { type Box, type Point, TILE_SIZE } from './tiled';
 
-export interface Box {
-  /** The top-left corner, in pixels. */
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-}
+export type { Box } from './tiled';
 
 /** What the resolver asks of a map: its size in cells and the row-major solid grid. A TileMap is one. */
 export interface SolidGrid {

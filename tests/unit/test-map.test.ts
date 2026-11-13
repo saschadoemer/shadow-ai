@@ -28,7 +28,8 @@ describe('tests/fixtures/maps/test.tmj', () => {
   it('references the hand-made seven-tile fixture tileset, never the real one', () => {
     expect(source).toBe('seven-tiles.tsj');
     expect(tileset.tileCount).toBe(7);
-    expect(tileset.solid).toStrictEqual([false, false, true, true, true, true, true]);
+    const full = [{ x: 0, y: 0, width: 16, height: 16 }];
+    expect(tileset.boxes).toStrictEqual([[], [], full, full, full, full, full]);
   });
 
   it('is 20x12 tiles, 320x192 px', () => {
