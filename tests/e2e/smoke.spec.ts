@@ -71,33 +71,33 @@ test('the map is drawn at the full factor, unclipped', async ({ page }) => {
         ),
       {
         message:
-          "the top-left pixel is grass #63c74d at tile (54, 40), the view's corner at the spawn: the map is drawn",
+          "the top-left pixel is carpet #8b9bb4 at tile (6, 39), the view's corner at the spawn: the map is drawn",
       },
     )
-    .toStrictEqual([0x63, 0xc7, 0x4d, 255]);
+    .toStrictEqual([0x8b, 0x9b, 0xb4, 255]);
 });
 
 test('one second of ArrowRight moves the figure and the camera right by at least 70 px', async ({
   page,
 }) => {
   await page.goto('/');
-  // The handle appears with the first frame; the figure starts at the campus spawn, x = 1024.
+  // The handle appears with the first frame; the figure starts at the floor's spawn, x = 256.
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.player.x), {
       message: 'window.shadowAi.state.player.x is the spawn: the game runs',
     })
-    .toBe(1024);
+    .toBe(256);
   expect(await page.evaluate(() => window.shadowAi?.state.camera)).toStrictEqual({
-    x: 864,
-    y: 640,
+    x: 96,
+    y: 624,
   });
   await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(1000);
   await page.keyboard.up('ArrowRight');
   const state = await page.evaluate(() => window.shadowAi?.state);
-  // 60 steps of 1.333 px are 80; CI may drop a few frames. Row 45 is path to x = 1104.
-  expect(state?.player.x).toBeGreaterThanOrEqual(1024 + 70);
-  expect(state?.camera.x).toBeGreaterThanOrEqual(864 + 70);
+  // 60 steps of 1.333 px are 80; CI may drop a few frames. Row 44 is free to x = 458.
+  expect(state?.player.x).toBeGreaterThanOrEqual(256 + 70);
+  expect(state?.camera.x).toBeGreaterThanOrEqual(96 + 70);
   expect(state?.player.facing).toBe('right');
 });
 
@@ -107,14 +107,14 @@ test('a held Space turns the lamp on and holds the figure in place', async ({ pa
     .poll(() => page.evaluate(() => window.shadowAi?.state.player.x), {
       message: 'window.shadowAi.state.player.x is the spawn: the game runs',
     })
-    .toBe(1024);
+    .toBe(256);
   await page.keyboard.down('Space');
   await expect.poll(() => page.evaluate(() => window.shadowAi?.state.lamp.on)).toBe(true);
   await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(300);
   const held = await page.evaluate(() => window.shadowAi?.state);
   // Nothing moves while the lamp is on; the direction key only turns the figure.
-  expect(held?.player.x).toBe(1024);
+  expect(held?.player.x).toBe(256);
   expect(held?.player.facing).toBe('right');
   expect(held?.player.frame).toBe(0);
   expect(held?.lamp.on).toBe(true);
@@ -123,20 +123,20 @@ test('a held Space turns the lamp on and holds the figure in place', async ({ pa
   await page.keyboard.up('ArrowRight');
 });
 
-test('the campus starts with three snippets and nothing captured', async ({ page }) => {
+test('the floor starts with three snippets and nothing captured', async ({ page }) => {
   await page.goto('/');
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.creatures.length), {
-      message: 'window.shadowAi.state.creatures holds the three snippets of the campus',
+      message: 'window.shadowAi.state.creatures holds the three snippets of the floor',
     })
     .toBe(3);
   const state = await page.evaluate(() => window.shadowAi?.state);
   expect(state?.creatures[0]).toStrictEqual({
     species: 'snippet',
-    x: 1288,
-    y: 760,
+    x: 1224,
+    y: 622,
     light: 0,
-    home: { x: 1288, y: 760 },
+    home: { x: 1224, y: 622 },
   });
   expect(state?.captured).toStrictEqual({ snippet: 0 });
 });
