@@ -63,10 +63,10 @@ change that weakens the test has violated the invariant.
 - **INV-6 — Every pixel is a palette pixel.** Every PNG under `public/` uses only Endesga 32. One
   colour of it is reserved for the shadow and appears nowhere else. Every tileset has dimensions
   in multiples of 16. *Test:* `tests/unit/assets`.
-- **INV-7 — Map truth lives in the map data.** Whether a tile is solid is a property of the tile
-  in the tileset — not a separate collision layer, not code. Layer names are fixed: `ground`,
-  `detail`, `above`, `objects`. Shadow densities live in the world data, and no region requires
-  an upgrade that cannot be earned before it. *Test:* the map loader rejects unknown layers; a
+- **INV-7 — Map truth lives in the map data.** Whether a tile is solid, and which part of it, is a
+  property of the tile in the tileset — not a separate collision layer, not code. Layer names are
+  fixed: `ground`, `detail`, `above`, `objects`. Shadow densities live in the world data, and no
+  region requires an upgrade that cannot be earned before it. *Test:* the map loader rejects unknown layers; a
   world-data test checks the gating order.
 
 ### Prohibitions that follow
@@ -179,7 +179,7 @@ these.
 | File | Covers |
 |---|---|
 | `docs/spec/vision.md` | purpose, message, the story in three acts, the vendor, design pillars, tone sheet, language, non-goals, title and licence |
-| `docs/spec/world.md` | the campus and its regions, shadow densities, the cases, order and gating, the cast, creature rules, the naming rule |
+| `docs/spec/world.md` | the floor and its regions, shadow densities, the cases, order and gating, the cast, creature rules, the naming rule |
 | `docs/spec/gameplay.md` | the lamp, the three layers, overview, progression, resolving a case, the journal |
 | `docs/spec/visual.md` | 320x180, integer scaling, tiles and figures, Endesga 32 and the signature colour, the asset pipeline, frame rate |
 | `docs/spec/architecture.md` | directory structure, the state model, the loop, input, the renderer interface, maps and the Tiled pipeline, text plumbing, tooling, dependency policy |

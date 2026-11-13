@@ -15,14 +15,14 @@ Early. The toolchain is in place (feature 0001), the surface and the loop run (f
 and the game shows a tile map (feature 0003): a test map authored in Tiled, drawn from generated
 placeholder tiles, scaled by whole factors in device pixels, with `F` for fullscreen. The figure
 walks on it (feature 0004): arrow keys or WASD, eight directions, a generated placeholder with a
-walk cycle. Walls, the pond and the fence stop it, and it slides along them (feature 0005). The
-camera follows the figure over the campus (feature 0006): 128x96 tiles, every region of the
-world as a footprint in placeholder tiles, every building closed. M2, walking the campus, is
-complete. The lamp shines (feature 0007): hold `Space` and a cone of light appears in front of
-the figure; the direction keys turn it. The first creature is on the campus (feature 0008):
-snippets come toward the figure, freeze in the light and are captured after one second. A
-snippet's touch costs one of three points of overview and pushes the figure back; at zero the
-figure wakes in front of the data protection officer's office (feature 0009). The roadmap is in [docs/plan.md](docs/plan.md).
+walk cycle. Walls stop it, and it slides along them (feature 0005). The camera follows the
+figure over the map (feature 0006), and M2 is complete. The lamp shines (feature 0007): hold
+`Space` and a cone of light appears in front of the figure; the direction keys turn it. The
+first creature is here (feature 0008): snippets come toward the figure, freeze in the light and
+are captured after one second. A snippet's touch costs one of three points of overview and
+pushes the figure back; at zero the figure wakes in the data protection officer's office
+(feature 0009). The world is one office floor (feature 0010): 108x80 tiles, a ring of corridors
+round a core, every department a room behind walls 4 px thin, still unfurnished. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 
@@ -35,12 +35,12 @@ npm run check        # typecheck, lint, build and the headless tests
 npm run test:e2e     # the smoke test against the dev server
 npm run gen-tiles    # regenerate the placeholder tiles under public/tiles/
 npm run gen-sprites  # regenerate the placeholder figure, the lamp sheet, the snippet sheet and the overview sheet under public/sprites/
-npm run gen-campus   # regenerate the campus map with its creatures and the wake point under public/maps/
+npm run gen-floor    # regenerate the floor map with its creatures and the wake point under public/maps/
 ```
 
-Maps are edited in [Tiled](https://www.mapeditor.org/) 1.10 or newer. The campus,
-`public/maps/campus.tmj`, is generated until the art pass: change `tools/campus-layout.ts`, run
-`npm run gen-campus`, reload the page. It opens in Tiled for looking; a save there reformats the
+Maps are edited in [Tiled](https://www.mapeditor.org/) 1.10 or newer. The floor,
+`public/maps/floor.tmj`, is generated until the art pass: change `tools/floor-layout.ts`, run
+`npm run gen-floor`, reload the page. It opens in Tiled for looking; a save there reformats the
 file and fails the generator test.
 
 The container is what ships — static files behind nginx on port 8080:
