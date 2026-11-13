@@ -103,6 +103,1584 @@
           "width": 0,
           "x": 296,
           "y": 504
+        },
+        {
+          "height": 0,
+          "id": 6,
+          "name": "person:reception:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 200,
+          "y": 648,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 7,
+          "name": "person:reception:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 312,
+          "y": 648
+        },
+        {
+          "height": 0,
+          "id": 8,
+          "name": "person:reception:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 312,
+          "y": 760,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 9,
+          "name": "person:reception:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 312,
+          "y": 648
+        },
+        {
+          "height": 0,
+          "id": 10,
+          "name": "person:marketing:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 136,
+          "y": 1032,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 11,
+          "name": "person:marketing:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 456,
+          "y": 1032
+        },
+        {
+          "height": 0,
+          "id": 12,
+          "name": "person:marketing:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 456,
+          "y": 1256,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 13,
+          "name": "person:marketing:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 456,
+          "y": 1032
+        },
+        {
+          "height": 0,
+          "id": 14,
+          "name": "person:support:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1128,
+          "y": 1032,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 15,
+          "name": "person:support:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1240,
+          "y": 1032
+        },
+        {
+          "height": 0,
+          "id": 16,
+          "name": "person:support:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1240,
+          "y": 1256,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 17,
+          "name": "person:support:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1240,
+          "y": 1032
+        },
+        {
+          "height": 0,
+          "id": 18,
+          "name": "person:sales:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1384,
+          "y": 504,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 19,
+          "name": "person:sales:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1672,
+          "y": 504
+        },
+        {
+          "height": 0,
+          "id": 20,
+          "name": "person:sales:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1672,
+          "y": 440,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 21,
+          "name": "person:sales:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1672,
+          "y": 504
+        },
+        {
+          "height": 0,
+          "id": 22,
+          "name": "dog:hr:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 40,
+          "y": 232,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 23,
+          "name": "dog:hr:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 120,
+          "y": 232,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 24,
+          "name": "dog:hr:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 120,
+          "y": 264,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 420
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 25,
+          "name": "dog:hr:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 40,
+          "y": 264,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 240
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 26,
+          "name": "dog:accounting:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 616,
+          "y": 216,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 27,
+          "name": "dog:accounting:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 680,
+          "y": 216,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 28,
+          "name": "dog:accounting:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 680,
+          "y": 248,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 420
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 29,
+          "name": "dog:accounting:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 616,
+          "y": 248,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 240
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 30,
+          "name": "dog:development:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1096,
+          "y": 296,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 31,
+          "name": "dog:development:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1224,
+          "y": 296,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 420
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 32,
+          "name": "dog:reception:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 184,
+          "y": 760,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 33,
+          "name": "dog:reception:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 264,
+          "y": 760,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 34,
+          "name": "dog:reception:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 264,
+          "y": 792,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 420
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 35,
+          "name": "dog:reception:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 184,
+          "y": 792,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 240
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 36,
+          "name": "dog:break-room:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 568,
+          "y": 568,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 37,
+          "name": "dog:break-room:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 648,
+          "y": 568,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 38,
+          "name": "dog:break-room:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 648,
+          "y": 600,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 420
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 39,
+          "name": "dog:break-room:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 568,
+          "y": 600,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 240
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 40,
+          "name": "dog:sales:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1336,
+          "y": 792,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 41,
+          "name": "dog:sales:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1416,
+          "y": 792,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 42,
+          "name": "dog:sales:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1416,
+          "y": 824,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 420
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 43,
+          "name": "dog:sales:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1336,
+          "y": 824,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 240
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 44,
+          "name": "dog:marketing:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 312,
+          "y": 1048,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 45,
+          "name": "dog:marketing:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 392,
+          "y": 1048,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 46,
+          "name": "dog:marketing:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 392,
+          "y": 1080,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 420
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 47,
+          "name": "dog:marketing:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 312,
+          "y": 1080,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 240
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 48,
+          "name": "dog:support:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1368,
+          "y": 1224,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 49,
+          "name": "dog:support:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1448,
+          "y": 1224,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 50,
+          "name": "dog:support:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1448,
+          "y": 1256,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 420
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 51,
+          "name": "dog:support:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1368,
+          "y": 1256,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 240
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 52,
+          "name": "vacuum:hr:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 40,
+          "y": 120,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 53,
+          "name": "vacuum:hr:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 328,
+          "y": 120,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 54,
+          "name": "vacuum:hr:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 328,
+          "y": 136,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 55,
+          "name": "vacuum:hr:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 40,
+          "y": 136,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 56,
+          "name": "vacuum:accounting:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 392,
+          "y": 88,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 57,
+          "name": "vacuum:accounting:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 680,
+          "y": 88,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 58,
+          "name": "vacuum:accounting:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 680,
+          "y": 104,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 59,
+          "name": "vacuum:accounting:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 392,
+          "y": 104,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 60,
+          "name": "vacuum:development:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 744,
+          "y": 120,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 61,
+          "name": "vacuum:development:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1336,
+          "y": 120,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 62,
+          "name": "vacuum:development:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1336,
+          "y": 136,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 63,
+          "name": "vacuum:development:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 744,
+          "y": 136,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 64,
+          "name": "vacuum:reception:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 40,
+          "y": 728,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 65,
+          "name": "vacuum:reception:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 344,
+          "y": 728,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 66,
+          "name": "vacuum:reception:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 344,
+          "y": 744,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 67,
+          "name": "vacuum:reception:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 40,
+          "y": 744,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 68,
+          "name": "vacuum:break-room:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 504,
+          "y": 712,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 69,
+          "name": "vacuum:break-room:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 760,
+          "y": 712,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 70,
+          "name": "vacuum:break-room:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 760,
+          "y": 728,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 71,
+          "name": "vacuum:break-room:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 504,
+          "y": 728,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 72,
+          "name": "vacuum:sales:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1304,
+          "y": 712,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 73,
+          "name": "vacuum:sales:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1688,
+          "y": 712,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 74,
+          "name": "vacuum:sales:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1688,
+          "y": 728,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 75,
+          "name": "vacuum:sales:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1304,
+          "y": 728,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 76,
+          "name": "vacuum:marketing:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 40,
+          "y": 1160,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 77,
+          "name": "vacuum:marketing:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 760,
+          "y": 1160,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 78,
+          "name": "vacuum:marketing:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 760,
+          "y": 1176,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 79,
+          "name": "vacuum:marketing:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 40,
+          "y": 1176,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 80,
+          "name": "vacuum:support:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 824,
+          "y": 1144,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 81,
+          "name": "vacuum:support:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1688,
+          "y": 1144,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 82,
+          "name": "vacuum:support:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1688,
+          "y": 1160,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 83,
+          "name": "vacuum:support:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 824,
+          "y": 1160,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 84,
+          "name": "drone:development:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 776,
+          "y": 104,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 120
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 85,
+          "name": "drone:development:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 936,
+          "y": 104,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 120
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 86,
+          "name": "drone:development:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 936,
+          "y": 200,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 120
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 87,
+          "name": "drone:development:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 776,
+          "y": 200,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 120
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 88,
+          "name": "drone:marketing:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 88,
+          "y": 984,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 120
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 89,
+          "name": "drone:marketing:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 248,
+          "y": 984,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 120
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 90,
+          "name": "drone:marketing:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 248,
+          "y": 1160,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 120
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 91,
+          "name": "drone:marketing:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 88,
+          "y": 1160,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 120
+            }
+          ]
         }
       ],
       "opacity": 1,
@@ -113,7 +1691,7 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 6,
+  "nextobjectid": 92,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",
