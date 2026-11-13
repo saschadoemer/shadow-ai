@@ -2,11 +2,13 @@ import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
 import type { Point, TileMap } from '../engine/tiled';
 import { CREATURE_SIZE } from '../game/creature';
 import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
+import { DOG_LOOKS, MOVER_SIZE } from '../game/mover';
 import { DARK_STEPS } from '../game/overview';
 import {
   type CreatureState,
   FACINGS,
   type GameState,
+  type MoverState,
   PHASES_PER_FACING,
   type PlayerState,
   type Species,
@@ -32,6 +34,13 @@ export interface SceneContent {
   readonly creatureSheets: Readonly<Record<Species, SpriteSheet>>;
   /** Two 8x8 frames: a full heart, an empty heart (0009, 0012). */
   readonly overviewSheet: SpriteSheet;
+  /** The movers' sheets (0015): one per person, the dogs' 24 frames, two frames each for the vacuum and the drone. */
+  readonly moverSheets: {
+    readonly person: readonly SpriteSheet[];
+    readonly dog: SpriteSheet;
+    readonly vacuum: SpriteSheet;
+    readonly drone: SpriteSheet;
+  };
 }
 
 /** The frame in the player sheet: facing × 5 + phase, facings in FACINGS order. */
@@ -74,6 +83,62 @@ export function creatureOrigin(creature: CreatureState, camera: Point): Point {
   };
 }
 
+/** A dog's sheet holds, per look, facing × 3 + phase (0015). */
+export const DOG_PHASES = 3;
+export const DOG_FRAMES_PER_LOOK = FACINGS.length * DOG_PHASES;
+/** The vacuum's light changes twice a second; the rotors change 15 times a second. */
+export const VACUUM_BLINK_STEPS = 30;
+export const DRONE_ROTOR_STEPS = 4;
+/** The drone hangs 1 px higher in every second half second. */
+export const DRONE_BOB_STEPS = 30;
+
+/** The frame of a mover in its sheet (0015). */
+export function moverFrame(mover: MoverState, tick: number): number {
+  const facing = FACINGS.indexOf(mover.facing);
+  switch (mover.kind) {
+    case 'person':
+      return facing * PHASES_PER_FACING + mover.frame;
+    case 'dog':
+      return (mover.look % DOG_LOOKS) * DOG_FRAMES_PER_LOOK + facing * DOG_PHASES + mover.frame;
+    case 'vacuum':
+      return Math.floor(tick / VACUUM_BLINK_STEPS) % 2;
+    case 'drone':
+      return Math.floor(tick / DRONE_ROTOR_STEPS) % 2;
+  }
+}
+
+/** The top-left corner of a mover's frame on the surface: the feet are its bottom centre. */
+export function moverOrigin(mover: MoverState, camera: Point, tick: number): Point {
+  const height = mover.kind === 'person' ? FRAME_HEIGHT : MOVER_SIZE;
+  const bob = mover.kind === 'drone' ? Math.floor(tick / DRONE_BOB_STEPS) % 2 : 0;
+  return {
+    x: Math.round(mover.x) - MOVER_SIZE / 2 - camera.x,
+    y: Math.round(mover.y) - height - bob - camera.y,
+  };
+}
+
+function moverSheet(content: SceneContent, mover: MoverState): SpriteSheet | undefined {
+  return mover.kind === 'person'
+    ? content.moverSheets.person[mover.look]
+    : content.moverSheets[mover.kind];
+}
+
+function drawMovers(
+  renderer: Renderer,
+  movers: readonly MoverState[],
+  state: GameState,
+  content: SceneContent,
+): void {
+  for (const mover of movers) {
+    const sheet = moverSheet(content, mover);
+    if (sheet === undefined) {
+      continue;
+    }
+    const origin = moverOrigin(mover, state.camera, state.tick);
+    renderer.drawSprite(sheet, moverFrame(mover, state.tick), origin.x, origin.y);
+  }
+}
+
 /** The hearts of overview (0009, 0012): 8x8, 4 px from the corner, one every 10 px. */
 export const HEART_SIZE = 8;
 export const HEART_MARGIN = 4;
@@ -98,12 +163,13 @@ export function lidHeight(dark: number): number {
 }
 
 /**
- * One frame: ground, detail, the cone when the lamp is on, the creatures in array order, the
- * player, above, all shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x, round(y) − 24 −
+ * One frame: ground, detail, the cone when the lamp is on, the ground movers whose feet are at
+ * or above the figure's, the creatures in array order, the player, the other ground movers,
+ * above, the drones (0015), all shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x, round(y) − 24 −
  * camera.y): the feet are its bottom centre, and the camera is already whole pixels
  * (engine/camera). The cone lies under the figure, so the body hides the apex. After `above`
  * come the hearts of overview, on the surface and not shifted by the camera, and the two lids of
- * the dark (0009). A safe figure blinks; its cone does not.
+ * the dark (0009). A safe figure blinks; its cone and the movers do not.
  */
 export function drawScene(renderer: Renderer, state: GameState, content: SceneContent): void {
   const { player, camera } = state;
@@ -114,6 +180,13 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
     const origin = lampFrameOrigin(player, camera);
     renderer.drawSprite(content.lampSheet, lampFrame(player), origin.x, origin.y);
   }
+  const ground = state.movers.filter((mover) => mover.kind !== 'drone');
+  drawMovers(
+    renderer,
+    ground.filter((mover) => mover.y <= player.y),
+    state,
+    content,
+  );
   for (const creature of state.creatures) {
     const origin = creatureOrigin(creature, camera);
     renderer.drawSprite(
@@ -131,7 +204,19 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
       Math.round(player.y) - FRAME_HEIGHT - camera.y,
     );
   }
+  drawMovers(
+    renderer,
+    ground.filter((mover) => mover.y > player.y),
+    state,
+    content,
+  );
   drawLayer(renderer, content.map, content.tileset, 'above', camera);
+  drawMovers(
+    renderer,
+    state.movers.filter((mover) => mover.kind === 'drone'),
+    state,
+    content,
+  );
   for (let i = 0; i < state.overview.max; i += 1) {
     renderer.drawSprite(
       content.overviewSheet,

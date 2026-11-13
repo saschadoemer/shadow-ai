@@ -3,6 +3,7 @@ import { EMPTY, type TileMap } from '../../src/engine/tiled';
 import {
   type CreatureState,
   type GameState,
+  type MoverState,
   NO_RECOIL,
   type PlayerState,
 } from '../../src/game/state';
@@ -16,6 +17,8 @@ import {
   lampFrame,
   lampFrameOrigin,
   lidHeight,
+  moverFrame,
+  moverOrigin,
   playerFrame,
   playerVisible,
   type SceneContent,
@@ -68,6 +71,16 @@ const CONTENT: SceneContent = {
   lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
   creatureSheets: { snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 } },
   overviewSheet: { image: {} as ImageBitmap, frameWidth: 8, frameHeight: 8 },
+  moverSheets: {
+    person: [0, 1, 2, 3].map(() => ({
+      image: {} as ImageBitmap,
+      frameWidth: 16,
+      frameHeight: 24,
+    })),
+    dog: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
+    vacuum: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
+    drone: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
+  },
 };
 const player = (fields: Partial<PlayerState>): PlayerState => ({
   x: 0,
@@ -378,5 +391,119 @@ describe('overview in the scene (0009, 0012)', () => {
     const renderer = recordingRenderer();
     drawScene(renderer, state({ x: 20.4, y: 30.6, grace: 87 }, { x: 0, y: 0 }, true), CONTENT);
     expect(renderer.sheets).toStrictEqual([CONTENT.lampSheet]);
+  });
+});
+
+const mover = (fields: Partial<MoverState> & Pick<MoverState, 'kind'>): MoverState => ({
+  look: 0,
+  route: 0,
+  x: 0,
+  y: 0,
+  facing: 'down',
+  frame: 0,
+  frameTimer: 0,
+  target: 1,
+  wait: 0,
+  ...fields,
+});
+
+describe('the movers in the scene (0015)', () => {
+  it('frames: a person as the figure, a dog by look, facing and phase, the others by the tick', () => {
+    expect(moverFrame(mover({ kind: 'person', facing: 'left', frame: 3 }), 0)).toBe(2 * 5 + 3);
+    expect(moverFrame(mover({ kind: 'dog', look: 1, facing: 'up', frame: 2 }), 0)).toBe(12 + 3 + 2);
+    expect(
+      [0, 29, 30, 59, 60].map((tick) => moverFrame(mover({ kind: 'vacuum' }), tick)),
+    ).toStrictEqual([0, 0, 1, 1, 0]);
+    expect([0, 3, 4, 7, 8].map((tick) => moverFrame(mover({ kind: 'drone' }), tick))).toStrictEqual(
+      [0, 0, 1, 1, 0],
+    );
+  });
+
+  it('origins: the feet are the bottom centre; a drone is 1 px higher in every second half second', () => {
+    const camera = { x: 10, y: 20 };
+    expect(moverOrigin(mover({ kind: 'person', x: 100.4, y: 80.6 }), camera, 0)).toStrictEqual({
+      x: 82,
+      y: 37,
+    });
+    expect(moverOrigin(mover({ kind: 'dog', x: 100.4, y: 80.6 }), camera, 0)).toStrictEqual({
+      x: 82,
+      y: 45,
+    });
+    expect(moverOrigin(mover({ kind: 'drone', x: 100, y: 80 }), camera, 29)).toStrictEqual({
+      x: 82,
+      y: 44,
+    });
+    expect(moverOrigin(mover({ kind: 'drone', x: 100, y: 80 }), camera, 30)).toStrictEqual({
+      x: 82,
+      y: 43,
+    });
+    expect(moverOrigin(mover({ kind: 'vacuum', x: 100, y: 80 }), camera, 30)).toStrictEqual({
+      x: 82,
+      y: 44,
+    });
+  });
+
+  it('draws ground movers at or above the figure before the creatures, the others after the figure, drones after `above`', () => {
+    const renderer = recordingRenderer();
+    const base = state({ x: 20, y: 30 });
+    drawScene(
+      renderer,
+      {
+        ...base,
+        tick: 30,
+        creatures: [{ species: 'snippet', x: 40, y: 20, light: 0, home: { x: 40, y: 20 } }],
+        overview: { current: 1, max: 1 },
+        movers: [
+          mover({ kind: 'drone', x: 24, y: 20 }),
+          mover({ kind: 'dog', look: 1, facing: 'left', frame: 1, x: 20, y: 31 }),
+          mover({ kind: 'person', look: 2, x: 20, y: 30 }),
+          mover({ kind: 'vacuum', x: 20, y: 29 }),
+        ],
+      },
+      CONTENT,
+    );
+    const names = new Map<SpriteSheet, string>([
+      [CONTENT.playerSheet, 'player'],
+      [CONTENT.creatureSheets.snippet, 'snippet'],
+      [CONTENT.overviewSheet, 'heart'],
+      [CONTENT.moverSheets.dog, 'dog'],
+      [CONTENT.moverSheets.vacuum, 'vacuum'],
+      [CONTENT.moverSheets.drone, 'drone'],
+      ...CONTENT.moverSheets.person.map((sheet, n) => [sheet, `person ${n}`] as const),
+    ]);
+    expect(renderer.sheets.map((sheet) => names.get(sheet))).toStrictEqual([
+      'person 2',
+      'vacuum',
+      'snippet',
+      'player',
+      'dog',
+      'drone',
+      'heart',
+    ]);
+    const sprites = renderer.calls.filter((call) => call.startsWith('drawSprite'));
+    expect(sprites).toStrictEqual([
+      'drawSprite 0 at 12,6', // person: (20 − 8, 30 − 24), facing down, frame 0
+      'drawSprite 1 at 12,13', // vacuum: tick 30 shows frame 1
+      'drawSprite 0 at 32,4', // snippet: tick 30 is its frame 0
+      'drawSprite 0 at 12,6', // player
+      'drawSprite 19 at 12,15', // dog: look 1 × 12 + left 2 × 3 + phase 1
+      'drawSprite 1 at 16,3', // drone: rotors frame 1 at tick 30, 1 px higher
+      'drawSprite 0 at 4,4', // heart
+    ]);
+    // The drone comes after the tile of `above` (id 6) and before the heart.
+    const aboveAt = renderer.calls.indexOf('drawTile 6 at 0,0');
+    const droneAt = renderer.calls.indexOf('drawSprite 1 at 16,3');
+    expect(aboveAt).toBeGreaterThan(renderer.calls.indexOf('drawSprite 19 at 12,15'));
+    expect(droneAt).toBeGreaterThan(aboveAt);
+  });
+
+  it('draws the movers while a safe figure blinks', () => {
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      { ...state({ x: 20, y: 30, grace: 4 }), movers: [mover({ kind: 'dog', x: 60, y: 20 })] },
+      CONTENT,
+    );
+    expect(renderer.sheets).toStrictEqual([CONTENT.moverSheets.dog]);
   });
 });

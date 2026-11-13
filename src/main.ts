@@ -5,6 +5,7 @@ import { FRAME_HEIGHT, FRAME_WIDTH } from './engine/sprite';
 import { parseTileMap, parseTileset, tilesetSource } from './engine/tiled';
 import { CREATURE_SIZE } from './game/creature';
 import { CONE_LENGTH } from './game/lamp';
+import { MOVER_SIZE } from './game/mover';
 import type { GameInput } from './game/player';
 import type { GameState } from './game/state';
 import { createInitialState, update } from './game/update';
@@ -27,10 +28,21 @@ const PLAYER_SHEET_URL = '/sprites/player.png';
 const LAMP_SHEET_URL = '/sprites/lamp.png';
 const SNIPPET_SHEET_URL = '/sprites/snippet.png';
 const OVERVIEW_SHEET_URL = '/sprites/overview.png';
+/** The movers' sheets (0015): a person of look n is person-(n + 1).png. */
+const PERSON_SHEET_URLS = [
+  '/sprites/person-1.png',
+  '/sprites/person-2.png',
+  '/sprites/person-3.png',
+  '/sprites/person-4.png',
+];
+const DOG_SHEET_URL = '/sprites/dog.png';
+const VACUUM_SHEET_URL = '/sprites/vacuum.png';
+const DRONE_SHEET_URL = '/sprites/drone.png';
 
 /**
  * The map, its tileset and the tileset's image, each resolved against the file naming it, then
- * the player's sprite sheet, the lamp's, one sheet per creature species and the overview sheet.
+ * the player's sprite sheet, the lamp's, one sheet per creature species, the overview sheet and
+ * the movers' seven sheets (0015).
  */
 async function loadContent(): Promise<SceneContent> {
   const mapJson = await loadJson(MAP_URL);
@@ -62,6 +74,30 @@ async function loadContent(): Promise<SceneContent> {
       image: await loadImage(OVERVIEW_SHEET_URL),
       frameWidth: HEART_SIZE,
       frameHeight: HEART_SIZE,
+    },
+    moverSheets: {
+      person: await Promise.all(
+        PERSON_SHEET_URLS.map(async (url) => ({
+          image: await loadImage(url),
+          frameWidth: FRAME_WIDTH,
+          frameHeight: FRAME_HEIGHT,
+        })),
+      ),
+      dog: {
+        image: await loadImage(DOG_SHEET_URL),
+        frameWidth: MOVER_SIZE,
+        frameHeight: MOVER_SIZE,
+      },
+      vacuum: {
+        image: await loadImage(VACUUM_SHEET_URL),
+        frameWidth: MOVER_SIZE,
+        frameHeight: MOVER_SIZE,
+      },
+      drone: {
+        image: await loadImage(DRONE_SHEET_URL),
+        frameWidth: MOVER_SIZE,
+        frameHeight: MOVER_SIZE,
+      },
     },
   };
 }
