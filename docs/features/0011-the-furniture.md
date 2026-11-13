@@ -62,8 +62,8 @@ free of walls and desks and is told from a fixed partition by its place and its 
 
 | Id | Name | Boxes | Low | Picture |
 |---|---|---|---|---|
-| 13 | partition-top | (0, 0, 16, 2) | yes | strip `#c0cbdc`, its lower row `#8b9bb4` |
-| 14 | partition-left | (0, 0, 2, 16) | yes | strip `#c0cbdc`, its right column `#8b9bb4` |
+| 13 | partition-top | (0, 0, 16, 2) | yes | strip `#c0cbdc`, its lower row `#5a6988` |
+| 14 | partition-left | (0, 0, 2, 16) | yes | strip `#c0cbdc`, its right column `#5a6988` |
 | 15 | partition-corner | (0, 0, 16, 2) and (0, 0, 2, 16) | yes | both strips |
 | 16 | desk | `solid` | yes | top `#e4a672`, edge `#b86f50` |
 | 17 | desk-monitor | `solid` | yes | the desk, a monitor `#262b44` with a screen `#2ce8f5` |

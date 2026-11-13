@@ -348,8 +348,8 @@ painters of 0010 keep returning a colour for every pixel. Pixel by pixel, x and 
 
 | Tile | Pixels |
 |---|---|
-| partition-top | y 0: `#c0cbdc`; y 1: the shade (see below); else transparent |
-| partition-left | x 0: `#c0cbdc`; x 1: the shade; else transparent |
+| partition-top | y 0: `#c0cbdc`; y 1: `#5a6988`; else transparent |
+| partition-left | x 0: `#c0cbdc`; x 1: `#5a6988`; else transparent |
 | partition-corner | the top strip where y ≤ 1, else the left strip where x ≤ 1, else transparent |
 | desk | y 0–12: `#e4a672`; y 13–15: `#b86f50` |
 | desk-monitor | the desk; over it x 4–11, y 2–8 `#262b44`; x 5–10, y 3–6 `#2ce8f5`; x 7–8, y 9–10 `#262b44` |
@@ -366,10 +366,6 @@ painters of 0010 keep returning a colour for every pixel. Pixel by pixel, x and 
 | screen | x 0–15, y 6–8: `#0099db`; y 9: `#124e89`; x 0–1 and x 14–15, y 10–11: `#3a4466`; else transparent |
 | screen-side | x 6–8, y 0–15: `#0099db`; x 9: `#124e89`; x 10–11, y 0–1 and y 14–15: `#3a4466`; else transparent |
 
-**The partition's shade** is the open question at the end of this plan: the spec says
-`#8b9bb4`, which is the carpet's own base colour, so on carpet the strip would show as one
-pixel. Do not start this task before the author has answered; use the colour of the answer.
-
 - [ ] **Failing tests** in `tests/unit/gen-tiles.test.ts`. Replace the "208x16" and "thirteen
   tiles" cases and add:
   - the sheet is 240x32, `SHEET_COLUMNS` 15, `TILE_KINDS` has 30 entries with ids 0–29 in
@@ -385,7 +381,7 @@ pixel. Do not start this task before the author has answered; use the colour of 
   - ids 16–19, 21 and 25–27 have 256 opaque pixels; 22 has 128, all in y 8–15; 24 has no
     opaque pixel in y 0–3;
   - one pixel per tile from the table above, as a table-driven case: 16 (0, 0) `#e4a672` and
-    (0, 15) `#b86f50`; 17 (5, 3) `#2ce8f5`; 18 (0, 0) `#c0cbdc`; 20 (3, 3) `#3a4466` and
+    (0, 15) `#b86f50`; 17 (5, 3) `#2ce8f5`; 18 (0, 0) `#c0cbdc` and (0, 1) `#5a6988`; 13 (0, 1) `#5a6988`; 14 (1, 0) `#5a6988`; 20 (3, 3) `#3a4466` and
     (3, 12) `#5a6988`; 21 (0, 0) `#733e39` and (3, 3) `#c28569`; 22 (3, 12) `#e8b796`; 23
     (4, 10) `#be4a2f` and (7, 0) `#265c42`; 24 (6, 6) `#63c74d` and (6, 7) `#3e8948`; 25
     (0, 0) `#b86f50`; 26 (0, 0) `#ffffff`; 27 (3, 1) `#ffffff` and (3, 10) `#3a4466`; 28
@@ -689,9 +685,6 @@ pixel by pixel — the spec names colours, the plan names pixels.
 
 ## Questions for the author
 
-1. **The partition's second colour.** The spec gives a partition strip `#c0cbdc` with its
-   lower row, or right column, in `#8b9bb4`. That is the carpet's base colour, and every
-   partition stands on carpet, so the strip would show 1 px thin instead of 2. The planning
-   session proposes `#5a6988` for that row and column — the carpet's speck colour, darker
-   than the carpet and lighter than a wall. Task 3 waits for the answer; the spec's tile
-   table is changed with it.
+None. The one question the plan was written with — the partition's second colour — was
+answered by the author on 2026-11-13: `#5a6988` instead of `#8b9bb4`, which is the carpet's
+base colour; the spec's tile table says so.
