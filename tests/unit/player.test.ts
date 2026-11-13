@@ -331,3 +331,85 @@ describe('stepPlayer: solid tiles stop the figure (0005)', () => {
     expect(walk(standing(160, 191.5), press('down'), 1, WALLS).y).toBe(192);
   });
 });
+
+describe('grace and the push (0009)', () => {
+  const figureWith = (fields: Partial<PlayerState>): PlayerState => ({
+    ...standing(160, 96, 'right'),
+    ...fields,
+  });
+
+  it('grace drops by one per step, walking, standing or shining, and stops at 0', () => {
+    expect(stepPlayer(figureWith({ grace: 2 }), NONE, MAP).grace).toBe(1);
+    expect(stepPlayer(figureWith({ grace: 2 }), press('left'), MAP).grace).toBe(1);
+    expect(stepPlayer(figureWith({ grace: 2 }), shining(), MAP).grace).toBe(1);
+    expect(stepPlayer(figureWith({ grace: 0 }), NONE, MAP).grace).toBe(0);
+  });
+
+  it('a push moves the figure by (dx, dy) and ignores the keys', () => {
+    const next = stepPlayer(
+      figureWith({ grace: 90, recoil: { dx: 3, dy: 0, steps: 8 } }),
+      shining('left'),
+      MAP,
+    );
+    expect(next).toStrictEqual({
+      x: 163,
+      y: 96,
+      facing: 'right',
+      frame: 0,
+      frameTimer: 0,
+      grace: 89,
+      recoil: { dx: 3, dy: 0, steps: 7 },
+    });
+  });
+
+  it('eight steps of 3 px are 24 px, then the push is over and the keys work again', () => {
+    const pushed = walk(figureWith({ recoil: { dx: 3, dy: 0, steps: 8 } }), press('left'), 8);
+    expect(pushed.x).toBe(184);
+    expect(pushed.facing).toBe('right');
+    expect(pushed.recoil).toStrictEqual({ dx: 0, dy: 0, steps: 0 });
+    const after = stepPlayer(pushed, press('left'), MAP);
+    expect(after.x).toBeCloseTo(182.6667, 3);
+    expect(after.facing).toBe('left');
+  });
+
+  it('a diagonal push ends with no push left', () => {
+    const next = stepPlayer(figureWith({ recoil: { dx: 1.8, dy: 2.4, steps: 1 } }), NONE, MAP);
+    expect(next.x).toBeCloseTo(161.8, 6);
+    expect(next.y).toBeCloseTo(98.4, 6);
+    expect(next.recoil).toStrictEqual({ dx: 0, dy: 0, steps: 0 });
+  });
+
+  it('a push resets the walk cycle to standing', () => {
+    const next = stepPlayer(
+      figureWith({ frame: 3, frameTimer: 2.5, recoil: { dx: 3, dy: 0, steps: 2 } }),
+      press('right'),
+      MAP,
+    );
+    expect([next.frame, next.frameTimer]).toStrictEqual([0, 0]);
+  });
+
+  it('a wall holds the push: a solid cell 10 px behind the box stops it flush', () => {
+    // Column 7 is [112, 128). The box of feet (96, 100) is [90, 102) × [92, 100): rows 5 and 6.
+    const rows = Array.from({ length: 12 }, (_, row) =>
+      row === 5 || row === 6 ? '.......#............' : '....................',
+    );
+    const walled = pictureMap(rows, { x: 96, y: 100 });
+    const pushed = walk(
+      { ...standing(96, 100, 'left'), recoil: { dx: 3, dy: 0, steps: 8 } },
+      NONE,
+      8,
+      walled,
+    );
+    expect(pushed.x).toBe(106); // the box's right edge at 112
+    expect(pushed.y).toBe(100);
+  });
+
+  it("the map's edge holds the push: the clamp keeps x at 8", () => {
+    const pushed = walk(
+      { ...standing(10, 96, 'right'), recoil: { dx: -3, dy: 0, steps: 8 } },
+      NONE,
+      8,
+    );
+    expect(pushed.x).toBe(8);
+  });
+});

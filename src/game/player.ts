@@ -1,8 +1,8 @@
 import { type Box, moveBox } from '../engine/collision';
 import { STEPS_PER_SECOND } from '../engine/loop';
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
-import { TILE_SIZE, type TileMap } from '../engine/tiled';
-import { type Facing, type PlayerState, WALK_PHASES } from './state';
+import { type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
+import { type Facing, NO_RECOIL, type PlayerState, WALK_PHASES } from './state';
 
 /** The four movement actions, resolved by main.ts once per frame from the held keys. */
 export interface MovementInput {
@@ -88,17 +88,48 @@ export function collisionBox(player: PlayerState): Box {
   };
 }
 
+/** The feet from a moved box, clamped so the whole 16x24 sprite stays inside the map. */
+function feetOf(box: Point, map: TileMap): { readonly x: number; readonly y: number } {
+  const halfWidth = FRAME_WIDTH / 2;
+  return {
+    x: clamp(box.x + BOX_WIDTH / 2, halfWidth, map.width * TILE_SIZE - halfWidth),
+    y: clamp(box.y + BOX_HEIGHT, FRAME_HEIGHT, map.height * TILE_SIZE),
+  };
+}
+
 /**
- * One step. With the lamp on (0007) the figure stands where it is and the direction keys only
- * turn it, by the same rule as walking; the walk cycle is standing. Otherwise: move the box
- * along the vector against the solid grid, X then Y (engine/collision), clamp the feet so the
- * whole 16x24 sprite stays inside the map, turn. "Moving" is the vector before collision and
- * clamp, so a figure held by a wall or an edge keeps its facing and its walk cycle.
+ * One step of a push (0009): the box moves by the push against the solid grid and the clamp,
+ * like a walking step. The keys are not read, the facing stays, the walk cycle is standing.
+ */
+function pushed(player: PlayerState, grace: number, map: TileMap): PlayerState {
+  const { dx, dy, steps } = player.recoil;
+  return {
+    ...feetOf(moveBox(collisionBox(player), dx, dy, map), map),
+    facing: player.facing,
+    frame: 0,
+    frameTimer: 0,
+    grace,
+    recoil: steps > 1 ? { dx, dy, steps: steps - 1 } : NO_RECOIL,
+  };
+}
+
+/**
+ * One step. `grace` drops by 1, not below 0 (0009). A figure that is being pushed is moved by
+ * the push and nothing else. With the lamp on (0007) the figure stands where it is and the
+ * direction keys only turn it, by the same rule as walking; the walk cycle is standing.
+ * Otherwise: move the box along the vector against the solid grid, X then Y (engine/collision),
+ * clamp the feet so the whole 16x24 sprite stays inside the map, turn. "Moving" is the vector
+ * before collision and clamp, so a figure held by a wall or an edge keeps its facing and its
+ * walk cycle.
  */
 export function stepPlayer(player: PlayerState, input: GameInput, map: TileMap): PlayerState {
+  const grace = Math.max(0, player.grace - 1);
+  if (player.recoil.steps > 0) {
+    return pushed(player, grace, map);
+  }
   const vector = movementVector(input);
   if (input.lamp) {
-    return { ...player, facing: facingOf(vector, player.facing), frame: 0, frameTimer: 0 };
+    return { ...player, facing: facingOf(vector, player.facing), frame: 0, frameTimer: 0, grace };
   }
   const moving = vector.x !== 0 || vector.y !== 0;
   const box = moveBox(
@@ -107,13 +138,11 @@ export function stepPlayer(player: PlayerState, input: GameInput, map: TileMap):
     vector.y * STEP_DISTANCE,
     map,
   );
-  const halfWidth = FRAME_WIDTH / 2;
   return {
-    x: clamp(box.x + BOX_WIDTH / 2, halfWidth, map.width * TILE_SIZE - halfWidth),
-    y: clamp(box.y + BOX_HEIGHT, FRAME_HEIGHT, map.height * TILE_SIZE),
+    ...feetOf(box, map),
     facing: facingOf(vector, player.facing),
     ...walkCycle(player, moving),
-    grace: player.grace,
+    grace,
     recoil: player.recoil,
   };
 }
