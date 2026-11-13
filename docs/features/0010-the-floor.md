@@ -454,7 +454,11 @@ at factor 3? Are a 96 px corridor and a 48 px doorway comfortable to walk — do
 catch anywhere? Which rooms feel too large or too small? Is the floor the right size —
 crossing it takes about 22 seconds?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-13, steps 1–24, on `http://localhost:5174` because port 5173 was
+taken by another project's dev server. Feel: the empty floor reads as an office floor; the 4 px
+walls are clear enough at factor 3; the 96 px corridors and 48 px doorways walk well, the figure
+catches nowhere; unfurnished, the rooms feel large overall — their size is judged again once the
+first desks, cubicles and partitions stand (0011); the floor's size is right.
 
 ## Open questions
 
