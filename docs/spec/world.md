@@ -19,7 +19,8 @@ and Sales; the reception south of the courtyard; the canteen by the pond and Mar
 Support along the south avenue; the parking lot, fenced, in the south-west; a canal along the
 east, a fence all round. Every building is closed. The player starts in the courtyard in front of
 the entrance. The tables in `docs/features/0006-camera-and-campus.md` are the layout until the
-art pass.
+art pass. Until the data protection officer's office has an interior (M5), the figure wakes in
+front of its door, at the map's `wake` point, tile (49, 46) (feature 0009).
 
 | Region | Role |
 |---|---|
