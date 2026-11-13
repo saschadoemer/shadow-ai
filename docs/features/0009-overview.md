@@ -327,7 +327,13 @@ of the screen the right length, and does it read as losing overview and waking u
 loading screen? Does waking in front of the office feel like a way back and not like a
 punishment? Are three points the right number against this creature?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-13, steps 1–23, on `http://localhost:5175` (5173 was taken by
+another project's dev server). Feel: the push of a tile and a half is right; 1.5 s of safety is
+right; the blinking reads as safe; the three lights are readable, but the imagery does not fit —
+small hearts would be better, as in other games (a new draft); the hit is clear without a sound;
+the length of the closing screen is right, and it reads not as waking up but as a simple restart,
+which is fine; waking in front of the office feels like a way back; three points are right
+against the snippet.
 
 ## Open questions
 
