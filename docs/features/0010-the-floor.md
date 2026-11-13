@@ -48,7 +48,7 @@ one, and walls are 4 px thin instead of a whole tile. The furniture is feature 0
 **Out, explicitly:** desks, chairs, cubicle partitions, cabinets, plants and the `above` layer
 (0011) · light through glass or over low things (0011 for furniture; glass walls are not
 planned) · doors that open, the lift and the stairs working, the top floor and the basement as
-maps, a map id in `GameState` (M6, M7) · shadow walls in the doorways and density data (0012) ·
+maps, a map id in `GameState` (M6, M7) · shadow walls in the doorways and density data (0013) ·
 figures in the rooms, region names on screen (M4, M5) · a swept collision
 test — the displacement stays below 4 px per call.
 
