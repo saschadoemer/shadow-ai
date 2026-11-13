@@ -328,7 +328,4 @@ just loaded; the figure stands in the reception. Arrow keys walk, the lamp key i
 
 ## Open questions
 
-1. **Order against 0014.** This spec assumes 0015 is built before 0014 (shadow walls and
-   density), because the walk enters HR, Accounting and Development, which a shadow wall will
-   close until the upgrades exist. `docs/plan.md` §4 is written that way. If 0014 goes first,
-   steps 28 and 29 are cut down to the rooms that are open.
+None. The order against 0014 was settled on 2026-11-13: 0015 is built first (see Scope).
