@@ -167,7 +167,10 @@ from each of the four sides, also from below, where the apex lies on the wall's 
 A wall is **in the light** in a step when the lamp is on, its box meets the cone of the
 stepped figure, and no opaque box of the map lies on the line from the centre of the figure's
 box, (x, y − 4), to the point of the wall's box nearest to that centre (`sightBlocked` against
-`map.opaque`). Other walls do not count on that line.
+`map.opaque`). Along the wall the box ends, for this point, at its last pixel — x + w − 1 for
+a horizontal wall, y + h − 1 for a vertical one: the corner beyond it belongs to the next wall
+strip, whose box is half-open, and the line would end inside that strip. Other walls do not
+count on that line.
 
 ### The step
 
@@ -282,7 +285,9 @@ the snippet.
   (110, 88) down → no; (152, 96) up → no; (152, 88) left → no; (152, 108) up → yes, flush from
   below; (118, 108) up → no; (152.4, 116) up → yes; (234, 60) right → yes; (234, 40) right →
   yes; (234, 36) right → no. With the lamp off none is in the light. A full opaque tile
-  between the figure and the box keeps it out of the light; a low box does not.
+  between the figure and the box keeps it out of the light; a low box does not. With a wall
+  strip (176, 96, 16, 4) beside the horizontal box, (186, 88) down → in the light: the line
+  ends on the wall's last pixel, not in the strip.
 - **Unit, `game/shadow`, the step:** criteria 8 and 9 step by step; a break at `light` 30; two
   walls in the cone at once both count; the wall that leaves the array keeps the others'
   `wall` indices.
