@@ -2,7 +2,7 @@ import { loadImage, loadJson, resolvePath } from './engine/assets';
 import { type Bindings, createKeyboard, listenToKeyboard, resolveActions } from './engine/input';
 import { runLoop } from './engine/loop';
 import { FRAME_HEIGHT, FRAME_WIDTH } from './engine/sprite';
-import { parseTileMap, parseTileset, tilesetSource } from './engine/tiled';
+import { parseTileMap, parseTileset, TILE_SIZE, tilesetSource } from './engine/tiled';
 import { CREATURE_SIZE } from './game/creature';
 import { CONE_LENGTH } from './game/lamp';
 import { MOVER_SIZE } from './game/mover';
@@ -38,11 +38,12 @@ const PERSON_SHEET_URLS = [
 const DOG_SHEET_URL = '/sprites/dog.png';
 const VACUUM_SHEET_URL = '/sprites/vacuum.png';
 const DRONE_SHEET_URL = '/sprites/drone.png';
+const SHADOW_WALL_SHEET_URL = '/sprites/shadow-wall.png';
 
 /**
  * The map, its tileset and the tileset's image, each resolved against the file naming it, then
  * the player's sprite sheet, the lamp's, one sheet per creature species, the overview sheet and
- * the movers' seven sheets (0015).
+ * the movers' seven sheets (0015) and the shadow-wall sheet (0014).
  */
 async function loadContent(): Promise<SceneContent> {
   const mapJson = await loadJson(MAP_URL);
@@ -74,6 +75,11 @@ async function loadContent(): Promise<SceneContent> {
       image: await loadImage(OVERVIEW_SHEET_URL),
       frameWidth: HEART_SIZE,
       frameHeight: HEART_SIZE,
+    },
+    shadowWallSheet: {
+      image: await loadImage(SHADOW_WALL_SHEET_URL),
+      frameWidth: TILE_SIZE,
+      frameHeight: TILE_SIZE,
     },
     moverSheets: {
       person: await Promise.all(

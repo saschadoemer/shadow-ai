@@ -1,9 +1,10 @@
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
-import type { Point, TileMap } from '../engine/tiled';
+import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { CREATURE_SIZE } from '../game/creature';
 import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE } from '../game/mover';
 import { DARK_STEPS } from '../game/overview';
+import { LIFT_STEPS, wallsOf } from '../game/shadow';
 import {
   type CreatureState,
   FACINGS,
@@ -11,6 +12,7 @@ import {
   type MoverState,
   PHASES_PER_FACING,
   type PlayerState,
+  type ShadowWallState,
   type Species,
 } from '../game/state';
 import { drawLayer } from './draw-map';
@@ -34,6 +36,8 @@ export interface SceneContent {
   readonly creatureSheets: Readonly<Record<Species, SpriteSheet>>;
   /** Two 8x8 frames: a full heart, an empty heart (0009, 0012). */
   readonly overviewSheet: SpriteSheet;
+  /** Sixteen 16x16 frames: orientation × 8 + look (0014). */
+  readonly shadowWallSheet: SpriteSheet;
   /** The movers' sheets (0015): one per person, the dogs' 24 frames, two frames each for the vacuum and the drone. */
   readonly moverSheets: {
     readonly person: readonly SpriteSheet[];
@@ -139,6 +143,47 @@ function drawMovers(
   }
 }
 
+/** The shadow-wall sheet (0014): frame = orientation × WALL_LOOKS + look. */
+export const WALL_LOOKS = 8;
+/** A wall the light is not on changes its phase every 15 steps: four changes per second. */
+export const WALL_FLICKER_STEPS = 15;
+/** The looks of a wall that gives way, one per third of LIFT_STEPS. */
+const GIVING_WAY_LOOKS = [0, 6, 7] as const;
+
+/**
+ * The look of a standing wall. Giving way: the thin wall's still look, then the two thinner
+ * ones, a third of LIFT_STEPS each. Holding against the light: its density's first look,
+ * still. Otherwise its density's two looks in turn, by the state's tick.
+ */
+export function wallLook(wall: ShadowWallState, density: number, tick: number): number {
+  if (wall.light > 0) {
+    const third = Math.floor((wall.light * GIVING_WAY_LOOKS.length) / LIFT_STEPS);
+    return GIVING_WAY_LOOKS[Math.min(third, GIVING_WAY_LOOKS.length - 1)] ?? 0;
+  }
+  const still = (density - 1) * 2;
+  return wall.lit ? still : still + (Math.floor(tick / WALL_FLICKER_STEPS) % 2);
+}
+
+/**
+ * A wall's frames on the surface: one per 16 px of its length, from the corner of its box. A
+ * wall wider than high is horizontal, orientation 0; the camera is whole pixels and so is the
+ * box.
+ */
+export function wallSegments(
+  box: Box,
+  camera: Point,
+): { readonly orientation: number; readonly origins: readonly Point[] } {
+  const horizontal = box.width > box.height;
+  const count = (horizontal ? box.width : box.height) / TILE_SIZE;
+  return {
+    orientation: horizontal ? 0 : 1,
+    origins: Array.from({ length: count }, (_, k) => ({
+      x: box.x + (horizontal ? k * TILE_SIZE : 0) - camera.x,
+      y: box.y + (horizontal ? 0 : k * TILE_SIZE) - camera.y,
+    })),
+  };
+}
+
 /** The hearts of overview (0009, 0012): 8x8, 4 px from the corner, one every 10 px. */
 export const HEART_SIZE = 8;
 export const HEART_MARGIN = 4;
@@ -163,7 +208,8 @@ export function lidHeight(dark: number): number {
 }
 
 /**
- * One frame: ground, detail, the cone when the lamp is on, the ground movers whose feet are at
+ * One frame: ground, detail, the cone when the lamp is on, the standing shadow walls in array
+ * order (0014), the ground movers whose feet are at
  * or above the figure's, the creatures in array order, the player, the other ground movers,
  * above, the drones (0015), all shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x, round(y) − 24 −
  * camera.y): the feet are its bottom centre, and the camera is already whole pixels
@@ -179,6 +225,18 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
   if (state.lamp.on) {
     const origin = lampFrameOrigin(player, camera);
     renderer.drawSprite(content.lampSheet, lampFrame(player), origin.x, origin.y);
+  }
+  const walls = wallsOf(content.map.rects);
+  for (const standing of state.shadowWalls) {
+    const wall = walls[standing.wall];
+    if (wall === undefined) {
+      continue;
+    }
+    const { orientation, origins } = wallSegments(wall.box, camera);
+    const frame = orientation * WALL_LOOKS + wallLook(standing, wall.density, state.tick);
+    for (const origin of origins) {
+      renderer.drawSprite(content.shadowWallSheet, frame, origin.x, origin.y);
+    }
   }
   const ground = state.movers.filter((mover) => mover.kind !== 'drone');
   drawMovers(
