@@ -28,7 +28,9 @@ lamp shines over everything lower than a person. The floor is lived in (feature 
 armchairs, beanbags, coffee machines, water dispensers, coat racks, a table football, an arcade
 cabinet and a few gadgets on desks. The floor moves (feature 0015): four colleagues, a dog and a
 robot vacuum in every room and two drones follow fixed routes; they block nothing, and the ones
-on the ground stand while the figure is close. The roadmap is in [docs/plan.md](docs/plan.md).
+on the ground stand while the figure is close. Shadow walls close the doorways of the regions
+under shadow (feature 0014): the lamp lifts the thin ones in a second, the dense ones hold until
+the lamp is stronger. Milestone M3 is complete. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 

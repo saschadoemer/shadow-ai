@@ -14,6 +14,7 @@ import {
   encodeOverviewPng,
   encodePersonPng,
   encodePng,
+  encodeShadowWallPng,
   encodeSnippetPng,
   encodeVacuumPng,
 } from '../../tools/gen-sprites.ts';
@@ -45,6 +46,17 @@ import {
   SHEET_HEIGHT,
   SHEET_WIDTH,
 } from '../../tools/placeholder-player.ts';
+import {
+  renderShadowWall,
+  WALL_DARK,
+  WALL_FRAME_SIZE,
+  WALL_LOOKS,
+  WALL_ORIENTATIONS,
+  WALL_SHEET_HEIGHT,
+  WALL_SHEET_WIDTH,
+  WALL_STRIP,
+  wallInk,
+} from '../../tools/placeholder-shadow-wall.ts';
 import {
   renderSnippet,
   SNIPPET_FRAME_SIZE,
@@ -540,5 +552,96 @@ describe('the movers’ sheets (0015)', () => {
     expect([count(0, 'rotor'), count(1, 'rotor')]).toStrictEqual([20, 4]);
     expect(count(0, 'light')).toBe(2);
     expect(count(0, 'body')).toBe(6 * 4 - 2 + 4);
+  });
+});
+
+describe('the placeholder shadow-wall generator (0014)', () => {
+  const FILE = join(ROOT, 'public/sprites/shadow-wall.png');
+  const WALL = renderShadowWall();
+  /** The colour of pixel (x, y) of a frame, or null when it is transparent. */
+  const pixel = (frame: number, x: number, y: number): string | null => {
+    const o = (y * WALL_SHEET_WIDTH + frame * WALL_FRAME_SIZE + x) * 4;
+    if (WALL[o + 3] === 0) {
+      return null;
+    }
+    expect(WALL[o + 3]).toBe(255);
+    return `#${[WALL[o], WALL[o + 1], WALL[o + 2]]
+      .map((c) => (c ?? 0).toString(16).padStart(2, '0'))
+      .join('')}`;
+  };
+  const frameOf = (frame: number): (string | null)[] =>
+    Array.from({ length: 256 }, (_, at) => pixel(frame, at % 16, Math.floor(at / 16)));
+
+  it('is deterministic: two runs give byte-identical files', () => {
+    expect(encodeShadowWallPng().equals(encodeShadowWallPng())).toBe(true);
+  });
+
+  it('matches the committed file', () => {
+    const committed = PNG.sync.read(readFileSync(FILE));
+    expect([committed.width, committed.height]).toStrictEqual([256, 16]);
+    expect(Buffer.from(WALL).equals(committed.data)).toBe(true);
+  });
+
+  it('is 256x16: sixteen 16x16 frames in one row, two orientations of eight looks', () => {
+    expect([
+      WALL_SHEET_WIDTH,
+      WALL_SHEET_HEIGHT,
+      WALL_FRAME_SIZE,
+      WALL_STRIP,
+      WALL_ORIENTATIONS,
+      WALL_LOOKS,
+    ]).toStrictEqual([256, 16, 16, 4, 2, 8]);
+    expect(WALL).toHaveLength(256 * 16 * 4);
+  });
+
+  it('draws every look by its rule', () => {
+    const violet = SHADOW_COLOUR;
+    const rules: readonly ((i: number, j: number) => string | null)[] = [
+      (i, j) => ((i + j) % 2 === 0 ? violet : null),
+      (i, j) => ((i + j) % 2 === 1 ? violet : null),
+      (i, j) => (i % 2 === 0 && j % 2 === 0 ? null : violet),
+      (i, j) => (i % 2 === 1 && j % 2 === 1 ? null : violet),
+      () => violet,
+      (i, j) => ((i + j) % 4 === 0 ? '#181425' : violet),
+      (i, j) => ((i + j) % 2 === 0 && i % 4 <= 1 ? violet : null),
+      (i, j) => ((i + j) % 8 === 0 ? violet : null),
+    ];
+    rules.forEach((rule, look) => {
+      for (let i = 0; i < 16; i += 1) {
+        for (let j = 0; j < 4; j += 1) {
+          expect(wallInk(look, i, j), `look ${look} (${i}, ${j})`).toBe(rule(i, j));
+          expect(pixel(look, i, j), `horizontal look ${look} (${i}, ${j})`).toBe(rule(i, j));
+          expect(pixel(8 + look, j, i), `vertical look ${look} (${i}, ${j})`).toBe(rule(i, j));
+        }
+      }
+    });
+  });
+
+  it('has the pixel counts of the spec: a denser wall has more, a wall that gives way loses them', () => {
+    for (const orientation of [0, 1]) {
+      const frames = Array.from({ length: 8 }, (_, look) => frameOf(orientation * 8 + look));
+      expect(frames.map((frame) => frame.filter((colour) => colour !== null).length)).toStrictEqual(
+        [32, 32, 48, 48, 64, 64, 16, 8],
+      );
+      expect(
+        frames.map((frame) => frame.filter((colour) => colour === SHADOW_COLOUR).length),
+      ).toStrictEqual([32, 32, 48, 48, 64, 48, 16, 8]);
+      expect(frames[5]?.filter((colour) => colour === WALL_DARK)).toHaveLength(16);
+    }
+  });
+
+  it('keeps everything outside the strip transparent: rows 4–15 or columns 4–15', () => {
+    for (let look = 0; look < 8; look += 1) {
+      for (let a = 0; a < 16; a += 1) {
+        for (let b = 4; b < 16; b += 1) {
+          expect(pixel(look, a, b)).toBeNull();
+          expect(pixel(8 + look, b, a)).toBeNull();
+        }
+      }
+    }
+  });
+
+  it('rejects a look outside 0–7', () => {
+    expect(() => wallInk(8, 0, 0)).toThrow('a shadow wall has looks 0 to 7, not 8');
   });
 });

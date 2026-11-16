@@ -626,7 +626,7 @@ describe('parseTileMap: named points (0008)', () => {
     }
   };
 
-  it('returns the named points besides the spawn in file order, and ignores other objects', () => {
+  it('returns the named points besides the spawn in file order', () => {
     const map = parse('points.tmj');
     expect(map.spawn).toStrictEqual({ x: 40, y: 56 });
     expect(map.points).toStrictEqual([
@@ -710,5 +710,105 @@ describe('parseTileMap: named points (0008)', () => {
         },
       ]),
     ).toThrow('point "dog:hr:1" has a pause that is not an int property');
+  });
+});
+
+describe('parseTileMap: rectangle objects (0014)', () => {
+  const tiles = fixture('fixture-tiles.tsj');
+  const tileset = parseTileset(tiles.json, tiles.file);
+  const parse = (name: string) => {
+    const { file, json } = fixture(name);
+    return parseTileMap(json, tileset, file);
+  };
+  /** walls.tmj with one change to its object `shadow:sales`. */
+  const rejection = (change: (object: Record<string, unknown>) => void): string => {
+    const { file, json } = fixture('walls.tmj');
+    const copy = structuredClone(json) as MapJson;
+    const sales = copy.layers
+      .find((layer) => layer.name === 'objects')
+      ?.objects?.find((object) => object.name === 'shadow:sales');
+    if (sales === undefined) {
+      throw new Error('walls.tmj has no object "shadow:sales"');
+    }
+    change(sales);
+    return messageOf(() => parseTileMap(copy, tileset, file));
+  };
+  const FILE = 'tests/fixtures/maps/walls.tmj';
+
+  it('reads the rectangles in file order, beside the points', () => {
+    const map = parse('walls.tmj');
+    expect(map.spawn).toStrictEqual({ x: 40, y: 152 });
+    expect(map.points).toStrictEqual([{ name: 'snippet', x: 200, y: 152 }]);
+    expect(map.rects).toStrictEqual([
+      { name: 'shadow:marketing', x: 128, y: 96, width: 48, height: 4 },
+      { name: 'shadow:sales', x: 240, y: 32, width: 4, height: 48 },
+      { name: 'shadow:hr', x: 32, y: 96, width: 48, height: 4 },
+    ]);
+  });
+
+  it('leaves `rects` empty on a map without rectangles', () => {
+    expect(parse('corridor.tmj').rects).toStrictEqual([]);
+  });
+
+  it('reads the rectangle of points.tmj, whatever its name means', () => {
+    expect(parse('points.tmj').rects).toStrictEqual([
+      { name: 'zone', x: 64, y: 64, width: 16, height: 16 },
+    ]);
+  });
+
+  it.each([
+    ['rect-without-name.tmj', 'layer "objects" has a rectangle object without a name'],
+    ['rect-rotated.tmj', 'rectangle "shadow:sales" is rotated'],
+    [
+      'rect-outside.tmj',
+      'rectangle "shadow:sales" (318, 32, 4, 48) is not whole pixels inside the map',
+    ],
+    ['object-ellipse.tmj', 'layer "objects" has an object that is neither a point nor a rectangle'],
+  ])('rejects %s', (name, problem) => {
+    expect(messageOf(() => parse(name))).toBe(`tests/fixtures/maps/${name}: ${problem}`);
+  });
+
+  it.each(['polygon', 'polyline', 'text', 'gid'])('rejects an object with `%s`', (field) => {
+    expect(
+      rejection((object) => {
+        object[field] = field === 'gid' ? 1 : [];
+      }),
+    ).toBe(`${FILE}: layer "objects" has an object that is neither a point nor a rectangle`);
+  });
+
+  it.each([
+    [{ x: 240.5 }, '(240.5, 32, 4, 48)'],
+    [{ width: 0 }, '(240, 32, 0, 48)'],
+    [{ height: 0.5 }, '(240, 32, 4, 0.5)'],
+    [{ x: -4 }, '(-4, 32, 4, 48)'],
+    [{ y: 160 }, '(240, 160, 4, 48)'],
+  ])('rejects a rectangle changed by %o', (change, box) => {
+    expect(rejection((object) => Object.assign(object, change))).toBe(
+      `${FILE}: rectangle "shadow:sales" ${box} is not whole pixels inside the map`,
+    );
+  });
+
+  it('accepts a rectangle that ends on the last pixel of the map', () => {
+    const { file, json } = fixture('walls.tmj');
+    const copy = structuredClone(json) as MapJson;
+    const objects = copy.layers.find((layer) => layer.name === 'objects')?.objects ?? [];
+    Object.assign(objects[3] ?? {}, { x: 316, y: 144 });
+    expect(parseTileMap(copy, tileset, file).rects[1]).toStrictEqual({
+      name: 'shadow:sales',
+      x: 316,
+      y: 144,
+      width: 4,
+      height: 48,
+    });
+  });
+
+  it('applies the rules for points first', () => {
+    const { file, json } = fixture('rect-rotated.tmj');
+    const copy = structuredClone(json) as MapJson;
+    const objects = copy.layers.find((layer) => layer.name === 'objects')?.objects ?? [];
+    Object.assign(objects[1] ?? {}, { name: '' });
+    expect(messageOf(() => parseTileMap(copy, tileset, file))).toBe(
+      `${file}: layer "objects" has a point object without a name`,
+    );
   });
 });

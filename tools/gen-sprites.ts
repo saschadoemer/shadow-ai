@@ -10,6 +10,11 @@ import {
 } from './placeholder-overview.ts';
 import { PERSON_SHIRTS, renderPerson } from './placeholder-person.ts';
 import { renderPlayer, SHEET_HEIGHT, SHEET_WIDTH } from './placeholder-player.ts';
+import {
+  renderShadowWall,
+  WALL_SHEET_HEIGHT,
+  WALL_SHEET_WIDTH,
+} from './placeholder-shadow-wall.ts';
 import { renderSnippet, SNIPPET_SHEET_HEIGHT, SNIPPET_SHEET_WIDTH } from './placeholder-snippet.ts';
 import { renderVacuum, VACUUM_SHEET_HEIGHT, VACUUM_SHEET_WIDTH } from './placeholder-vacuum.ts';
 
@@ -19,7 +24,8 @@ import { renderVacuum, VACUUM_SHEET_HEIGHT, VACUUM_SHEET_WIDTH } from './placeho
  * tools/placeholder-snippet.ts and public/sprites/overview.png from
  * tools/placeholder-overview.ts; and the movers' seven sheets of 0015 —
  * public/sprites/person-1.png to person-4.png from tools/placeholder-person.ts, dog.png,
- * vacuum.png and drone.png from tools/placeholder-dog.ts, -vacuum.ts and -drone.ts. Deterministic — pngjs writes no
+ * vacuum.png and drone.png from tools/placeholder-dog.ts, -vacuum.ts and -drone.ts; and
+ * public/sprites/shadow-wall.png of 0014 from tools/placeholder-shadow-wall.ts. Deterministic — pngjs writes no
  * timestamp — and Node runs this TypeScript file directly, without a transpiler.
  */
 
@@ -72,6 +78,12 @@ export function encodeDronePng(): Buffer {
   return PNG.sync.write(png);
 }
 
+export function encodeShadowWallPng(): Buffer {
+  const png = new PNG({ width: WALL_SHEET_WIDTH, height: WALL_SHEET_HEIGHT });
+  png.data = Buffer.from(renderShadowWall());
+  return PNG.sync.write(png);
+}
+
 if (import.meta.main) {
   mkdirSync('public/sprites', { recursive: true });
   writeFileSync('public/sprites/player.png', encodePng());
@@ -84,4 +96,5 @@ if (import.meta.main) {
   writeFileSync('public/sprites/dog.png', encodeDogPng());
   writeFileSync('public/sprites/vacuum.png', encodeVacuumPng());
   writeFileSync('public/sprites/drone.png', encodeDronePng());
+  writeFileSync('public/sprites/shadow-wall.png', encodeShadowWallPng());
 }

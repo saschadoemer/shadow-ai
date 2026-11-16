@@ -83,7 +83,7 @@ office in which nothing moves does not read as one — and before 0014, because 
 every room. The density rule last, together with the first thing it gates — the shadow
 walls, which stand in the doorways of the floor — because 0006 left the density data to M3. The
 shadow as a region's colour — desaturation, the violet dithering, the clearing — arrives with the
-first cleared region in M5.
+first cleared region in M5. M3 is done: 0014 was the last of the nine.
 
 ## 5. Deferred, with reasons
 

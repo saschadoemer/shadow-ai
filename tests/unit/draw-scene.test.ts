@@ -6,6 +6,7 @@ import {
   type MoverState,
   NO_RECOIL,
   type PlayerState,
+  type ShadowWallState,
 } from '../../src/game/state';
 import {
   creatureFrame,
@@ -22,6 +23,8 @@ import {
   playerFrame,
   playerVisible,
   type SceneContent,
+  wallLook,
+  wallSegments,
 } from '../../src/render/draw-scene';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
 import { solidsOf } from './solids';
@@ -61,6 +64,7 @@ const MAP: TileMap = {
   above: [6, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   spawn: { x: 8, y: 8 },
   points: [],
+  rects: [],
   solids: solidsOf([false, false, false, true, true, true], 3),
   opaque: solidsOf([false, false, false, true, true, true], 3),
 };
@@ -71,6 +75,7 @@ const CONTENT: SceneContent = {
   lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
   creatureSheets: { snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 } },
   overviewSheet: { image: {} as ImageBitmap, frameWidth: 8, frameHeight: 8 },
+  shadowWallSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   moverSheets: {
     person: [0, 1, 2, 3].map(() => ({
       image: {} as ImageBitmap,
@@ -100,9 +105,10 @@ const state = (
   tick: 0,
   player: player(fields),
   camera,
-  lamp: { on: lampOn },
+  lamp: { on: lampOn, strength: 1 },
   creatures: [],
   movers: [],
+  shadowWalls: [],
   captured: { snippet: 0 },
   // No hearts: the call lists of the earlier features stay as they were (0009).
   overview: { current: 0, max: 0 },
@@ -505,5 +511,102 @@ describe('the movers in the scene (0015)', () => {
       CONTENT,
     );
     expect(renderer.sheets).toStrictEqual([CONTENT.moverSheets.dog]);
+  });
+});
+
+describe('the shadow walls in the scene (0014)', () => {
+  /** A thin horizontal wall and a dense vertical one, three segments each. */
+  const WALLED: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...MAP,
+      rects: [
+        { name: 'shadow:marketing', x: 16, y: 16, width: 48, height: 4 },
+        { name: 'shadow:hr', x: 32, y: 0, width: 4, height: 48 },
+      ],
+    },
+  };
+  const standing = (wall: number, fields: Partial<ShadowWallState> = {}): ShadowWallState => ({
+    wall,
+    lit: false,
+    light: 0,
+    ...fields,
+  });
+
+  it('flickers every 15 steps by its density while the light is not on it', () => {
+    const looks = (density: number) =>
+      [0, 14, 15, 29, 30].map((tick) => wallLook(standing(0), density, tick));
+    expect(looks(1)).toStrictEqual([0, 0, 1, 1, 0]);
+    expect(looks(2)).toStrictEqual([2, 2, 3, 3, 2]);
+    expect(looks(3)).toStrictEqual([4, 4, 5, 5, 4]);
+  });
+
+  it('stands still while it holds against the light', () => {
+    expect([0, 15, 30].map((tick) => wallLook(standing(0, { lit: true }), 2, tick))).toStrictEqual([
+      2, 2, 2,
+    ]);
+    expect(wallLook(standing(0, { lit: true }), 3, 15)).toBe(4);
+  });
+
+  it('thins out in thirds while it gives way, whatever the tick', () => {
+    const look = (light: number) => wallLook(standing(0, { lit: true, light }), 1, 15);
+    expect([1, 19, 20, 39, 40, 59].map(look)).toStrictEqual([0, 0, 6, 6, 7, 7]);
+  });
+
+  it('cuts a wall into 16 px segments from the corner of its box, shifted by the camera', () => {
+    expect(wallSegments({ x: 16, y: 16, width: 48, height: 4 }, { x: 5, y: 7 })).toStrictEqual({
+      orientation: 0,
+      origins: [
+        { x: 11, y: 9 },
+        { x: 27, y: 9 },
+        { x: 43, y: 9 },
+      ],
+    });
+    expect(wallSegments({ x: 32, y: 0, width: 4, height: 48 }, { x: 5, y: 7 })).toStrictEqual({
+      orientation: 1,
+      origins: [
+        { x: 27, y: -7 },
+        { x: 27, y: 9 },
+        { x: 27, y: 25 },
+      ],
+    });
+  });
+
+  it('draws the walls after the cone and before the ground movers, in array order', () => {
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      {
+        ...state({ x: 20, y: 30 }, { x: 5, y: 7 }, true),
+        movers: [mover({ kind: 'dog', x: 60, y: 20 })],
+        shadowWalls: [standing(0), standing(1)],
+      },
+      WALLED,
+    );
+    expect(renderer.sheets[0]).toBe(WALLED.lampSheet);
+    expect(renderer.sheets.slice(1, 7).every((sheet) => sheet === WALLED.shadowWallSheet)).toBe(
+      true,
+    );
+    expect(renderer.sheets[7]).toBe(WALLED.moverSheets.dog);
+    expect(renderer.sheets[8]).toBe(WALLED.playerSheet);
+    expect(
+      renderer.calls.filter((call) => call.startsWith('drawSprite')).slice(1, 7),
+    ).toStrictEqual([
+      'drawSprite 0 at 11,9',
+      'drawSprite 0 at 27,9',
+      'drawSprite 0 at 43,9',
+      'drawSprite 10 at 27,-7',
+      'drawSprite 10 at 27,9',
+      'drawSprite 10 at 27,25',
+    ]);
+  });
+
+  it('draws no lifted wall, and no wall on a map without them', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, { ...state({ x: 20, y: 30 }), shadowWalls: [standing(1)] }, WALLED);
+    expect(renderer.sheets.filter((sheet) => sheet === WALLED.shadowWallSheet)).toHaveLength(3);
+    const bare = recordingRenderer();
+    drawScene(bare, state({ x: 20, y: 30 }), CONTENT);
+    expect(bare.sheets.filter((sheet) => sheet === CONTENT.shadowWallSheet)).toHaveLength(0);
   });
 });

@@ -1,6 +1,7 @@
 import type { Point, TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
 import { DIRECTIONS } from './lamp';
+import { restedWalls } from './shadow';
 import {
   type CreatureState,
   type GameState,
@@ -115,7 +116,7 @@ export function wakePoint(map: TileMap): Point {
   return wake === undefined ? map.spawn : { x: wake.x, y: wake.y };
 }
 
-/** The world set right: the figure at the wake point, overview full, every creature at home; the movers stay where they are (0015). */
+/** The world set right: the figure at the wake point, overview full, every creature at home; the movers stay where they are (0015); every standing wall unlit, no lifted wall back (0014). */
 function woken(state: GameState, map: TileMap): GameState {
   const wake = wakePoint(map);
   const player: PlayerState = {
@@ -131,7 +132,7 @@ function woken(state: GameState, map: TileMap): GameState {
     tick: state.tick,
     player,
     camera: followPlayer(player, map),
-    lamp: { on: false },
+    lamp: { on: false, strength: state.lamp.strength },
     creatures: state.creatures.map((creature) => ({
       ...creature,
       x: creature.home.x,
@@ -139,6 +140,7 @@ function woken(state: GameState, map: TileMap): GameState {
       light: 0,
     })),
     movers: state.movers,
+    shadowWalls: restedWalls(state.shadowWalls),
     captured: state.captured,
     overview: { current: state.overview.max, max: state.overview.max },
     dark: state.dark,
@@ -155,7 +157,7 @@ export function stepDark(state: GameState, map: TileMap): GameState {
   const next: GameState = {
     ...state,
     tick: state.tick + 1,
-    lamp: { on: false },
+    lamp: { on: false, strength: state.lamp.strength },
     dark: dark >= DARK_STEPS ? 0 : dark,
   };
   return dark === WAKE_STEP ? woken(next, map) : next;

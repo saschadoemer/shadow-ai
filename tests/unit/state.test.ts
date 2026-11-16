@@ -25,6 +25,8 @@ const ROUTES_MAP = loadMap(
   'tests/fixtures/maps/routes.tmj',
   'tests/fixtures/maps/fixture-tiles.tsj',
 );
+/** Three walls on open floor (0014): marketing and hr horizontal, sales vertical. */
+const WALLS_MAP = loadMap('tests/fixtures/maps/walls.tmj', 'tests/fixtures/maps/fixture-tiles.tsj');
 /** The floor the game loads. */
 const FLOOR_MAP = loadMap('public/maps/floor.tmj', 'public/tiles/placeholder.tsj');
 
@@ -58,9 +60,10 @@ describe('GameState (INV-1)', () => {
         recoil: { dx: 0, dy: 0, steps: 0 },
       },
       camera: { x: 0, y: 12 },
-      lamp: { on: false },
+      lamp: { on: false, strength: 1 },
       creatures: [],
       movers: [],
+      shadowWalls: [],
       captured: { snippet: 0 },
       overview: { current: 5, max: 5 },
       dark: 0,
@@ -78,7 +81,7 @@ describe('GameState (INV-1)', () => {
     expect(Number.isInteger(state.player.x), 'x is fractional after a diagonal').toBe(false);
     expect(state.player.facing).toBe('left');
     expect(state.camera).toStrictEqual({ x: 0, y: 0 });
-    expect(state.lamp).toStrictEqual({ on: true });
+    expect(state.lamp).toStrictEqual({ on: true, strength: 1 });
     const copy: unknown = JSON.parse(JSON.stringify(state));
     expect(copy).toStrictEqual(state);
   });
@@ -110,9 +113,10 @@ describe('update', () => {
         tick: 41,
         player,
         camera: { x: 0, y: 12 },
-        lamp: { on: false },
+        lamp: { on: false, strength: 1 },
         creatures: [],
         movers: [],
+        shadowWalls: [],
         captured: { snippet: 0 },
         overview: { current: 3, max: 3 },
         dark: 0,
@@ -130,9 +134,10 @@ describe('update', () => {
       tick: 7,
       player,
       camera: { x: 0, y: 12 },
-      lamp: { on: false },
+      lamp: { on: false, strength: 1 },
       creatures: [],
       movers: [],
+      shadowWalls: [],
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -142,9 +147,10 @@ describe('update', () => {
       tick: 7,
       player,
       camera: { x: 0, y: 12 },
-      lamp: { on: false },
+      lamp: { on: false, strength: 1 },
       creatures: [],
       movers: [],
+      shadowWalls: [],
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -187,12 +193,12 @@ describe('the camera in the state (0006)', () => {
 
 describe('the lamp in the state (0007)', () => {
   it('starts off', () => {
-    expect(createInitialState(MAP).lamp).toStrictEqual({ on: false });
+    expect(createInitialState(MAP).lamp).toStrictEqual({ on: false, strength: 1 });
   });
 
   it('is on in a step whose input holds lamp; the figure stays, turns, and the camera stays on it', () => {
     const state = update(createInitialState(MAP), { ...SHINE, right: true }, MAP);
-    expect(state.lamp).toStrictEqual({ on: true });
+    expect(state.lamp).toStrictEqual({ on: true, strength: 1 });
     expect([state.player.x, state.player.y, state.player.facing]).toStrictEqual([
       136,
       120,
@@ -204,7 +210,7 @@ describe('the lamp in the state (0007)', () => {
 
   it('is off again in the first step without it', () => {
     const shone = update(createInitialState(MAP), SHINE, MAP);
-    expect(update(shone, NONE, MAP).lamp).toStrictEqual({ on: false });
+    expect(update(shone, NONE, MAP).lamp).toStrictEqual({ on: false, strength: 1 });
   });
 });
 
@@ -390,5 +396,165 @@ describe('movers in the state (0015)', () => {
       without = update(without, input, FLOOR_MAP);
     }
     expect({ ...withMovers, movers: [] }).toStrictEqual(without);
+  });
+});
+
+describe('shadow walls in the state (0014)', () => {
+  const DOWN: GameInput = { ...NONE, down: true };
+  const UP: GameInput = { ...NONE, up: true };
+  const LEFT: GameInput = { ...NONE, left: true };
+  const THIN = { name: 'shadow:marketing', x: 128, y: 96, width: 48, height: 4 };
+  const DENSE = { name: 'shadow:hr', x: 128, y: 96, width: 48, height: 4 };
+  const SIDE = { name: 'shadow:sales', x: 240, y: 32, width: 4, height: 48 };
+  const run = (
+    map: TileMap,
+    start: GameState,
+    ...legs: readonly (readonly [number, GameInput])[]
+  ): GameState => {
+    let state = start;
+    for (const [steps, input] of legs) {
+      for (let i = 0; i < steps; i += 1) {
+        state = update(state, input, map);
+      }
+    }
+    return state;
+  };
+  const from = (map: TileMap, ...legs: readonly (readonly [number, GameInput])[]): GameState =>
+    run(map, createInitialState(map), ...legs);
+
+  it('starts with every wall of the map standing and a lamp of strength 1', () => {
+    const state = createInitialState(WALLS_MAP);
+    expect(state.lamp).toStrictEqual({ on: false, strength: 1 });
+    expect(state.shadowWalls).toStrictEqual([
+      { wall: 0, lit: false, light: 0 },
+      { wall: 1, lit: false, light: 0 },
+      { wall: 2, lit: false, light: 0 },
+    ]);
+  });
+
+  it('starts without walls on a map without rectangles', () => {
+    expect(createInitialState(MAP).shadowWalls).toStrictEqual([]);
+  });
+
+  it('refuses a map with a rectangle that is no shadow wall before the game starts', () => {
+    const map = grassMap(20, 12, { x: 40, y: 152 }, [], [{ ...THIN, name: 'door' }]);
+    expect(() => createInitialState(map)).toThrow('unknown rectangle object "door"');
+  });
+
+  it('stops the figure flush at a standing wall from each of the four sides', () => {
+    const above = from(grassMap(20, 12, { x: 152, y: 80 }, [], [THIN]), [30, DOWN]);
+    expect([above.player.x, above.player.y]).toStrictEqual([152, 96]);
+    const below = from(grassMap(20, 12, { x: 152, y: 124 }, [], [THIN]), [30, UP]);
+    expect([below.player.x, below.player.y]).toStrictEqual([152, 108]);
+    const left = from(grassMap(20, 12, { x: 220, y: 60 }, [], [SIDE]), [30, RIGHT]);
+    expect([left.player.x, left.player.y]).toStrictEqual([234, 60]);
+    const right = from(grassMap(20, 12, { x: 260, y: 60 }, [], [SIDE]), [30, LEFT]);
+    expect([right.player.x, right.player.y]).toStrictEqual([250, 60]);
+  });
+
+  it('lets the figure slide along a standing wall', () => {
+    const map = grassMap(20, 12, { x: 152, y: 80 }, [], [THIN]);
+    const state = from(map, [30, DOWN], [10, { ...NONE, down: true, right: true }]);
+    expect(state.player.y).toBe(96);
+    expect(state.player.x).toBeCloseTo(152 + (10 * (80 / 60)) / Math.SQRT2, 6);
+  });
+
+  it('holds a push of 3 px per step', () => {
+    const map = grassMap(20, 12, { x: 152, y: 90 }, [], [THIN]);
+    const start = createInitialState(map);
+    const pushed = run(
+      map,
+      { ...start, player: { ...start.player, recoil: { dx: 0, dy: 3, steps: 8 } } },
+      [8, NONE],
+    );
+    expect([pushed.player.x, pushed.player.y]).toStrictEqual([152, 96]);
+    expect(pushed.player.recoil.steps).toBe(0);
+  });
+
+  describe('a snippet beyond a wall', () => {
+    /** The figure at (152, 80) faces down; the snippet's body point (152, 112) is in the cone. */
+    const map = grassMap(20, 12, { x: 152, y: 80 }, [{ name: 'snippet', x: 152, y: 120 }], [DENSE]);
+
+    it('is not lit through a standing wall and is held by it', () => {
+      const state = from(map, [90, SHINE]);
+      expect(state.creatures).toStrictEqual([
+        { species: 'snippet', x: 152, y: 108, light: 0, home: { x: 152, y: 120 } },
+      ]);
+      expect(state.captured).toStrictEqual({ snippet: 0 });
+      expect(state.shadowWalls).toStrictEqual([{ wall: 0, lit: true, light: 0 }]);
+    });
+
+    it('is lit and captured once the wall is lifted', () => {
+      const lifted: GameState = { ...createInitialState(map), shadowWalls: [] };
+      const state = run(map, lifted, [60, SHINE]);
+      expect(state.creatures).toStrictEqual([]);
+      expect(state.captured).toStrictEqual({ snippet: 1 });
+    });
+
+    it('walks through the doorway once the wall is lifted', () => {
+      const lifted: GameState = { ...createInitialState(map), shadowWalls: [] };
+      const state = run(map, lifted, [30, NONE]);
+      expect(state.creatures[0]?.y).toBeCloseTo(100, 6);
+    });
+  });
+
+  it('lifts a thin wall in the 60th step of light; from the next step the doorway is open', () => {
+    const map = grassMap(20, 12, { x: 152, y: 96 }, [], [THIN]);
+    expect(from(map, [3, DOWN]).player.y).toBe(96);
+    const almost = from(map, [59, SHINE]);
+    expect(almost.shadowWalls).toStrictEqual([{ wall: 0, lit: true, light: 59 }]);
+    const lifted = run(map, almost, [1, SHINE]);
+    expect(lifted.shadowWalls).toStrictEqual([]);
+    expect(lifted.player.y).toBe(96);
+    expect(run(map, lifted, [3, DOWN]).player.y).toBeCloseTo(100, 6);
+  });
+
+  it('survives a JSON round trip with a wall at light 30 and with a wall lifted (INV-1)', () => {
+    const map = grassMap(20, 12, { x: 152, y: 96 }, [], [THIN, SIDE]);
+    const half = from(map, [30, SHINE]);
+    expect(half.shadowWalls).toStrictEqual([
+      { wall: 0, lit: true, light: 30 },
+      { wall: 1, lit: false, light: 0 },
+    ]);
+    expect(JSON.parse(JSON.stringify(half))).toStrictEqual(half);
+    const lifted = run(map, half, [30, SHINE]);
+    expect(lifted.shadowWalls).toStrictEqual([{ wall: 1, lit: false, light: 0 }]);
+    expect(JSON.parse(JSON.stringify(lifted))).toStrictEqual(lifted);
+  });
+
+  it('changes no wall in the dark, rests the standing ones at the wake and brings none back', () => {
+    const map = grassMap(20, 12, { x: 152, y: 96 }, [], [THIN, SIDE]);
+    const half = from(map, [30, SHINE]);
+    const fallen: GameState = {
+      ...half,
+      shadowWalls: [{ wall: 0, lit: true, light: 30 }],
+      dark: 1,
+    };
+    const before = run(map, fallen, [43, SHINE]);
+    expect(before.dark).toBe(44);
+    expect(before.shadowWalls).toStrictEqual([{ wall: 0, lit: true, light: 30 }]);
+    const woken = run(map, before, [1, SHINE]);
+    expect(woken.dark).toBe(45);
+    expect(woken.shadowWalls).toStrictEqual([{ wall: 0, lit: false, light: 0 }]);
+    expect(woken.lamp).toStrictEqual({ on: false, strength: 1 });
+  });
+
+  it('steps a state without standing walls exactly as a map without rectangles (600 steps)', () => {
+    const inputs = Array.from({ length: 600 }, (_, i) => ({
+      up: i % 240 >= 180,
+      down: i % 240 >= 60 && i % 240 < 120,
+      left: i % 240 >= 120 && i % 240 < 180,
+      right: i % 240 < 60,
+      lamp: i % 97 < 20,
+    }));
+    const bare: TileMap = { ...FLOOR_MAP, rects: [] };
+    let open: GameState = { ...createInitialState(FLOOR_MAP), shadowWalls: [] };
+    let without = createInitialState(bare);
+    expect(open).toStrictEqual(without);
+    for (const input of inputs) {
+      open = update(open, input, FLOOR_MAP);
+      without = update(without, input, bare);
+    }
+    expect(open).toStrictEqual(without);
   });
 });

@@ -33,13 +33,20 @@ Three upgrades over the game, each changing what the player can do:
 figure stands and the direction keys turn it, so a sweep is a deliberate act. The cone starts at
 the chest, 12 px above the feet, is 48 px long — three tiles — and opens with slope 1/2 to each
 side, so it is as wide at its end as it is long; both numbers *tune*. It is drawn as a yellow
-checkerboard under the figure. Nothing is lit yet: strength and the density rule arrive with
-0010, the battery with M6.
+checkerboard under the figure. The battery arrives with M6.
 
 **As built** (feature 0008): a creature whose body is in the cone, with no solid tile between it
 and the figure, freezes. After one second of unbroken light — 60 steps, *tune* — it is captured
 and gone. A break starts the second again. Solid tiles block the light: walls, and fences and
 water too. The cone's picture is not cut at a wall.
+
+**As built** (feature 0014): the lamp has a strength, 1 at the start; nothing raises it before
+M6. A shadow wall is in the light when its box, edges included, meets the cone and nothing
+opaque lies on the line from the centre of the figure's box to the nearest point of the wall —
+the last pixel along the wall, not the corner past its end. After one second of unbroken light,
+60 steps as for a creature, a wall whose density the strength meets is lifted for good. A denser
+wall stands still in the light and holds. A standing wall is solid for the figure, the push and
+the creatures, and the light stops at it; other walls do not count on the line to a wall.
 
 ## 3. Three layers of opposition
 
@@ -76,6 +83,12 @@ One rule gates the world: **shadow density against light strength.** Every regio
 (`world.md` §1); the lamp has a strength that the upgrades raise. A shadow wall gives way when
 strength meets density. The same number decides which creatures can be captured and which regions
 can be entered, and it is tested once.
+
+**As built** (feature 0014): the rule lives in `src/game/world.ts` — the density of every region,
+the lamp's base strength of 1, and the upgrades in the order they are earned, each with the region
+it is earned in and each raising the strength by 1. `gatingFaults` checks the order: no density
+outside 0–3, none above what the lamp reaches with every upgrade, and no upgrade earned in a region
+the lamp cannot open before it. Nothing earns an upgrade before M6.
 
 Two keys where the story demands them: the keycard to the server room, handed over by the
 convinced managing director, and one further door chosen in the case specs.

@@ -33,9 +33,11 @@ export interface PlayerState {
   readonly recoil: Recoil;
 }
 
-/** The lamp (0007): on in every step whose input holds `lamp`. Later fields: strength (0010), charge (M6). */
+/** The lamp (0007, 0014): on in every step whose input holds `lamp`. Later field: charge (M6). */
 export interface LampState {
   readonly on: boolean;
+  /** Against a region's density (gameplay.md §5): BASE_STRENGTH plus the upgrades earned. */
+  readonly strength: number;
 }
 
 /** The creature species (world.md §4), in journal order. 0008 brings the first. */
@@ -79,6 +81,16 @@ export interface MoverState {
   readonly wait: number;
 }
 
+/** A shadow wall still standing (0014). Its box stays in the map, its density in the world data. */
+export interface ShadowWallState {
+  /** The index of the wall in `wallsOf(map.rects)`. */
+  readonly wall: number;
+  /** Whether the light was on it in the last step. */
+  readonly lit: boolean;
+  /** Steps it has been giving way without a break, 0–59. */
+  readonly light: number;
+}
+
 /** How many creatures of each species were captured. */
 export type Captured = Readonly<Record<Species, number>>;
 
@@ -107,6 +119,8 @@ export interface GameState {
   readonly creatures: readonly CreatureState[];
   /** The movers on their routes, in route order (0015). */
   readonly movers: readonly MoverState[];
+  /** The shadow walls still standing, in the map's order (0014); a lifted wall has left it for good. */
+  readonly shadowWalls: readonly ShadowWallState[];
   /** Captured creatures per species; the journal (M4) reads it. */
   readonly captured: Captured;
   readonly overview: Overview;

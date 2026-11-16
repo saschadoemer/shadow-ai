@@ -75,6 +75,44 @@ rule of the game (`gameplay.md` §5): a thin shadow wall gives way to the basic 
 only to an upgrade. Densities are set once, in the world data, and tested for consistency: no
 region may require an upgrade that cannot be earned before it.
 
+**As built** (feature 0014): the densities of the floor, in `src/game/world.ts`. The data
+protection officer's office and the corridors are no regions and have no shadow. Management and
+the server room join the table with their maps.
+
+| Region | Density |
+|---|---|
+| Reception | 0 |
+| Break room | 0 |
+| Sales | 1 |
+| Marketing | 1 |
+| Support | 1 |
+| Meeting rooms | 1 |
+| HR | 2 |
+| Accounting | 2 |
+| Development | 3 |
+
+Eight shadow walls close the doorways of the regions under shadow. Each is a rectangle named
+`shadow:<region>` in the map's `objects` layer, a strip 4 px thick exactly where the doorway's
+wall strip is missing; the meeting rooms have one in each of their two doorways.
+
+| Wall | Doorway cells | Density | Lit from |
+|---|---|---|---|
+| `shadow:sales` | (79, 37)–(79, 39) | 1 | the east corridor |
+| `shadow:marketing` | (23, 58)–(25, 58) | 1 | the south corridor |
+| `shadow:support` | (77, 58)–(79, 58) | 1 | the south corridor |
+| `shadow:meeting-rooms` | (89, 4)–(89, 6) | 1 | the side passage |
+| `shadow:meeting-rooms` | (89, 14)–(89, 16) | 1 | the side passage |
+| `shadow:hr` | (10, 20)–(12, 20) | 2 | the north corridor |
+| `shadow:accounting` | (31, 20)–(33, 20) | 2 | the north corridor |
+| `shadow:development` | (63, 20)–(65, 20) | 3 | the north corridor |
+
+The openings of the reception, the data protection officer's office, the break room and the side
+passage stay open. With the basic lamp the player lifts the walls of density 1 and enters Sales,
+Marketing, Support and both meeting rooms; HR, Accounting and Development can be seen but stay
+closed until the upgrades of M6. The two upgrades that gate the floor are earned in this order:
+the wider cone in Marketing (strength 2), the colour filter in HR (strength 3). A case spec of M6
+may move either; the gating test then guards the new place.
+
 ## 2. The cases
 
 Seven department cases and one side case. Each needs a pattern the visitor recognizes from their

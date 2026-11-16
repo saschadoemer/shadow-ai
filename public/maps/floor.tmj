@@ -1681,6 +1681,94 @@
               "value": 120
             }
           ]
+        },
+        {
+          "height": 48,
+          "id": 92,
+          "name": "shadow:sales",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 4,
+          "x": 1264,
+          "y": 592
+        },
+        {
+          "height": 4,
+          "id": 93,
+          "name": "shadow:marketing",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 48,
+          "x": 368,
+          "y": 928
+        },
+        {
+          "height": 4,
+          "id": 94,
+          "name": "shadow:support",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 48,
+          "x": 1232,
+          "y": 928
+        },
+        {
+          "height": 48,
+          "id": 95,
+          "name": "shadow:meeting-rooms",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 4,
+          "x": 1424,
+          "y": 64
+        },
+        {
+          "height": 48,
+          "id": 96,
+          "name": "shadow:meeting-rooms",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 4,
+          "x": 1424,
+          "y": 224
+        },
+        {
+          "height": 4,
+          "id": 97,
+          "name": "shadow:hr",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 48,
+          "x": 160,
+          "y": 320
+        },
+        {
+          "height": 4,
+          "id": 98,
+          "name": "shadow:accounting",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 48,
+          "x": 496,
+          "y": 320
+        },
+        {
+          "height": 4,
+          "id": 99,
+          "name": "shadow:development",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 48,
+          "x": 1008,
+          "y": 320
         }
       ],
       "opacity": 1,
@@ -1691,7 +1779,7 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 92,
+  "nextobjectid": 100,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",

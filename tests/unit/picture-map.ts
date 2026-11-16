@@ -55,6 +55,7 @@ export function pictureMap(rows: readonly string[], spawn: Point): TileMap {
     above: new Array<number>(cells).fill(EMPTY),
     spawn,
     points: [],
+    rects: [],
     solids,
     opaque: solids,
   };

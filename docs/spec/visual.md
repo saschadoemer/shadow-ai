@@ -72,13 +72,21 @@ The colour of a transparent pixel is not checked. The palette is data in
 
 **The signature colour.** One violet of the palette, `#68386c`, is reserved for the shadow and
 for nothing else in the world; the asset test rejects it in every PNG under `public/` except the
-shadow assets, a list in the test whose first entry is `sprites/snippet.png` (feature 0008).
+shadow assets, a list in the test: `sprites/snippet.png` (feature 0008) and
+`sprites/shadow-wall.png` (feature 0014).
 Every trace of shadow AI glows in
 it. The player learns in seconds what to look for, without a word of text. Because colour alone
 excludes colour-blind players, the signature colour is always accompanied by **form and
 motion** — flicker, dithering — so the shadow is unmistakable without it. The snippet carries
 the colour on its border and its lines of text, and it bobs while it is free — form and motion —
 and stands still in the light.
+
+The shadow wall (feature 0014) is the second shadow asset: a dithered strip 4 px thick in the
+signature colour, with `#181425` for the pattern of the densest wall. Its density is read from how
+many pixels it has — 32 per 16 px segment for density 1, 48 for density 2, 64 for density 3 — and
+it flickers four times a second between two phases of that look. In the light it stands still; a
+wall that holds keeps its density's first look, a wall that gives way thins out to 16 and then 8
+pixels per segment before it is gone.
 
 **Shadowed and cleared.** A region under shadow renders desaturated with violet dithering; a
 cleared region renders in the full palette. The world shows progress by colour (`vision.md` §5).

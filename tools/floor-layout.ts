@@ -1,4 +1,4 @@
-import { EMPTY, type Point, TILE_SIZE } from '../src/engine/tiled.ts';
+import { type Box, EMPTY, type Point, TILE_SIZE } from '../src/engine/tiled.ts';
 import {
   ARCADE,
   ARCADE_TOP,
@@ -56,7 +56,8 @@ import {
  * 0013 is placed in pieces from the room tables, one tile per cell on `detail`; the tops of the
  * tall things — cabinets, plants, coat racks, water dispensers and the arcade cabinet — go on
  * `above`, one row higher. A few pieces of 0013 replace a tile of 0011: a coffee machine on a
- * counter, a gadget on a desk. Pure — it returns the layers and
+ * counter, a gadget on a desk. The shadow walls of 0014 are rectangle objects, one strip per
+ * doorway of a region under shadow, after the points. Pure — it returns the layers and
  * the .tmj object; tools/gen-floor.ts writes the file. Retired when the art pass takes the map over
  * by hand in Tiled (visual.md §5).
  */
@@ -175,6 +176,34 @@ export const SNIPPETS: readonly Point[] = [
 
 /** Where the figure wakes (0009), feet in pixels: the middle of tile (18, 31), in the data protection officer's office. */
 export const WAKE: Point = { x: 296, y: 504 };
+
+/**
+ * The shadow walls (0014): per wall its region and the cells of the doorway it closes. A
+ * doorway in a row of cells gets a strip on their top edge, one in a column a strip on their
+ * left edge — where the wall strip is missing. The order is the order in the file.
+ */
+export const SHADOW_WALLS: readonly { readonly region: string; readonly cells: CellRect }[] = [
+  { region: 'sales', cells: cells(79, 79, 37, 39) },
+  { region: 'marketing', cells: cells(23, 25, 58, 58) },
+  { region: 'support', cells: cells(77, 79, 58, 58) },
+  { region: 'meeting-rooms', cells: cells(89, 89, 4, 6) },
+  { region: 'meeting-rooms', cells: cells(89, 89, 14, 16) },
+  { region: 'hr', cells: cells(10, 12, 20, 20) },
+  { region: 'accounting', cells: cells(31, 33, 20, 20) },
+  { region: 'development', cells: cells(63, 65, 20, 20) },
+];
+
+/** A shadow wall is as thick as a wall strip. */
+const SHADOW_WALL_THICKNESS = 4;
+
+/** The box of a shadow wall in map pixels: 4 px on the top edge of a row, or on the left edge of a column. */
+export function shadowWallBox(rect: CellRect): Box {
+  const x = rect.c0 * TILE_SIZE;
+  const y = rect.r0 * TILE_SIZE;
+  return rect.r0 === rect.r1
+    ? { x, y, width: (rect.c1 - rect.c0 + 1) * TILE_SIZE, height: SHADOW_WALL_THICKNESS }
+    : { x, y, width: SHADOW_WALL_THICKNESS, height: (rect.r1 - rect.r0 + 1) * TILE_SIZE };
+}
 
 /**
  * The routes of the movers (0015): per route its points as [column, row, pause in steps]; a
@@ -981,11 +1010,24 @@ interface PointJson {
   }[];
 }
 
+/** A rectangle object as Tiled writes it: no `point` key (0014). */
+interface RectJson {
+  readonly height: number;
+  readonly id: number;
+  readonly name: string;
+  readonly rotation: 0;
+  readonly type: '';
+  readonly visible: true;
+  readonly width: number;
+  readonly x: number;
+  readonly y: number;
+}
+
 interface ObjectLayerJson {
   readonly draworder: 'topdown';
   readonly id: number;
   readonly name: 'objects';
-  readonly objects: readonly PointJson[];
+  readonly objects: readonly (PointJson | RectJson)[];
   readonly opacity: 1;
   readonly type: 'objectgroup';
   readonly visible: true;
@@ -1051,9 +1093,24 @@ function pointObject(id: number, name: string, at: Point, pause = 0): PointJson 
     : point;
 }
 
+function rectObject(id: number, name: string, box: Box): RectJson {
+  return {
+    height: box.height,
+    id,
+    name,
+    rotation: 0,
+    type: '',
+    visible: true,
+    width: box.width,
+    x: box.x,
+    y: box.y,
+  };
+}
+
 export function floorJson(): MapJson {
   const { detail, above } = buildFurniture();
   const routes = routePoints();
+  const firstWall = SNIPPETS.length + 3 + routes.length;
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1073,6 +1130,9 @@ export function floorJson(): MapJson {
           ...routes.map((point, i) =>
             pointObject(SNIPPETS.length + 3 + i, point.name, point.at, point.pause),
           ),
+          ...SHADOW_WALLS.map((wall, i) =>
+            rectObject(firstWall + i, `shadow:${wall.region}`, shadowWallBox(wall.cells)),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1082,7 +1142,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: SNIPPETS.length + 3 + routes.length,
+    nextobjectid: firstWall + SHADOW_WALLS.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',
