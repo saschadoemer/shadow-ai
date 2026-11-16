@@ -232,6 +232,11 @@ export interface NamedPoint extends Point {
   readonly pause?: number;
 }
 
+/** A rectangle object of the `objects` layer (0014), in map pixels: what it is, is the game's business. */
+export interface NamedRect extends Box {
+  readonly name: string;
+}
+
 export interface TileMap {
   /** In tiles. */
   readonly width: number;
@@ -245,6 +250,8 @@ export interface TileMap {
   readonly spawn: Point;
   /** The named point objects besides the spawn, in file order; each inside the map on an open cell. */
   readonly points: readonly NamedPoint[];
+  /** The rectangle objects, in file order; each unrotated, of whole pixels, inside the map (0014). */
+  readonly rects: readonly NamedRect[];
   /** Row-major, width × height: the solid boxes of the cell's tiles on the three layers, in map pixels. */
   readonly solids: readonly (readonly Box[])[];
   /**
@@ -372,6 +379,56 @@ function readPause(object: Json, name: string, file: string): number | undefined
   return undefined;
 }
 
+/**
+ * Every object that is not a point, in file order (0014): a rectangle with a name, unrotated,
+ * of whole pixels, inside the map. Anything else — an ellipse, a polygon, a polyline, a text,
+ * a tile object — is rejected, so that a shape the game cannot read is not silently ignored.
+ */
+function readRects(layer: Json, columns: number, rows: number, file: string): NamedRect[] {
+  const what = `layer "${OBJECT_LAYER_NAME}"`;
+  return asArray(layer.objects, file, `${what} objects`)
+    .map((value) => asRecord(value, file, 'object'))
+    .filter((object) => object.point !== true)
+    .map((object) => {
+      if (
+        object.ellipse === true ||
+        NON_RECTANGLE_FIELDS.some((field) => object[field] !== undefined)
+      ) {
+        fail(file, `${what} has an object that is neither a point nor a rectangle`);
+      }
+      if (typeof object.name !== 'string' || object.name === '') {
+        fail(file, `${what} has a rectangle object without a name`);
+      }
+      const name = object.name;
+      const rotation =
+        object.rotation === undefined
+          ? 0
+          : asNumber(object.rotation, file, `rectangle "${name}" rotation`);
+      if (rotation !== 0) {
+        fail(file, `rectangle "${name}" is rotated`);
+      }
+      const x = asNumber(object.x, file, `rectangle "${name}" x`);
+      const y = asNumber(object.y, file, `rectangle "${name}" y`);
+      const width = asNumber(object.width, file, `rectangle "${name}" width`);
+      const height = asNumber(object.height, file, `rectangle "${name}" height`);
+      const inside =
+        [x, y, width, height].every(Number.isInteger) &&
+        width >= 1 &&
+        height >= 1 &&
+        x >= 0 &&
+        y >= 0 &&
+        x + width <= columns * TILE_SIZE &&
+        y + height <= rows * TILE_SIZE;
+      if (!inside) {
+        fail(
+          file,
+          `rectangle "${name}" (${x}, ${y}, ${width}, ${height}) is not whole pixels inside the map`,
+        );
+      }
+      return { name, x, y, width, height };
+    });
+}
+
 /** Rules 11, 7, 5 and 6: what the map as a whole must be, before any layer is read. */
 function checkMap(map: Json, file: string): { readonly width: number; readonly height: number } {
   const orientation = asString(map.orientation, file, 'orientation');
@@ -497,5 +554,6 @@ export function parseTileMap(mapJson: unknown, tileset: Tileset, mapFile: string
   for (const point of points) {
     checkPosition(`point "${point.name}"`, point, width, height, solids, mapFile);
   }
-  return { width, height, ground, detail, above, spawn, points, solids, opaque };
+  const rects = readRects(objects, width, height, mapFile);
+  return { width, height, ground, detail, above, spawn, points, rects, solids, opaque };
 }

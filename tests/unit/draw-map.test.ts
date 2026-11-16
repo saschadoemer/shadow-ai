@@ -42,6 +42,7 @@ const MAP: TileMap = {
   above: [6, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   spawn: { x: 8, y: 8 },
   points: [],
+  rects: [],
   solids: solidsOf([false, false, false, true, true, true], 3),
   opaque: solidsOf([false, false, false, true, true, true], 3),
 };
