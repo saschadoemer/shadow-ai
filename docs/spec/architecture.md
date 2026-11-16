@@ -15,7 +15,9 @@ src/
                  Tiled JSON → TileMap, camera math, collision of a box against solid boxes
   game/          Shadow AI itself: the GameState type and update(state, input, content) – plain
                  data, pure functions, no DOM, no Canvas, no window (INV-1, INV-2); game/mover.ts
-                 holds the movers' routes, their checks and their step (0015)
+                 holds the movers' routes, their checks and their step (0015); game/world.ts the
+                 world data — densities, the lamp's strength, the upgrades — and its gating
+                 check; game/shadow.ts the shadow walls, their light test and their step (0014)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene)
   text/          the language table and the TextKey type (INV-4)
@@ -29,7 +31,8 @@ tools/
   gen-tiles.ts          writes them to public/tiles/; `npm run gen-tiles`
   placeholder-player.ts the placeholder figure as pure data: the pixels of its sprite sheet
   gen-sprites.ts        writes the figure, the lamp, the snippet, the overview sheet and the
-                        movers' seven sheets to public/sprites/; `npm run gen-sprites`
+                        movers' seven sheets and the shadow-wall sheet to public/sprites/;
+                        `npm run gen-sprites`
   placeholder-lamp.ts   the placeholder lamp sheet as pure data: the cone of light, one 48x48
                         frame per facing, drawn from game/lamp
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
@@ -39,9 +42,12 @@ tools/
   placeholder-dog.ts    the placeholder office dog: one row of 24 16x16 frames, two coats
   placeholder-vacuum.ts the placeholder robot vacuum: two 16x16 frames, the light on and off
   placeholder-drone.ts  the placeholder drone: two 16x16 frames, the rotors as bars and dots
+  placeholder-shadow-wall.ts the placeholder shadow-wall sheet: sixteen 16x16 frames, two
+                        orientations of eight looks (0014)
   floor-layout.ts       the floor as pure data: the corridors and rooms, the walls and their
                         openings, the closed doors, the spawn, the creatures' points, the
-                        wake point, the furniture and the movers' routes (world.md §1)
+                        wake point, the furniture, the movers' routes and the shadow walls
+                        (world.md §1)
   gen-floor.ts          writes it to public/maps/; `npm run gen-floor`
 tests/
   unit/          Vitest, headless: engine math, game rules, map loading, assets
@@ -63,7 +69,7 @@ against the container alike. It is read-only by convention; nothing in the game 
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
 logic steps since the start, the player, the camera, the lamp, the creatures, the movers, the
-captured count, overview and the step of the dark; later the current map id, NPCs, cleared regions and the journal join them. It is plain data: numbers,
+standing shadow walls, the captured count, overview and the step of the dark; later the current map id, NPCs, cleared regions and the journal join them. It is plain data: numbers,
 strings, booleans, arrays and plain objects. No functions, no class instances, no `Map` or `Set`,
 no `Date`. A JSON round trip reproduces it exactly, and a test proves that on a populated state.
 
@@ -95,9 +101,10 @@ start, and kept in the state so a saved game comes back as it was left.
 `createInitialState(map)` lives in `game/update` beside `update`, so that `game/state` holds
 types and constants only.
 
-`lamp` is `{ on }` (feature 0007): on in every step whose input holds `lamp`, derived from the
-input and kept in the state so the renderer knows what to draw and so later fields — strength
-(0010), charge (M6) — join it. While it is on, `stepPlayer` keeps the feet where they are, resets
+`lamp` is `{ on, strength }` (features 0007, 0014): `on` in every step whose input holds `lamp`,
+derived from the input and kept in the state so the renderer knows what to draw; `strength` is
+`BASE_STRENGTH`, 1, from `createInitialState` on, and no step changes it before the upgrades of
+M6 — the wake keeps it. A later field, charge (M6), joins them. While it is on, `stepPlayer` keeps the feet where they are, resets
 the walk cycle to standing and turns the facing by the walking rule; no collision or clamp runs.
 The cone is `game/lamp`: the apex 12 px above the feet, the facing's unit vector, 48 px long and
 half-open, opening with slope 1/2 to each side; `inCone(point, cone)` is the one test the game
@@ -154,6 +161,28 @@ arrival slack of 10⁻⁶ px absorbs the error of summed thirds. While it moves 
 runs 1–4 at 15 steps per phase and a dog's changes between 0 and 1 every 8 steps. In the dark no
 mover is stepped (`stepDark` and the wake leave the array as it is). Nothing about a mover is
 solid or opaque: the figure, the creatures and the light pass, and no creature sees one.
+
+`shadowWalls` is an array of `{ wall, lit, light }`, one entry per shadow wall still standing,
+in the map's order (feature 0014, `game/shadow`). `wall` is the index of the wall among
+`wallsOf(map.rects)`; its box stays in the map and its density in the world data
+(`game/world`). `lit` says whether the light was on it in the last step; `light` counts the steps
+it has been giving way without a break, 0–59. A lifted wall leaves the array and never comes
+back. As with the routes, `update` rebuilds the walls from `map.rects` in every step and keeps
+them nowhere. `createInitialState` reads the walls — and so rejects a map whose rectangles are no
+walls (§6) — and starts every wall standing, `{ wall: n, lit: false, light: 0 }`. In a step the
+figure, the push and the creatures are stepped against the map **with** the walls standing at
+the start of the step (`withWalls`: each standing wall's box added, as solid and as opaque, to
+every cell it covers, on a copy of the grids); then every standing wall is stepped against the
+stepped figure and the map **as loaded**, so a wall does not block its own light. A wall is in
+the light when the lamp is on, its box meets the cone (`meetsCone`, closed form: in the cone's
+coordinates, near = max(d0, 0), far = min(d1, 48), and the gap from 0 across the facing to the
+box is at most far / 2, with near ≤ far and near < 48), and no opaque box lies on the line from
+(x, y − 4) to the point of the wall's box nearest to it — along the wall the box ends at its last
+pixel. Not in the light: `lit` false, `light` 0. In the light with `lamp.strength` below the
+wall's density: `lit` true, `light` 0, it holds. Otherwise `light` grows by 1, and in the step it
+would reach 60 the wall leaves the array. In the dark no wall is stepped; at the wake every
+standing wall has `lit` false and `light` 0. A state whose `shadowWalls` is empty steps exactly as
+before 0014.
 
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
@@ -249,7 +278,7 @@ sprite round the same value.
 `frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48 — with its
 top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
 `render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the lamp's
-cone when the lamp is on, the ground movers whose feet y is at most the figure's in array order,
+cone when the lamp is on, the standing shadow walls in array order (feature 0014), the ground movers whose feet y is at most the figure's in array order,
 the creatures in array order, the player, the other ground movers in array order, `above` (§6),
 the drones, the hearts of overview, the lids of the dark (feature 0015). A ground mover is a
 person, a dog or a vacuum; comparing the feet makes walking past a colleague read as depth, and a
@@ -262,6 +291,16 @@ up (24, 47), left (47, 24), right (0, 24)), minus the camera; its frame is the f
 Cone and figure round the same values, so they agree pixel for pixel, and the cone lies under the
 figure. A creature's frame has its top-left corner at (round(x) − 8 − camera.x, round(y) − 16 −
 camera.y); its frame is 2 while `light` is above 0, else ⌊tick / 15⌋ mod 2 (feature 0008).
+
+The shadow walls (feature 0014) lie on the floor like the cone, under every figure. A wall whose
+box is (x, y, w, h) is drawn in 16 px segments from the corner of its box: a horizontal wall
+(wider than high) as w / 16 frames of orientation 0 at (x + 16k − camera.x, y − camera.y), a
+vertical one as h / 16 frames of orientation 1 at (x − camera.x, y + 16k − camera.y), k from 0.
+The frame is orientation × 8 + look (§7). The look: while `light` is 1–19 look 0, 20–39 look 6,
+40–59 look 7, still, whatever the density; `lit` with `light` 0, a wall that holds, look
+(density − 1) × 2, still; otherwise look (density − 1) × 2 + ⌊tick / 15⌋ mod 2, a flicker four
+times a second. A lifted wall is not drawn. The walls are rebuilt from `map.rects` every frame,
+as in `update`.
 
 The movers (feature 0015): a person's frame has its top-left corner at (round(x) − 8 − camera.x,
 round(y) − 24 − camera.y) and is facing × 5 + `frame`, as the figure's, in its own sheet
@@ -291,8 +330,9 @@ beside their PNG. Nothing is converted at build time. The floor, `public/maps/fl
 Tiled like any other map.
 
 Fixed layer names (INV-7): `ground` and `detail` are drawn below the player, `above` is drawn
-over the player, `objects` is an object layer that holds the spawn point and named points —
-creatures today, later doors, NPCs and triggers. Whether a tile is solid, and which part of it,
+over the player, `objects` is an object layer that holds the spawn point, named points —
+creatures and route points today, later doors, NPCs and triggers — and named rectangles, the
+shadow walls today (feature 0014). Whether a tile is solid, and which part of it,
 is a property of the tile in the tileset (feature 0010): the boolean tile property `solid` makes
 the whole tile solid, the box (0, 0, 16, 16); a tile without it may carry rectangles drawn in
 Tiled's tile collision editor, its `objectgroup` in the `.tsj`, each a box in tile-local pixels.
@@ -312,10 +352,14 @@ and per tile its boxes — the full tile for `solid`, else its collision rectang
 as `Tileset.boxes`, and per tile whether it is `low` as `Tileset.low`; `parseTileMap` reads the map against the parsed tileset and
 returns a `TileMap`. It reads only what the game uses: of the map `orientation`, `infinite`,
 `width`, `height`, `tilewidth`, `tileheight`, `tilesets` and `layers`; of a layer `name`, `type`,
-`data`, `encoding`, `compression` and, for `objects`, the objects' `name`, `point`, `x`, `y`
-and the one custom property `pause` (feature 0015). `TileMap.points` are the point objects other
+`data`, `encoding`, `compression` and, for `objects`, the objects' `name`, `point`, `x`, `y`,
+`width`, `height`, `rotation`, the fields that make an object some other shape, and the one
+custom property `pause` (feature 0015). `TileMap.points` are the point objects other
 than the spawn, as `{ name, x, y }` in file order, with `pause` added when the object carries
-the property; `engine/` does not know what a name means, `game/` does. The game knows the
+the property. `TileMap.rects` are the rectangle objects — an object with none of `point`,
+`ellipse`, `polygon`, `polyline`, `text` and `gid` — as `{ name, x, y, width, height }` in file
+order, empty on a map without them (feature 0014). `engine/` does not know what a name means,
+`game/` does. The game knows the
 species' names, `wake` (feature 0009) and the route points of the movers (feature 0015). Everything else Tiled writes is
 ignored — a layer hidden in Tiled is drawn by the game. It does
 not try to be a general Tiled importer.
@@ -361,7 +405,13 @@ has no collision box`). Then the map, in this order:
 - a point object without a name;
 - a named point outside the map, or inside a solid box of its cell;
 - a point whose `pause` property is not of type `int` (`point "dog:hr:1" has a pause that is not
-  an int property`).
+  an int property`);
+- after the rules for points, an object that is neither a point nor a rectangle (`layer
+  "objects" has an object that is neither a point nor a rectangle`), a rectangle without a name
+  (`layer "objects" has a rectangle object without a name`), a rotated rectangle (`rectangle
+  "shadow:sales" is rotated`), and a rectangle with a fractional number, a width or height below
+  1 or any part outside the map (`rectangle "shadow:sales" (x, y, w, h) is not whole pixels
+  inside the map`) (feature 0014).
 
 Last, the tileset's image must load.
 
@@ -381,6 +431,17 @@ dog:hr leg 2 is not straight`), and, for every kind but `drone`, a leg on which 
 `[x − 6, x + 6) × [y − 8, y)` meets a solid box (`route dog:hr leg 2 crosses a solid tile (c,
 r)`, the first such cell row by row). A drone's legs may cross anything; its points, like every
 named point, lie outside every solid box. `creaturesFrom` skips route points.
+
+**Shadow walls** (feature 0014). A rectangle named `shadow:<region>` is a shadow wall: a strip
+4 px thick on the top or the left edge of whole cells, where a doorway's wall strip is missing. A
+region may have more than one. `game/shadow` reads the walls from `map.rects` in file order as
+`{ region, density, box }`, the density from `game/world`, and, in `createInitialState`, refuses
+the map — each with its message — for a rectangle with another name (`unknown rectangle object
+"door"`), a region not in the world data (`shadow wall shadow:cellar names no region`), a region
+of density 0 (`shadow wall shadow:reception stands in a region without shadow`), and a box whose
+`x` or `y` is no multiple of 16 or whose size is neither 4 px high and a multiple of 16 px wide
+nor 4 px wide and a multiple of 16 px high (`shadow wall shadow:sales (x, y, w, h) is no strip on
+a cell edge`). No coordinate of a wall is in `src/` (INV-7).
 
 Flipped and rotated tiles, more than one tileset per map, embedded tilesets, encoded or
 compressed data and infinite maps stay rejected until a feature needs one and lifts its rule. A
@@ -532,6 +593,26 @@ frame 1. `tools/placeholder-drone.ts`: `drone.png`, 32x16, two frames — a 6x4 
 with a light `#e43b44`, four arms and four rotors `#c0cbdc`, bars of 5 px in frame 0 and dots in
 frame 1. The art pass replaces them under the same names and frame orders.
 
+`tools/placeholder-shadow-wall.ts` draws the shadow-wall sheet (feature 0014) and returns its
+pixels as data: `public/sprites/shadow-wall.png`, 256x16, sixteen 16x16 frames in one row, frame
+= orientation × 8 + look. Orientation 0 is a horizontal wall, the strip on the frame's rows 0–3;
+orientation 1 a vertical wall, the strip on its columns 0–3; every other pixel is transparent.
+In a strip, i counts along it, 0–15, and j across it, 0–3: the pixel is (i, j) in orientation 0
+and (j, i) in orientation 1. It is the second shadow asset (`visual.md` §4). `npm run
+gen-sprites` writes it beside the others; it is committed, deterministic and tested against the
+generator pixel by pixel. The art pass replaces it under the same name and frame order.
+
+| Look | Shows | Opaque pixels |
+|---|---|---|
+| 0 | density 1, phase 0 | `#68386c` where i + j is even — 32 |
+| 1 | density 1, phase 1 | `#68386c` where i + j is odd — 32 |
+| 2 | density 2, phase 0 | `#68386c` everywhere but where i and j are both even — 48 |
+| 3 | density 2, phase 1 | `#68386c` everywhere but where i and j are both odd — 48 |
+| 4 | density 3, phase 0 | `#68386c` everywhere — 64 |
+| 5 | density 3, phase 1 | `#181425` where (i + j) mod 4 = 0 — 16; `#68386c` elsewhere — 48 |
+| 6 | giving way, second third | `#68386c` where i + j is even and i mod 4 is 0 or 1 — 16 |
+| 7 | giving way, last third | `#68386c` where (i + j) mod 8 = 0 — 8 |
+
 `tools/floor-layout.ts` holds the floor as data (feature 0010) — the corridors and rooms as
 rectangles of floor, the walls as lines of top or left strips with their openings, the closed
 doors, the spawn, the three snippet points and the wake point, as the tables of the feature spec
@@ -548,6 +629,10 @@ desk-partition for a gadget desk — and is an error when the cell does not hold
 The movers' routes (feature 0015) are `ROUTES`, per route its name and its points as [column,
 row, pause], a cell standing for its middle; they become point objects after the spawn, the
 snippets and `wake`, ids following theirs, with the `int` property `pause` when it is above 0.
+The shadow walls (feature 0014) are `SHADOW_WALLS`, per wall its region and the doorway cells it
+closes; `shadowWallBox` makes the strip — 4 px on the top edge of a row of cells, or on the left
+edge of a column — and the walls become rectangle objects after the route points, ids following
+theirs (92–99 today, `nextobjectid` 100).
 `floor.tmj` has the layers `ground` (id 1), `detail` (id 3), `above` (id 4) and `objects` (id 2),
 in that order. Posts are
 derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper
@@ -564,7 +649,10 @@ areas that stay empty, every tall thing's top above its body in the same area, e
 reached, the reception's counter in the first view, and which boxes are opaque; and the lounge
 and the gadgets against the picture of 0013, their counts and pieces, that nothing of 0011 moved
 but the ten replaced cells, every cell without a solid box reached, and the reception's seating
-corner in the first view. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
+corner in the first view; and the shadow walls against the table of 0014, each on the cells of
+exactly one opening and clear of every solid box, the spawn, the wake point and the snippets
+clear of every wall, and reachability with all walls standing and with the walls of density 1,
+of 1 and 2, and all lifted. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
 test, so until the art pass the layout changes in `floor-layout.ts`. When the art pass takes the
 floor over by hand (`visual.md` §5), the layout, the generator and the determinism test are
 removed and `floor.tmj` is authored in Tiled like every other map; the layout test's
