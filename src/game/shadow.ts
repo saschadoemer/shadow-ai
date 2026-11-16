@@ -2,7 +2,7 @@ import { type Box, sightBlocked } from '../engine/collision';
 import { type NamedRect, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { CONE_LENGTH, type Cone, DIRECTIONS, lampCone } from './lamp';
 import { BOX_HEIGHT } from './player';
-import type { PlayerState } from './state';
+import type { LampState, PlayerState, ShadowWallState } from './state';
 import { densityOf } from './world';
 
 /**
@@ -140,4 +140,77 @@ export function wallInLight(
     height: map.height,
     solids: map.opaque,
   });
+}
+
+/** Tune: one second of unbroken light lifts a wall, as it captures a creature. */
+export const LIFT_STEPS = 60;
+
+/** Every wall of the map standing, unlit: the walls a game starts with. */
+export function standingWalls(walls: readonly ShadowWall[]): ShadowWallState[] {
+  return walls.map((_wall, wall) => ({ wall, lit: false, light: 0 }));
+}
+
+/** The standing walls when the figure wakes (0009): unlit, the second not begun. No lifted wall comes back. */
+export function restedWalls(standing: readonly ShadowWallState[]): ShadowWallState[] {
+  return standing.map(({ wall }) => ({ wall, lit: false, light: 0 }));
+}
+
+/**
+ * One step of the standing walls against the stepped figure and the lamp of that step. Not in
+ * the light: unlit, and the count starts again. In the light of a lamp weaker than its
+ * density: lit, and it holds. In the light of a lamp strong enough: the count grows by 1, and
+ * in the step it would reach LIFT_STEPS the wall leaves the list. `map` is the map as loaded.
+ */
+export function stepWalls(
+  standing: readonly ShadowWallState[],
+  walls: readonly ShadowWall[],
+  player: PlayerState,
+  lamp: LampState,
+  map: TileMap,
+): ShadowWallState[] {
+  const next: ShadowWallState[] = [];
+  for (const state of standing) {
+    const wall = walls[state.wall];
+    if (wall === undefined || !wallInLight(wall, player, lamp.on, map)) {
+      next.push({ wall: state.wall, lit: false, light: 0 });
+    } else if (lamp.strength < wall.density) {
+      next.push({ wall: state.wall, lit: true, light: 0 });
+    } else if (state.light + 1 < LIFT_STEPS) {
+      next.push({ wall: state.wall, lit: true, light: state.light + 1 });
+    }
+  }
+  return next;
+}
+
+/**
+ * The map with the box of every standing wall added to each cell it covers, as a solid box and
+ * as an opaque one: what the figure, the push and the creatures are stepped against. The map
+ * itself when no wall stands. A new object; the map is not changed.
+ */
+export function withWalls(
+  map: TileMap,
+  walls: readonly ShadowWall[],
+  standing: readonly ShadowWallState[],
+): TileMap {
+  if (standing.length === 0) {
+    return map;
+  }
+  const solids = [...map.solids];
+  const opaque = [...map.opaque];
+  for (const { wall } of standing) {
+    const box = walls[wall]?.box;
+    if (box === undefined) {
+      continue;
+    }
+    const lastColumn = Math.ceil((box.x + box.width) / TILE_SIZE) - 1;
+    const lastRow = Math.ceil((box.y + box.height) / TILE_SIZE) - 1;
+    for (let row = Math.floor(box.y / TILE_SIZE); row <= lastRow; row += 1) {
+      for (let column = Math.floor(box.x / TILE_SIZE); column <= lastColumn; column += 1) {
+        const at = row * map.width + column;
+        solids[at] = [...(solids[at] ?? []), box];
+        opaque[at] = [...(opaque[at] ?? []), box];
+      }
+    }
+  }
+  return { ...map, solids, opaque };
 }

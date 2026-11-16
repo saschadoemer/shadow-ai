@@ -164,9 +164,10 @@ describe('stepDark', () => {
     tick: 500,
     player: figure(300, 200, 'left', { frame: 2, frameTimer: 3.5 }),
     camera: { x: 140, y: 106 },
-    lamp: { on: true },
+    lamp: { on: true, strength: 1 },
     creatures: [snippet(310, 200)],
     movers: [],
+    shadowWalls: [{ wall: 1, lit: true, light: 30 }],
     captured: { snippet: 2 },
     overview: { current: 0, max: 3 },
     dark: 1,
@@ -180,7 +181,12 @@ describe('stepDark', () => {
   };
 
   it('for 43 steps only dark and tick grow, and the lamp is off', () => {
-    expect(darkSteps(43)).toStrictEqual({ ...FALLEN, tick: 543, lamp: { on: false }, dark: 44 });
+    expect(darkSteps(43)).toStrictEqual({
+      ...FALLEN,
+      tick: 543,
+      lamp: { on: false, strength: 1 },
+      dark: 44,
+    });
   });
 
   it('the 44th step, dark 45, sets the world right', () => {
@@ -190,9 +196,10 @@ describe('stepDark', () => {
       tick: 544,
       player,
       camera: followPlayer(player, MAP),
-      lamp: { on: false },
+      lamp: { on: false, strength: 1 },
       creatures: [{ ...snippet(40, 40), home: { x: 40, y: 40 } }],
       movers: [],
+      shadowWalls: [{ wall: 1, lit: false, light: 0 }],
       captured: { snippet: 2 },
       overview: { current: 3, max: 3 },
       dark: 45,

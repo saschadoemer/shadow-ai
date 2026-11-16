@@ -101,9 +101,10 @@ const state = (
   tick: 0,
   player: player(fields),
   camera,
-  lamp: { on: lampOn },
+  lamp: { on: lampOn, strength: 1 },
   creatures: [],
   movers: [],
+  shadowWalls: [],
   captured: { snippet: 0 },
   // No hearts: the call lists of the earlier features stay as they were (0009).
   overview: { current: 0, max: 0 },

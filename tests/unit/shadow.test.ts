@@ -5,8 +5,23 @@ import { describe, expect, it } from 'vitest';
 import type { Box } from '../../src/engine/collision';
 import { type NamedRect, parseTileMap, parseTileset, type TileMap } from '../../src/engine/tiled';
 import { lampCone } from '../../src/game/lamp';
-import { meetsCone, type ShadowWall, wallInLight, wallsOf } from '../../src/game/shadow';
-import { type Facing, NO_RECOIL, type PlayerState } from '../../src/game/state';
+import {
+  LIFT_STEPS,
+  meetsCone,
+  restedWalls,
+  type ShadowWall,
+  standingWalls,
+  stepWalls,
+  wallInLight,
+  wallsOf,
+  withWalls,
+} from '../../src/game/shadow';
+import {
+  type Facing,
+  NO_RECOIL,
+  type PlayerState,
+  type ShadowWallState,
+} from '../../src/game/state';
 import { grassMap } from './grass-map';
 import { solidsWith } from './solids';
 
@@ -137,5 +152,121 @@ describe('a wall in the light (0014)', () => {
     const boxes = solidsWith(20, 12, [{ column: 15, row: 5, box: strip }]);
     const map = { ...OPEN, solids: boxes, opaque: boxes };
     expect(wallInLight(wall(V, 'sales'), figure(230, 96, 'right'), true, map)).toBe(true);
+  });
+});
+
+describe('the step of the walls (0014)', () => {
+  /** A thin horizontal wall and a dense vertical one, both in the cone of a figure at (152, 80) facing down. */
+  const WALLS: readonly ShadowWall[] = [
+    wall(H),
+    wall({ x: 160, y: 80, width: 4, height: 32 }, 'hr', 2),
+  ];
+  const PLAYER = figure(152, 80, 'down');
+  const BASIC = { on: true, strength: 1 };
+  const run = (
+    standing: readonly ShadowWallState[],
+    steps: number,
+    lamp = BASIC,
+    player = PLAYER,
+  ): readonly ShadowWallState[] => {
+    let next = standing;
+    for (let i = 0; i < steps; i += 1) {
+      next = stepWalls(next, WALLS, player, lamp, OPEN);
+    }
+    return next;
+  };
+
+  it('every wall stands at the start, unlit', () => {
+    expect(standingWalls(WALLS)).toStrictEqual([
+      { wall: 0, lit: false, light: 0 },
+      { wall: 1, lit: false, light: 0 },
+    ]);
+    expect(LIFT_STEPS).toBe(60);
+  });
+
+  it('two walls in the cone both count: the thin one gives way, the dense one holds', () => {
+    expect(run(standingWalls(WALLS), 1)).toStrictEqual([
+      { wall: 0, lit: true, light: 1 },
+      { wall: 1, lit: true, light: 0 },
+    ]);
+  });
+
+  it('a wall of density 1 has light 59 after 59 steps and is gone after the 60th', () => {
+    expect(run(standingWalls(WALLS), 59)).toStrictEqual([
+      { wall: 0, lit: true, light: 59 },
+      { wall: 1, lit: true, light: 0 },
+    ]);
+    expect(run(standingWalls(WALLS), 60)).toStrictEqual([{ wall: 1, lit: true, light: 0 }]);
+  });
+
+  it('the wall that leaves keeps the index of the others', () => {
+    const left = run(standingWalls(WALLS), 60);
+    expect(left.map((standing) => standing.wall)).toStrictEqual([1]);
+    expect(run(left, 1)).toStrictEqual([{ wall: 1, lit: true, light: 0 }]);
+  });
+
+  it('a wall of density 2 holds against strength 1 however long, and is gone after 60 steps of strength 2', () => {
+    expect(run(standingWalls(WALLS), 600)).toStrictEqual([{ wall: 1, lit: true, light: 0 }]);
+    const strong = { on: true, strength: 2 };
+    expect(run([{ wall: 1, lit: false, light: 0 }], 59, strong)).toStrictEqual([
+      { wall: 1, lit: true, light: 59 },
+    ]);
+    expect(run([{ wall: 1, lit: false, light: 0 }], 60, strong)).toStrictEqual([]);
+  });
+
+  it('a step out of the light starts the second again', () => {
+    const half = run(standingWalls(WALLS), 30);
+    expect(half[0]).toStrictEqual({ wall: 0, lit: true, light: 30 });
+    const broken = run(half, 1, { on: false, strength: 1 });
+    expect(broken).toStrictEqual([
+      { wall: 0, lit: false, light: 0 },
+      { wall: 1, lit: false, light: 0 },
+    ]);
+    expect(run(broken, 1)[0]).toStrictEqual({ wall: 0, lit: true, light: 1 });
+  });
+
+  it('a figure that turns away breaks the light as well', () => {
+    const half = run(standingWalls(WALLS), 30);
+    expect(run(half, 1, BASIC, figure(152, 80, 'up'))).toStrictEqual([
+      { wall: 0, lit: false, light: 0 },
+      { wall: 1, lit: false, light: 0 },
+    ]);
+  });
+
+  it('rests the standing walls and brings no lifted wall back', () => {
+    expect(restedWalls([{ wall: 1, lit: true, light: 30 }])).toStrictEqual([
+      { wall: 1, lit: false, light: 0 },
+    ]);
+    expect(restedWalls([])).toStrictEqual([]);
+  });
+});
+
+describe('the map with its standing walls (0014)', () => {
+  const WALLS: readonly ShadowWall[] = [wall(H), wall(V, 'sales')];
+
+  it('is the map itself when no wall stands', () => {
+    expect(withWalls(OPEN, WALLS, [])).toBe(OPEN);
+  });
+
+  it('adds the box of a standing wall to every cell it covers, as solid and as opaque', () => {
+    const walled = withWalls(OPEN, WALLS, [{ wall: 0, lit: false, light: 0 }]);
+    const cellsWith = (grid: readonly (readonly Box[])[]) =>
+      grid.flatMap((boxes, at) => (boxes.length > 0 ? [at] : []));
+    expect(cellsWith(walled.solids)).toStrictEqual([6 * 20 + 8, 6 * 20 + 9, 6 * 20 + 10]);
+    expect(cellsWith(walled.opaque)).toStrictEqual([6 * 20 + 8, 6 * 20 + 9, 6 * 20 + 10]);
+    expect(walled.solids[6 * 20 + 9]).toStrictEqual([H]);
+    expect(cellsWith(OPEN.solids)).toStrictEqual([]);
+  });
+
+  it('covers three rows for a vertical wall and keeps the boxes the map already has', () => {
+    const tile = { x: 240, y: 32, width: 16, height: 16 };
+    const boxes = solidsWith(20, 12, [{ column: 15, row: 2, box: tile }]);
+    const walled = withWalls({ ...OPEN, solids: boxes, opaque: boxes }, WALLS, [
+      { wall: 1, lit: false, light: 0 },
+    ]);
+    expect(walled.solids[2 * 20 + 15]).toStrictEqual([tile, V]);
+    expect(walled.solids[3 * 20 + 15]).toStrictEqual([V]);
+    expect(walled.solids[4 * 20 + 15]).toStrictEqual([V]);
+    expect(walled.solids[5 * 20 + 15]).toStrictEqual([]);
   });
 });
