@@ -6,6 +6,7 @@ import { cameraFor } from '../../src/engine/camera';
 import { moveBox } from '../../src/engine/collision';
 import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../src/engine/tiled';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
+import { standingWalls, wallsOf, withWalls } from '../../src/game/shadow';
 import { createInitialState } from '../../src/game/update';
 import {
   type CellRect,
@@ -19,8 +20,10 @@ import {
   POSTS,
   ROOMS,
   ROUTES,
+  SHADOW_WALLS,
   SNIPPETS,
   SPAWN,
+  shadowWallBox,
   VERTICAL_WALLS,
   WAKE,
 } from '../../tools/floor-layout.ts';
@@ -479,9 +482,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 91 }, (_, i) => i + 1),
+      Array.from({ length: 99 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(92);
+    expect(json.nextobjectid).toBe(100);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -897,5 +900,157 @@ describe('lounge and gadgets (0013)', () => {
       expect(floor.opaque[cell(column, row)], name).toStrictEqual([]);
       expect(floor.solids[cell(column, row)]?.length ?? 0, name).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('the shadow walls of the floor (0014)', () => {
+  /** The spec's table: region, density, box. */
+  const TABLE: readonly (readonly [string, number, Box])[] = [
+    ['sales', 1, { x: 1264, y: 592, width: 4, height: 48 }],
+    ['marketing', 1, { x: 368, y: 928, width: 48, height: 4 }],
+    ['support', 1, { x: 1232, y: 928, width: 48, height: 4 }],
+    ['meeting-rooms', 1, { x: 1424, y: 64, width: 4, height: 48 }],
+    ['meeting-rooms', 1, { x: 1424, y: 224, width: 4, height: 48 }],
+    ['hr', 2, { x: 160, y: 320, width: 48, height: 4 }],
+    ['accounting', 2, { x: 496, y: 320, width: 48, height: 4 }],
+    ['development', 3, { x: 1008, y: 320, width: 48, height: 4 }],
+  ];
+  const walls = wallsOf(floor.rects);
+  const overlap = (a: Box, b: Box): boolean =>
+    a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+
+  it('holds the eight rectangles of the spec after the 91 points, with the ids 92–99', () => {
+    expect(floor.rects).toStrictEqual(
+      TABLE.map(([region, , box]) => ({ name: `shadow:${region}`, ...box })),
+    );
+    const objects = floorJson().layers[3].objects;
+    expect(objects.slice(0, 91).every((object) => 'point' in object)).toBe(true);
+    expect(objects.slice(91).map((object) => [object.id, object.name])).toStrictEqual(
+      TABLE.map(([region], i) => [92 + i, `shadow:${region}`]),
+    );
+    expect(objects.slice(91).some((object) => 'point' in object)).toBe(false);
+    expect(floor.points).toHaveLength(90);
+  });
+
+  it('builds the boxes from the doorway cells of the layout', () => {
+    expect(SHADOW_WALLS.map((wall) => [wall.region, shadowWallBox(wall.cells)])).toStrictEqual(
+      TABLE.map(([region, , box]) => [region, box]),
+    );
+  });
+
+  it('reads them as walls with region, density and box', () => {
+    expect(walls).toStrictEqual(TABLE.map(([region, density, box]) => ({ region, density, box })));
+  });
+
+  it('puts each wall on the cells of exactly one opening', () => {
+    for (const { region, box } of walls) {
+      const column = box.x / 16;
+      const row = box.y / 16;
+      if (box.height === 4) {
+        const line = HORIZONTAL_WALLS.find(
+          (wall) => wall.row === row && wall.from <= column && column <= wall.to,
+        );
+        const columns = Array.from({ length: box.width / 16 }, (_, k) => column + k);
+        expect(
+          columns.every((c) => line?.openings.includes(c)),
+          region,
+        ).toBe(true);
+        expect(line?.openings.includes(column - 1), region).toBe(false);
+        expect(line?.openings.includes(column + columns.length), region).toBe(false);
+      } else {
+        const line = VERTICAL_WALLS.find(
+          (wall) => wall.column === column && wall.from <= row && row <= wall.to,
+        );
+        const rows = Array.from({ length: box.height / 16 }, (_, k) => row + k);
+        expect(
+          rows.every((r) => line?.openings.includes(r)),
+          region,
+        ).toBe(true);
+        expect(line?.openings.includes(row - 1), region).toBe(false);
+        expect(line?.openings.includes(row + rows.length), region).toBe(false);
+      }
+    }
+  });
+
+  it('keeps every wall clear of every solid box of the map', () => {
+    for (const { region, box } of walls) {
+      for (
+        let row = Math.floor(box.y / 16);
+        row <= Math.ceil((box.y + box.height) / 16) - 1;
+        row += 1
+      ) {
+        for (
+          let column = Math.floor(box.x / 16);
+          column <= Math.ceil((box.x + box.width) / 16) - 1;
+          column += 1
+        ) {
+          for (const solid of floor.solids[cell(column, row)] ?? []) {
+            expect(overlap(box, solid), `${region} at (${column}, ${row})`).toBe(false);
+          }
+        }
+      }
+    }
+  });
+
+  it('keeps the spawn, the wake point and the snippets clear of every wall', () => {
+    for (const feet of [SPAWN, WAKE, ...SNIPPETS]) {
+      for (const { region, box } of walls) {
+        expect(overlap(boxAt(feet), box), `(${feet.x}, ${feet.y}) against ${region}`).toBe(false);
+      }
+    }
+  });
+
+  describe('reachability on foot', () => {
+    const OPEN: readonly (readonly [string, number, number])[] = [
+      ['data protection officer', 19, 34],
+      ['reception', 5, 48],
+      ['break room', 38, 38],
+      ['north corridor', 2, 21],
+      ['south corridor', 105, 56],
+      ['west corridor', 24, 27],
+      ['east corridor', 77, 50],
+      ['side passage', 86, 2],
+    ];
+    const THIN: readonly (readonly [string, number, number])[] = [
+      ['sales', 80, 38],
+      ['marketing', 24, 60],
+      ['support', 78, 59],
+      ['meeting room north', 91, 8],
+      ['meeting room south', 91, 18],
+    ];
+    const DENSE: readonly (readonly [string, number, number])[] = [
+      ['hr', 11, 17],
+      ['accounting', 32, 17],
+    ];
+    const DENSEST: readonly (readonly [string, number, number])[] = [['development', 64, 13]];
+    /** The flood with every wall of a density up to `lifted` gone. */
+    const flood = (lifted: number) =>
+      reachableFeet(
+        withWalls(
+          floor,
+          walls,
+          standingWalls(walls).filter(({ wall }) => (walls[wall]?.density ?? 0) > lifted),
+        ),
+        SPAWN,
+      );
+    const names = (
+      reached: (feet: Point) => boolean,
+      probes: readonly (readonly [string, number, number])[],
+    ) => probes.filter(([, column, row]) => reached(feetIn(column, row))).map(([name]) => name);
+    const all = (probes: readonly (readonly [string, number, number])[]) =>
+      probes.map(([name]) => name);
+
+    it.each([
+      [0, all(OPEN), [], [], []],
+      [1, all(OPEN), all(THIN), [], []],
+      [2, all(OPEN), all(THIN), all(DENSE), []],
+      [3, all(OPEN), all(THIN), all(DENSE), all(DENSEST)],
+    ])('with the walls up to density %d lifted', (lifted, open, thin, dense, densest) => {
+      const reached = flood(lifted);
+      expect(names(reached, OPEN)).toStrictEqual(open);
+      expect(names(reached, THIN)).toStrictEqual(thin);
+      expect(names(reached, DENSE)).toStrictEqual(dense);
+      expect(names(reached, DENSEST)).toStrictEqual(densest);
+    });
   });
 });
