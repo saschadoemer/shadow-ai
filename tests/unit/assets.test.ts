@@ -9,8 +9,11 @@ import { checkTileset, type TilesetFacts } from './tileset-check';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const RULES = { palette: new Set<string>(ENDESGA_32), reserved: SHADOW_COLOUR };
-/** The shadow assets: the only files that may use the reserved colour (visual.md §4, 0008). */
-const SHADOW_ASSETS: ReadonlySet<string> = new Set(['public/sprites/snippet.png']);
+/** The shadow assets: the only files that may use the reserved colour (visual.md §4, 0008, 0014). */
+const SHADOW_ASSETS: ReadonlySet<string> = new Set([
+  'public/sprites/snippet.png',
+  'public/sprites/shadow-wall.png',
+]);
 const rulesFor = (file: string) => ({
   ...RULES,
   reserved: SHADOW_ASSETS.has(file) ? null : SHADOW_COLOUR,
@@ -77,10 +80,18 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
   it('allows the reserved colour in a shadow asset and nowhere else', () => {
     const violet = onePixel(0x68, 0x38, 0x6c, 255);
     expect(checkPng('x.png', violet, rulesFor('public/sprites/snippet.png'))).toStrictEqual([]);
+    expect(checkPng('x.png', violet, rulesFor('public/sprites/shadow-wall.png'))).toStrictEqual([]);
     expect(checkPng('x.png', violet, rulesFor('public/sprites/player.png'))).toStrictEqual([
       'x.png: pixel (0, 0) uses the reserved shadow colour #68386c',
     ]);
-    expect([...SHADOW_ASSETS]).toStrictEqual(['public/sprites/snippet.png']);
+    expect([...SHADOW_ASSETS]).toStrictEqual([
+      'public/sprites/snippet.png',
+      'public/sprites/shadow-wall.png',
+    ]);
+  });
+
+  it('checks the shadow-wall sheet under public/sprites/ with every other PNG (0014)', () => {
+    expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/shadow-wall.png');
   });
 
   it('holds a shadow asset to the palette all the same', () => {
