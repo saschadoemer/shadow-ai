@@ -381,7 +381,11 @@ lamp.
 - HR, Accounting and Development can be seen but not entered until the upgrades exist (M6).
   Does that tease, or does it disturb?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-16, steps 1–32. Feel: a strip 4 px thick reads as a wall of shadow at
+factor 6 and at factor 3; the three densities can be told apart at a glance; one second to lift
+a thin wall is right; a wall that holds against the lamp can be told from a wall the light
+misses; seeing HR, Accounting and Development without entering them makes curious and does not
+disturb.
 
 ## Open questions
 
