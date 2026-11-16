@@ -1,6 +1,6 @@
 # 0014 — Shadow walls and density
 
-**Status:** approved 2026-11-16
+**Status:** implemented 2026-11-16
 **Milestone:** M3
 **Drafted:** 2026-11-16
 
