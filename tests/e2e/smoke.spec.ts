@@ -164,6 +164,22 @@ test('the floor starts with its 22 movers and draws the person of the reception'
     .toStrictEqual([0x3e, 0x89, 0x48, 255]);
 });
 
+test('the floor starts with its eight shadow walls standing and a lamp of strength 1', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.shadowWalls.length), {
+      message: 'window.shadowAi.state.shadowWalls holds the eight walls of the floor',
+    })
+    .toBe(8);
+  const state = await page.evaluate(() => window.shadowAi?.state);
+  expect(state?.shadowWalls).toStrictEqual(
+    Array.from({ length: 8 }, (_, wall) => ({ wall, lit: false, light: 0 })),
+  );
+  expect(state?.lamp.strength).toBe(1);
+});
+
 test('the game starts with full overview and outside the dark', async ({ page }) => {
   await page.goto('/');
   await expect
