@@ -1,5 +1,6 @@
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
 import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
+import { type Figure, figuresOf } from '../game/cast';
 import { CREATURE_SIZE } from '../game/creature';
 import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE } from '../game/mover';
@@ -9,6 +10,7 @@ import { LIFT_STEPS, wallsOf } from '../game/shadow';
 import {
   type CreatureState,
   FACINGS,
+  type FigureState,
   type GameState,
   type MoverState,
   PHASES_PER_FACING,
@@ -20,7 +22,7 @@ import { type Language, textOf } from '../text/text';
 import { drawLayer } from './draw-map';
 import { drawText } from './draw-text';
 import { GLYPH_HEIGHT, GLYPH_WIDTH } from './font';
-import { PAGE_BACKGROUND } from './palette';
+import { PAGE_BACKGROUND, type PaletteColour } from './palette';
 import {
   type Renderer,
   type SpriteSheet,
@@ -51,6 +53,8 @@ export interface SceneContent {
   };
   /** 108 glyphs of 6x10 in one row, in the order of render/font (0016). */
   readonly fontSheet: SpriteSheet;
+  /** One sheet per figure of the cast, by its id: twenty 16x24 frames like the player's (0017). */
+  readonly figureSheets: Readonly<Record<string, SpriteSheet>>;
   /** The language text is drawn in. */
   readonly language: Language;
 }
@@ -151,6 +155,38 @@ function drawMovers(
   }
 }
 
+/** The frame of a standing figure in its sheet (0017): its facing, standing. */
+export function figureFrame(figure: FigureState): number {
+  return FACINGS.indexOf(figure.facing) * PHASES_PER_FACING;
+}
+
+/** The top-left corner of a standing figure's frame on the surface: the feet are its bottom centre. */
+export function figureOrigin(at: Point, camera: Point): Point {
+  return {
+    x: Math.round(at.x) - FRAME_WIDTH / 2 - camera.x,
+    y: Math.round(at.y) - FRAME_HEIGHT - camera.y,
+  };
+}
+
+function drawFigures(
+  renderer: Renderer,
+  standing: readonly FigureState[],
+  figures: readonly Figure[],
+  wanted: (at: Figure) => boolean,
+  state: GameState,
+  content: SceneContent,
+): void {
+  for (const figure of standing) {
+    const at = figures[figure.figure];
+    const sheet = at === undefined ? undefined : content.figureSheets[at.id];
+    if (at === undefined || sheet === undefined || !wanted(at)) {
+      continue;
+    }
+    const origin = figureOrigin(at, state.camera);
+    renderer.drawSprite(sheet, figureFrame(figure), origin.x, origin.y);
+  }
+}
+
 /** The shadow-wall sheet (0014): frame = orientation × WALL_LOOKS + look. */
 export const WALL_LOOKS = 8;
 /** A wall the light is not on changes its phase every 15 steps: four changes per second. */
@@ -214,6 +250,27 @@ export function noticeOrigin(length: number): Point {
   };
 }
 
+/** The dialogue box (0017): the notice's bar grown upwards to three lines, the same bottom edge. */
+export const DIALOGUE_BOX: Box = { x: 8, y: 134, width: 304, height: 42 };
+/** Where the first line of a page starts; the lines are left-aligned. */
+export const DIALOGUE_TEXT: Point = { x: 12, y: 138 };
+export const DIALOGUE_LINES = 3;
+/** The longest line of a page, in characters: it ends at x = 294, left of the marker. */
+export const DIALOGUE_LINE_CAPACITY = 47;
+/** A small triangle that points down, in the box's lower right corner: a press goes on. */
+export const DIALOGUE_MARKER: readonly Box[] = [
+  { x: 299, y: 169, width: 5, height: 1 },
+  { x: 300, y: 170, width: 3, height: 1 },
+  { x: 301, y: 171, width: 1, height: 1 },
+];
+const MARKER_COLOUR: PaletteColour = '#ffffff';
+/** The marker is on for half a second and off for half a second. */
+export const MARKER_BLINK_STEPS = 30;
+
+export function markerVisible(tick: number): boolean {
+  return Math.floor(tick / MARKER_BLINK_STEPS) % 2 === 0;
+}
+
 /** A safe figure is left out in every second group of four steps. */
 export const BLINK_STEPS = 4;
 
@@ -232,14 +289,17 @@ export function lidHeight(dark: number): number {
 
 /**
  * One frame: ground, detail, the cone when the lamp is on, the standing shadow walls in array
- * order (0014), the ground movers whose feet are at
- * or above the figure's, the creatures in array order, the player, the other ground movers,
- * above, the drones (0015), all shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x, round(y) − 24 −
- * camera.y): the feet are its bottom centre, and the camera is already whole pixels
- * (engine/camera). The cone lies under the figure, so the body hides the apex. After `above`
- * come the hearts of overview, on the surface and not shifted by the camera, then the notice —
- * the bar and its line, on the surface and not shifted by the camera (0016) — and the two lids
- * of the dark (0009). A safe figure blinks; its cone and the movers do not.
+ * order (0014), the ground movers whose feet are at or above the player's, then the standing
+ * figures whose feet are at or above the player's (0017), the creatures in array order, the
+ * player, the other standing figures, the other ground movers, above, the drones (0015), all
+ * shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x,
+ * round(y) − 24 − camera.y): the feet are its bottom centre, and the camera is already whole
+ * pixels (engine/camera). The cone lies under the figure, so the body hides the apex. After
+ * `above` come the hearts of overview, on the surface and not shifted by the camera; then,
+ * while a dialogue is open, the dialogue box with the page's lines and its blinking marker
+ * (0017), else the notice — the bar and its line (0016) — both on the surface and not shifted
+ * by the camera; and last the two lids of the dark (0009). A safe figure blinks; its cone and
+ * the movers do not.
  */
 export function drawScene(renderer: Renderer, state: GameState, content: SceneContent): void {
   const { player, camera } = state;
@@ -262,6 +322,7 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
       renderer.drawSprite(content.shadowWallSheet, frame, origin.x, origin.y);
     }
   }
+  const figures = figuresOf(content.map.points);
   const ground = state.movers.filter((mover) => mover.kind !== 'drone');
   drawMovers(
     renderer,
@@ -269,6 +330,7 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
     state,
     content,
   );
+  drawFigures(renderer, state.figures, figures, (at) => at.y <= player.y, state, content);
   for (const creature of state.creatures) {
     const origin = creatureOrigin(creature, camera);
     renderer.drawSprite(
@@ -286,6 +348,7 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
       Math.round(player.y) - FRAME_HEIGHT - camera.y,
     );
   }
+  drawFigures(renderer, state.figures, figures, (at) => at.y > player.y, state, content);
   drawMovers(
     renderer,
     ground.filter((mover) => mover.y > player.y),
@@ -307,8 +370,26 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
       HEART_MARGIN,
     );
   }
+  const page =
+    state.dialogue === null
+      ? undefined
+      : figures[state.dialogue.figure]?.pages[state.dialogue.page];
   const notice = noticeOf(state);
-  if (notice !== null) {
+  if (page !== undefined) {
+    renderer.fillRect(
+      DIALOGUE_BOX.x,
+      DIALOGUE_BOX.y,
+      DIALOGUE_BOX.width,
+      DIALOGUE_BOX.height,
+      PAGE_BACKGROUND,
+    );
+    drawText(renderer, content.fontSheet, page, content.language, DIALOGUE_TEXT.x, DIALOGUE_TEXT.y);
+    if (markerVisible(state.tick)) {
+      for (const part of DIALOGUE_MARKER) {
+        renderer.fillRect(part.x, part.y, part.width, part.height, MARKER_COLOUR);
+      }
+    }
+  } else if (notice !== null) {
     renderer.fillRect(
       NOTICE_BAR.x,
       NOTICE_BAR.y,

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { EMPTY, type TileMap } from '../../src/engine/tiled';
 import {
   type CreatureState,
+  type FigureState,
   type GameState,
   type MoverState,
   NO_RECOIL,
@@ -11,13 +12,22 @@ import {
 import {
   creatureFrame,
   creatureOrigin,
+  DIALOGUE_BOX,
+  DIALOGUE_LINE_CAPACITY,
+  DIALOGUE_LINES,
+  DIALOGUE_MARKER,
+  DIALOGUE_TEXT,
   drawScene,
+  figureFrame,
+  figureOrigin,
   HEART_MARGIN,
   HEART_PITCH,
   HEART_SIZE,
   lampFrame,
   lampFrameOrigin,
   lidHeight,
+  MARKER_BLINK_STEPS,
+  markerVisible,
   moverFrame,
   moverOrigin,
   NOTICE_BAR,
@@ -29,6 +39,7 @@ import {
   wallLook,
   wallSegments,
 } from '../../src/render/draw-scene';
+import { GLYPH_WIDTH } from '../../src/render/font';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
 import { LANGUAGES, TABLE } from '../../src/text/text';
 import { solidsOf } from './solids';
@@ -91,6 +102,7 @@ const CONTENT: SceneContent = {
     drone: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   },
   fontSheet: { image: {} as ImageBitmap, frameWidth: 6, frameHeight: 10 },
+  figureSheets: { officer: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 } },
   language: 'de',
 };
 const player = (fields: Partial<PlayerState>): PlayerState => ({
@@ -696,6 +708,182 @@ describe('the notice in the scene (0016)', () => {
       for (const [key, text] of Object.entries(TABLE[language])) {
         if (key.startsWith('notice.')) {
           expect(text.length, `${language} ${key}`).toBeLessThanOrEqual(NOTICE_CAPACITY);
+        }
+      }
+    }
+  });
+});
+
+describe('the standing figures in the scene (0017)', () => {
+  /** The officer at (40, y) on the 3x2 map; the player stands at (20, 30). */
+  const withOfficer = (y: number): SceneContent => ({
+    ...CONTENT,
+    map: { ...MAP, points: [{ name: 'figure:officer', x: 40, y }] },
+  });
+  const standing = (facing: FigureState['facing']): FigureState => ({ figure: 0, facing });
+  const snippet = { species: 'snippet', x: 60, y: 25, light: 0, home: { x: 0, y: 0 } } as const;
+
+  it('shows a figure standing: the frame is facing × 5', () => {
+    expect(
+      (['down', 'up', 'left', 'right'] as const).map((facing) => figureFrame(standing(facing))),
+    ).toStrictEqual([0, 5, 10, 15]);
+  });
+
+  it('puts the frame so that the feet are its bottom centre, shifted by the camera', () => {
+    expect(figureOrigin({ x: 40, y: 20 }, { x: 0, y: 0 })).toStrictEqual({ x: 32, y: -4 });
+    expect(figureOrigin({ x: 264, y: 472 }, { x: 136, y: 410 })).toStrictEqual({ x: 120, y: 38 });
+  });
+
+  it('draws a figure at or above the player after the ground movers of that group and before the creatures', () => {
+    const renderer = recordingRenderer();
+    const content = withOfficer(20);
+    drawScene(
+      renderer,
+      {
+        ...state({ x: 20, y: 30 }),
+        movers: [mover({ kind: 'dog', x: 60, y: 10 })],
+        creatures: [snippet],
+        figures: [standing('left')],
+      },
+      content,
+    );
+    expect(renderer.sheets).toStrictEqual([
+      content.moverSheets.dog,
+      content.figureSheets.officer,
+      content.creatureSheets.snippet,
+      content.playerSheet,
+    ]);
+    expect(renderer.calls).toContain('drawSprite 10 at 32,-4');
+  });
+
+  it('draws a figure below the player after the player and before the other ground movers', () => {
+    const renderer = recordingRenderer();
+    const content = withOfficer(40);
+    drawScene(
+      renderer,
+      {
+        ...state({ x: 20, y: 30 }),
+        movers: [mover({ kind: 'dog', x: 60, y: 50 })],
+        creatures: [snippet],
+        figures: [standing('down')],
+      },
+      content,
+    );
+    expect(renderer.sheets).toStrictEqual([
+      content.creatureSheets.snippet,
+      content.playerSheet,
+      content.figureSheets.officer,
+      content.moverSheets.dog,
+    ]);
+    expect(renderer.calls).toContain('drawSprite 0 at 32,16');
+  });
+
+  it('draws no figure the map does not have', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, { ...state({ x: 20, y: 30 }), figures: [standing('down')] }, CONTENT);
+    expect(renderer.sheets).toStrictEqual([CONTENT.playerSheet]);
+  });
+});
+
+describe('the dialogue box in the scene (0017)', () => {
+  const content: SceneContent = {
+    ...CONTENT,
+    map: { ...MAP, points: [{ name: 'figure:officer', x: 40, y: 20 }] },
+  };
+  const talking = (page: number, tick = 0): GameState => ({
+    ...state({ x: 20, y: 30 }),
+    tick,
+    figures: [{ figure: 0, facing: 'left' }],
+    dialogue: { figure: 0, page },
+    overview: { current: 1, max: 2 },
+  });
+  const BOX = 'fillRect 8,134 304x42 #181425';
+  const MARKER = [
+    'fillRect 299,169 5x1 #ffffff',
+    'fillRect 300,170 3x1 #ffffff',
+    'fillRect 301,171 1x1 #ffffff',
+  ];
+  const spritesOn = (renderer: ReturnType<typeof recordingRenderer>, sheet: unknown): string[] =>
+    renderer.calls
+      .filter((call) => call.startsWith('drawSprite'))
+      .filter((_call, i) => renderer.sheets[i] === sheet);
+
+  it('places the box, the lines and the marker as the spec says', () => {
+    expect(DIALOGUE_BOX).toStrictEqual({ x: 8, y: 134, width: 304, height: 42 });
+    expect(DIALOGUE_TEXT).toStrictEqual({ x: 12, y: 138 });
+    expect([DIALOGUE_LINES, DIALOGUE_LINE_CAPACITY, MARKER_BLINK_STEPS]).toStrictEqual([3, 47, 30]);
+    expect(DIALOGUE_MARKER).toStrictEqual([
+      { x: 299, y: 169, width: 5, height: 1 },
+      { x: 300, y: 170, width: 3, height: 1 },
+      { x: 301, y: 171, width: 1, height: 1 },
+    ]);
+    // The same bottom edge as the notice's bar, and the longest line ends left of the marker.
+    expect(DIALOGUE_BOX.y + DIALOGUE_BOX.height).toBe(NOTICE_BAR.y + NOTICE_BAR.height);
+    expect(DIALOGUE_TEXT.x + DIALOGUE_LINE_CAPACITY * GLYPH_WIDTH).toBeLessThan(299);
+  });
+
+  it('blinks the marker once a second: on for 30 steps, off for 30', () => {
+    expect([0, 29, 30, 59, 60].map(markerVisible)).toStrictEqual([true, true, false, false, true]);
+  });
+
+  it('draws the box, the first page and the marker after the hearts', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, talking(0), content);
+    const box = renderer.calls.indexOf(BOX);
+    expect(box).toBeGreaterThan(renderer.calls.indexOf('drawSprite 1 at 14,4'));
+    const after = renderer.calls.slice(box + 1);
+    expect(after).toHaveLength(96 + 3);
+    expect(after[0]).toBe('drawSprite 36 at 12,138');
+    expect(after[28]).toBe('drawSprite 37 at 12,150');
+    expect(after[64]).toBe('drawSprite 40 at 12,162');
+    expect(after.slice(-3)).toStrictEqual(MARKER);
+    expect(spritesOn(renderer, content.fontSheet)).toHaveLength(96);
+  });
+
+  it('draws the second page, and no marker in the second half second', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, talking(1, 30), content);
+    const after = renderer.calls.slice(renderer.calls.indexOf(BOX) + 1);
+    expect(after).toHaveLength(86);
+    expect(after[0]).toBe('drawSprite 45 at 12,138');
+    expect(renderer.calls.some((call) => call.endsWith('#ffffff'))).toBe(false);
+  });
+
+  it('draws the page in English when the language is `en`', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, talking(0), { ...content, language: 'en' });
+    const line = spritesOn(renderer, content.fontSheet);
+    expect(line).toHaveLength(82);
+    expect(line[0]).toBe('drawSprite 51 at 12,138');
+  });
+
+  it('draws the lids over the box', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, talking(0, 30), content);
+    drawScene(renderer, { ...talking(0, 30), dark: 10 }, content);
+    expect(renderer.calls.slice(-2)).toStrictEqual([
+      'fillRect 0,0 320x30 #181425',
+      'fillRect 0,150 320x30 #181425',
+    ]);
+  });
+
+  it('draws no box without a dialogue', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, { ...talking(0), dialogue: null }, content);
+    expect(renderer.calls).not.toContain(BOX);
+    expect(spritesOn(renderer, content.fontSheet)).toStrictEqual([]);
+  });
+
+  it('holds every page of the table to the box: its lines and their length', () => {
+    for (const language of LANGUAGES) {
+      for (const [key, text] of Object.entries(TABLE[language])) {
+        if (key.startsWith('talk.')) {
+          const lines = text.split('\n');
+          expect(lines.length, `${language} ${key}`).toBeLessThanOrEqual(DIALOGUE_LINES);
+          expect(
+            Math.max(...lines.map((line) => line.length)),
+            `${language} ${key}`,
+          ).toBeLessThanOrEqual(DIALOGUE_LINE_CAPACITY);
         }
       }
     }

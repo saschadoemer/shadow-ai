@@ -1352,7 +1352,7 @@ export function encodeOfficerPng(): Buffer {
   `DIALOGUE_MARKER`, `MARKER_BLINK_STEPS` (30), `markerVisible(tick): boolean`,
   `figureFrame(figure: FigureState): number`, `figureOrigin(at: Point, camera: Point): Point`.
 
-- [ ] **Step 1: Write the failing tests.** In `tests/unit/draw-scene.test.ts`: `CONTENT` gets
+- [x] **Step 1: Write the failing tests.** In `tests/unit/draw-scene.test.ts`: `CONTENT` gets
   `figureSheets: { officer: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 } },`;
   import the names above, `GLYPH_WIDTH` from `../../src/render/font` and `type FigureState`;
   add at the end:
@@ -1538,10 +1538,10 @@ describe('the dialogue box in the scene (0017)', () => {
   `mover`, `LANGUAGES`, `TABLE` and `NOTICE_BAR` are already in the file. The frames: `D` is
   36, `E` 37, `H` 40, `M` 45, `S` 51.
 
-- [ ] **Step 2: Run** `npx vitest run tests/unit/draw-scene.test.ts` — expected: the new tests
+- [x] **Step 2: Run** `npx vitest run tests/unit/draw-scene.test.ts` — expected: the new tests
   fail, and the typecheck names `CONTENT`.
 
-- [ ] **Step 3: Implement** in `src/render/draw-scene.ts`. Imports: `type Figure` and
+- [x] **Step 3: Implement** in `src/render/draw-scene.ts`. Imports: `type Figure` and
   `figuresOf` from `../game/cast`, `type FigureState` from `../game/state`,
   `type PaletteColour` from `./palette`. In `SceneContent`:
 
@@ -1691,11 +1691,11 @@ export function markerVisible(tick: number): boolean {
   `Promise<readonly [string, SpriteSheet]>` and import `type SpriteSheet` from
   `./render/renderer`.
 
-- [ ] **Step 4: Run** `npm run check` — expected: green. Then `npm run dev` and look once: the
+- [x] **Step 4: Run** `npm run check` — expected: green. Then `npm run dev` and look once: the
   game loads without an error in the console. Looking is not walking the plan — do not go
   through the acceptance steps.
 
-- [ ] **Step 5: Commit** — `Draw the standing figures and the dialogue box`, body: the box is
+- [x] **Step 5: Commit** — `Draw the standing figures and the dialogue box`, body: the box is
   the notice's bar grown upwards, so text has one place on the screen; a figure is drawn by
   its feet like everyone on the floor.
 
