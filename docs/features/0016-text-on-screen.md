@@ -211,7 +211,10 @@ lamp, `F` toggles fullscreen.
   should it stay for a moment?
 - Is the sentence right in tone — and is it right that the game says a sentence here at all?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-17, steps 1–18. Feel: the line reads without effort, in fullscreen and
+in a window of about 1000x600; letters of one width read well and stay; the bar is at the right
+place and the right size and needs no border; the line may go the moment the light leaves the
+wall; the sentence is right in tone, and it is right that the game says it here.
 
 ## Open questions
 
