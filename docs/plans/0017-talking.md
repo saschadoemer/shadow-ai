@@ -1808,10 +1808,10 @@ test('the floor starts with the officer standing and no dialogue open', async ({
 
 ### Task 11: The pull request
 
-- [ ] **Step 1:** merge the latest `main` again and rerun Task 9. If the merge changed code,
+- [x] **Step 1:** merge the latest `main` again and rerun Task 9. If the merge changed code,
   the walk is run again.
-- [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
+- [x] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`; commit — `Mark 0017 implemented`.
-- [ ] **Step 3:** push the branch and open the pull request against `main`, titled
+- [x] **Step 3:** push the branch and open the pull request against `main`, titled
   `Feature 0017: talking`, with the walk's result and feel notes in its description. CI must
   be green. The author merges.
