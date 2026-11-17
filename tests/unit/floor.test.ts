@@ -5,13 +5,16 @@ import { describe, expect, it } from 'vitest';
 import { cameraFor } from '../../src/engine/camera';
 import { moveBox } from '../../src/engine/collision';
 import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../src/engine/tiled';
+import { figuresOf } from '../../src/game/cast';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
 import { standingWalls, wallsOf, withWalls } from '../../src/game/shadow';
+import { TALK_DISTANCE } from '../../src/game/talk';
 import { createInitialState } from '../../src/game/update';
 import {
   type CellRect,
   CLOSED_DOORS,
   CORRIDORS,
+  FIGURES,
   FLOOR_HEIGHT,
   FLOOR_WIDTH,
   FURNITURE,
@@ -482,9 +485,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 99 }, (_, i) => i + 1),
+      Array.from({ length: 100 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(100);
+    expect(json.nextobjectid).toBe(101);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -925,11 +928,11 @@ describe('the shadow walls of the floor (0014)', () => {
     );
     const objects = floorJson().layers[3].objects;
     expect(objects.slice(0, 91).every((object) => 'point' in object)).toBe(true);
-    expect(objects.slice(91).map((object) => [object.id, object.name])).toStrictEqual(
+    expect(objects.slice(91, 99).map((object) => [object.id, object.name])).toStrictEqual(
       TABLE.map(([region], i) => [92 + i, `shadow:${region}`]),
     );
-    expect(objects.slice(91).some((object) => 'point' in object)).toBe(false);
-    expect(floor.points).toHaveLength(90);
+    expect(objects.slice(91, 99).some((object) => 'point' in object)).toBe(false);
+    expect(floor.points).toHaveLength(91);
   });
 
   it('builds the boxes from the doorway cells of the layout', () => {
@@ -1052,5 +1055,69 @@ describe('the shadow walls of the floor (0014)', () => {
       expect(names(reached, DENSE)).toStrictEqual(dense);
       expect(names(reached, DENSEST)).toStrictEqual(densest);
     });
+  });
+});
+
+describe('the standing figures of the floor (0017)', () => {
+  const OFFICER = { x: 264, y: 472 };
+  const figures = figuresOf(floor.points);
+
+  it('holds the point figure:officer after the rectangles, with the id 100', () => {
+    expect(FIGURES).toStrictEqual([{ id: 'officer', at: OFFICER }]);
+    expect(floor.points.at(-1)).toStrictEqual({ name: 'figure:officer', ...OFFICER });
+    const objects = floorJson().layers[3].objects;
+    expect(objects).toHaveLength(100);
+    const last = objects.at(-1);
+    expect([last?.id, last?.name, last?.x, last?.y]).toStrictEqual([
+      100,
+      'figure:officer',
+      264,
+      472,
+    ]);
+    expect(last !== undefined && 'point' in last).toBe(true);
+    expect(floorJson().nextobjectid).toBe(101);
+  });
+
+  it('gives the floor one figure, the officer, with her two pages', () => {
+    expect(
+      figures.map((figure) => [figure.id, figure.x, figure.y, figure.pages.length]),
+    ).toStrictEqual([['officer', 264, 472, 2]]);
+    expect(createInitialState(floor).figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
+  });
+
+  it("stands in the middle of tile (16, 29), in the data protection officer's office", () => {
+    expect([(OFFICER.x - 8) / 16, (OFFICER.y - 8) / 16]).toStrictEqual([16, 29]);
+    const office = ROOMS.find((room) => room.name === "data protection officer's office");
+    expect(office?.cells).toStrictEqual({ c0: 1, c1: 22, r0: 26, r1: 37 });
+  });
+
+  it('is free of every solid box and reached on foot from the spawn', () => {
+    expect(blocked(boxAt(OFFICER))).toBe(false);
+    expect(reached(OFFICER)).toBe(true);
+  });
+
+  it('lies in the view of the wake point, and out of reach of it', () => {
+    const camera = cameraFor({ x: WAKE.x, y: WAKE.y - 4 }, MAP_PX);
+    expect(camera).toStrictEqual({ x: 136, y: 410 });
+    expect(OFFICER.x - 8).toBeGreaterThanOrEqual(camera.x);
+    expect(OFFICER.x + 8).toBeLessThanOrEqual(camera.x + 320);
+    expect(OFFICER.y - 24).toBeGreaterThanOrEqual(camera.y);
+    expect(OFFICER.y).toBeLessThanOrEqual(camera.y + 180);
+    expect(Math.hypot(WAKE.x - OFFICER.x, WAKE.y - OFFICER.y)).toBeGreaterThan(TALK_DISTANCE);
+  });
+
+  it('has no route passing within reach of her', () => {
+    for (const route of routesOf(floor.points)) {
+      route.points.forEach((from, i) => {
+        const to = route.points[(i + 1) % route.points.length] ?? from;
+        // The legs are horizontal or vertical: the nearest point of a leg is a clamp.
+        const x = Math.min(Math.max(OFFICER.x, Math.min(from.x, to.x)), Math.max(from.x, to.x));
+        const y = Math.min(Math.max(OFFICER.y, Math.min(from.y, to.y)), Math.max(from.y, to.y));
+        expect(
+          Math.hypot(x - OFFICER.x, y - OFFICER.y),
+          `${route.name} leg ${i + 1}`,
+        ).toBeGreaterThan(TALK_DISTANCE);
+      });
+    }
   });
 });

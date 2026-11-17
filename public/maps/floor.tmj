@@ -1769,6 +1769,18 @@
           "width": 48,
           "x": 1008,
           "y": 320
+        },
+        {
+          "height": 0,
+          "id": 100,
+          "name": "figure:officer",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 264,
+          "y": 472
         }
       ],
       "opacity": 1,
@@ -1779,7 +1791,7 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 100,
+  "nextobjectid": 101,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",

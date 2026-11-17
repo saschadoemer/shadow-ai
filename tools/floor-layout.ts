@@ -57,8 +57,9 @@ import {
  * tall things — cabinets, plants, coat racks, water dispensers and the arcade cabinet — go on
  * `above`, one row higher. A few pieces of 0013 replace a tile of 0011: a coffee machine on a
  * counter, a gadget on a desk. The shadow walls of 0014 are rectangle objects, one strip per
- * doorway of a region under shadow, after the points. Pure — it returns the layers and
- * the .tmj object; tools/gen-floor.ts writes the file. Retired when the art pass takes the map over
+ * doorway of a region under shadow, after the points. The standing figures of 0017 are point
+ * objects named `figure:<id>`, after the rectangles. Pure — it returns the layers and the .tmj
+ * object; tools/gen-floor.ts writes the file. Retired when the art pass takes the map over
  * by hand in Tiled (visual.md §5).
  */
 
@@ -204,6 +205,15 @@ export function shadowWallBox(rect: CellRect): Box {
     ? { x, y, width: (rect.c1 - rect.c0 + 1) * TILE_SIZE, height: SHADOW_WALL_THICKNESS }
     : { x, y, width: SHADOW_WALL_THICKNESS, height: (rect.r1 - rect.r0 + 1) * TILE_SIZE };
 }
+
+/**
+ * The standing figures (0017): per figure its id in the cast and its feet in pixels. The
+ * data protection officer stands in the middle of tile (16, 29), in her office — two tiles
+ * left of and two above the wake point, in the view when the player wakes.
+ */
+export const FIGURES: readonly { readonly id: string; readonly at: Point }[] = [
+  { id: 'officer', at: { x: 264, y: 472 } },
+];
 
 /**
  * The routes of the movers (0015): per route its points as [column, row, pause in steps]; a
@@ -1111,6 +1121,7 @@ export function floorJson(): MapJson {
   const { detail, above } = buildFurniture();
   const routes = routePoints();
   const firstWall = SNIPPETS.length + 3 + routes.length;
+  const firstFigure = firstWall + SHADOW_WALLS.length;
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1133,6 +1144,9 @@ export function floorJson(): MapJson {
           ...SHADOW_WALLS.map((wall, i) =>
             rectObject(firstWall + i, `shadow:${wall.region}`, shadowWallBox(wall.cells)),
           ),
+          ...FIGURES.map((figure, i) =>
+            pointObject(firstFigure + i, `figure:${figure.id}`, figure.at),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1142,7 +1156,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstWall + SHADOW_WALLS.length,
+    nextobjectid: firstFigure + FIGURES.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

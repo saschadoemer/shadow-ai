@@ -1110,7 +1110,7 @@ export function stepDialogue(
 - Consumes: `figuresOf` (T2), `TALK_DISTANCE` (T3).
 - Produces: `FIGURES` in `tools/floor-layout.ts`; one more point object in `floor.tmj`.
 
-- [ ] **Step 1: Write the failing tests.** In `tests/unit/floor.test.ts`: import `figuresOf`
+- [x] **Step 1: Write the failing tests.** In `tests/unit/floor.test.ts`: import `figuresOf`
   from `../../src/game/cast`, `TALK_DISTANCE` from `../../src/game/talk` and `FIGURES` from
   `../../tools/floor-layout.ts`. Change the tests that count objects: in `keeps the five points
   of 0010 first, with their ids` the ids become `Array.from({ length: 100 }, (_, i) => i + 1)`
@@ -1182,10 +1182,10 @@ describe('the standing figures of the floor (0017)', () => {
   `blocked`, `boxAt`, `reached`, `cameraFor`, `MAP_PX`, `WAKE`, `ROOMS`, `routesOf`,
   `floorJson` and `createInitialState` are already imported or declared in the file.
 
-- [ ] **Step 2: Run** `npx vitest run tests/unit/floor.test.ts` — expected: the new tests fail
+- [x] **Step 2: Run** `npx vitest run tests/unit/floor.test.ts` — expected: the new tests fail
   (`FIGURES` does not exist).
 
-- [ ] **Step 3: Implement** in `tools/floor-layout.ts`. After `SHADOW_WALLS` and its helper:
+- [x] **Step 3: Implement** in `tools/floor-layout.ts`. After `SHADOW_WALLS` and its helper:
 
 ```ts
 /**
@@ -1210,15 +1210,15 @@ export const FIGURES: readonly { readonly id: string; readonly at: Point }[] = [
   and `nextobjectid: firstFigure + FIGURES.length,`. Extend the file's head comment by the
   standing figures of 0017.
 
-- [ ] **Step 4: Generate** — `npm run gen-floor`. Then check that only one object was added:
+- [x] **Step 4: Generate** — `npm run gen-floor`. Then check that only one object was added:
   `git diff -U0 public/maps/floor.tmj | grep -c '^[-+] *"data"'` prints `0`, and the diff
   shows the new point, the comma after the last rectangle and `nextobjectid`.
 
-- [ ] **Step 5: Run** `npm run check` and `npm run test:e2e` — expected: green. Her place was
+- [x] **Step 5: Run** `npm run check` and `npm run test:e2e` — expected: green. Her place was
   checked against the map when the spec was written: the cell is free, reached from the spawn
   and in the wake's view. If one of these fails, stop and ask; do not move her.
 
-- [ ] **Step 6: Commit** — `Put the data protection officer into her office`, body: she is the
+- [x] **Step 6: Commit** — `Put the data protection officer into her office`, body: she is the
   first of the cast who can be spoken to, and she stands where the player wakes, so the first
   thing seen after the dark is somebody to ask.
 
