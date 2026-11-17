@@ -1,6 +1,6 @@
 # 0017 — Cloud Run deployment
 
-**Status:** draft
+**Status:** approved 2026-11-17
 **Milestone:** M8, pulled forward
 **Drafted:** 2026-11-17
 

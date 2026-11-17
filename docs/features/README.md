@@ -38,4 +38,4 @@ in two.
 | [0014](0014-shadow-walls-and-density.md) | Shadow walls and density | M3 | implemented 2026-11-16 |
 | [0015](0015-the-moving-floor.md) | The moving floor | M3 | implemented 2026-11-13 |
 | [0016](0016-text-on-screen.md) | Text on screen | M4 | implemented 2026-11-17 |
-| [0017](0017-cloud-run-deployment.md) | Cloud Run deployment | M8 | draft |
+| [0017](0017-cloud-run-deployment.md) | Cloud Run deployment | M8 | approved 2026-11-17 |
