@@ -32,7 +32,9 @@ on the ground stand while the figure is close. Shadow walls close the doorways o
 under shadow (feature 0014): the lamp lifts the thin ones in a second, the dense ones hold until
 the lamp is stronger. The game shows its first text (feature 0016): a wall that holds against
 the lamp says so in one line, in the game's own pixel font, from a language table in German and
-English. Milestone M3 is complete. The roadmap is in [docs/plan.md](docs/plan.md).
+English. The data protection officer stands in her office beside the reception and can be
+spoken to with `E` or `Enter` (feature 0017): a box shows what she says, page by page, and the
+world stands still while it is open. Milestone M3 is complete. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 
@@ -44,7 +46,7 @@ npm run dev          # the dev server at http://localhost:5173
 npm run check        # typecheck, lint, build and the headless tests
 npm run test:e2e     # the smoke test against the dev server
 npm run gen-tiles    # regenerate the placeholder tiles under public/tiles/
-npm run gen-sprites  # regenerate the placeholder figure, the lamp, snippet, overview, movers', shadow-wall and font sheets under public/sprites/
+npm run gen-sprites  # regenerate the placeholder figure, the lamp, snippet, overview, movers', shadow-wall, font and officer sheets under public/sprites/
 npm run gen-floor    # regenerate the floor map with its creatures and the wake point under public/maps/
 ```
 

@@ -134,9 +134,17 @@ There is no map in the journal. The map itself shows by colour what has been cle
 ## 8. Controls and presentation
 
 Desktop browser with keyboard; a gamepad is deferred (`docs/plan.md` §5); touch and
-mobile are non-goals. Arrow keys or WASD walk, Space holds the lamp, F toggles fullscreen.
+mobile are non-goals. Arrow keys or WASD walk, Space holds the lamp, E or Enter talks to a
+figure and turns the pages of what it says, F toggles fullscreen.
 Scrolling camera on a 320x180 internal resolution (`visual.md`). Movement,
 collision and camera behaviour are specified in the feature that introduces them.
+
+**As built** (feature 0017): a press of E or Enter within 24 px of a standing figure — between
+the feet of the two — opens a dialogue. The two turn to each other, and the figure's first page
+appears in a box at the bottom of the screen. A press turns to the next page; a press on the
+last page closes the box. While it is open the world stands still: nothing moves, nothing can
+hurt the player, the lamp is off and the other keys do nothing. A press does not open a dialogue
+while the lamp is held or while the player is being pushed. A held key counts once.
 
 ## 9. Deliberately simple in the first draft
 

@@ -1736,18 +1736,18 @@ test('the floor starts with the officer standing and no dialogue open', async ({
 - Modify: `docs/spec/gameplay.md`, `docs/spec/world.md`, `docs/spec/architecture.md`,
   `docs/spec/visual.md`, `docs/spec/testing.md`, `README.md`
 
-- [ ] **Step 1: `gameplay.md` §8:** `E` or `Enter` talks to a figure and turns the pages of
+- [x] **Step 1: `gameplay.md` §8:** `E` or `Enter` talks to a figure and turns the pages of
   what it says. Add a paragraph **As built** (feature 0017): a press within 24 px of a
   standing figure opens a dialogue; the two turn to each other; a press turns the page, a
   press on the last page closes it; the world stands still while it is open; not while the
   lamp is held or during a push.
 
-- [ ] **Step 2: `world.md` §3**, at the data protection officer: she stands in her office
+- [x] **Step 2: `world.md` §3**, at the data protection officer: she stands in her office
   since 0017, at tile (16, 29), two tiles from the wake point, and says the three sentences
   that explain the shadow and the lamp — every time, until M5 brings the first meeting; she
   has no name yet and is not solid.
 
-- [ ] **Step 3: `architecture.md`.** §1 directory list: `game/cast.ts`, `game/talk.ts`; the
+- [x] **Step 3: `architecture.md`.** §1 directory list: `game/cast.ts`, `game/talk.ts`; the
   person generator also draws the officer. §2: `figures`, `dialogue` and `talkHeld` — the
   fields, that places and pages stay in the map and in `game/cast`, the three kinds of step
   (dark, dialogue, ordinary) and what a dialogue step changes. §4: the action `talk` ← E or
@@ -1759,20 +1759,20 @@ test('the floor starts with the officer standing and no dialogue open', async ({
   and no creature. §7: `officer.png`. §8: a string may hold line breaks; a page of talk is one
   key with at most three lines of 47 characters; the key rule with digits.
 
-- [ ] **Step 4: `visual.md` §3:** a standing figure is 16x24 like a colleague, in a shirt no
+- [x] **Step 4: `visual.md` §3:** a standing figure is 16x24 like a colleague, in a shirt no
   one else wears — the officer's is `#c0cbdc`; "The display" gains the dialogue box: the
   notice's bar grown to three lines, left-aligned, with a white triangle that blinks once a
   second in its lower right corner.
 
-- [ ] **Step 5: `testing.md`.** §2: the INV-1 row gains the round trip with a dialogue open;
+- [x] **Step 5: `testing.md`.** §2: the INV-1 row gains the round trip with a dialogue open;
   the INV-4 row the page rule (three lines, 47 characters) and the glyph test that skips line
   breaks; the INV-7 row the figure points and their refusals. §6: `figures.tmj`.
 
-- [ ] **Step 6: `README.md`:** one sentence after the first text — the data protection officer
+- [x] **Step 6: `README.md`:** one sentence after the first text — the data protection officer
   stands in her office and can be spoken to with E or Enter (feature 0017). Add `E`/`Enter`
   where the README lists the keys, if it does.
 
-- [ ] **Step 7: Run** `npm run check`, **commit** — `Move talking into the spec`.
+- [x] **Step 7: Run** `npm run check`, **commit** — `Move talking into the spec`.
 
 ---
 
