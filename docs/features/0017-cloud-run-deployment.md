@@ -254,8 +254,9 @@ default 30 days. `ops.md` §2 says so in place of "nothing is logged beyond ngin
 - Not tested by a machine: the bootstrap against a real project (criteria 1 to 3, 12 and 14),
   the deployment by hand (4 to 6), the log exclusion (13). A test double for a cloud proves the
   double. These are steps of the walk. The keyless login and the handover of the tested image
-  (9) are proved by the first run on `main`; criteria 8, 10 and 11 by the workflow runs of the
-  pull request and of `main` before the bootstrap.
+  (9) are proved by the first run on `main`, and criterion 8 by the workflow run of the pull
+  request. Criteria 10 and 11 are read in the job's condition, not provoked: nobody turns
+  `main` red or deletes a variable to watch a job being skipped.
 - No fixture is added.
 
 ## Acceptance plan (manual test)
