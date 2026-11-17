@@ -1,6 +1,6 @@
 # 0016 — Text on screen
 
-**Status:** approved 2026-11-17
+**Status:** implemented 2026-11-17
 **Milestone:** M4
 **Drafted:** 2026-11-16
 
