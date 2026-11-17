@@ -6,7 +6,14 @@ import { createInitialState, update } from '../../src/game/update';
 import { textKey } from '../../src/text/text';
 import { grassMap } from './grass-map';
 
-const NONE: GameInput = { up: false, down: false, left: false, right: false, lamp: false };
+const NONE: GameInput = {
+  up: false,
+  down: false,
+  left: false,
+  right: false,
+  lamp: false,
+  talk: false,
+};
 const SHINE: GameInput = { ...NONE, lamp: true };
 const HOLDS: ShadowWallState = { wall: 0, lit: true, light: 0 };
 const BASE = createInitialState(grassMap(20, 12, { x: 152, y: 96 }));

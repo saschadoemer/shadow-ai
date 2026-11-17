@@ -145,6 +145,7 @@ const BINDINGS: Bindings<Action> = {
   left: ['ArrowLeft', 'KeyA'],
   right: ['ArrowRight', 'KeyD'],
   lamp: ['Space'],
+  talk: ['KeyE', 'Enter'],
   fullscreen: ['KeyF'],
 };
 const BOUND_CODES: ReadonlySet<string> = new Set(Object.values(BINDINGS).flat());
@@ -168,8 +169,8 @@ window.addEventListener('keydown', (event) => {
 
 /** The game's actions of this frame; `fullscreen` stays in main.ts. */
 function readInput(): GameInput {
-  const { up, down, left, right, lamp } = resolveActions(keyboard.held, BINDINGS);
-  return { up, down, left, right, lamp };
+  const { up, down, left, right, lamp, talk } = resolveActions(keyboard.held, BINDINGS);
+  return { up, down, left, right, lamp, talk };
 }
 
 /** Loading finishes before the first frame; until then the page shows its background. */

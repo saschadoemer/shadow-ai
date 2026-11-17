@@ -296,7 +296,7 @@ export function drawText(
   `GameState.figures`, `GameState.dialogue: Dialogue | null`, `GameState.talkHeld`. In
   `player.ts`: `GameInput.talk`.
 
-- [ ] **Step 1: Make the fixture.** Copy `tests/fixtures/maps/walls.tmj` to
+- [x] **Step 1: Make the fixture.** Copy `tests/fixtures/maps/walls.tmj` to
   `tests/fixtures/maps/figures.tmj`, set `nextobjectid` to `4` and replace the `objects` array
   by these three, in the file's own style:
 
@@ -308,7 +308,7 @@ export function drawText(
 ]
 ```
 
-- [ ] **Step 2: Write the failing tests** in `tests/unit/cast.test.ts`:
+- [x] **Step 2: Write the failing tests** in `tests/unit/cast.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -470,10 +470,10 @@ describe('standing figures in the state (0017)', () => {
 });
 ```
 
-- [ ] **Step 3: Run** `npx vitest run tests/unit/cast.test.ts tests/unit/state.test.ts` —
+- [x] **Step 3: Run** `npx vitest run tests/unit/cast.test.ts tests/unit/state.test.ts` —
   expected: fails, the module does not exist.
 
-- [ ] **Step 4: Implement.** `src/game/state.ts`, before `Captured`:
+- [x] **Step 4: Implement.** `src/game/state.ts`, before `Captured`:
 
 ```ts
 /** A standing figure of the cast (0017). Its place stays in the map, its pages in game/cast. */
@@ -630,10 +630,10 @@ export function isRoutePoint(name: string): boolean {
   state.talkHeld,`. `src/main.ts`: the table gets `talk: ['KeyE', 'Enter'],` after `lamp`, and
   `readInput` returns `talk` with the others.
 
-- [ ] **Step 5: Run** `npm run check` — expected: green. Every remaining type error is a
+- [x] **Step 5: Run** `npm run check` — expected: green. Every remaining type error is a
   `GameInput` or `GameState` literal in a test that needs a new field.
 
-- [ ] **Step 6: Commit** — `Add the cast and the fields talking needs`, body: a figure's place
+- [x] **Step 6: Commit** — `Add the cast and the fields talking needs`, body: a figure's place
   is map truth and its words are data; the state remembers the key so that a press needs no
   change to the keyboard and stays testable in a pure step.
 

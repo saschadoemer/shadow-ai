@@ -91,6 +91,22 @@ export interface ShadowWallState {
   readonly light: number;
 }
 
+/** A standing figure of the cast (0017). Its place stays in the map, its pages in game/cast. */
+export interface FigureState {
+  /** The index of the figure in `figuresOf(map.points)`. */
+  readonly figure: number;
+  /** Where it looks: `down` at the start, then to whoever spoke to it last. */
+  readonly facing: Facing;
+}
+
+/** An open dialogue (0017). */
+export interface Dialogue {
+  /** The index of the figure that speaks. */
+  readonly figure: number;
+  /** The page shown, from 0. */
+  readonly page: number;
+}
+
 /** How many creatures of each species were captured. */
 export type Captured = Readonly<Record<Species, number>>;
 
@@ -121,6 +137,12 @@ export interface GameState {
   readonly movers: readonly MoverState[];
   /** The shadow walls still standing, in the map's order (0014); a lifted wall has left it for good. */
   readonly shadowWalls: readonly ShadowWallState[];
+  /** The standing figures of the map, in file order (0017). */
+  readonly figures: readonly FigureState[];
+  /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
+  readonly dialogue: Dialogue | null;
+  /** Whether the last step's input held `talk`: a press is held now and not then (0017). */
+  readonly talkHeld: boolean;
   /** Captured creatures per species; the journal (M4) reads it. */
   readonly captured: Captured;
   readonly overview: Overview;

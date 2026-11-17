@@ -168,6 +168,9 @@ describe('stepDark', () => {
     creatures: [snippet(310, 200)],
     movers: [],
     shadowWalls: [{ wall: 1, lit: true, light: 30 }],
+    figures: [],
+    dialogue: null,
+    talkHeld: false,
     captured: { snippet: 2 },
     overview: { current: 0, max: 3 },
     dark: 1,
@@ -200,6 +203,9 @@ describe('stepDark', () => {
       creatures: [{ ...snippet(40, 40), home: { x: 40, y: 40 } }],
       movers: [],
       shadowWalls: [{ wall: 1, lit: false, light: 0 }],
+      figures: [],
+      dialogue: null,
+      talkHeld: false,
       captured: { snippet: 2 },
       overview: { current: 3, max: 3 },
       dark: 45,
@@ -224,10 +230,17 @@ describe('stepDark', () => {
 describe('overview in update', () => {
   /** Open ground, 20x12 tiles, with the wake point at (80, 60). */
   const MAP = grassMap(20, 12, { x: 160, y: 100 }, [{ name: 'wake', x: 80, y: 60 }]);
-  const NONE: GameInput = { up: false, down: false, left: false, right: false, lamp: false };
+  const NONE: GameInput = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+    lamp: false,
+    talk: false,
+  };
   const SHINE: GameInput = { ...NONE, lamp: true };
   const LEFT_SHINE: GameInput = { ...NONE, left: true, lamp: true };
-  const ALL: GameInput = { up: true, down: true, left: true, right: true, lamp: true };
+  const ALL: GameInput = { up: true, down: true, left: true, right: true, lamp: true, talk: false };
   /** The figure at (160, 100) facing right, with these creatures. */
   const game = (
     creatures: readonly CreatureState[],

@@ -115,6 +115,9 @@ const state = (
   creatures: [],
   movers: [],
   shadowWalls: [],
+  figures: [],
+  dialogue: null,
+  talkHeld: false,
   captured: { snippet: 0 },
   // No hearts: the call lists of the earlier features stay as they were (0009).
   overview: { current: 0, max: 0 },
