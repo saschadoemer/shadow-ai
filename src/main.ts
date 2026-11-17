@@ -11,7 +11,9 @@ import type { GameState } from './game/state';
 import { createInitialState, update } from './game/update';
 import { createCanvas2dRenderer } from './render/canvas2d/canvas2d-renderer';
 import { drawScene, HEART_SIZE, type SceneContent } from './render/draw-scene';
+import { GLYPH_HEIGHT, GLYPH_WIDTH } from './render/font';
 import { computeLayout } from './render/scale';
+import { DEFAULT_LANGUAGE } from './text/text';
 
 declare global {
   interface Window {
@@ -39,11 +41,12 @@ const DOG_SHEET_URL = '/sprites/dog.png';
 const VACUUM_SHEET_URL = '/sprites/vacuum.png';
 const DRONE_SHEET_URL = '/sprites/drone.png';
 const SHADOW_WALL_SHEET_URL = '/sprites/shadow-wall.png';
+const FONT_SHEET_URL = '/sprites/font.png';
 
 /**
  * The map, its tileset and the tileset's image, each resolved against the file naming it, then
  * the player's sprite sheet, the lamp's, one sheet per creature species, the overview sheet and
- * the movers' seven sheets (0015) and the shadow-wall sheet (0014).
+ * the movers' seven sheets (0015), the shadow-wall sheet (0014) and the font sheet (0016).
  */
 async function loadContent(): Promise<SceneContent> {
   const mapJson = await loadJson(MAP_URL);
@@ -105,6 +108,12 @@ async function loadContent(): Promise<SceneContent> {
         frameHeight: MOVER_SIZE,
       },
     },
+    fontSheet: {
+      image: await loadImage(FONT_SHEET_URL),
+      frameWidth: GLYPH_WIDTH,
+      frameHeight: GLYPH_HEIGHT,
+    },
+    language: DEFAULT_LANGUAGE,
   };
 }
 

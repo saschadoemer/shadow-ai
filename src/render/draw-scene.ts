@@ -3,6 +3,7 @@ import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { CREATURE_SIZE } from '../game/creature';
 import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE } from '../game/mover';
+import { noticeOf } from '../game/notice';
 import { DARK_STEPS } from '../game/overview';
 import { LIFT_STEPS, wallsOf } from '../game/shadow';
 import {
@@ -15,7 +16,10 @@ import {
   type ShadowWallState,
   type Species,
 } from '../game/state';
+import { type Language, textOf } from '../text/text';
 import { drawLayer } from './draw-map';
+import { drawText } from './draw-text';
+import { GLYPH_HEIGHT, GLYPH_WIDTH } from './font';
 import { PAGE_BACKGROUND } from './palette';
 import {
   type Renderer,
@@ -45,6 +49,10 @@ export interface SceneContent {
     readonly vacuum: SpriteSheet;
     readonly drone: SpriteSheet;
   };
+  /** 108 glyphs of 6x10 in one row, in the order of render/font (0016). */
+  readonly fontSheet: SpriteSheet;
+  /** The language text is drawn in. */
+  readonly language: Language;
 }
 
 /** The frame in the player sheet: facing × 5 + phase, facings in FACINGS order. */
@@ -191,6 +199,21 @@ export const HEART_PITCH = 10;
 const HEART_FULL_FRAME = 0;
 const HEART_EMPTY_FRAME = 1;
 
+/** The notice (0016): a dark bar at the bottom of the surface, with one line centred in it. */
+export const NOTICE_BAR: Box = { x: 8, y: 158, width: 304, height: 18 };
+/** The room between the bar's edge and the line, on every side. */
+export const NOTICE_PADDING = (NOTICE_BAR.height - GLYPH_HEIGHT) / 2;
+/** The longest line the bar holds, in characters. */
+export const NOTICE_CAPACITY = Math.floor((NOTICE_BAR.width - 2 * NOTICE_PADDING) / GLYPH_WIDTH);
+
+/** The top-left corner of a line of `length` characters, centred on the surface: (160 − 3n, 162). */
+export function noticeOrigin(length: number): Point {
+  return {
+    x: SURFACE_WIDTH / 2 - (length * GLYPH_WIDTH) / 2,
+    y: NOTICE_BAR.y + NOTICE_PADDING,
+  };
+}
+
 /** A safe figure is left out in every second group of four steps. */
 export const BLINK_STEPS = 4;
 
@@ -214,8 +237,9 @@ export function lidHeight(dark: number): number {
  * above, the drones (0015), all shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x, round(y) − 24 −
  * camera.y): the feet are its bottom centre, and the camera is already whole pixels
  * (engine/camera). The cone lies under the figure, so the body hides the apex. After `above`
- * come the hearts of overview, on the surface and not shifted by the camera, and the two lids of
- * the dark (0009). A safe figure blinks; its cone and the movers do not.
+ * come the hearts of overview, on the surface and not shifted by the camera, then the notice —
+ * the bar and its line, on the surface and not shifted by the camera (0016) — and the two lids
+ * of the dark (0009). A safe figure blinks; its cone and the movers do not.
  */
 export function drawScene(renderer: Renderer, state: GameState, content: SceneContent): void {
   const { player, camera } = state;
@@ -282,6 +306,18 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
       HEART_MARGIN + i * HEART_PITCH,
       HEART_MARGIN,
     );
+  }
+  const notice = noticeOf(state);
+  if (notice !== null) {
+    renderer.fillRect(
+      NOTICE_BAR.x,
+      NOTICE_BAR.y,
+      NOTICE_BAR.width,
+      NOTICE_BAR.height,
+      PAGE_BACKGROUND,
+    );
+    const origin = noticeOrigin(textOf(notice, content.language).length);
+    drawText(renderer, content.fontSheet, notice, content.language, origin.x, origin.y);
   }
   const lid = lidHeight(state.dark);
   if (lid > 0) {
