@@ -9,7 +9,7 @@ import {
   OVERVIEW_SHEET_WIDTH,
   renderOverview,
 } from './placeholder-overview.ts';
-import { PERSON_SHIRTS, renderPerson } from './placeholder-person.ts';
+import { OFFICER_SHIRT, PERSON_SHIRTS, renderFigure, renderPerson } from './placeholder-person.ts';
 import { renderPlayer, SHEET_HEIGHT, SHEET_WIDTH } from './placeholder-player.ts';
 import {
   renderShadowWall,
@@ -27,8 +27,9 @@ import { renderVacuum, VACUUM_SHEET_HEIGHT, VACUUM_SHEET_WIDTH } from './placeho
  * public/sprites/person-1.png to person-4.png from tools/placeholder-person.ts, dog.png,
  * vacuum.png and drone.png from tools/placeholder-dog.ts, -vacuum.ts and -drone.ts; and
  * public/sprites/shadow-wall.png of 0014 from tools/placeholder-shadow-wall.ts; and
- * public/sprites/font.png of 0016 from tools/placeholder-font.ts. Deterministic — pngjs writes no
- * timestamp — and Node runs this TypeScript file directly, without a transpiler.
+ * public/sprites/font.png of 0016 from tools/placeholder-font.ts; and public/sprites/officer.png
+ * of 0017 from tools/placeholder-person.ts. Deterministic — pngjs writes no timestamp — and Node
+ * runs this TypeScript file directly, without a transpiler.
  */
 
 export function encodePng(): Buffer {
@@ -59,6 +60,13 @@ export function encodeOverviewPng(): Buffer {
 export function encodePersonPng(look: number): Buffer {
   const png = new PNG({ width: SHEET_WIDTH, height: SHEET_HEIGHT });
   png.data = Buffer.from(renderPerson(look));
+  return PNG.sync.write(png);
+}
+
+/** The data protection officer (0017): the first figure of the cast with a sheet of its own. */
+export function encodeOfficerPng(): Buffer {
+  const png = new PNG({ width: SHEET_WIDTH, height: SHEET_HEIGHT });
+  png.data = Buffer.from(renderFigure(OFFICER_SHIRT));
   return PNG.sync.write(png);
 }
 
@@ -106,4 +114,5 @@ if (import.meta.main) {
   writeFileSync('public/sprites/drone.png', encodeDronePng());
   writeFileSync('public/sprites/shadow-wall.png', encodeShadowWallPng());
   writeFileSync('public/sprites/font.png', encodeFontPng());
+  writeFileSync('public/sprites/officer.png', encodeOfficerPng());
 }

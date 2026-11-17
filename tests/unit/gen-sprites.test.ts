@@ -11,6 +11,7 @@ import {
   encodeDogPng,
   encodeDronePng,
   encodeLampPng,
+  encodeOfficerPng,
   encodeOverviewPng,
   encodePersonPng,
   encodePng,
@@ -37,7 +38,12 @@ import {
   OVERVIEW_SHEET_WIDTH,
   renderOverview,
 } from '../../tools/placeholder-overview.ts';
-import { PERSON_SHIRTS, renderPerson } from '../../tools/placeholder-person.ts';
+import {
+  OFFICER_SHIRT,
+  PERSON_SHIRTS,
+  renderFigure,
+  renderPerson,
+} from '../../tools/placeholder-person.ts';
 import {
   FRAME_COUNT,
   frameRows,
@@ -428,6 +434,31 @@ describe('the movers’ sheets (0015)', () => {
   const pixel = (data: Uint8Array, width: number, x: number, y: number) => [
     ...data.slice((y * width + x) * 4, (y * width + x) * 4 + 4),
   ];
+
+  it('officer.png equals its generator and is the player in a light grey shirt, without the lanyard (0017)', () => {
+    const png = read('officer.png');
+    expect([png.width, png.height]).toStrictEqual([SHEET_WIDTH, SHEET_HEIGHT]);
+    expect(encodeOfficerPng().equals(file('officer.png'))).toBe(true);
+    expect(OFFICER_SHIRT).toBe('#c0cbdc');
+    expect(PERSON_SHIRTS).not.toContain(OFFICER_SHIRT);
+    expect(OFFICER_SHIRT).not.toBe(INKS.T);
+    const officer = renderFigure(OFFICER_SHIRT);
+    const player = renderPlayer();
+    const shirt = [...rgb(OFFICER_SHIRT), 255].join();
+    const playerShirt = [...rgb(INKS.T), 255].join();
+    const lanyard = [...rgb(INKS.L), 255].join();
+    for (let i = 0; i < player.length; i += 4) {
+      const was = [...player.slice(i, i + 4)].join();
+      const is = [...officer.slice(i, i + 4)].join();
+      expect(is).toBe(was === playerShirt || was === lanyard ? shirt : was);
+    }
+  });
+
+  it('a person is a figure in its shirt: the two generators agree', () => {
+    for (const [look, shirt] of PERSON_SHIRTS.entries()) {
+      expect(Buffer.from(renderPerson(look)).equals(Buffer.from(renderFigure(shirt)))).toBe(true);
+    }
+  });
 
   it.each([0, 1, 2, 3])(
     'person %i equals its generator and is the figure in another shirt',

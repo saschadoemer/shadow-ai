@@ -1235,7 +1235,7 @@ export const FIGURES: readonly { readonly id: string; readonly at: Point }[] = [
 - Produces: `OFFICER_SHIRT` (`#c0cbdc`), `renderFigure(shirt: PaletteColour): Uint8Array` in
   `tools/placeholder-person.ts`; `encodeOfficerPng(): Buffer` in `tools/gen-sprites.ts`.
 
-- [ ] **Step 1: Write the failing tests.** In `tests/unit/gen-sprites.test.ts` import
+- [x] **Step 1: Write the failing tests.** In `tests/unit/gen-sprites.test.ts` import
   `encodeOfficerPng`, `OFFICER_SHIRT` and `renderFigure`, and add inside the `describe` of the
   movers' sheets — it has the helpers `file` and `read`:
 
@@ -1274,10 +1274,10 @@ export const FIGURES: readonly { readonly id: string; readonly at: Point }[] = [
   });
 ```
 
-- [ ] **Step 2: Run** `npx vitest run tests/unit/gen-sprites.test.ts` — expected: fails,
+- [x] **Step 2: Run** `npx vitest run tests/unit/gen-sprites.test.ts` — expected: fails,
   `renderFigure` does not exist.
 
-- [ ] **Step 3: Implement.** In `tools/placeholder-person.ts` move the body of `renderPerson`
+- [x] **Step 3: Implement.** In `tools/placeholder-person.ts` move the body of `renderPerson`
   into `renderFigure` and keep `renderPerson` as its caller:
 
 ```ts
@@ -1328,12 +1328,12 @@ export function encodeOfficerPng(): Buffer {
 
   write `public/sprites/officer.png` in the main block, and name the file in the head comment.
 
-- [ ] **Step 4: Generate** — `npm run gen-sprites`; `git status --short public/sprites` shows
+- [x] **Step 4: Generate** — `npm run gen-sprites`; `git status --short public/sprites` shows
   one new file and no changed one: the four person sheets are byte for byte what they were.
 
-- [ ] **Step 5: Run** `npm run check` — expected: green.
+- [x] **Step 5: Run** `npm run check` — expected: green.
 
-- [ ] **Step 6: Commit** — `Draw the data protection officer`, body: she must be told from the
+- [x] **Step 6: Commit** — `Draw the data protection officer`, body: she must be told from the
   colleagues who walk at a glance; a shirt no one else wears does that until the art pass.
 
 ---
