@@ -48,6 +48,11 @@ the last pixel along the wall, not the corner past its end. After one second of 
 wall stands still in the light and holds. A standing wall is solid for the figure, the push and
 the creatures, and the light stops at it; other walls do not count on the line to a wall.
 
+**As built** (feature 0016): while a wall holds against the lamp, the game says so in one line
+at the bottom of the screen — `Dieser Schatten ist zu dicht für die Lampe.` The line is there as
+long as the light is on the wall and gone with it: when Space is let go, when the figure turns
+away, when it is pushed.
+
 ## 3. Three layers of opposition
 
 Combat matters but is never the whole answer. Every piece of shadow belongs to one layer:

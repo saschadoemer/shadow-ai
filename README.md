@@ -30,7 +30,9 @@ cabinet and a few gadgets on desks. The floor moves (feature 0015): four colleag
 robot vacuum in every room and two drones follow fixed routes; they block nothing, and the ones
 on the ground stand while the figure is close. Shadow walls close the doorways of the regions
 under shadow (feature 0014): the lamp lifts the thin ones in a second, the dense ones hold until
-the lamp is stronger. Milestone M3 is complete. The roadmap is in [docs/plan.md](docs/plan.md).
+the lamp is stronger. The game shows its first text (feature 0016): a wall that holds against
+the lamp says so in one line, in the game's own pixel font, from a language table in German and
+English. Milestone M3 is complete. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 
@@ -42,7 +44,7 @@ npm run dev          # the dev server at http://localhost:5173
 npm run check        # typecheck, lint, build and the headless tests
 npm run test:e2e     # the smoke test against the dev server
 npm run gen-tiles    # regenerate the placeholder tiles under public/tiles/
-npm run gen-sprites  # regenerate the placeholder figure, the lamp sheet, the snippet sheet and the overview sheet under public/sprites/
+npm run gen-sprites  # regenerate the placeholder figure, the lamp, snippet, overview, movers', shadow-wall and font sheets under public/sprites/
 npm run gen-floor    # regenerate the floor map with its creatures and the wake point under public/maps/
 ```
 

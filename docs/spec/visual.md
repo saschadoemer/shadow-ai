@@ -55,9 +55,11 @@ frames in another shirt. An office dog, a robot vacuum and a drone are 16x16, on
 vacuum is a plain disc and the drone a body with four rotors, so neither shows a real product.
 The drone has no drop shadow: a dark patch on the floor would read as the shadow of the game.
 
-**The display.** The only thing drawn over the world is the row of overview hearts in the
+**The display.** Two things are drawn over the world. The row of overview hearts in the
 top-left corner (features 0009, 0012): 8x8, 4 px from the corner, one every 10 px, one per point
-of the maximum; no text. A heart is 7x7 with a rim in `#181425`, red `#e43b44` when full and
+of the maximum. And the notice (feature 0016), while there is one: a bar in `#181425` at the
+bottom, 8 px from the left, the right and the bottom edge, 304x18, with one white line centred in
+it. A heart is 7x7 with a rim in `#181425`, red `#e43b44` when full and
 `#3a4466` when empty. The screen of the dark is two rectangles in `#181425` that close from the top
 and the bottom; nothing is blended, so no pixel leaves the palette.
 
@@ -100,8 +102,11 @@ The art pipeline is stable from the first stage, whatever the art source:
   integration are fixed by it.
 - Later an **art pass** replaces the generated graphics file by file — by hand, by a pixel artist
   or by the author — in the same size and the same palette, without any change to code.
-- Text is drawn with a bitmap font, either drawn in-house or an OFL-licensed pixel font. The first
-  stage needs no text.
+- Text is drawn with a bitmap font drawn in-house (feature 0016): one font, monospaced, white,
+  6x10 per glyph with the glyph in the left five columns, 108 glyphs — every character German and
+  English dialogue needs. It is generated from pictures in `tools/placeholder-font.ts`; no font
+  file of anyone else is copied or shipped. The art pass may replace the PNG in the same size and
+  order.
 
 Every tileset has dimensions in multiples of 16. Every asset ships from the game's own origin;
 nothing is loaded from a third party at run time (`vision.md` §5).

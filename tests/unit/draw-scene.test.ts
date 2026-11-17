@@ -20,6 +20,9 @@ import {
   lidHeight,
   moverFrame,
   moverOrigin,
+  NOTICE_BAR,
+  NOTICE_CAPACITY,
+  noticeOrigin,
   playerFrame,
   playerVisible,
   type SceneContent,
@@ -27,6 +30,7 @@ import {
   wallSegments,
 } from '../../src/render/draw-scene';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
+import { LANGUAGES, TABLE } from '../../src/text/text';
 import { solidsOf } from './solids';
 
 /** A renderer that only records what it was asked to draw, one line per call. */
@@ -86,6 +90,8 @@ const CONTENT: SceneContent = {
     vacuum: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
     drone: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   },
+  fontSheet: { image: {} as ImageBitmap, frameWidth: 6, frameHeight: 10 },
+  language: 'de',
 };
 const player = (fields: Partial<PlayerState>): PlayerState => ({
   x: 0,
@@ -608,5 +614,87 @@ describe('the shadow walls in the scene (0014)', () => {
     const bare = recordingRenderer();
     drawScene(bare, state({ x: 20, y: 30 }), CONTENT);
     expect(bare.sheets.filter((sheet) => sheet === CONTENT.shadowWallSheet)).toHaveLength(0);
+  });
+});
+
+describe('the notice in the scene (0016)', () => {
+  /** The lamp is on a wall that holds; one full and one empty heart. */
+  const holding = (fields: Partial<GameState> = {}): GameState => ({
+    ...state({ x: 20, y: 30 }, { x: 0, y: 0 }, true),
+    shadowWalls: [{ wall: 0, lit: true, light: 0 }],
+    overview: { current: 1, max: 2 },
+    ...fields,
+  });
+  const BAR = 'fillRect 8,158 304x18 #181425';
+  /** The sprite calls that went to a sheet, in order. */
+  const spritesOn = (renderer: ReturnType<typeof recordingRenderer>, sheet: unknown): string[] =>
+    renderer.calls
+      .filter((call) => call.startsWith('drawSprite'))
+      .filter((_call, i) => renderer.sheets[i] === sheet);
+
+  it('places the bar and the line as the spec says', () => {
+    expect(NOTICE_BAR).toStrictEqual({ x: 8, y: 158, width: 304, height: 18 });
+    expect(NOTICE_CAPACITY).toBe(49);
+    expect(noticeOrigin(43)).toStrictEqual({ x: 31, y: 162 });
+    expect(noticeOrigin(38)).toStrictEqual({ x: 46, y: 162 });
+    expect(noticeOrigin(49)).toStrictEqual({ x: 13, y: 162 });
+  });
+
+  it('draws the bar and then the German line, after the hearts', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, holding(), CONTENT);
+    const bar = renderer.calls.indexOf(BAR);
+    expect(bar).toBeGreaterThan(renderer.calls.indexOf('drawSprite 1 at 14,4'));
+    expect(renderer.calls.indexOf('drawSprite 0 at 4,4')).toBeGreaterThan(-1);
+    const line = renderer.calls.slice(bar + 1);
+    expect(line).toHaveLength(36);
+    expect(line[0]).toBe('drawSprite 36 at 31,162');
+    expect(line).toContain('drawSprite 100 at 211,162');
+    expect(line.at(-1)).toBe('drawSprite 14 at 283,162');
+    expect(spritesOn(renderer, CONTENT.fontSheet)).toStrictEqual(line);
+  });
+
+  it('draws the lids over it', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, holding({ dark: 10 }), CONTENT);
+    expect(renderer.calls.slice(-2)).toStrictEqual([
+      'fillRect 0,0 320x30 #181425',
+      'fillRect 0,150 320x30 #181425',
+    ]);
+    expect(renderer.calls.indexOf(BAR)).toBeGreaterThan(-1);
+    expect(renderer.calls.indexOf('drawSprite 14 at 283,162')).toBe(renderer.calls.length - 3);
+  });
+
+  it('draws the English line when the language is `en`', () => {
+    const renderer = recordingRenderer();
+    const english: SceneContent = { ...CONTENT, language: 'en' };
+    drawScene(renderer, holding(), english);
+    const line = spritesOn(renderer, CONTENT.fontSheet);
+    expect(line).toHaveLength(31);
+    expect(line[0]).toBe('drawSprite 52 at 46,162');
+    expect(line.at(-1)).toBe('drawSprite 14 at 268,162');
+  });
+
+  it('draws neither bar nor line without a notice', () => {
+    for (const scene of [
+      holding({ shadowWalls: [{ wall: 0, lit: true, light: 1 }] }),
+      holding({ shadowWalls: [] }),
+      holding({ lamp: { on: false, strength: 1 } }),
+    ]) {
+      const renderer = recordingRenderer();
+      drawScene(renderer, scene, CONTENT);
+      expect(renderer.calls.some((call) => call.startsWith('fillRect'))).toBe(false);
+      expect(spritesOn(renderer, CONTENT.fontSheet)).toStrictEqual([]);
+    }
+  });
+
+  it('fits every notice of the table into the bar, in both languages', () => {
+    for (const language of LANGUAGES) {
+      for (const [key, text] of Object.entries(TABLE[language])) {
+        if (key.startsWith('notice.')) {
+          expect(text.length, `${language} ${key}`).toBeLessThanOrEqual(NOTICE_CAPACITY);
+        }
+      }
+    }
   });
 });

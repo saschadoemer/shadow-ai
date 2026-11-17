@@ -94,6 +94,10 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
     expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/shadow-wall.png');
   });
 
+  it('checks the font sheet under public/sprites/ with every other PNG (0016)', () => {
+    expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/font.png');
+  });
+
   it('holds a shadow asset to the palette all the same', () => {
     expect(
       checkPng('x.png', onePixel(0x12, 0x34, 0x56, 255), rulesFor('public/sprites/snippet.png')),
