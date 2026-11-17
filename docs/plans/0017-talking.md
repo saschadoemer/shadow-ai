@@ -1706,7 +1706,7 @@ export function markerVisible(tick: number): boolean {
 **Files:**
 - Modify: `tests/e2e/smoke.spec.ts`
 
-- [ ] **Step 1: Add the test** after the test of the shadow walls:
+- [x] **Step 1: Add the test** after the test of the shadow walls:
 
 ```ts
 test('the floor starts with the officer standing and no dialogue open', async ({ page }) => {
@@ -1723,9 +1723,9 @@ test('the floor starts with the officer standing and no dialogue open', async ({
 });
 ```
 
-- [ ] **Step 2: Run** `npm run test:e2e` — expected: green, the existing tests included.
+- [x] **Step 2: Run** `npm run test:e2e` — expected: green, the existing tests included.
 
-- [ ] **Step 3: Commit** — `Check the standing figure in the smoke spec`, body: the real
+- [x] **Step 3: Commit** — `Check the standing figure in the smoke spec`, body: the real
   browser must load her point and her sheet; the unit tests cannot see that.
 
 ---
