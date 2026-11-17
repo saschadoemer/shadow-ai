@@ -654,7 +654,7 @@ export function isRoutePoint(name: string): boolean {
   `openDialogue(state, input, figures): GameState | null`,
   `stepDialogue(state, dialogue, input, figures): GameState`.
 
-- [ ] **Step 1: Write the failing tests** in `tests/unit/talk.test.ts`:
+- [x] **Step 1: Write the failing tests** in `tests/unit/talk.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -948,10 +948,10 @@ describe('a game without figures (0017)', () => {
 });
 ```
 
-- [ ] **Step 2: Run** `npx vitest run tests/unit/talk.test.ts` — expected: fails, the module
+- [x] **Step 2: Run** `npx vitest run tests/unit/talk.test.ts` — expected: fails, the module
   does not exist.
 
-- [ ] **Step 3: Implement** `src/game/talk.ts`:
+- [x] **Step 3: Implement** `src/game/talk.ts`:
 
 ```ts
 import type { Point } from '../engine/tiled';
@@ -1090,11 +1090,11 @@ export function stepDialogue(
   Extend the comment of `update`: with a dialogue open the step is the dialogue's and nothing
   else; a press of `talk` next to a figure opens one instead of an ordinary step (0017).
 
-- [ ] **Step 4: Run** `npm run check` — expected: green. In the test of the opening at 24 px
+- [x] **Step 4: Run** `npm run check` — expected: green. In the test of the opening at 24 px
   the whole state is compared: if a field differs that the spec does not name, the step
   stepped something it must not.
 
-- [ ] **Step 5: Commit** — `Open, turn and close a dialogue`, body: reading must be safe, so a
+- [x] **Step 5: Commit** — `Open, turn and close a dialogue`, body: reading must be safe, so a
   dialogue stops the world instead of racing it; the press is derived from the remembered key,
   so a held key turns one page however many steps a frame runs.
 
