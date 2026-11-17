@@ -277,7 +277,11 @@ lamp, `E` or `Enter` talks.
 - The world stands still while she speaks. Right, or should it go on?
 - Are the three sentences right in tone and in content?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-17, steps 1–22. Feel: three lines of this length read well and the
+box sits right; `E` is the key the hand finds and `Enter` stays beside it; the triangle is noticed
+and says that a press goes on; walking through her does not disturb — she stays not solid; the
+world standing still while she speaks is right; the three sentences are right in tone and
+content.
 
 ## Open questions
 
