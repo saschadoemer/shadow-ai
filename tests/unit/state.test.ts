@@ -27,10 +27,22 @@ const ROUTES_MAP = loadMap(
 );
 /** Three walls on open floor (0014): marketing and hr horizontal, sales vertical. */
 const WALLS_MAP = loadMap('tests/fixtures/maps/walls.tmj', 'tests/fixtures/maps/fixture-tiles.tsj');
+/** One standing figure and one snippet on open floor (0017). */
+const FIGURES_MAP = loadMap(
+  'tests/fixtures/maps/figures.tmj',
+  'tests/fixtures/maps/fixture-tiles.tsj',
+);
 /** The floor the game loads. */
 const FLOOR_MAP = loadMap('public/maps/floor.tmj', 'public/tiles/placeholder.tsj');
 
-const NONE: GameInput = { up: false, down: false, left: false, right: false, lamp: false };
+const NONE: GameInput = {
+  up: false,
+  down: false,
+  left: false,
+  right: false,
+  lamp: false,
+  talk: false,
+};
 const RIGHT: GameInput = { ...NONE, right: true };
 const UP_LEFT: GameInput = { ...NONE, up: true, left: true };
 const SHINE: GameInput = { ...NONE, lamp: true };
@@ -64,6 +76,9 @@ describe('GameState (INV-1)', () => {
       creatures: [],
       movers: [],
       shadowWalls: [],
+      figures: [],
+      dialogue: null,
+      talkHeld: false,
       captured: { snippet: 0 },
       overview: { current: 5, max: 5 },
       dark: 0,
@@ -117,6 +132,9 @@ describe('update', () => {
         creatures: [],
         movers: [],
         shadowWalls: [],
+        figures: [],
+        dialogue: null,
+        talkHeld: false,
         captured: { snippet: 0 },
         overview: { current: 3, max: 3 },
         dark: 0,
@@ -138,6 +156,9 @@ describe('update', () => {
       creatures: [],
       movers: [],
       shadowWalls: [],
+      figures: [],
+      dialogue: null,
+      talkHeld: false,
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -151,6 +172,9 @@ describe('update', () => {
       creatures: [],
       movers: [],
       shadowWalls: [],
+      figures: [],
+      dialogue: null,
+      talkHeld: false,
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -388,6 +412,7 @@ describe('movers in the state (0015)', () => {
       left: i % 240 >= 120 && i % 240 < 180,
       right: i % 240 < 60,
       lamp: i % 97 < 20,
+      talk: false,
     }));
     let withMovers = createInitialState(FLOOR_MAP);
     let without: GameState = { ...withMovers, movers: [] };
@@ -546,6 +571,7 @@ describe('shadow walls in the state (0014)', () => {
       left: i % 240 >= 120 && i % 240 < 180,
       right: i % 240 < 60,
       lamp: i % 97 < 20,
+      talk: false,
     }));
     const bare: TileMap = { ...FLOOR_MAP, rects: [] };
     let open: GameState = { ...createInitialState(FLOOR_MAP), shadowWalls: [] };
@@ -556,5 +582,51 @@ describe('shadow walls in the state (0014)', () => {
       without = update(without, input, bare);
     }
     expect(open).toStrictEqual(without);
+  });
+});
+
+describe('standing figures in the state (0017)', () => {
+  const TALK: GameInput = { ...NONE, talk: true };
+
+  it('starts with one entry per figure of the map, facing down, no dialogue, the key not held', () => {
+    const state = createInitialState(FIGURES_MAP);
+    expect(state.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
+    expect(state.dialogue).toBeNull();
+    expect(state.talkHeld).toBe(false);
+    expect(state.creatures).toHaveLength(1);
+    expect(state.movers).toStrictEqual([]);
+  });
+
+  it('starts without figures on a map without figure points', () => {
+    expect(createInitialState(MAP).figures).toStrictEqual([]);
+  });
+
+  it('refuses a map with a figure the cast does not have before the game starts', () => {
+    const map = grassMap(20, 12, { x: 40, y: 152 }, [{ name: 'figure:cellar', x: 160, y: 96 }]);
+    expect(() => createInitialState(map)).toThrow('figure point figure:cellar names no figure');
+  });
+
+  it('remembers in every step whether talk was held: an ordinary step and a step of the dark', () => {
+    const start = createInitialState(MAP);
+    const held = update(start, TALK, MAP);
+    expect(held.talkHeld).toBe(true);
+    expect(update(held, NONE, MAP).talkHeld).toBe(false);
+    const dark = update({ ...start, dark: 1 }, TALK, MAP);
+    expect(dark.dark).toBe(2);
+    expect(dark.talkHeld).toBe(true);
+    expect(update(dark, NONE, MAP).talkHeld).toBe(false);
+  });
+
+  it('keeps the figures through the wake', () => {
+    let state: GameState = { ...createInitialState(FIGURES_MAP), dark: 44 };
+    state = update(state, NONE, FIGURES_MAP);
+    expect(state.dark).toBe(45);
+    expect(state.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
+    expect(state.dialogue).toBeNull();
+  });
+
+  it('survives a JSON round trip at the start (INV-1)', () => {
+    const state = createInitialState(FIGURES_MAP);
+    expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
   });
 });

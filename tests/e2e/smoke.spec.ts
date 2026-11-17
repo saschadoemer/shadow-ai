@@ -180,6 +180,19 @@ test('the floor starts with its eight shadow walls standing and a lamp of streng
   expect(state?.lamp.strength).toBe(1);
 });
 
+test('the floor starts with the officer standing and no dialogue open', async ({ page }) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.figures.length), {
+      message: 'window.shadowAi.state.figures holds the one figure of the floor',
+    })
+    .toBe(1);
+  const state = await page.evaluate(() => window.shadowAi?.state);
+  expect(state?.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
+  expect(state?.dialogue).toBeNull();
+  expect(state?.talkHeld).toBe(false);
+});
+
 test('the game starts with full overview and outside the dark', async ({ page }) => {
   await page.goto('/');
   await expect

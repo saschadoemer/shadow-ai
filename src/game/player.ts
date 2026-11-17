@@ -12,9 +12,10 @@ export interface MovementInput {
   readonly right: boolean;
 }
 
-/** Everything the game reads from the keys (0007): the movement actions and `lamp`, on while Space is held. */
+/** Everything the game reads from the keys: the movement actions, `lamp`, on while Space is held (0007), and `talk`, on while E or Enter is held (0017). */
 export interface GameInput extends MovementInput {
   readonly lamp: boolean;
+  readonly talk: boolean;
 }
 
 /** Tune: 80 px/s is 1.333 px per step. */

@@ -1,6 +1,7 @@
 import type { Box, SolidGrid } from '../engine/collision';
 import { STEPS_PER_SECOND } from '../engine/loop';
 import { type NamedPoint, type Point, TILE_SIZE } from '../engine/tiled';
+import { isFigurePoint } from './cast';
 import { BOX_HEIGHT, BOX_WIDTH } from './player';
 import {
   type Facing,
@@ -69,9 +70,9 @@ export interface Route {
   readonly points: readonly RoutePoint[];
 }
 
-/** A route point has a colon in its name; every other point is a creature's or `wake`. */
+/** A route point has a colon in its name and is no figure point (0017); every other point is a creature's, a figure's or `wake`. */
 export function isRoutePoint(name: string): boolean {
-  return name.includes(':');
+  return name.includes(':') && !isFigurePoint(name);
 }
 
 function isKind(value: string | undefined): value is MoverKind {

@@ -18,10 +18,12 @@ src/
                  holds the movers' routes, their checks and their step (0015); game/world.ts the
                  world data — densities, the lamp's strength, the upgrades — and its gating
                  check; game/shadow.ts the shadow walls, their light test and their step (0014);
-                 game/notice.ts which notice a state shows (0016)
+                 game/notice.ts which notice a state shows (0016); game/cast.ts the cast and
+                 the standing figures of a map, game/talk.ts the rules of talking (0017)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene); render/font.ts the glyph order and the
-                 cell size of the font, render/draw-text.ts one line of text by TextKey (0016)
+                 cell size of the font, render/draw-text.ts text by TextKey, line by line
+                 (0016, 0017)
   text/          the language table and the TextKey type (INV-4): de.ts and en.ts hold the
                  strings, text.ts the languages, the keys and the lookup (0016)
 public/
@@ -34,14 +36,15 @@ tools/
   gen-tiles.ts          writes them to public/tiles/; `npm run gen-tiles`
   placeholder-player.ts the placeholder figure as pure data: the pixels of its sprite sheet
   gen-sprites.ts        writes the figure, the lamp, the snippet, the overview sheet, the
-                        movers' seven sheets, the shadow-wall sheet and the font sheet to
-                        public/sprites/; `npm run gen-sprites`
+                        movers' seven sheets, the shadow-wall sheet, the font sheet and the
+                        officer's sheet to public/sprites/; `npm run gen-sprites`
   placeholder-lamp.ts   the placeholder lamp sheet as pure data: the cone of light, one 48x48
                         frame per facing, drawn from game/lamp
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
   placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames,
                         a full and an empty heart
-  placeholder-person.ts the placeholder colleagues: the figure's frames in four other shirts
+  placeholder-person.ts the placeholder colleagues: the figure's frames in four other shirts,
+                        and the data protection officer in a fifth (0017)
   placeholder-dog.ts    the placeholder office dog: one row of 24 16x16 frames, two coats
   placeholder-vacuum.ts the placeholder robot vacuum: two 16x16 frames, the light on and off
   placeholder-drone.ts  the placeholder drone: two 16x16 frames, the rotors as bars and dots
@@ -51,8 +54,8 @@ tools/
                         sheet as pure pixel data (0016)
   floor-layout.ts       the floor as pure data: the corridors and rooms, the walls and their
                         openings, the closed doors, the spawn, the creatures' points, the
-                        wake point, the furniture, the movers' routes and the shadow walls
-                        (world.md §1)
+                        wake point, the furniture, the movers' routes, the shadow walls and
+                        the standing figures (world.md §1)
   gen-floor.ts          writes it to public/maps/; `npm run gen-floor`
 tests/
   unit/          Vitest, headless: engine math, game rules, map loading, assets
@@ -74,7 +77,9 @@ against the container alike. It is read-only by convention; nothing in the game 
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
 logic steps since the start, the player, the camera, the lamp, the creatures, the movers, the
-standing shadow walls, the captured count, overview and the step of the dark; later the current map id, NPCs, cleared regions and the journal join them. It is plain data: numbers,
+standing shadow walls, the standing figures, the open dialogue, whether the talk key was held,
+the captured count, overview and the step of the dark; later the current map id, cleared
+regions and the journal join them. It is plain data: numbers,
 strings, booleans, arrays and plain objects. No functions, no class instances, no `Map` or `Set`,
 no `Date`. A JSON round trip reproduces it exactly, and a test proves that on a populated state.
 
@@ -189,12 +194,35 @@ would reach 60 the wall leaves the array. In the dark no wall is stepped; at the
 standing wall has `lit` false and `light` 0. A state whose `shadowWalls` is empty steps exactly as
 before 0014.
 
+`figures` is an array of `{ figure, facing }`, one entry per standing figure of the map, in file
+order (feature 0017, `game/cast`). `figure` is the index of the figure among
+`figuresOf(map.points)`; its place stays in the map and its pages in the cast, and neither is in
+the state: `update` and the scene rebuild the figures from `map.points` on every call and keep
+them nowhere. `facing` is `down` at the start and then where the figure turned the last time it
+was spoken to. A standing figure never moves and is not solid. `dialogue` is `null`, or
+`{ figure, page }`: the index of the figure that speaks and the page shown, from 0. `talkHeld` is
+the `talk` of the last step's input, false at the start; `talk` is **pressed** in a step when the
+input holds it and `talkHeld` is false (`game/talk`, `talkPressed`).
+
+A step is one of three kinds. **Dark:** with `dark` above 0 it is `stepDark`, as above. **Dialogue:**
+with a dialogue open, `tick` grows by 1, `talkHeld` is set, and a press turns to the next page or,
+on the last page, sets `dialogue` to `null`; nothing else changes — not the player, the lamp, the
+creatures, the movers or the walls. **Ordinary:** otherwise, a press while the input does not
+hold `lamp`, the player is not pushed and a figure stands at most 24 px (`TALK_DISTANCE`) from
+the player's feet opens a dialogue with the nearest one — the first in file order of two equally
+near — on page 0, and nothing else is stepped: the two turn to each other (left or right when the
+horizontal distance is the larger one, up or down otherwise, unchanged on the same spot), the
+player stands at phase 0, timer 0, the lamp is off, and `tick` grows by 1. Without such a press the
+step is the one described above. Every step, of every kind, sets `talkHeld` from its input, so a
+key held down is pressed once. The wake keeps `figures` and `talkHeld` and has no dialogue. A
+state without figures, in which `talk` is never held, steps exactly as before 0017.
+
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
 save state, it is in `GameState`; if it ships with the build, it is content.
 
 `update(state, input, content)` advances the state by exactly one logic step and returns the new
-state. `input` is `GameInput`: the four movement actions and `lamp`, as booleans (§4);
+state. `input` is `GameInput`: the four movement actions, `lamp` and `talk`, as booleans (§4);
 `content` is the loaded map. Whether it mutates in place or returns a copy is an implementation
 choice per module; what it may not do is read anything but its arguments or write anything but
 its result.
@@ -244,16 +272,17 @@ the window and when the document turns hidden (`visibilitychange`), every key is
 because no `keyup` will come for what is held. A `keydown` with `repeat` changes nothing. That
 matters after a release: a key still held when the page regains focus keeps repeating, and must
 not press itself again, so the figure stands until the key is really pressed again. The keyboard
-does not keep which keys went down this step, the edge a single press needs: nothing in the game
-needs one — the lamp is held, not toggled — so the journal (M4) is the first that may.
+does not keep which keys went down this step, the edge a single press needs. Talking (feature
+0017) is the first that needs a press, and the game derives it in the state: `talkHeld` remembers
+the last step's `talk` (§2). The keyboard still keeps no edge.
 
-The game reads named actions — `up`, `down`, `left`, `right` and `lamp`, later `journal` — never
-key codes. The mapping from keys to actions lives in one table in `main.ts`: `up` ← ArrowUp or W,
-`down` ← ArrowDown or S, `left` ← ArrowLeft or A, `right` ← ArrowRight or D, `lamp` ← Space,
-`fullscreen` ← F.
+The game reads named actions — `up`, `down`, `left`, `right`, `lamp` and `talk`, later
+`journal` — never key codes. The mapping from keys to actions lives in one table in `main.ts`:
+`up` ← ArrowUp or W, `down` ← ArrowDown or S, `left` ← ArrowLeft or A, `right` ← ArrowRight or
+D, `lamp` ← Space, `talk` ← E or Enter, `fullscreen` ← F.
 Once per frame, before the steps (§3), `main.ts` resolves the held keys through the table with
 `resolveActions`, a pure function in `engine/input`: an action is on when any of its keys is
-down. The game gets the five actions as booleans and nothing else. A gamepad (deferred,
+down. The game gets the six actions as booleans and nothing else. A gamepad (deferred,
 `docs/plan.md` §5) and remappable keys are additions to the table, not changes to the game.
 
 A bound key pressed without Ctrl, Alt or Cmd belongs to the game: `main.ts` prevents its default,
@@ -284,10 +313,12 @@ sprite round the same value.
 `frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48 — with its
 top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
 `render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the lamp's
-cone when the lamp is on, the standing shadow walls in array order (feature 0014), the ground movers whose feet y is at most the figure's in array order,
-the creatures in array order, the player, the other ground movers in array order, `above` (§6),
-the drones (feature 0015), the hearts of overview, the notice (feature 0016), the lids of the
-dark. A ground mover is a person, a dog or a vacuum; comparing the feet makes walking past a colleague read as depth, and a
+cone when the lamp is on, the standing shadow walls in array order (feature 0014), the ground
+movers whose feet y is at most the player's in array order, the standing figures whose feet y is
+at most the player's (feature 0017), the creatures in array order, the player, the other
+standing figures, the other ground movers in array order, `above` (§6), the drones (feature
+0015), the hearts of overview, the dialogue box while a dialogue is open or else the notice
+(features 0016, 0017), the lids of the dark. A ground mover is a person, a dog or a vacuum; comparing the feet makes walking past a colleague read as depth, and a
 drone flies over the tops of `above`. The player's sprite has its top-left corner at
 (round(x) − 8 − camera.x, round(y) − 24 − camera.y): the feet are the bottom centre of the
 sprite, so they sit on the tile grid and the figure stands on its tile. Its frame in the sheet is
@@ -328,11 +359,22 @@ and before the lids: when `game/notice` names one, a rectangle (8, 158, 304, 18)
 then its line, a string of n characters from (160 − 3n, 162). The bar leaves 4 px around the
 10 px line and holds at most 49 characters; a test holds every notice of the table to that in
 both languages. Text is drawn by `render/draw-text`, the one function that draws it: it takes a
-`TextKey` and a language, never a string, and draws character n of the key's string as a sprite
-of the font sheet with its top-left corner at (x + 6n, y), its frame the character's place in
-the glyph order (§7). A space is not drawn and only takes its 6 px; a character the font does
-not have is drawn as `?`. There is no wrapping. The language comes with the scene's content;
-`main.ts` sets it to `DEFAULT_LANGUAGE`.
+`TextKey` and a language, never a string, and draws character n of line k of the key's string as
+a sprite of the font sheet with its top-left corner at (x + 6n, y + 12k), its frame the
+character's place in the glyph order (§7). A line break starts the next line, 12 px lower — a
+line is 10 px high and 2 px lie between two lines (feature 0017). A space is not drawn and only
+takes its 6 px; a character the font does not have is drawn as `?`. There is no wrapping. The
+language comes with the scene's content; `main.ts` sets it to `DEFAULT_LANGUAGE`.
+
+A standing figure (feature 0017) is drawn from its own sheet, `<id>.png`, like a colleague who
+stands: frame facing × 5, top-left corner at (round(x) − 8 − camera.x, round(y) − 24 −
+camera.y). The figures are rebuilt from `map.points` every frame, as in `update`. While a dialogue
+is open the dialogue box is drawn in the notice's place, on the surface and not shifted by the
+camera, and no notice is drawn: a rectangle (8, 134, 304, 42) in `#181425` — the notice's bar
+grown upwards to three lines, with the same bottom edge —, the page's lines left-aligned from
+(12, 138), and, while ⌊tick / 30⌋ is even, the marker: three rectangles in `#ffffff`, (299, 169,
+5, 1), (300, 170, 3, 1) and (301, 171, 1, 1), a small triangle that points down and blinks once a
+second, on every page. A line of 47 characters ends at x = 294, left of the marker.
 
 The interface exists so the implementation can change (ADR-0001 names PixiJS as the candidate)
 without touching `game/`. It is not an abstraction for its own sake: it has exactly one
@@ -377,7 +419,8 @@ the property. `TileMap.rects` are the rectangle objects — an object with none 
 `ellipse`, `polygon`, `polyline`, `text` and `gid` — as `{ name, x, y, width, height }` in file
 order, empty on a map without them (feature 0014). `engine/` does not know what a name means,
 `game/` does. The game knows the
-species' names, `wake` (feature 0009) and the route points of the movers (feature 0015). Everything else Tiled writes is
+species' names, `wake` (feature 0009), the route points of the movers (feature 0015) and the
+points of the standing figures (feature 0017). Everything else Tiled writes is
 ignored — a layer hidden in Tiled is drawn by the game. It does
 not try to be a general Tiled importer.
 
@@ -448,6 +491,14 @@ dog:hr leg 2 is not straight`), and, for every kind but `drone`, a leg on which 
 `[x − 6, x + 6) × [y − 8, y)` meets a solid box (`route dog:hr leg 2 crosses a solid tile (c,
 r)`, the first such cell row by row). A drone's legs may cross anything; its points, like every
 named point, lie outside every solid box. `creaturesFrom` skips route points.
+
+**Figure points** (feature 0017). A point named `figure:<id>` is where a figure of the cast
+stands; its position is the feet. It is no route point and makes no creature: `isRoutePoint` and
+`creaturesFrom` skip it. `figuresOf` (`game/cast`) reads the figures in file order and, in
+`createInitialState`, refuses the map — each with its message — for an id the cast does not have
+(`figure point figure:cellar names no figure`) and for two points with the same id (`more than one
+point object "figure:officer"`). A map without such points has no figures; a figure of the cast
+without a point is simply not there.
 
 **Shadow walls** (feature 0014). A rectangle named `shadow:<region>` is a shadow wall: a strip
 4 px thick on the top or the left edge of whole cells, where a doorway's wall strip is missing. A
@@ -600,7 +651,11 @@ The movers' seven sheets (feature 0015), all in Endesga 32 and none using `#6838
 generators. `tools/placeholder-person.ts`: `person-1.png` to `person-4.png`, each the size and
 frame order of `player.png` — the figure's twenty frames with the shirt in `#3e8948`, `#e43b44`,
 `#f77622` or `#b55088` and the lanyard's pixels in the shirt's colour; a person of `look` n uses
-`person-(n + 1)`. `tools/placeholder-dog.ts`: `dog.png`, 384x16, one row of 24 frames of 16x16,
+`person-(n + 1)`. The data protection officer's sheet (feature 0017), `officer.png`, comes
+from the same generator: the size and frame order of `player.png`, with the shirt and the
+lanyard's pixels in `#c0cbdc`, the colour of no other shirt. A figure of the cast `<id>` has the
+sheet `public/sprites/<id>.png`, and `main.ts` loads one per member of the cast.
+`tools/placeholder-dog.ts`: `dog.png`, 384x16, one row of 24 frames of 16x16,
 frame = `look` × 12 + facing × 3 + phase, facings in `FACINGS` order, phase 0 stands, 1 steps,
 2 sits; `look` 0 has the coat `#b86f50`, `look` 1 `#ead4aa`, ears, nose and eyes `#3e2731`; left
 is right mirrored. The sheet is one row because a sprite sheet is one row (§5).
@@ -682,7 +737,9 @@ but the ten replaced cells, every cell without a solid box reached, and the rece
 corner in the first view; and the shadow walls against the table of 0014, each on the cells of
 exactly one opening and clear of every solid box, the spawn, the wake point and the snippets
 clear of every wall, and reachability with all walls standing and with the walls of density 1,
-of 1 and 2, and all lifted. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
+of 1 and 2, and all lifted; and the standing figure of 0017 — the point `figure:officer` with
+the id 100 after the rectangles, its box free of every solid box, reached from the spawn, in the
+view of the wake point, and no route leg within 24 px of it. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
 test, so until the art pass the layout changes in `floor-layout.ts`. When the art pass takes the
 floor over by hand (`visual.md` §5), the layout, the generator and the determinism test are
 removed and `floor.tmj` is authored in Tiled like every other map; the layout test's
@@ -692,8 +749,8 @@ reachability and closure checks stay.
 
 `text/` holds the language table (feature 0016): one object per language, `de` in `de.ts` and
 `en` in `en.ts`. `de` is written first and defines the keys; `en` is typed by the keys of `de`,
-so a missing or an extra key does not compile. A key is a dotted name in lower case,
-`<kind>.<what>`. `text.ts` exports `LANGUAGES` (`de`, then `en`), the type `Language`,
+so a missing or an extra key does not compile. A key is a dotted name, `<kind>.<what>`, in
+lower-case letters, digits and hyphens (digits since feature 0017). `text.ts` exports `LANGUAGES` (`de`, then `en`), the type `Language`,
 `DEFAULT_LANGUAGE` (`de`), `TABLE`, and `TextKey`, a branded string type: the only way to get one
 is `textKey(id)`, which accepts the ids of the table and nothing else, so a misspelt key does not
 compile either. At run time a key is its id, a plain string, so a state that holds one stays
@@ -705,8 +762,14 @@ tables are the only text a player can read in `src/`.
 The notice is the first text: `game/notice` derives from the state, in every frame, which notice
 it shows, if any. While the lamp is on and a standing shadow wall has `lit` true and `light` 0 —
 a wall in the light that holds (0014) — it is `notice.shadow-too-dense`; otherwise there is none.
-The state has no field for it (INV-1). Until the language switch (0018) the game shows German
-only; English is in the table and tested.
+The state has no field for it (INV-1). Until the language switch (0019) the game shows German
+only; English is in the table and tested. A notice stays one line.
+
+A string of the table may hold line breaks; each starts a new line (feature 0017). A page of
+dialogue is one key of the kind `talk`, with at most three lines of at most 47 characters and no
+empty line; the break is written in the table, and the game computes none, so a translation
+decides its own breaks. A test holds every page of both languages to that rule; the glyph test
+skips the line breaks. The cast (`game/cast`) names its pages by key.
 
 ## 9. Tooling
 

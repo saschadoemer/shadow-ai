@@ -5,19 +5,19 @@ import { frameRows, INKS, SHEET_HEIGHT, SHEET_WIDTH } from './placeholder-player
 import { rgb } from './placeholder-tiles.ts';
 
 /**
- * The placeholder colleagues (feature 0015): the figure's twenty frames in the figure's order,
- * in another shirt and without the lanyard — its pixels take the shirt's colour. Pure.
+ * The placeholder colleagues (feature 0015) and the data protection officer (0017): the
+ * figure's twenty frames in the figure's order, in another shirt and without the lanyard — its
+ * pixels take the shirt's colour. Pure.
  */
 
 /** One shirt per person, in route order: reception, marketing, support, sales. */
 export const PERSON_SHIRTS: readonly PaletteColour[] = ['#3e8948', '#e43b44', '#f77622', '#b55088'];
 
-/** RGBA, row-major, SHEET_WIDTH × SHEET_HEIGHT × 4 bytes; alpha 0 or 255. */
-export function renderPerson(look: number): Uint8Array {
-  const shirt = PERSON_SHIRTS[look];
-  if (shirt === undefined) {
-    throw new Error(`person ${look} has no shirt`);
-  }
+/** The data protection officer's shirt (0017): light grey, the colour of no other shirt. */
+export const OFFICER_SHIRT: PaletteColour = '#c0cbdc';
+
+/** The player's twenty frames in a shirt of `shirt`, without the lanyard. RGBA, row-major, SHEET_WIDTH × SHEET_HEIGHT × 4 bytes; alpha 0 or 255. */
+export function renderFigure(shirt: PaletteColour): Uint8Array {
   const colours = new Map<string, PaletteColour>(Object.entries({ ...INKS, T: shirt, L: shirt }));
   const data = new Uint8Array(SHEET_WIDTH * SHEET_HEIGHT * 4);
   for (const [f, facing] of FACINGS.entries()) {
@@ -34,4 +34,13 @@ export function renderPerson(look: number): Uint8Array {
     }
   }
   return data;
+}
+
+/** A colleague who walks (0015): the figure in look `look`'s shirt. */
+export function renderPerson(look: number): Uint8Array {
+  const shirt = PERSON_SHIRTS[look];
+  if (shirt === undefined) {
+    throw new Error(`person ${look} has no shirt`);
+  }
+  return renderFigure(shirt);
 }

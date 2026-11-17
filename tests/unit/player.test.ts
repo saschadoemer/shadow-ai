@@ -14,7 +14,14 @@ import { solidsWith } from './solids';
 
 /** 20x12 tiles, 320x192 px, like the test map; the player starts mid-map. */
 const MAP = grassMap(20, 12, { x: 160, y: 96 });
-const NONE: GameInput = { up: false, down: false, left: false, right: false, lamp: false };
+const NONE: GameInput = {
+  up: false,
+  down: false,
+  left: false,
+  right: false,
+  lamp: false,
+  talk: false,
+};
 
 function press(...actions: readonly (keyof MovementInput)[]): GameInput {
   return {
@@ -23,6 +30,7 @@ function press(...actions: readonly (keyof MovementInput)[]): GameInput {
     left: actions.includes('left'),
     right: actions.includes('right'),
     lamp: false,
+    talk: false,
   };
 }
 

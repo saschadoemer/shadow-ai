@@ -142,6 +142,10 @@ Kept as small as the story allows. About thirty figures in all.
 - **The data protection officer.** Mentor. Office beside the reception, which is also where the
   player wakes up after losing overview. The only person besides the player who sees the shadow
   from the start. Gives the lamp and explains the rules of the world in three sentences.
+  Since feature 0017 she stands in her office at tile (16, 29), two tiles from the wake point,
+  and can be spoken to. She says the three sentences that explain the shadow and the lamp, the
+  same two pages every time, until M5 brings the first meeting. She has no name yet and is not
+  solid: the player walks through her.
 - **The vendor.** See `vision.md` §4. Recurring in every department, never an enemy, changing
   over the game from seller to advisor. As advisor he supplies the approved alternatives that
   solve the later cases.

@@ -55,11 +55,19 @@ frames in another shirt. An office dog, a robot vacuum and a drone are 16x16, on
 vacuum is a plain disc and the drone a body with four rotors, so neither shows a real product.
 The drone has no drop shadow: a dark patch on the floor would read as the shadow of the game.
 
+**The standing figures** (feature 0017). A figure of the cast that stands in the map is 16x24
+like a colleague, drawn from the figure's frames in a shirt no one else wears, so it is told from
+the colleagues at a glance. The data protection officer's shirt is `#c0cbdc`, light grey.
+
 **The display.** Two things are drawn over the world. The row of overview hearts in the
 top-left corner (features 0009, 0012): 8x8, 4 px from the corner, one every 10 px, one per point
 of the maximum. And the notice (feature 0016), while there is one: a bar in `#181425` at the
 bottom, 8 px from the left, the right and the bottom edge, 304x18, with one white line centred in
-it. A heart is 7x7 with a rim in `#181425`, red `#e43b44` when full and
+it. While a dialogue is open the dialogue box (feature 0017) is drawn in the notice's place: the
+notice's bar grown upwards to three lines, (8, 134, 304, 42) in `#181425`, with the page's white
+lines left-aligned from (12, 138), 12 px apart, and in its lower right corner a small white
+triangle that points down and blinks once a second — a press goes on. A heart is 7x7 with a rim
+in `#181425`, red `#e43b44` when full and
 `#3a4466` when empty. The screen of the dark is two rectangles in `#181425` that close from the top
 and the bottom; nothing is blended, so no pixel leaves the palette.
 

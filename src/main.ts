@@ -3,6 +3,7 @@ import { type Bindings, createKeyboard, listenToKeyboard, resolveActions } from 
 import { runLoop } from './engine/loop';
 import { FRAME_HEIGHT, FRAME_WIDTH } from './engine/sprite';
 import { parseTileMap, parseTileset, TILE_SIZE, tilesetSource } from './engine/tiled';
+import { CAST } from './game/cast';
 import { CREATURE_SIZE } from './game/creature';
 import { CONE_LENGTH } from './game/lamp';
 import { MOVER_SIZE } from './game/mover';
@@ -46,7 +47,8 @@ const FONT_SHEET_URL = '/sprites/font.png';
 /**
  * The map, its tileset and the tileset's image, each resolved against the file naming it, then
  * the player's sprite sheet, the lamp's, one sheet per creature species, the overview sheet and
- * the movers' seven sheets (0015), the shadow-wall sheet (0014) and the font sheet (0016).
+ * the movers' seven sheets (0015), the shadow-wall sheet (0014), the font sheet (0016) and one
+ * sheet per figure of the cast (0017).
  */
 async function loadContent(): Promise<SceneContent> {
   const mapJson = await loadJson(MAP_URL);
@@ -113,6 +115,19 @@ async function loadContent(): Promise<SceneContent> {
       frameWidth: GLYPH_WIDTH,
       frameHeight: GLYPH_HEIGHT,
     },
+    // A figure of the cast `<id>` has the sheet /sprites/<id>.png (0017).
+    figureSheets: Object.fromEntries(
+      await Promise.all(
+        CAST.map(async ({ id }) => [
+          id,
+          {
+            image: await loadImage(`/sprites/${id}.png`),
+            frameWidth: FRAME_WIDTH,
+            frameHeight: FRAME_HEIGHT,
+          },
+        ]),
+      ),
+    ),
     language: DEFAULT_LANGUAGE,
   };
 }
@@ -145,6 +160,7 @@ const BINDINGS: Bindings<Action> = {
   left: ['ArrowLeft', 'KeyA'],
   right: ['ArrowRight', 'KeyD'],
   lamp: ['Space'],
+  talk: ['KeyE', 'Enter'],
   fullscreen: ['KeyF'],
 };
 const BOUND_CODES: ReadonlySet<string> = new Set(Object.values(BINDINGS).flat());
@@ -168,8 +184,8 @@ window.addEventListener('keydown', (event) => {
 
 /** The game's actions of this frame; `fullscreen` stays in main.ts. */
 function readInput(): GameInput {
-  const { up, down, left, right, lamp } = resolveActions(keyboard.held, BINDINGS);
-  return { up, down, left, right, lamp };
+  const { up, down, left, right, lamp, talk } = resolveActions(keyboard.held, BINDINGS);
+  return { up, down, left, right, lamp, talk };
 }
 
 /** Loading finishes before the first frame; until then the page shows its background. */

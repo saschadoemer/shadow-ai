@@ -1,6 +1,7 @@
 import { moveBox, sightBlocked } from '../engine/collision';
 import { STEPS_PER_SECOND } from '../engine/loop';
 import { type NamedPoint, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
+import { isFigurePoint } from './cast';
 import { inCone, lampCone } from './lamp';
 import { isRoutePoint } from './mover';
 import { WAKE_POINT } from './overview';
@@ -142,13 +143,16 @@ function isSpecies(name: string): name is Species {
 
 /**
  * The creatures a map starts with: one per named point, whose name is its species. The `wake`
- * point (0009) and the route points of the movers (0015) are the names besides the species, and
- * they make no creature. Any other name is an error, so a typing mistake in the map is not a
+ * point (0009), the route points of the movers (0015) and the points of the standing figures
+ * (0017) are the names besides the species, and they make no creature. Any other name is an error, so a typing mistake in the map is not a
  * silently missing creature.
  */
 export function creaturesFrom(points: readonly NamedPoint[]): CreatureState[] {
   return points
-    .filter((point) => point.name !== WAKE_POINT && !isRoutePoint(point.name))
+    .filter(
+      (point) =>
+        point.name !== WAKE_POINT && !isRoutePoint(point.name) && !isFigurePoint(point.name),
+    )
     .map((point) => {
       if (!isSpecies(point.name)) {
         throw new Error(`unknown point object "${point.name}" at (${point.x}, ${point.y})`);

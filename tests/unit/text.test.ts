@@ -19,9 +19,9 @@ describe('the language table (INV-4, 0016)', () => {
     expect(Object.keys(TABLE.en).sort()).toStrictEqual(Object.keys(TABLE.de).sort());
   });
 
-  it('names every key `<kind>.<what>` in lower case', () => {
+  it('names every key `<kind>.<what>` in lower-case letters, digits and hyphens', () => {
     for (const key of Object.keys(TABLE.de)) {
-      expect(key).toMatch(/^[a-z]+\.[a-z]+(-[a-z]+)*$/);
+      expect(key).toMatch(/^[a-z]+\.[a-z0-9]+(-[a-z0-9]+)*$/);
     }
   });
 
@@ -37,6 +37,56 @@ describe('the language table (INV-4, 0016)', () => {
     const key = textKey('notice.shadow-too-dense');
     expect(textOf(key, 'de')).toBe('Dieser Schatten ist zu dicht für die Lampe.');
     expect(textOf(key, 'en')).toBe('This shadow is too dense for the lamp.');
+  });
+
+  it('holds the two pages of the officer in both languages (0017)', () => {
+    const first = textKey('talk.officer-rules-1');
+    const second = textKey('talk.officer-rules-2');
+    expect(textOf(first, 'de').split('\n')).toStrictEqual([
+      'Du siehst den Schatten also auch.',
+      'Er bleibt überall dort zurück, wo Daten das',
+      'Haus verlassen und niemand hinsieht.',
+    ]);
+    expect(textOf(second, 'de').split('\n')).toStrictEqual([
+      'Mit der Lampe hältst du fest, was sich darin',
+      'regt – nicht um es zu vertreiben, sondern um',
+      'es zu verstehen.',
+    ]);
+    expect(textOf(first, 'en').split('\n')).toStrictEqual([
+      'So you can see the shadow too.',
+      'It stays behind wherever data leaves the house',
+      'and nobody is looking.',
+    ]);
+    expect(textOf(second, 'en').split('\n')).toStrictEqual([
+      'The lamp holds still whatever stirs in it –',
+      'not to drive it away, but to understand it.',
+    ]);
+  });
+
+  it('gives a page of talk at most three lines of at most 47 characters, none empty', () => {
+    for (const language of LANGUAGES) {
+      for (const [key, text] of Object.entries(TABLE[language])) {
+        if (!key.startsWith('talk.')) {
+          continue;
+        }
+        const lines = text.split('\n');
+        expect(lines.length, `${language} ${key}`).toBeLessThanOrEqual(3);
+        for (const line of lines) {
+          expect(line.length, `${language} ${key}: "${line}"`).toBeLessThanOrEqual(47);
+          expect(line.trim(), `${language} ${key}`).not.toBe('');
+        }
+      }
+    }
+  });
+
+  it('keeps a notice on one line', () => {
+    for (const language of LANGUAGES) {
+      for (const [key, text] of Object.entries(TABLE[language])) {
+        if (key.startsWith('notice.')) {
+          expect(text.includes('\n'), `${language} ${key}`).toBe(false);
+        }
+      }
+    }
   });
 
   it('makes a key that is a plain string at run time, so a state that holds one stays plain data', () => {

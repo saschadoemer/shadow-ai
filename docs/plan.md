@@ -87,18 +87,19 @@ first cleared region in M5. M3 is done: 0014 was the last of the nine.
 
 ### M4 — Dialogue, language table and journal
 
-Four features, each its own pull request with its own acceptance plan, in this order: 0016 text
-on screen · 0017 talking · 0018 the language switch · 0019 the journal. Text first, because
-everything else in the milestone is made of it: the font, the language table in German and
-English and the `TextKey` arrive with one sentence — the line that says a shadow wall is too
-dense for the lamp, which 0014 left to M4. Talking after it, so the dialogue box has a font to
-draw with: a key to speak to a figure, lines over more than one page, the data protection
-officer as the first figure with text, and everyday lines for the four colleagues who walk the
-floor since 0015. The language switch after talking, when there is enough text for English to
-be worth looking at; the title screen that will hold the switch is M8, so M4 needs an interim
-one. The journal last: its three tabs are text and pictures, and its first content — the
-captured snippet — exists since 0008. Only 0016 is drafted; the others are named here and
-specified when their turn comes.
+Five features, each its own pull request with its own acceptance plan, in this order: 0016 text
+on screen · 0017 talking · 0018 everyday lines · 0019 the language switch · 0020 the journal.
+Text first, because everything else in the milestone is made of it: the font, the language
+table in German and English and the `TextKey` arrive with one sentence — the line that says a
+shadow wall is too dense for the lamp, which 0014 left to M4. Talking after it, so the dialogue
+box has a font to draw with: a key to speak to a figure, lines over more than one page, and the
+data protection officer as the first figure with text — one who stands, so that talking itself
+is the whole feature. Then everyday lines for the four colleagues who walk the floor since
+0015: they have to stop and turn before they can be spoken to. The language switch after that,
+when there is enough text for English to be worth looking at; the title screen that will hold
+the switch is M8, so M4 needs an interim one. The journal last: its three tabs are text and
+pictures, and its first content — the captured snippet — exists since 0008. 0016 is
+implemented and 0017 drafted; the others are named here and specified when their turn comes.
 
 ## 5. Deferred, with reasons
 

@@ -9,7 +9,7 @@ import { en } from './en';
 /** German first, English second (vision.md §7). */
 export const LANGUAGES = ['de', 'en'] as const;
 export type Language = (typeof LANGUAGES)[number];
-/** The language the game shows until it can be switched (0018). */
+/** The language the game shows until it can be switched (0019). */
 export const DEFAULT_LANGUAGE: Language = 'de';
 
 /** The ids of the table: the keys of `de`. */
