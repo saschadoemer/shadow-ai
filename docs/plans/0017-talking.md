@@ -91,7 +91,7 @@ dependency.
 - Produces: the ids `talk.officer-rules-1` and `talk.officer-rules-2`; `LINE_PITCH` (12) in
   `draw-text`; `drawText` starts a new line at a line break.
 
-- [ ] **Step 1: Write the failing tests.** In `tests/unit/text.test.ts` replace the test of the
+- [x] **Step 1: Write the failing tests.** In `tests/unit/text.test.ts` replace the test of the
   key names and add the three tests after the sentence of 0016:
 
 ```ts
@@ -180,10 +180,10 @@ dependency.
   });
 ```
 
-- [ ] **Step 2: Run** `npx vitest run tests/unit/text.test.ts tests/unit/draw-text.test.ts` —
+- [x] **Step 2: Run** `npx vitest run tests/unit/text.test.ts tests/unit/draw-text.test.ts` —
   expected: the new tests fail, and the typecheck rejects the two ids.
 
-- [ ] **Step 3: Implement.** `src/text/de.ts` — one array entry per line on screen:
+- [x] **Step 3: Implement.** `src/text/de.ts` — one array entry per line on screen:
 
 ```ts
 /**
@@ -269,10 +269,10 @@ export function drawText(
 }
 ```
 
-- [ ] **Step 4: Run** `npm run check` — expected: green; the tests of 0016 are unchanged and
+- [x] **Step 4: Run** `npm run check` — expected: green; the tests of 0016 are unchanged and
   still pass.
 
-- [ ] **Step 5: Commit** — `Give the officer her two pages`, body: a page is one key and its
+- [x] **Step 5: Commit** — `Give the officer her two pages`, body: a page is one key and its
   line breaks are written in the table, so a translation decides its own breaks and the game
   measures nothing.
 

@@ -73,6 +73,9 @@ describe('the glyph order (0016)', () => {
     for (const language of LANGUAGES) {
       for (const [key, text] of Object.entries(TABLE[language])) {
         for (const character of text) {
+          if (character === '\n') {
+            continue;
+          }
           expect(GLYPHS.includes(character), `${language} ${key}: "${character}"`).toBe(true);
         }
       }

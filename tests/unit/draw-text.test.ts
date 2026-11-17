@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
-import { drawText } from '../../src/render/draw-text';
+import { drawText, LINE_PITCH } from '../../src/render/draw-text';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
 import { type TextKey, textKey } from '../../src/text/text';
 
@@ -88,6 +88,18 @@ describe('drawText (0016)', () => {
     drawText(renderer, FONT, KEY, 'de', 10, 20);
     // a is 65, ? is 31, b is 66.
     expect(calls).toStrictEqual(['65 at 10,20', '31 at 16,20', '66 at 22,20']);
+  });
+
+  it('starts a new line 12 px lower at a line break, from x again (0017)', () => {
+    const { renderer, calls } = recorder();
+    drawText(renderer, FONT, textKey('talk.officer-rules-1'), 'de', 12, 138);
+    expect(LINE_PITCH).toBe(12);
+    // 33, 43 and 36 characters with 5, 7 and 4 spaces: 28, 36 and 32 glyphs.
+    expect(calls).toHaveLength(96);
+    expect(calls[0]).toBe('36 at 12,138'); // D
+    expect(calls[28]).toBe('37 at 12,150'); // E
+    expect(calls[64]).toBe('40 at 12,162'); // H
+    expect(calls.at(-1)).toBe('14 at 222,162'); // the full stop, character 35 of line 2
   });
 
   it('asks for a TextKey: a literal does not compile (INV-4)', () => {
