@@ -34,7 +34,8 @@ the lamp is stronger. The game shows its first text (feature 0016): a wall that 
 the lamp says so in one line, in the game's own pixel font, from a language table in German and
 English. The data protection officer stands in her office beside the reception and can be
 spoken to with `E` or `Enter` (feature 0017): a box shows what she says, page by page, and the
-world stands still while it is open. Milestone M3 is complete. The roadmap is in [docs/plan.md](docs/plan.md).
+world stands still while it is open. The four colleagues who walk the floor can be spoken to as
+well, across the counter too, and each has a saying (feature 0018). Milestone M3 is complete. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 
