@@ -1,7 +1,7 @@
 import type { TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
 import { answeredCase, clearRegion, progressOf, solve } from './cases';
-import { figuresFrom, figuresOf } from './cast';
+import { figuresFrom, figuresIn, figuresOf, isFirstMeeting } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
 import { openHelp, stepHelp } from './help';
 import { openJournal, stepJournal } from './journal';
@@ -10,7 +10,14 @@ import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from 
 import { type GameInput, NO_INPUT, stepPlayer } from './player';
 import { areasOf } from './region';
 import { standingWalls, stepWalls, wallsOf, withWalls } from './shadow';
-import { type GameState, type LampState, NO_RECOIL, type PlayerState } from './state';
+import {
+  type Dialogue,
+  type GameState,
+  type LampState,
+  NO_RECOIL,
+  type PlayerState,
+} from './state';
+import { OPENING_SCENE } from './story';
 import { openDialogue, speakersOf, stepDialogue } from './talk';
 import { hiddenTraces, stepTraces, tracesOf } from './trace';
 import { BASE_STRENGTH } from './world';
@@ -69,17 +76,66 @@ export function createInitialState(map: TileMap): GameState {
 }
 
 /**
+ * The state a played game starts with (0026): the initial state with the call open on its
+ * first page, the lamp not yet owned, and the opening not ended. `main.ts` starts with it; the
+ * tests of the earlier features step from `createInitialState`.
+ */
+export function newGame(map: TileMap): GameState {
+  return {
+    ...createInitialState(map),
+    started: null,
+    lamp: { on: false, strength: BASE_STRENGTH, owned: false, used: false },
+    dialogue: { speaker: 'story', index: OPENING_SCENE, page: 0 },
+  };
+}
+
+/**
+ * What the step that closed a dialogue changes besides closing it (0024, 0025, 0026). Closing
+ * the scene a game opens with ends the opening: `started` is this step's tick. Closing the
+ * first meeting hands the lamp over. Closing the source's answer of a ready case solves the
+ * case, and what is left of the region's shadow goes with it. Every other closing changes
+ * nothing more.
+ */
+function closed(
+  stepped: GameState,
+  dialogue: Dialogue,
+  before: GameState,
+  content: TileMap,
+): GameState {
+  if (dialogue.speaker === 'story') {
+    return dialogue.index === OPENING_SCENE && stepped.started === null
+      ? { ...stepped, started: stepped.tick }
+      : stepped;
+  }
+  if (isFirstMeeting(dialogue, figuresOf(content.points), before.lamp.owned)) {
+    return { ...stepped, lamp: { ...stepped.lamp, owned: true } };
+  }
+  const answered = answeredCase(
+    dialogue,
+    before,
+    routesOf(content.points),
+    progressOf(before, content),
+  );
+  return answered === null
+    ? stepped
+    : clearRegion(solve(stepped, answered.region), answered.region, content);
+}
+
+/**
  * Advances the game by exactly one logic step and returns the new state; its arguments are not
  * mutated. In the dark the step is the dark sequence and nothing else (0009). With the help open
  * the step is the help's and nothing else, and a press of `help` opens it over whatever is there
  * — an open journal and an open dialogue too (0021). With the journal open the step is the
- * journal's and nothing else (0020). With a dialogue open the step is the dialogue's and nothing
- * else; the step that closes the source's answer of a ready case solves the case (0024) and
- * removes the region's standing shadow walls and the creatures at home in it (0025). A press of `journal` opens the journal instead of an ordinary
+ * journal's and nothing else (0020). With a dialogue open — a speaker's or a scene's (0026) —
+ * the step is the dialogue's and nothing else; the step that closes the source's answer of a
+ * ready case solves the case (0024) and removes the region's standing shadow walls and the
+ * creatures at home in it (0025), the step that closes the first meeting hands the lamp over,
+ * and the step that closes the call ends the opening (0026). A press of `journal` opens the journal instead of an ordinary
  * step, before a press of `talk` is looked at (0020); a press of `talk` near a speaker — a
  * standing figure or a colleague — in reach and in sight opens a dialogue instead of an
- * ordinary step (0017, 0018). Otherwise: the lamp is on when the input holds
- * it and the figure is not being pushed; the figure is stepped; each creature is stepped
+ * ordinary step (0017, 0018). Otherwise: the lamp is on when the player has it, the input holds
+ * it and the figure is not being pushed — without the lamp the input's `lamp` counts as not
+ * held, for the figure too (0026); the figure is stepped; each creature is stepped
  * against the stepped figure (0008); the first free creature within reach of a figure that is
  * not safe hits; the camera follows the figure; each mover is stepped against the figure after
  * the hit, on routes rebuilt from the map's points (0015). The figure and the creatures are
@@ -106,16 +162,12 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   }
   const routes = routesOf(content.points);
   const progress = progressOf(state, content);
-  const speakers = speakersOf(figuresOf(content.points), state.movers, routes, undefined, progress);
+  // Without the lamp the data protection officer says the first meeting (0026).
+  const figures = figuresIn(figuresOf(content.points), state.lamp.owned);
+  const speakers = speakersOf(figures, state.movers, routes, undefined, progress);
   if (state.dialogue !== null) {
     const stepped = stepDialogue(state, state.dialogue, input, speakers);
-    // The step that closes the source's answer solves its case (0024), and what is left of the
-    // region's shadow goes with it (0025).
-    const answered =
-      stepped.dialogue === null ? answeredCase(state.dialogue, state, routes, progress) : null;
-    return answered === null
-      ? stepped
-      : clearRegion(solve(stepped, answered.region), answered.region, content);
+    return stepped.dialogue === null ? closed(stepped, state.dialogue, state, content) : stepped;
   }
   const journal = openJournal(state, input);
   if (journal !== null) {
@@ -126,14 +178,14 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   if (opened !== null) {
     return opened;
   }
-  const lamp: LampState = {
-    ...state.lamp,
-    on: input.lamp && state.player.recoil.steps === 0,
-  };
+  // Without the lamp the input's `lamp` counts as not held: for the light and for the figure.
+  const acting: GameInput = { ...input, lamp: input.lamp && state.lamp.owned };
+  const on = acting.lamp && state.player.recoil.steps === 0;
+  const lamp: LampState = { ...state.lamp, on, used: state.lamp.used || on };
   const walls = wallsOf(content.rects);
   // The figure, the push and the creatures meet the walls standing at the start of the step.
   const walled = withWalls(content, walls, state.shadowWalls);
-  const stepped = stepPlayer(state.player, input, walled);
+  const stepped = stepPlayer(state.player, acting, walled);
   const { creatures, captured } = stepCreatures(
     state.creatures,
     state.captured,
