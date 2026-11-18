@@ -52,7 +52,7 @@ A coffee at a coffee machine wins overview back — in the break room from the s
 department once its case is solved (feature 0027). M6, the second act, has begun: Marketing
 has five traces of its own, on four screens and on the printer, and the colleague in the red
 shirt is the source of the second case; the two cases can be solved in either order (feature
-0028).
+0028). Every merge to `main` is deployed to Cloud Run (feature 0030).
 The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
@@ -81,6 +81,17 @@ docker build -t shadow-ai .
 docker run --rm -p 8080:8080 shadow-ai      # http://localhost:8080
 BASE_URL=http://localhost:8080 npm run test:e2e
 ```
+
+Every merge to `main` is deployed by the workflow. A new Google Cloud project is prepared
+once; a deployment by hand uses the script the workflow uses:
+
+```
+tools/gcp-bootstrap.sh <project-id>      # once: registry, keyless login, accounts, budget, repository variables
+docker build --platform linux/amd64 -t shadow-ai .
+GCP_PROJECT_ID=<project-id> GCP_REGION=europe-west1 tools/gcp-deploy.sh shadow-ai <tag>
+```
+
+What they create and what it costs is in [docs/spec/ops.md](docs/spec/ops.md) §5.
 
 ## How it is built
 

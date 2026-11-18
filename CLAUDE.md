@@ -29,8 +29,8 @@ enemy is the shadow — the absence of safe, approved ways. You win by making th
 unnecessary, not by forbidding.** `docs/spec/vision.md` holds the story, the pillars and the tone.
 
 Technically: TypeScript (strict), Canvas 2D, Vite, Vitest, no game framework (ADR-0001). A static
-site served by nginx from a container. Cloud Run is the target; until the end of the project the
-container runs locally.
+site served by nginx from a container. Every merge to `main` is deployed to Cloud Run
+(`docs/spec/ops.md` §5); the same container runs locally.
 
 ---
 
@@ -187,7 +187,7 @@ these.
 | `docs/spec/gameplay.md` | the lamp, the three layers, overview, progression, resolving a case, the journal, the Harmonic station |
 | `docs/spec/visual.md` | 320x180, integer scaling, tiles and figures, Endesga 32 and the signature colour, the asset pipeline, frame rate |
 | `docs/spec/architecture.md` | directory structure, the state model, the loop, input, the renderer interface, maps and the Tiled pipeline, text plumbing, tooling, dependency policy |
-| `docs/spec/ops.md` | build, the container, nginx and headers, running locally, CI, the Cloud Run target |
+| `docs/spec/ops.md` | build, the container, nginx and headers, running locally, CI, the deployment to Cloud Run |
 | `docs/spec/testing.md` | the four test layers, the test behind each invariant, test-first, what is not tested, the acceptance walk |
 | `docs/plan.md` | roadmap M1–M8, content budget, open milestones, deferred ideas — **not** a source of product rules |
 | `docs/features/` | one spec per feature with its status, and the template |

@@ -1,7 +1,8 @@
 import http from 'node:http';
+import https from 'node:https';
 import { expect, type Page, test } from '@playwright/test';
 
-/** Set when the spec runs against the container; the header checks need nginx. */
+/** Set when the spec runs against a served build — the container or the live service. */
 const containerUrl = process.env.BASE_URL;
 
 /** ops.md §2, on every response. */
@@ -19,10 +20,14 @@ interface RawResponse {
   readonly body: string;
 }
 
-/** A plain HTTP GET that reports headers exactly as sent — nothing decompresses or redirects. */
+/**
+ * A plain GET that reports headers exactly as sent — nothing decompresses or redirects. The
+ * module follows the scheme: the local container speaks HTTP, the live service HTTPS.
+ */
 function get(url: string, headers: Record<string, string> = {}): Promise<RawResponse> {
+  const client = url.startsWith('https:') ? https : http;
   return new Promise((resolve, reject) => {
-    http
+    client
       .get(url, { headers }, (response) => {
         const chunks: Buffer[] = [];
         response.on('data', (chunk: Buffer) => chunks.push(chunk));
@@ -263,7 +268,7 @@ test('the game starts with full overview and outside the dark', async ({ page })
 });
 
 test.describe('served by the container', () => {
-  test.skip(containerUrl === undefined, 'header checks run against the container (BASE_URL)');
+  test.skip(containerUrl === undefined, 'header checks run against a served build (BASE_URL)');
 
   test('the page and a 404 carry the four security headers', async () => {
     const page = await get(`${container()}/`);
