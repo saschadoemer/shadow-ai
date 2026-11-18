@@ -84,7 +84,7 @@ test. The container was **not** run with the prototype.
 **Interfaces:**
 - Produces: `nextLanguage(language: Language): Language`; the text id `notice.language`.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -118,12 +118,12 @@ test. The container was **not** run with the prototype.
    });
 ```
 
-- [ ] **Step 2: Run them and see them fail.**
+- [x] **Step 2: Run them and see them fail.**
 
 Run: `npx vitest run tests/unit/text.test.ts`
 Expected: FAIL — `nextLanguage` is not exported, and `notice.language` is no key.
 
-- [ ] **Step 3: Add the function and the strings.**
+- [x] **Step 3: Add the function and the strings.**
 
 ```diff
 --- a/src/text/text.ts
@@ -172,13 +172,13 @@ Expected: FAIL — `nextLanguage` is not exported, and `notice.language` is no k
      'It stays behind wherever data leaves the house',
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npx vitest run tests/unit/text.test.ts tests/unit/font.test.ts tests/unit/draw-scene.test.ts`
 Expected: PASS. The tests of 0016 hold the new notice to one line and to the bar's 49
 characters without a change.
 
-- [ ] **Step 5:** `npm run check`, then commit — `Name the language that is on`.
+- [x] **Step 5:** `npm run check`, then commit — `Name the language that is on`.
 
 ---
 
@@ -197,7 +197,7 @@ characters without a change.
   `LANGUAGE_NOTICE: TextKey`; `LANGUAGE_NOTICE_STEPS = 120`;
   `languageNoticeVisible(tick: number, switchedAt: number | null): boolean`.
 
-- [ ] **Step 1: Change the scene tests.** The file's own `drawScene` becomes a wrapper that
+- [x] **Step 1: Change the scene tests.** The file's own `drawScene` becomes a wrapper that
   passes the settings of a fresh game, `{ language: 'de', switchedAt: null }`, so the 33
   existing calls stay as they are and expect what they expected. The two English tests of
   0016 and 0017 pass `ENGLISH`. A new block of six tests follows at the end of the file.
@@ -380,13 +380,13 @@ characters without a change.
 +});
 ```
 
-- [ ] **Step 2: Run and see it fail.**
+- [x] **Step 2: Run and see it fail.**
 
 Run: `npm run typecheck`
 Expected: errors in `tests/unit/draw-scene.test.ts` — `SceneSettings`, `LANGUAGE_NOTICE_STEPS`
 and `languageNoticeVisible` are not exported, and `drawScene` takes three arguments.
 
-- [ ] **Step 3: Change the scene.**
+- [x] **Step 3: Change the scene.**
 
 ```diff
 --- a/src/render/draw-scene.ts
@@ -500,7 +500,7 @@ and `languageNoticeVisible` are not exported, and `drawScene` takes three argume
    if (lid > 0) {
 ```
 
-- [ ] **Step 4: Keep `main.ts` compiling.** The content no longer carries the language; until
+- [x] **Step 4: Keep `main.ts` compiling.** The content no longer carries the language; until
   Task 3 the scene is drawn with constant settings:
 
 ```diff
@@ -525,12 +525,12 @@ and `languageNoticeVisible` are not exported, and `drawScene` takes three argume
            computeLayout(window.innerWidth, window.innerHeight, window.devicePixelRatio),
 ```
 
-- [ ] **Step 5: Run the tests.**
+- [x] **Step 5: Run the tests.**
 
 Run: `npm run typecheck && npx vitest run tests/unit/draw-scene.test.ts`
 Expected: PASS — the file has 58 tests. Then `npm run test`: 876 tests, every file green.
 
-- [ ] **Step 6:** `npm run check`, then commit —
+- [x] **Step 6:** `npm run check`, then commit —
   `Draw the scene in the language of its settings`. The body says that the language is a
   setting of the player and not a fact of the game, so it stays out of the state.
 
@@ -549,7 +549,7 @@ The handler lives in `main.ts`, which no unit test loads; the smoke spec is its 
 - Produces: `window.shadowAi: { state: GameState; language: Language }`; the binding
   `language` ← `KeyL`.
 
-- [ ] **Step 1: Write the failing smoke test,** at the end of `tests/e2e/smoke.spec.ts`. A
+- [x] **Step 1: Write the failing smoke test,** at the end of `tests/e2e/smoke.spec.ts`. A
   second `keydown` without a `keyup` is what a held key sends: Playwright marks it `repeat`.
 
 ```diff
@@ -582,14 +582,14 @@ The handler lives in `main.ts`, which no unit test loads; the smoke spec is its 
 +});
 ```
 
-- [ ] **Step 2: Run it and see it fail.**
+- [x] **Step 2: Run it and see it fail.**
 
 Run: `npm run test:e2e`
 Expected: the new test FAILS at its first poll — `window.shadowAi.language` is `undefined`.
 `npm run typecheck` fails too: `language` is no property of `window.shadowAi`. If a dev
 server already runs on port 5173, Playwright uses it.
 
-- [ ] **Step 3: Hold the settings in `main.ts` and switch them on `L`.**
+- [x] **Step 3: Hold the settings in `main.ts` and switch them on `L`.**
 
 ```diff
 --- a/src/main.ts
@@ -703,12 +703,12 @@ server already runs on port 5173, Playwright uses it.
   loaded; before that `L` does nothing. `handle.language` is set in `render`, so the global
   reports the language of the last frame.
 
-- [ ] **Step 4: Run.**
+- [x] **Step 4: Run.**
 
 Run: `npm run typecheck && npm run test:e2e`
 Expected: PASS — ten tests, three skipped (they need the container).
 
-- [ ] **Step 5:** `npm run check`, then commit — `Switch the language with L`.
+- [x] **Step 5:** `npm run check`, then commit — `Switch the language with L`.
 
 ---
 
@@ -718,7 +718,7 @@ Expected: PASS — ten tests, three skipped (they need the container).
 - Modify: `tests/arch/game-boundary.ts`
 - Test: `tests/arch/game-boundary.test.ts`
 
-- [ ] **Step 1: Write the failing test.**
+- [x] **Step 1: Write the failing test.**
 
 ```diff
 --- a/tests/arch/game-boundary.test.ts
@@ -744,12 +744,12 @@ Expected: PASS — ten tests, three skipped (they need the container).
        "import { clamp } from '../engine/math';\nimport type { TextKey } from '../text/keys';\n";
 ```
 
-- [ ] **Step 2: Run it and see it fail.**
+- [x] **Step 2: Run it and see it fail.**
 
 Run: `npx vitest run tests/arch`
 Expected: FAIL in the new test — the check reports nothing.
 
-- [ ] **Step 3: Add the rule.** It is over the source text, like the browser names; the word
+- [x] **Step 3: Add the rule.** It is over the source text, like the browser names; the word
   `language` in lower case stays allowed.
 
 ```diff
@@ -783,10 +783,10 @@ Expected: FAIL in the new test — the check reports nothing.
  }
 ```
 
-- [ ] **Step 4: Run.** `npx vitest run tests/arch` — PASS, and every file under `src/game/`
+- [x] **Step 4: Run.** `npx vitest run tests/arch` — PASS, and every file under `src/game/`
   is still clean. `npm run test`: 877 tests.
 
-- [ ] **Step 5:** `npm run check`, then commit — `Keep the type Language out of the game`.
+- [x] **Step 5:** `npm run check`, then commit — `Keep the type Language out of the game`.
 
 ---
 
@@ -796,14 +796,14 @@ Expected: FAIL in the new test — the check reports nothing.
 - Modify: `docs/spec/gameplay.md`, `docs/spec/architecture.md`, `docs/spec/vision.md`,
   `docs/spec/testing.md`, `README.md`
 
-- [ ] **Step 1: `gameplay.md` §8.** The list of keys gains: `L` switches between German and
+- [x] **Step 1: `gameplay.md` §8.** The list of keys gains: `L` switches between German and
   English. Add a paragraph **As built** (feature 0019): a press of `L` switches the language
   at any moment — while walking, with the lamp held, with a dialogue open, in the dark; every
   text on screen changes at once; where no text is on screen a line names the language that
   is on, in that language, for two seconds; every load starts in German and nothing is
   remembered; the title screen of M8 will hold the switch.
 
-- [ ] **Step 2: `architecture.md`.** §4: the action `language` ← L, handled in `main.ts` on
+- [x] **Step 2: `architecture.md`.** §4: the action `language` ← L, handled in `main.ts` on
   `keydown` without `repeat` and without Ctrl, Alt or Cmd, like `fullscreen`; it never reaches
   the game, which still gets six actions. §5: `drawScene` takes the settings
   `{ language, switchedAt }` as its fourth argument; `SceneContent` holds loaded content only;
@@ -814,30 +814,30 @@ Expected: FAIL in the new test — the check reports nothing.
   know it; `window.shadowAi` carries it for the smoke test. Where §2 or §5 says that `main.ts`
   sets the content's language, correct it.
 
-- [ ] **Step 3: `vision.md` §7.** After "The language is switched on the title screen": until
+- [x] **Step 3: `vision.md` §7.** After "The language is switched on the title screen": until
   the title screen exists (M8), `L` switches it while playing (feature 0019).
 
-- [ ] **Step 4: `testing.md` §2.** The INV-2 row gains the rule that `tests/arch/` fails on
+- [x] **Step 4: `testing.md` §2.** The INV-2 row gains the rule that `tests/arch/` fails on
   the type `Language` in `src/game/` (0019). The INV-4 row gains: the scene tests draw the
   notice and a page in both languages, and the smoke test switches the language with `L`.
 
-- [ ] **Step 5: `README.md`:** one sentence after the one on the colleagues — `L` switches
+- [x] **Step 5: `README.md`:** one sentence after the one on the colleagues — `L` switches
   the game between German and English at any moment (feature 0019). Add `L` where the README
   lists the keys, if it does.
 
-- [ ] **Step 6:** `npm run check`, then commit — `Move the language switch into the spec`.
+- [x] **Step 6:** `npm run check`, then commit — `Move the language switch into the spec`.
 
 ---
 
 ### Task 6: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing. `git diff main -- src/game` is empty.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
   `Tick the full check of 0019`.
 
 ---
