@@ -118,7 +118,7 @@ region next, because it is the answer to the case and the picture the teaser end
 returns, more colleagues see the shadow, overview grows by one. The call last of the story:
 the customer on the phone, the first sight of the shadow and the lamp handed over can be told
 once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
-has left it open since 0009. 0022, 0023 and 0024 are implemented; 0025,
+has left it open since 0009. 0022, 0023, 0024 and 0025 are implemented;
 0026 and 0027 are approved.
 
 ### M6 — The cases of Act 2
