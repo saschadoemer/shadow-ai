@@ -162,7 +162,6 @@ describe('stepDark', () => {
   const MAP = grassMap(40, 30, { x: 320, y: 240 }, [{ name: 'wake', x: 80, y: 60 }]);
   const FALLEN: GameState = {
     tick: 500,
-    started: 0,
     rested: null,
     player: figure(300, 200, 'left', { frame: 2, frameTimer: 3.5 }),
     camera: { x: 140, y: 106 },
@@ -193,7 +192,6 @@ describe('stepDark', () => {
     expect(darkSteps(43)).toStrictEqual({
       ...FALLEN,
       tick: 543,
-      started: 0,
       rested: null,
       lamp: { on: false, strength: 1, owned: true, used: true },
       dark: 44,
@@ -205,7 +203,6 @@ describe('stepDark', () => {
     const player = figure(80, 60, 'down');
     expect(woken).toStrictEqual({
       tick: 544,
-      started: 0,
       rested: null,
       player,
       camera: followPlayer(player, MAP),

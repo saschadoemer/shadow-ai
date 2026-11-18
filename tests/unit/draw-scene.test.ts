@@ -190,7 +190,6 @@ const state = (
   lampOn = false,
 ): GameState => ({
   tick: QUIET_TICK,
-  started: 0,
   rested: null,
   player: player(fields),
   camera,
@@ -1474,11 +1473,10 @@ describe('the story in the scene (0026)', () => {
   const BOX = 'fillRect 8,134 304x42 #181425';
   const BAR = 'fillRect 8,158 304x18 #181425';
   const NO_LAMP = { on: false, strength: 1, owned: false, used: false };
-  /** A new game on the 3x2 map: the call open on `page`, no lamp, the opening not ended. */
+  /** A new game on the 3x2 map: the call open on `page`, no lamp. */
   const calling = (page: number, tick = 0): GameState => ({
     ...state({ x: 20, y: 30 }),
     tick,
-    started: null,
     lamp: NO_LAMP,
     dialogue: { speaker: 'story', index: 0, page },
     overview: { current: 1, max: 2 },
@@ -1545,7 +1543,7 @@ describe('the story in the scene (0026)', () => {
 
   it('draws no cone while the lamp is not owned, whatever is held', () => {
     const renderer = recordingRenderer();
-    drawScene(renderer, { ...calling(0), dialogue: null, started: 5 }, CONTENT);
+    drawScene(renderer, { ...calling(0), dialogue: null }, CONTENT);
     expect(renderer.sheets).not.toContain(CONTENT.lampSheet);
     const owned = recordingRenderer();
     drawScene(owned, state({ x: 20, y: 30 }, { x: 0, y: 0 }, true), CONTENT);

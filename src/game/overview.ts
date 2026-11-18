@@ -131,7 +131,6 @@ function woken(state: GameState, map: TileMap): GameState {
   };
   return {
     tick: state.tick,
-    started: state.started,
     player,
     camera: followPlayer(player, map),
     lamp: { ...state.lamp, on: false },

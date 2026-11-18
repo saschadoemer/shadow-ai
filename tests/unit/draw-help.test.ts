@@ -91,7 +91,6 @@ const BAR = 'fillRect 8,158 304x18 #181425';
 /** A game with five hearts and the officer standing; the help as `fields` say. */
 const playing = (fields: Partial<GameState> = {}): GameState => ({
   tick: 700,
-  started: 0,
   rested: null,
   player: {
     x: 184,
