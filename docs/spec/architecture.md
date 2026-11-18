@@ -22,11 +22,13 @@ src/
                  game/notice.ts which notice a state shows (0016); game/cast.ts the cast and
                  the standing figures of a map, and the colleagues' lines (0018),
                  game/talk.ts the rules of talking (0017, 0018); game/journal.ts the
-                 journal's tabs, entries and step (0020)
+                 journal's tabs, entries and step (0020); game/help.ts the help's step and
+                 when the start hint is due (0021)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene); render/font.ts the glyph order and the
                  cell size of the font, render/draw-text.ts text by TextKey, line by line
-                 (0016, 0017); render/draw-journal.ts the journal's screen (0020)
+                 (0016, 0017); render/draw-journal.ts the journal's screen (0020);
+                 render/draw-help.ts the help's rows and its box (0021)
   text/          the language table and the TextKey type (INV-4): de.ts and en.ts hold the
                  strings, text.ts the languages, the keys and the lookup (0016)
 public/
@@ -81,8 +83,8 @@ render (feature 0019). It is read-only by convention; nothing in the game reads 
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
 logic steps since the start, the player, the camera, the lamp, the creatures, the movers, the
-standing shadow walls, the standing figures, the open dialogue, the open journal, the input of
-the last step, the captured count, overview and the step of the dark; later the current map id
+standing shadow walls, the standing figures, the open dialogue, the open journal, whether the help is
+open, the input of the last step, the captured count, overview and the step of the dark; later the current map id
 and cleared regions join them. It is plain data: numbers,
 strings, booleans, arrays and plain objects. No functions, no class instances, no `Map` or `Set`,
 no `Date`. A JSON round trip reproduces it exactly, and a test proves that on a populated state.
@@ -215,6 +217,10 @@ it and `held` does not (`game/player`, `pressed`; `talkPressed` in `game/talk` r
 `policy` — (feature 0020, `game/journal`). What a tab shows is not in the state: the **entries**
 of the creatures tab are the species of which at least one was captured, in `SPECIES` order,
 derived from `captured` in every frame by `entriesOf`; the cases and the policy have none yet.
+`help` is a boolean, `false` at the start: whether the help is open (feature 0021,
+`game/help`). The rows the help shows and whether the start hint is due are not in the state:
+the rows are constants of `render/draw-help`, and the hint is derived from `tick` in every frame
+(`helpHintDue`).
 
 The **speakers** of a step (feature 0018, `speakersOf` in `game/talk`) are the standing figures in
 file order, then the movers of the kind `person` whose route is in `COLLEAGUES` (`game/cast`), in
@@ -222,8 +228,14 @@ the order of `movers`; each is where it is in this step — a figure at its poin
 `x` and `y` in the state, not rounded. Like the figures they are rebuilt on every call and kept
 nowhere. A person whose route has no lines, a dog, a vacuum and a drone are no speakers.
 
-A step is one of four kinds, in this order. **Dark:** with `dark` above 0 it is `stepDark`, as
-above, and sets `held`; `journal` does nothing. **Journal:** with the journal open, `tick` grows
+A step is one of five kinds, in this order. **Dark:** with `dark` above 0 it is `stepDark`, as
+above, and sets `held`; `journal` and `help` do nothing. **Help:** with the help open, `tick`
+grows by 1 and `held` is set; a press of `help` sets `help` to `false`; nothing else changes —
+not the player, the lamp, the creatures, the movers, the walls or a figure, not the page of an
+open dialogue and not the tab of the open journal (`stepHelp`). Otherwise a press of `help`
+opens it before anything else is looked at, over an open journal and an open dialogue too,
+whatever else the input holds: `help` becomes `true`, `tick` grows by 1, `held` is set, and
+nothing else changes in this step (`openHelp`). **Journal:** with the journal open, `tick` grows
 by 1 and `held` is set; a press of `journal` sets `journal` to `null`; otherwise a press of
 `right` while `left` is not pressed turns to the next tab, a press of `left` while `right` is not
 pressed to the one before, and at either end the tab stays. Nothing else changes — not the
@@ -245,8 +257,10 @@ is the larger one, up or down otherwise, unchanged on the same spot), the player
 steps it on unchanged after the dialogue. Without such a press the
 step is the one described above. Every step, of every kind, sets `held` from its input, so a
 key held down is pressed once. The wake keeps `figures` and `held` and has no dialogue and no
-journal. A state without speakers, in which `talk` is never held, steps exactly as before 0018;
-a state in which `journal` is never held steps exactly as before 0020.
+journal, and its help is closed: the help does not open in the dark, and no dark begins while it
+is open. A state without speakers, in which `talk` is never held, steps exactly as before 0018;
+a state in which `journal` is never held steps exactly as before 0020; a state in which `help`
+is never held steps exactly as before 0021.
 
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
@@ -255,8 +269,8 @@ settings are neither: the language (feature 0019) is held by `main.ts`, not save
 not shipped, and reaches only the scene (§5, §8).
 
 `update(state, input, content)` advances the state by exactly one logic step and returns the new
-state. `input` is `GameInput`: the four movement actions, `lamp`, `talk` and `journal`, as
-booleans (§4);
+state. `input` is `GameInput`: the four movement actions, `lamp`, `talk`, `journal` and `help`,
+as booleans (§4);
 `content` is the loaded map. Whether it mutates in place or returns a copy is an implementation
 choice per module; what it may not do is read anything but its arguments or write anything but
 its result.
@@ -312,14 +326,14 @@ the whole input of the last step (§2; `talkHeld`, the last step's `talk`, until
 The keyboard still keeps no edge, and it reads the held keys once per frame, so a key that goes
 down and up within one frame is not seen.
 
-The game reads named actions — `up`, `down`, `left`, `right`, `lamp`, `talk` and `journal` —
-never key codes. The mapping from keys to actions lives in one table in `main.ts`:
+The game reads named actions — `up`, `down`, `left`, `right`, `lamp`, `talk`, `journal` and
+`help` — never key codes. The mapping from keys to actions lives in one table in `main.ts`:
 `up` ← ArrowUp or W, `down` ← ArrowDown or S, `left` ← ArrowLeft or A, `right` ← ArrowRight or
-D, `lamp` ← Space, `talk` ← E or Enter, `journal` ← J (feature 0020), `fullscreen` ← F,
-`language` ← L.
+D, `lamp` ← Space, `talk` ← E or Enter, `journal` ← J (feature 0020), `help` ← H (feature
+0021), `fullscreen` ← F, `language` ← L.
 Once per frame, before the steps (§3), `main.ts` resolves the held keys through the table with
 `resolveActions`, a pure function in `engine/input`: an action is on when any of its keys is
-down. The game gets the seven actions as booleans and nothing else. A gamepad (deferred,
+down. The game gets the eight actions as booleans and nothing else. A gamepad (deferred,
 `docs/plan.md` §5) and remappable keys are additions to the table, not changes to the game.
 
 A bound key pressed without Ctrl, Alt or Cmd belongs to the game: `main.ts` prevents its default,
@@ -330,7 +344,7 @@ Alt or Cmd; it never reaches the game. `language` (feature 0019) is handled the 
 `keydown` of L: `main.ts` sets the language to `nextLanguage` of it, notes the state's `tick` of
 the last frame as `switchedAt`, and sets the `lang` attribute of the page's root element. A held
 key switches once; with Ctrl, Alt or Cmd the browser keeps its shortcut and the language stays;
-before the content has loaded the key does nothing. The game still gets its seven actions.
+before the content has loaded the key does nothing. The game still gets its eight actions.
 
 ## 5. The renderer interface
 
@@ -359,7 +373,7 @@ movers whose feet y is at most the player's in array order, the standing figures
 at most the player's (feature 0017), the creatures in array order, the player, the other
 standing figures, the other ground movers in array order, `above` (§6), the drones (feature
 0015), the hearts of overview, the dialogue box while a dialogue is open or else the notice
-(features 0016, 0017), the lids of the dark. A ground mover is a person, a dog or a vacuum; comparing the feet makes walking past a colleague read as depth, and a
+(features 0016, 0017), the help while it is open (feature 0021), the lids of the dark. A ground mover is a person, a dog or a vacuum; comparing the feet makes walking past a colleague read as depth, and a
 drone flies over the tops of `above`. The player's sprite has its top-left corner at
 (round(x) − 8 − camera.x, round(y) − 24 − camera.y): the feet are the bottom centre of the
 sprite, so they sit on the tile grid and the figure stands on its tile. Its frame in the sheet is
@@ -412,9 +426,14 @@ every frame. `SceneContent` holds loaded content only. Every text of the scene i
 `language`. The language line, the key `notice.language`, is drawn like the notice — the bar
 (8, 158, 304, 18) in `#181425` and the line centred in it — when `switchedAt` is not null and
 0 ≤ `tick` − `switchedAt` < `LANGUAGE_NOTICE_STEPS` (120, two seconds), no dialogue is open and
-no notice shows. The dialogue box comes first, then the notice, then the language line: where a
-text is on screen, that text changes with the language and is the answer to a switch. The lids
-of the dark close over the line as over everything.
+no notice shows. The start hint (feature 0021), the key `notice.help`, is drawn the same way
+when `tick` < `HELP_HINT_STEPS` (600, ten seconds, `helpHintDue` in `game/help`), no dialogue is
+open, no notice shows and the language line is not due. The dialogue box comes first, then the
+notice, then the language line, then the start hint: where a text is on screen, that text
+changes with the language and is the answer to a switch. `quietLine` names the line of the bar
+where no dialogue is open and no notice shows: none while the help is open, else the language
+line when it is due, else the start hint when it is due. The lids of the dark close over the
+line as over everything.
 
 A standing figure (feature 0017) is drawn from its own sheet, `<id>.png`, like a colleague who
 stands: frame facing × 5, top-left corner at (round(x) − 8 − camera.x, round(y) − 24 −
@@ -440,6 +459,21 @@ of the species' sheet — the creature as the light shows it, `ENTRY_FRAME`, hel
 (40, 35 + 72k) and the text from (16, 54 + 72k), lines 12 px apart. A line of 47 characters ends
 at x = 298; two entries fit, the second ending at y = 172. `draw-journal` imports only types
 from `draw-scene`, and `draw-scene` imports `drawJournal`.
+
+The help (feature 0021, `render/draw-help`). While `help` is `true`, `drawScene` draws what it
+draws otherwise — the world with its hearts and the dialogue box or the notice, or the journal —
+but neither the language line nor the start hint, and then the help: after everything else and
+before the lids, and after the journal when the journal is open. The lids never meet it: the
+help does not open in the dark, and no dark begins while it is open. In the language of the
+settings, on the surface and not shifted by the camera, it draws the frame, a rectangle
+(48, 30, 224, 98) in `#3a4466`; the field, (49, 31, 222, 96) in `#181425`, so 1 px of the frame
+is left on every side; and the seven rows of `HELP_ROWS` — walk, lamp, talk, journal, language,
+fullscreen, help — row k from 0 with its key from (56, 38 + 12k) and what it does from
+(170, 38 + 12k). A key of 17 characters ends at x = 158, 12 px left of the second column; a text
+of 16 characters ends at x = 266; the last row ends at y = 120, 7 px above the field's lower
+edge. The box keeps clear of the hearts (to y = 12), the journal's tabs and rule (to y = 24) and
+the dialogue box (from y = 134). `draw-help` imports nothing from `draw-scene`, and `draw-scene`
+imports `drawHelp`.
 
 The interface exists so the implementation can change (ADR-0001 names PixiJS as the candidate)
 without touching `game/`. It is not an abstraction for its own sake: it has exactly one
@@ -849,6 +883,14 @@ most 47. `creature.<species>-name` is a species' displayed name, one line of at 
 characters; `creature.<species>-text` its journal text, two to four lines of at most 47 and no
 empty line. `game/journal` names them by key in `TAB_TEXT` and `ENTRY_TEXT`, and a test holds
 every key of the two kinds to the rule of its kind in both languages.
+
+The help (feature 0021) adds the key `notice.help`, the start hint, one line that the notice's
+bar holds like every notice, and one kind. `help.key-<what>` is the name of a key, one line of
+at most 17 characters; `help.do-<what>` what it does, one line of at most 16. `HELP_ROWS` in
+`render/draw-help` names them by key, seven rows in the order walk, lamp, talk, journal,
+language, fullscreen, help; a test holds every key of the kind to the rule of its kind in both
+languages. The letter of a key is a string of the table like every other text, also where it is
+the same in both languages.
 
 ## 9. Tooling
 

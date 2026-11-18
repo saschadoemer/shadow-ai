@@ -66,16 +66,26 @@ bottom, 8 px from the left, the right and the bottom edge, 304x18, with one whit
 it. While a dialogue is open the dialogue box (feature 0017) is drawn in the notice's place: the
 notice's bar grown upwards to three lines, (8, 134, 304, 42) in `#181425`, with the page's white
 lines left-aligned from (12, 138), 12 px apart, and in its lower right corner a small white
-triangle that points down and blinks once a second — a press goes on. A heart is 7x7 with a rim
+triangle that points down and blinks once a second — a press goes on. For the first ten
+seconds of a game the same bar holds the start hint (feature 0021), one white line that names
+the key of the help, where no other text has the bar. A heart is 7x7 with a rim
 in `#181425`, red `#e43b44` when full and
 `#3a4466` when empty. The screen of the dark is two rectangles in `#181425` that close from the top
 and the bottom; nothing is blended, so no pixel leaves the palette.
+
+**The help** (feature 0021) is a box over the game, (48, 30, 224, 98): a frame of 1 px in
+`#3a4466` around a field in `#181425`, with seven white rows in two columns — the key on the
+left, what it does on the right. It keeps clear of the hearts, of the journal's tabs and of the
+dialogue box, so the floor stays visible on all four sides and a dialogue's page stays readable
+under it.
 
 **The journal** (feature 0020) is drawn instead of the world, not over it: a dark screen in
 `#181425` with three tabs along the top in two blues — `#3a4466` for the open tab, `#262b44` for
 the other two — each with its title centred in white, and under them a rule in the open tab's
 colour, so that the open tab stands on it. A captured species shows its own 16x16 picture, the
-frame the light shows, with its name beside it and its lines below.
+frame the light shows, with its name beside it and its lines below. The help is the one thing
+drawn over it; its frame is what makes it a box on the journal's screen, which has the field's
+colour.
 
 ## 4. Palette
 
