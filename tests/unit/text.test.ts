@@ -183,6 +183,47 @@ describe('the language table (INV-4, 0016)', () => {
     }
   });
 
+  it('holds the words of the help in both languages (0021)', () => {
+    const both = (id: Parameters<typeof textKey>[0]): string[] => [
+      textOf(textKey(id), 'de'),
+      textOf(textKey(id), 'en'),
+    ];
+    expect(both('notice.help')).toStrictEqual(['Hilfe: Taste H', 'Help: press H']);
+    expect(both('help.key-walk')).toStrictEqual(['Pfeiltasten, WASD', 'Arrow keys, WASD']);
+    expect(both('help.do-walk')).toStrictEqual(['Gehen', 'Walk']);
+    expect(both('help.key-lamp')).toStrictEqual(['Leertaste', 'Space']);
+    expect(both('help.do-lamp')).toStrictEqual(['Lampe halten', 'Hold the lamp']);
+    expect(both('help.key-talk')).toStrictEqual(['E, Enter', 'E, Enter']);
+    expect(both('help.do-talk')).toStrictEqual(['Sprechen, weiter', 'Talk, next page']);
+    expect(both('help.key-journal')).toStrictEqual(['J', 'J']);
+    expect(both('help.do-journal')).toStrictEqual(['Journal', 'Journal']);
+    expect(both('help.key-language')).toStrictEqual(['L', 'L']);
+    expect(both('help.do-language')).toStrictEqual(['Sprache wechseln', 'Switch language']);
+    expect(both('help.key-fullscreen')).toStrictEqual(['F', 'F']);
+    expect(both('help.do-fullscreen')).toStrictEqual(['Vollbild', 'Fullscreen']);
+    expect(both('help.key-help')).toStrictEqual(['H', 'H']);
+    expect(both('help.do-help')).toStrictEqual(['Hilfe schließen', 'Close help']);
+  });
+
+  it('holds every text of the help to the rule of its kind (0021)', () => {
+    /** The most characters a key of the help may have, by what its id starts with. */
+    const rules: readonly (readonly [string, number])[] = [
+      ['help.key-', 17],
+      ['help.do-', 16],
+    ];
+    const ids = Object.keys(TABLE.de).filter((key) => key.startsWith('help.'));
+    expect(ids).toHaveLength(14);
+    for (const language of LANGUAGES) {
+      for (const id of ids) {
+        const rule = rules.find(([start]) => id.startsWith(start));
+        expect(rule, `${id} has a rule`).toBeDefined();
+        const text = TABLE[language][id as TextId];
+        expect(text.includes('\n'), `${language} ${id}`).toBe(false);
+        expect(text.length, `${language} ${id}: "${text}"`).toBeLessThanOrEqual(rule?.[1] ?? 0);
+      }
+    }
+  });
+
   it('gives a page of talk at most three lines of at most 47 characters, none empty', () => {
     for (const language of LANGUAGES) {
       for (const [key, text] of Object.entries(TABLE[language])) {
