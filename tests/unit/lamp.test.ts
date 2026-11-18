@@ -8,8 +8,13 @@ import {
   inCone,
   LAMP_HEIGHT,
   lampCone,
+  SPREAD,
+  spreadOf,
+  WIDE_CONE,
+  WIDE_SPREAD,
 } from '../../src/game/lamp';
 import { FACINGS, type Facing, NO_RECOIL, type PlayerState } from '../../src/game/state';
+import { UPGRADES } from '../../src/game/world';
 
 const APEX: Point = { x: 100, y: 100 };
 
@@ -84,5 +89,57 @@ describe('the directions and the frame apexes', () => {
       left: { x: 47, y: 24 },
       right: { x: 0, y: 24 },
     });
+  });
+});
+
+describe('the spread of the cone (0029)', () => {
+  it('is one half without the wider cone and three quarters with it', () => {
+    expect([SPREAD, WIDE_SPREAD]).toStrictEqual([0.5, 0.75]);
+    expect(spreadOf([])).toBe(0.5);
+    expect(spreadOf(['wide-cone'])).toBe(0.75);
+    expect(spreadOf(['filter'])).toBe(0.5);
+    expect(spreadOf(['filter', 'wide-cone'])).toBe(0.75);
+  });
+
+  it('follows from an upgrade the world data has', () => {
+    expect(WIDE_CONE).toBe('wide-cone');
+    expect(UPGRADES.map((upgrade) => upgrade.id)).toContain(WIDE_CONE);
+  });
+});
+
+describe.each(FACINGS)('inCone with a spread, facing %s (0029)', (facing) => {
+  const cone: Cone = { apex: APEX, facing };
+  const inside = (along: number, aside: number, spread: number): boolean =>
+    inCone(at(facing, along, aside), cone, spread);
+
+  it('with one half: 40 px along, 20 px beside the axis is in and 20.5 px is not', () => {
+    expect(inside(40, 20, SPREAD)).toBe(true);
+    expect(inside(40, -20, SPREAD)).toBe(true);
+    expect(inside(40, 20.5, SPREAD)).toBe(false);
+    expect(inside(40, -20.5, SPREAD)).toBe(false);
+  });
+
+  it('with three quarters: 40 px along, 30 px beside the axis is in and 30.5 px is not', () => {
+    expect(inside(40, 30, WIDE_SPREAD)).toBe(true);
+    expect(inside(40, -30, WIDE_SPREAD)).toBe(true);
+    expect(inside(40, 30.5, WIDE_SPREAD)).toBe(false);
+    expect(inside(40, -30.5, WIDE_SPREAD)).toBe(false);
+  });
+
+  it('is 48 px long with either: 47.99 on the axis is in, 48 is out', () => {
+    for (const spread of [SPREAD, WIDE_SPREAD]) {
+      expect(inside(47.99, 0, spread)).toBe(true);
+      expect(inside(48, 0, spread)).toBe(false);
+      expect(inside(-0.01, 0, spread)).toBe(false);
+    }
+  });
+
+  it('gives without a spread what it gives with one half', () => {
+    for (let along = -4; along <= 52; along += 4) {
+      for (let aside = -40; aside <= 40; aside += 0.5) {
+        const point = at(facing, along, aside);
+        expect(inCone(point, cone), `${along}, ${aside}`).toBe(inCone(point, cone, SPREAD));
+      }
+    }
   });
 });
