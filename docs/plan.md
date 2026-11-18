@@ -124,8 +124,8 @@ once there is a case to walk into. Overview won back after it; `gameplay.md` §4
 open since 0009. The help label closes the milestone: the line that named the help's key for
 ten seconds, right after the call, was on screen too long, and a small label in the corner
 that stays takes its place. It comes after 0027 because it takes a field out of the state to
-which 0027 adds one. 0022, 0023, 0024, 0025, 0026 and 0027 are implemented; 0031 is
-approved; the two named below are not specified yet.
+which 0027 adds one. All seven are implemented; the two named below are not specified yet, so
+M5 stays open until they are.
 
 Named here without a number and specified when their turn comes, both for the teaser
 (`vision.md` §10): the Harmonic station of Sales · the line that says LMIS presents the

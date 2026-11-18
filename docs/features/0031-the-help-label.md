@@ -1,6 +1,6 @@
 # 0031 — The help label
 
-**Status:** approved 2026-11-18
+**Status:** implemented 2026-11-19
 **Milestone:** M5
 **Drafted:** 2026-11-18
 
