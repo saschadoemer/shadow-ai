@@ -78,7 +78,7 @@ thresholds. The summary is what the author checks; nobody has to click through a
 
 | Thing | Value |
 |---|---|
-| APIs | Cloud Run, Artifact Registry, IAM, IAM Credentials, Security Token Service, Cloud Resource Manager, Cloud Billing Budget |
+| APIs | Cloud Run, Artifact Registry, IAM, IAM Credentials, Security Token Service, Cloud Resource Manager, Cloud Billing, Cloud Billing Budget |
 | Image repository | Artifact Registry, format Docker, name `shadow-ai`, in the region |
 | Cleanup rule | the 5 newest image versions are kept; every other version older than 1 day is deleted |
 | Workload identity pool | `github`, with one OIDC provider `shadow-ai` for the issuer `https://token.actions.githubusercontent.com` |

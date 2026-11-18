@@ -97,7 +97,7 @@ It reads the repository from the `origin` remote and creates:
 
 | Thing | Value |
 |---|---|
-| APIs | Cloud Run, Artifact Registry, IAM, IAM Credentials, Security Token Service, Cloud Resource Manager, Cloud Billing Budget |
+| APIs | Cloud Run, Artifact Registry, IAM, IAM Credentials, Security Token Service, Cloud Resource Manager, Cloud Billing, Cloud Billing Budget |
 | Image repository | Artifact Registry, format Docker, name `shadow-ai`, in the region |
 | Cleanup rule | the 5 newest image versions are kept; every other version older than 1 day is deleted |
 | Workload identity pool | `github`, with one OIDC provider `shadow-ai` for the issuer `https://token.actions.githubusercontent.com` |
@@ -114,7 +114,9 @@ alone when it is there. It prints one line per step, `created` or `exists`, and 
 summary of five lines read back from the project, not from its own variables: the provider's
 condition, the cleanup rule, the number of user-managed service-account keys, the filter of the
 log exclusion, and the budget with its thresholds. A step that fails stops the script with its
-name; the run is repeated after the cause is fixed.
+name; the run is repeated after the cause is fixed. A project, an API or a billing link that is minutes old
+is not visible to every service at once, so every call is tried again for about two minutes
+before it counts as failed; an error is never read as "not there".
 
 Cloud Run Admin on the project is more than a second deployment needs: it is what creates the
 service on the first run and makes it public. The project holds nothing but this game, so the

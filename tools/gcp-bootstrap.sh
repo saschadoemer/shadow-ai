@@ -30,6 +30,7 @@ readonly APIS=(
   iamcredentials.googleapis.com
   sts.googleapis.com
   cloudresourcemanager.googleapis.com
+  cloudbilling.googleapis.com
   billingbudgets.googleapis.com
 )
 
@@ -38,6 +39,13 @@ export CLOUDSDK_CORE_PROJECT="$PROJECT_ID"
 export CLOUDSDK_BILLING_QUOTA_PROJECT="$PROJECT_ID"
 export CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
+# A project, an API or a billing link that is minutes old is not visible to every service at
+# once. Every call is tried up to 12 times, 10 seconds apart — about two minutes.
+readonly ATTEMPTS=12
+ERRORS="$(mktemp)"
+readonly ERRORS
+trap 'rm -f "$ERRORS"' EXIT
+
 step="start"
 trap 'echo "failed: ${step}" >&2' ERR
 
@@ -45,43 +53,85 @@ report() {
   printf '%-22s %s\n' "$step" "$1"
 }
 
-# Runs a command that changes something. Its output is shown only when it fails, so a good run
-# prints one line per step.
-quiet() {
-  local output
-  if ! output="$("$@" 2>&1)"; then
-    echo "$output" >&2
-    return 1
+# Stops the script with the name of the step, where the ERR trap does not reach: inside a
+# condition.
+die() {
+  echo "failed: ${step}" >&2
+  exit 1
+}
+
+pause() {
+  if [[ $1 -lt $ATTEMPTS ]]; then
+    sleep 10
   fi
 }
 
-# An API that was enabled or an account that was created seconds ago is not always visible to
-# the next call. Such calls are tried up to six times, ten seconds apart.
-retry() {
-  local attempt
-  for attempt in 1 2 3 4 5 6; do
-    if "$@"; then
+# read_back <command…> — runs a command that only reads, and prints what it printed. An error is
+# tried again; after the last try it is shown and read_back fails. An error never reads as an
+# empty answer. It always runs inside a command substitution, where the caller reports the
+# failure; the trap is cleared so the step is not named twice.
+read_back() {
+  local attempt output
+  trap - ERR
+  for ((attempt = 1; attempt <= ATTEMPTS; attempt++)); do
+    if output="$(trap - ERR; "$@" 2>"$ERRORS")"; then
+      if [[ -n "$output" ]]; then
+        printf '%s\n' "$output"
+      fi
       return 0
     fi
-    if [[ $attempt -lt 6 ]]; then
-      sleep 10
-    fi
+    pause "$attempt"
   done
+  cat "$ERRORS" >&2
+  return 1
+}
+
+# exists <describe command…> — true when the thing is there, false when Google answers NOT_FOUND.
+# Any other error — a permission or an API not visible yet — is tried again and then stops the
+# script: it never reads as "missing".
+exists() {
+  local attempt
+  for ((attempt = 1; attempt <= ATTEMPTS; attempt++)); do
+    if (trap - ERR; "$@") >/dev/null 2>"$ERRORS"; then
+      return 0
+    fi
+    if grep -q 'NOT_FOUND' "$ERRORS"; then
+      return 1
+    fi
+    pause "$attempt"
+  done
+  cat "$ERRORS" >&2
+  die
+}
+
+# change <command…> — runs a command that changes something. Its output is shown only when the
+# last try has failed, so a good run prints one line per step. ALREADY_EXISTS counts as done: an
+# earlier try made the thing and its answer was lost.
+change() {
+  local attempt
+  for ((attempt = 1; attempt <= ATTEMPTS; attempt++)); do
+    if (trap - ERR; "$@") >"$ERRORS" 2>&1 || grep -q 'ALREADY_EXISTS' "$ERRORS"; then
+      return 0
+    fi
+    pause "$attempt"
+  done
+  cat "$ERRORS" >&2
   return 1
 }
 
 # has_binding <role> <member> <a get-iam-policy command…>
 has_binding() {
-  local role="$1" member="$2"
+  local role="$1" member="$2" found
   shift 2
-  [[ -n "$("$@" --flatten='bindings[].members' \
+  found="$(read_back "$@" --flatten='bindings[].members' \
     --filter="bindings.role=\"${role}\" AND bindings.members=\"${member}\"" \
-    --format='value(bindings.role)' 2>/dev/null)" ]]
+    --format='value(bindings.role)')" || die
+  [[ -n "$found" ]]
 }
 
 # ---------------------------------------------------------------------------------------------
 step="apis"
-enabled="$(gcloud services list --enabled --format='value(config.name)')"
+enabled="$(read_back gcloud services list --enabled --format='value(config.name)')"
 missing=()
 for api in "${APIS[@]}"; do
   if ! grep -qxF "$api" <<<"$enabled"; then
@@ -89,7 +139,7 @@ for api in "${APIS[@]}"; do
   fi
 done
 if [[ ${#missing[@]} -gt 0 ]]; then
-  quiet gcloud services enable "${missing[@]}"
+  change gcloud services enable "${missing[@]}"
   report created
 else
   report exists
@@ -99,9 +149,9 @@ fi
 # the numeric ID cannot, so the login is bound to the ID.
 step="facts"
 GITHUB_REPO="$(git remote get-url origin | sed -E 's#^(https://github\.com/|git@github\.com:)##; s#\.git$##')"
-REPOSITORY_ID="$(gh api "repos/${GITHUB_REPO}" --jq .id)"
-PROJECT_NUMBER="$(retry gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
-BILLING_ACCOUNT="$(retry gcloud billing projects describe "$PROJECT_ID" --format='value(billingAccountName)')"
+REPOSITORY_ID="$(read_back gh api "repos/${GITHUB_REPO}" --jq .id)"
+PROJECT_NUMBER="$(read_back gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
+BILLING_ACCOUNT="$(read_back gcloud billing projects describe "$PROJECT_ID" --format='value(billingAccountName)')"
 BILLING_ACCOUNT="${BILLING_ACCOUNT#billingAccounts/}"
 if [[ -z "$BILLING_ACCOUNT" ]]; then
   echo "the project is not linked to a billing account" >&2
@@ -113,17 +163,17 @@ readonly CONDITION="assertion.repository_id == '${REPOSITORY_ID}' && assertion.r
 
 # ---------------------------------------------------------------------------------------------
 step="image repository"
-if gcloud artifacts repositories describe "$REPOSITORY" --location="$REGION" >/dev/null 2>&1; then
+if exists gcloud artifacts repositories describe "$REPOSITORY" --location="$REGION"; then
   report exists
 else
-  retry quiet gcloud artifacts repositories create "$REPOSITORY" --location="$REGION" \
+  change gcloud artifacts repositories create "$REPOSITORY" --location="$REGION" \
     --repository-format=docker --description="Images of the game, pushed by the deploy job"
   report created
 fi
 
 step="cleanup rule"
-policies="$(gcloud artifacts repositories describe "$REPOSITORY" --location="$REGION" \
-  --format='value(cleanupPolicies.keep.id,cleanupPolicies.delete.id,cleanupPolicyDryRun)' 2>/dev/null)"
+policies="$(read_back gcloud artifacts repositories describe "$REPOSITORY" --location="$REGION" \
+  --format='value(cleanupPolicies.keep.id,cleanupPolicies.delete.id,cleanupPolicyDryRun)')"
 if [[ "$policies" == *keep*delete* && "$policies" != *True* ]]; then
   report exists
 else
@@ -134,27 +184,27 @@ else
   {"name": "delete", "action": {"type": "Delete"}, "condition": {"tagState": "any", "olderThan": "1d"}}
 ]
 JSON
-  quiet gcloud artifacts repositories set-cleanup-policies "$REPOSITORY" --location="$REGION" \
+  change gcloud artifacts repositories set-cleanup-policies "$REPOSITORY" --location="$REGION" \
     --policy="$policy_file" --no-dry-run
   rm -f "$policy_file"
   report created
 fi
 
 step="identity pool"
-if gcloud iam workload-identity-pools describe "$POOL" --location=global >/dev/null 2>&1; then
+if exists gcloud iam workload-identity-pools describe "$POOL" --location=global; then
   report exists
 else
-  retry quiet gcloud iam workload-identity-pools create "$POOL" --location=global \
+  change gcloud iam workload-identity-pools create "$POOL" --location=global \
     --display-name="GitHub Actions"
   report created
 fi
 
 step="identity provider"
-if gcloud iam workload-identity-pools providers describe "$PROVIDER" --location=global \
-  --workload-identity-pool="$POOL" >/dev/null 2>&1; then
+if exists gcloud iam workload-identity-pools providers describe "$PROVIDER" --location=global \
+  --workload-identity-pool="$POOL"; then
   report exists
 else
-  retry quiet gcloud iam workload-identity-pools providers create-oidc "$PROVIDER" \
+  change gcloud iam workload-identity-pools providers create-oidc "$PROVIDER" \
     --location=global --workload-identity-pool="$POOL" \
     --display-name="shadow-ai on GitHub" \
     --issuer-uri="https://token.actions.githubusercontent.com" \
@@ -164,19 +214,19 @@ else
 fi
 
 step="deploy account"
-if gcloud iam service-accounts describe "$DEPLOY_EMAIL" >/dev/null 2>&1; then
+if exists gcloud iam service-accounts describe "$DEPLOY_EMAIL"; then
   report exists
 else
-  retry quiet gcloud iam service-accounts create shadow-ai-deploy \
+  change gcloud iam service-accounts create shadow-ai-deploy \
     --display-name="Deploys the game from GitHub Actions"
   report created
 fi
 
 step="runtime account"
-if gcloud iam service-accounts describe "$RUNTIME_EMAIL" >/dev/null 2>&1; then
+if exists gcloud iam service-accounts describe "$RUNTIME_EMAIL"; then
   report exists
 else
-  retry quiet gcloud iam service-accounts create shadow-ai-run \
+  change gcloud iam service-accounts create shadow-ai-run \
     --display-name="The identity the game runs as; it holds no role"
   report created
 fi
@@ -188,7 +238,7 @@ if has_binding roles/iam.workloadIdentityUser "$login_member" \
   gcloud iam service-accounts get-iam-policy "$DEPLOY_EMAIL"; then
   report exists
 else
-  retry quiet gcloud iam service-accounts add-iam-policy-binding "$DEPLOY_EMAIL" \
+  change gcloud iam service-accounts add-iam-policy-binding "$DEPLOY_EMAIL" \
     --member="$login_member" --role=roles/iam.workloadIdentityUser
   report created
 fi
@@ -199,18 +249,18 @@ deploy_member="serviceAccount:${DEPLOY_EMAIL}"
 granted=0
 if ! has_binding roles/artifactregistry.writer "$deploy_member" \
   gcloud artifacts repositories get-iam-policy "$REPOSITORY" --location="$REGION"; then
-  retry quiet gcloud artifacts repositories add-iam-policy-binding "$REPOSITORY" \
+  change gcloud artifacts repositories add-iam-policy-binding "$REPOSITORY" \
     --location="$REGION" --member="$deploy_member" --role=roles/artifactregistry.writer
   granted=1
 fi
 if ! has_binding roles/run.admin "$deploy_member" gcloud projects get-iam-policy "$PROJECT_ID"; then
-  retry quiet gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  change gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="$deploy_member" --role=roles/run.admin --condition=None
   granted=1
 fi
 if ! has_binding roles/iam.serviceAccountUser "$deploy_member" \
   gcloud iam service-accounts get-iam-policy "$RUNTIME_EMAIL"; then
-  retry quiet gcloud iam service-accounts add-iam-policy-binding "$RUNTIME_EMAIL" \
+  change gcloud iam service-accounts add-iam-policy-binding "$RUNTIME_EMAIL" \
     --member="$deploy_member" --role=roles/iam.serviceAccountUser
   granted=1
 fi
@@ -222,20 +272,22 @@ fi
 
 # Request logs and nginx's access log carry the caller's IP address. They are not stored.
 step="log exclusion"
-if gcloud logging sinks describe _Default --format='value(exclusions[].name)' | grep -q "$EXCLUSION"; then
+exclusions="$(read_back gcloud logging sinks describe _Default --format='value(exclusions[].name)')"
+if grep -q "$EXCLUSION" <<<"$exclusions"; then
   report exists
 else
-  quiet gcloud logging sinks update _Default \
+  change gcloud logging sinks update _Default \
     --add-exclusion="name=${EXCLUSION},filter=${EXCLUSION_FILTER}"
   report created
 fi
 
 step="budget"
-if [[ -n "$(gcloud billing budgets list --billing-account="$BILLING_ACCOUNT" \
-  --filter="displayName=\"${BUDGET}\"" --format='value(name)')" ]]; then
+budgets="$(read_back gcloud billing budgets list --billing-account="$BILLING_ACCOUNT" \
+  --filter="displayName=\"${BUDGET}\"" --format='value(name)')"
+if [[ -n "$budgets" ]]; then
   report exists
 else
-  retry quiet gcloud billing budgets create --billing-account="$BILLING_ACCOUNT" \
+  change gcloud billing budgets create --billing-account="$BILLING_ACCOUNT" \
     --display-name="$BUDGET" --budget-amount=5 --calendar-period=month \
     --filter-projects="projects/${PROJECT_ID}" \
     --threshold-rule=percent=0.5 --threshold-rule=percent=0.9 --threshold-rule=percent=1.0
@@ -248,7 +300,7 @@ put_variable() {
   local name="$1" value="$2" current
   current="$(gh variable get "$name" --repo "$GITHUB_REPO" 2>/dev/null || true)"
   if [[ "$current" != "$value" ]]; then
-    quiet gh variable set "$name" --repo "$GITHUB_REPO" --body "$value"
+    change gh variable set "$name" --repo "$GITHUB_REPO" --body "$value"
     changed=1
   fi
 }
@@ -267,27 +319,27 @@ fi
 # there, not what this script meant to create.
 step="summary"
 keys=0
-for account in $(gcloud iam service-accounts list --format='value(email)'); do
-  count="$(gcloud iam service-accounts keys list --iam-account="$account" --managed-by=user \
+for account in $(read_back gcloud iam service-accounts list --format='value(email)'); do
+  count="$(read_back gcloud iam service-accounts keys list --iam-account="$account" --managed-by=user \
     --format='value(name)' | wc -l)"
   keys=$((keys + count))
 done
 
-older="$(gcloud artifacts repositories describe "$REPOSITORY" --location="$REGION" \
-  --format='value(cleanupPolicies.delete.condition.olderThan)' 2>/dev/null)"
+older="$(read_back gcloud artifacts repositories describe "$REPOSITORY" --location="$REGION" \
+  --format='value(cleanupPolicies.delete.condition.olderThan)')"
 if [[ "$older" =~ ^[0-9]+s$ ]]; then
   older="$((${older%s} / 86400)) d"
 fi
 
 echo
-echo "login condition:   $(gcloud iam workload-identity-pools providers describe "$PROVIDER" \
+echo "login condition:   $(read_back gcloud iam workload-identity-pools providers describe "$PROVIDER" \
   --location=global --workload-identity-pool="$POOL" --format='value(attributeCondition)')"
-echo "cleanup rule:      keep $(gcloud artifacts repositories describe "$REPOSITORY" \
-  --location="$REGION" --format='value(cleanupPolicies.keep.mostRecentVersions.keepCount)' 2>/dev/null) newest, delete others older than ${older}, dry run: $(gcloud artifacts repositories describe "$REPOSITORY" \
-  --location="$REGION" --format='value(cleanupPolicyDryRun)' 2>/dev/null)"
+echo "cleanup rule:      keep $(read_back gcloud artifacts repositories describe "$REPOSITORY" \
+  --location="$REGION" --format='value(cleanupPolicies.keep.mostRecentVersions.keepCount)') newest, delete others older than ${older}, dry run: $(read_back gcloud artifacts repositories describe "$REPOSITORY" \
+  --location="$REGION" --format='value(cleanupPolicyDryRun)')"
 echo "user-managed keys: ${keys}"
-echo "log exclusion:     $(gcloud logging sinks describe _Default --flatten='exclusions[]' \
+echo "log exclusion:     $(read_back gcloud logging sinks describe _Default --flatten='exclusions[]' \
   --filter="exclusions.name=\"${EXCLUSION}\"" --format='value(exclusions.filter)')"
-echo "budget:            $(gcloud billing budgets list --billing-account="$BILLING_ACCOUNT" \
+echo "budget:            $(read_back gcloud billing budgets list --billing-account="$BILLING_ACCOUNT" \
   --filter="displayName=\"${BUDGET}\"" \
   --format='value(amount.specifiedAmount.units,amount.specifiedAmount.currencyCode,thresholdRules[].thresholdPercent)') (amount, currency, thresholds as fractions)"
