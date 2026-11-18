@@ -139,7 +139,8 @@ Linear and lean, by decision for the first draft (`docs/plan.md`, deferred, reco
 alternative):
 
 1. Traces found in the region are shadow residue on devices, visible in the lamp's light; each
-   goes into the journal. *As built* (feature 0022): the five traces of Sales.
+   goes into the journal. *As built* (feature 0022): the five traces of Sales; (feature 0028)
+   the five of Marketing.
 2. Conversations in the department and the break room lead to the source — the person where the
    data flow begins.
 3. At the source the player **shows a matching trace** from the journal. It is a gesture, not an
@@ -165,6 +166,15 @@ parts over two seconds and is gone (`visual.md` §4). The game goes on while it 
 region is cleared exactly when its case is solved; nothing else is stored about it. More
 colleagues who see the shadow, as a rule of the game, come with M6, and the first act has no
 end card: it ends in the cleared room, and the game goes on.
+
+**As built** (feature 0028): the case of Marketing, by the same rules and with nothing added
+to them. Its source is the colleague in the red shirt who walks between the desk islands and
+the printer. Its five traces lie on four screens and on the printer. With all five found the
+colleague answers in two pages, and the press that closes the answer solves the case and
+clears the room: overview grows by one again, to seven with both cases solved. The two cases
+do not depend on each other: Marketing is open from the start, and the player may solve it
+before Sales. What a case of Act 2 has more than the first — its species, the upgrade it
+earns, the vendor — comes with features of their own.
 
 ## 7. The journal
 
@@ -202,6 +212,11 @@ to, the source and the outcome come with 0024.
 policy tab shows one block per solved case, in the order they were solved, two to four lines
 each; until a case is solved it shows its line for nothing. Two blocks fit the screen; pages
 within the tab come with the third (M6).
+
+**As built** (feature 0028): with two cases the cases tab shows two entries, the second 36 px
+below the first, in the order of the world data — Sales, then Marketing — whichever was
+solved first. The policy tab shows the two blocks in the order they were solved, the second
+60 px below the first.
 
 **As built** (feature 0026): the journal does not open while the call is read, like under any
 dialogue. After it, J opens it with or without the lamp.

@@ -60,17 +60,15 @@ const T0 = 1000;
 const READY: GameState = { ...withTraces(10, 20), tick: T0 };
 
 describe('the cases (0024)', () => {
-  it('holds the case of Sales: its source, its answer, its afterwards, its outcome, its block', () => {
-    expect(CASES).toStrictEqual([
-      {
-        region: 'sales',
-        source: 'person:sales',
-        answer: ANSWER,
-        after: AFTER,
-        outcome: textKey('case.sales-outcome'),
-        policy: textKey('policy.sales'),
-      },
-    ]);
+  it('holds the case of Sales first: its source, its answer, its afterwards, its outcome, its block', () => {
+    expect(CASES[0]).toStrictEqual({
+      region: 'sales',
+      source: 'person:sales',
+      answer: ANSWER,
+      after: AFTER,
+      outcome: textKey('case.sales-outcome'),
+      policy: textKey('policy.sales'),
+    });
     expect(CASE_OVERVIEW).toBe(1);
   });
 });
@@ -144,7 +142,8 @@ describe('what a colleague says (0024)', () => {
   it('stays the everyday line of everyone who is no source, in all three states', () => {
     const lines = [textKey('talk.reception-everyday')];
     for (const progress of [at(null), at(10), at(10, true)]) {
-      for (const route of ['person:reception', 'person:marketing', 'person:support']) {
+      // The colleague of Marketing is a source since 0028.
+      for (const route of ['person:reception', 'person:support']) {
         expect(pagesIn(progress, route, lines)).toBe(lines);
       }
     }
@@ -439,5 +438,122 @@ describe('what goes with the shadow of a solved region (0025)', () => {
     const before = JSON.stringify(start);
     clearRegion(start, 'sales', ROOMS);
     expect(JSON.stringify(start)).toBe(before);
+  });
+});
+
+describe('the case of Marketing (0028)', () => {
+  const SALES_EVERYDAY = [textKey('talk.sales-everyday')];
+  const MARKETING_EVERYDAY = [textKey('talk.marketing-everyday')];
+  const MARKETING_ANSWER = [textKey('talk.marketing-source-1'), textKey('talk.marketing-source-2')];
+  const MARKETING_AFTER = [textKey('talk.marketing-after')];
+  /** Both sources, each waiting ten seconds on its first point, 96 px apart. */
+  const SOURCES: readonly NamedPoint[] = [
+    { name: 'person:sales:1', x: 64, y: 48, pause: 600 },
+    { name: 'person:sales:2', x: 128, y: 48 },
+    { name: 'person:marketing:1', x: 64, y: 144, pause: 600 },
+    { name: 'person:marketing:2', x: 128, y: 144 },
+  ];
+  const rect = (name: string, x: number, y: number): NamedRect => ({
+    name,
+    x,
+    y,
+    width: 16,
+    height: 16,
+  });
+  /** 20x12 cells of open floor: two traces of Sales, then two of Marketing. */
+  const BOTH: TileMap = grassMap(20, 12, { x: 104, y: 48 }, SOURCES, [
+    rect('trace:sales', 240, 32),
+    rect('trace:sales', 272, 32),
+    rect('trace:marketing', 240, 128),
+    rect('trace:marketing', 272, 128),
+  ]);
+  /** The start of BOTH at step 1000 with its four traces found, or not, as given. */
+  const having = (...ticks: readonly (number | null)[]): GameState => ({
+    ...createInitialState(BOTH),
+    tick: T0,
+    traces: found(...ticks),
+  });
+  /** The figure 40 px right of the colleague of Sales, or of the colleague of Marketing. */
+  const beside = (state: GameState, source: 'sales' | 'marketing'): GameState => ({
+    ...state,
+    player: { ...state.player, x: 104, y: source === 'sales' ? 48 : 144 },
+  });
+  const step = (start: GameState, ...inputs: readonly GameInput[]): GameState =>
+    inputs.reduce((state, input) => update(state, input, BOTH), start);
+  /** Three presses of talk: the answer opens, turns to its second page and closes. */
+  const answer = (start: GameState): GameState => step(start, TALK, NONE, TALK, NONE, TALK, NONE);
+  const said = (state: GameState) =>
+    state.dialogue === null
+      ? null
+      : speakerOf(
+          state.dialogue,
+          speakersOf([], state.movers, routesOf(BOTH.points), undefined, progressOf(state, BOTH)),
+        )?.pages;
+
+  it('is the second case, after Sales: its source, its answer, its afterwards, its outcome, its block', () => {
+    expect(CASES).toHaveLength(2);
+    expect(CASES.map((entry) => entry.region)).toStrictEqual(['sales', 'marketing']);
+    expect(CASES[1]).toStrictEqual({
+      region: 'marketing',
+      source: 'person:marketing',
+      answer: MARKETING_ANSWER,
+      after: MARKETING_AFTER,
+      outcome: textKey('case.marketing-outcome'),
+      policy: textKey('policy.marketing'),
+    });
+  });
+
+  it('gives each source its answer only when its own case is ready', () => {
+    const marketing = having(null, null, 10, 20);
+    expect(said(step(beside(marketing, 'marketing'), TALK))).toStrictEqual(MARKETING_ANSWER);
+    expect(said(step(beside(marketing, 'sales'), TALK))).toStrictEqual(SALES_EVERYDAY);
+    const sales = having(10, 20, null, null);
+    expect(said(step(beside(sales, 'marketing'), TALK))).toStrictEqual(MARKETING_EVERYDAY);
+    expect(said(step(beside(sales, 'sales'), TALK))).toStrictEqual(ANSWER);
+    // One trace of Marketing is missing: the everyday line, whatever is found in Sales.
+    const almost = having(10, 20, 30, null);
+    expect(said(step(beside(almost, 'marketing'), TALK))).toStrictEqual(MARKETING_EVERYDAY);
+  });
+
+  it('says "afterwards" once its case is solved, and Sales still its everyday line', () => {
+    const solved = answer(beside(having(null, null, 10, 20), 'marketing'));
+    expect(said(step(solved, TALK))).toStrictEqual(MARKETING_AFTER);
+    expect(said(step(beside(solved, 'sales'), TALK))).toStrictEqual(SALES_EVERYDAY);
+  });
+
+  it('is solved first when the player solves it first: six of six, then seven of seven', () => {
+    const first = answer(beside(having(10, 20, 30, 40), 'marketing'));
+    expect(first.solved).toStrictEqual([{ region: 'marketing', at: T0 + 5 }]);
+    expect(first.overview).toStrictEqual({ current: 6, max: 6 });
+    const second = answer(beside(first, 'sales'));
+    expect(second.solved).toStrictEqual([
+      { region: 'marketing', at: T0 + 5 },
+      { region: 'sales', at: T0 + 11 },
+    ]);
+    expect(second.overview).toStrictEqual({ current: 7, max: 7 });
+  });
+
+  it('is solved second when Sales is solved first', () => {
+    const first = answer(beside(having(10, 20, 30, 40), 'sales'));
+    expect(first.solved).toStrictEqual([{ region: 'sales', at: T0 + 5 }]);
+    const second = answer(beside(first, 'marketing'));
+    expect(second.solved.map((entry) => entry.region)).toStrictEqual(['sales', 'marketing']);
+    expect(second.overview).toStrictEqual({ current: 7, max: 7 });
+  });
+
+  it('gives the journal its outcome and its block, the blocks in the order they were solved', () => {
+    const marketing = [{ region: 'marketing', at: 5 }];
+    expect(outcomeOf('marketing', [])).toBeNull();
+    expect(outcomeOf('marketing', marketing)).toBe(textKey('case.marketing-outcome'));
+    expect(outcomeOf('sales', marketing)).toBeNull();
+    expect(policyBlocks(marketing)).toStrictEqual([textKey('policy.marketing')]);
+    expect(policyBlocks([...marketing, { region: 'sales', at: 9 }])).toStrictEqual([
+      textKey('policy.marketing'),
+      textKey('policy.sales'),
+    ]);
+    expect(policyBlocks([{ region: 'sales', at: 5 }, ...marketing])).toStrictEqual([
+      textKey('policy.sales'),
+      textKey('policy.marketing'),
+    ]);
   });
 });

@@ -7,11 +7,11 @@ import type { Dialogue, GameState, SolvedCase, TraceState } from './state';
 import { type Trace, tracesOf } from './trace';
 
 /**
- * The cases (gameplay.md §6, world.md §2, feature 0024). A case belongs to a region and has a
- * source: the colleague where the data flow begins. When every trace of the region is found,
- * the case is ready, and the source no longer says its everyday line: shown what the lamp
- * found, it answers honestly. The step that closes that answer solves the case. Nobody gets
- * into trouble. Pure data and pure functions.
+ * The cases (gameplay.md §6, world.md §2, features 0024 and 0028). A case belongs to a region
+ * and has a source: the colleague where the data flow begins. When every trace of the region
+ * is found, the case is ready, and the source no longer says its everyday line: shown what
+ * the lamp found, it answers honestly. The step that closes that answer solves the case.
+ * Nobody gets into trouble. Pure data and pure functions.
  */
 
 export interface Case {
@@ -36,6 +36,14 @@ export const CASES: readonly Case[] = [
     after: [textKey('talk.sales-after')],
     outcome: textKey('case.sales-outcome'),
     policy: textKey('policy.sales'),
+  },
+  {
+    region: 'marketing',
+    source: 'person:marketing',
+    answer: [textKey('talk.marketing-source-1'), textKey('talk.marketing-source-2')],
+    after: [textKey('talk.marketing-after')],
+    outcome: textKey('case.marketing-outcome'),
+    policy: textKey('policy.marketing'),
   },
 ];
 

@@ -32,6 +32,7 @@ export const de = {
   'journal.traces': 'Spuren:',
   'journal.of': 'von',
   'region.sales': 'Vertrieb',
+  'region.marketing': 'Marketing',
   'creature.snippet-name': 'Schnipsel',
   'creature.snippet-text': [
     'Ein Stück Text, das jemand in einen',
@@ -107,6 +108,27 @@ export const de = {
     'unsicher ist, fragt – ohne Ärger.',
   ].join('\n'),
   'notice.case-solved': 'Der Fall ist gelöst. Sieh ins Journal.',
+  'talk.marketing-source-1': [
+    'Die Motive macht ein Bildgenerator – in zehn',
+    'Minuten statt in zwei Tagen, und die Agentur',
+    'haben wir uns gespart.',
+  ].join('\n'),
+  'talk.marketing-source-2': [
+    'Dass fremde Logos und Gesichter darin stecken,',
+    'habe ich erst auf dem Plakat gesehen.',
+    'Geprüft hat das vor dem Druck niemand.',
+  ].join('\n'),
+  'talk.marketing-after': [
+    'Danke. Ab jetzt schaut jemand drauf, bevor',
+    'etwas rausgeht – und sei es nur jemand vom',
+    'Nachbartisch.',
+  ].join('\n'),
+  'case.marketing-outcome': 'Gelöst: Bilder gingen ungeprüft raus.',
+  'policy.marketing': [
+    'Was eine Maschine erzeugt hat, sieht sich',
+    'ein Mensch an, bevor es das Haus verlässt.',
+    'Bild oder Text – lieber einmal zu viel.',
+  ].join('\n'),
   'talk.sales-everyday': [
     'Drei Angebote bis heute Abend, und jedes soll',
     'klingen, als hätte ich eine Woche Zeit gehabt.',

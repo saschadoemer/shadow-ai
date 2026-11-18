@@ -802,7 +802,7 @@ the walls, and, in `createInitialState`, refuses the map — each with its messa
 not in the world data (`trace trace:cellar names no region`) and a box that is not one cell
 (`trace trace:sales (1330, 448, 16, 16) is not one cell`). A map without such rectangles has no
 traces. No coordinate of a trace is in `src/` (INV-7); `tools/floor-layout.ts` names the cells
-of the floor's five, `TRACES`.
+of the floor's ten, `TRACES`: five of Sales (feature 0022) and five of Marketing (feature 0028).
 
 **Areas of the regions** (feature 0023). A rectangle named `region:<id>` is an area of a region
 of the world data: whole cells, its corner on the grid, its width and its height multiples of 16
@@ -1071,7 +1071,10 @@ closes; `shadowWallBox` makes the strip — 4 px on the top edge of a row of cel
 edge of a column — and the walls become rectangle objects after the route points, ids following
 theirs (92–99 today). The standing figure's point follows them (100), and the traces (feature
 0022) are `TRACES`, per trace its region and the cell of its device; `traceBox` makes the cell's
-box, and they become rectangle objects after the figure's point, ids 101–105, `nextobjectid` 106.
+box. The first five (`FIRST_TRACES`), those of 0022, become rectangle objects after the figure's
+point, ids 101–105. Every later trace is written at the end of the file, after the areas and
+the rests, so that no object of an earlier feature changes its id: the five of Marketing
+(feature 0028) have the ids 124–128, and `nextobjectid` is 129.
 `floor.tmj` has the layers `ground` (id 1), `detail` (id 3), `above` (id 4) and `objects` (id 2),
 in that order. Posts are
 derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper
@@ -1095,7 +1098,10 @@ of 1 and 2, and all lifted; and the standing figure of 0017 — the point `figur
 the id 100 after the rectangles, its box free of every solid box, reached from the spawn, in the
 view of the wake point, and no route leg within 24 px of it; and the traces of 0022 against
 the spec's table — each on a desk with a screen in Sales, its chair on the cell below, and in the
-light of a player who looks up from every reached place on the cell below that chair. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
+light of a player who looks up from every reached place on the cell below that chair; and the
+traces of 0028 against theirs — each in the area of Marketing, on a desk with a screen or on
+the printer, and in the light of a player who looks down from every reached place on the cell
+above — with the 123 objects before them held to a recorded digest. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
 test, so until the art pass the layout changes in `floor-layout.ts`. When the art pass takes the
 floor over by hand (`visual.md` §5), the layout, the generator and the determinism test are
 removed and `floor.tmj` is authored in Tiled like every other map; the layout test's
@@ -1167,7 +1173,8 @@ cases tab, one line of at most 47 characters; `policy.<region>` is a case's poli
 to four lines of at most 47 and no empty line. The source's answer and what it says afterwards
 are pages of the kind `talk`, `talk.<region>-source-<n>` and `talk.<region>-after`, under the
 rule of a page; `notice.case-solved` is a notice. `game/cases` names them by key in `CASES`,
-and the rule test covers both new kinds in both languages.
+and the rule test covers both new kinds in both languages. The case of Marketing (feature
+0028) adds six keys — `region.marketing` and five of these — and no kind.
 
 The story (feature 0026) adds the kind `story`: `story.<scene>-<n>` is a page of a scene, under
 the rule of a page of talk — at most three lines of at most 47 characters, none empty — and the

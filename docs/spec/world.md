@@ -173,6 +173,18 @@ five traces are found. Its policy block, in the words of `docs/features/0024-the
 every text has a level — open, internal or confidential; confidential text stays in tools we
 have approved; whoever is unsure asks, without trouble.
 
+**Traces of Marketing** (feature 0028): five traces lie on four of the sixteen screens of the
+desk islands of Marketing — three in the upper row, one in the lower — and on the printer at
+the room's lower wall. The table of `docs/features/0028-the-case-of-marketing.md` is the
+placement until the art pass.
+
+**The case of Marketing** (feature 0028): the second case, by the rules of the first. An image
+generator makes the visuals, other companies' logos and faces are in them, and nobody looked
+before they went to print. Its policy block, in the words of
+`docs/features/0028-the-case-of-marketing.md`: what a machine has made, a person looks at
+before it leaves the house — image or text, rather once too often. The two cases do not depend
+on each other: the player may solve Marketing before Sales.
+
 **Order and gating.** Marketing and Support are open from the start (thin shadow). HR and
 Accounting open after the first upgrade, Development after the second. Management is last: without
 the filter nothing is visible there, and without the vendor as advisor there is no alternative
@@ -211,6 +223,8 @@ Kept as small as the story allows. About thirty figures in all.
   Since feature 0024 the colleague of Sales is the source of the first case. What the colleague
   says follows from the case: the everyday line while a trace is missing, the honest answer
   once all five are found, and the line afterwards once the case is solved.
+  Since feature 0028 the colleague of Marketing — the one in the red shirt, with the printer —
+  is the source of the second case, by the same rule.
 - **The managing director.** The last case. In the first act a sentence of the call (feature
   0026); a figure with the map of Management (M6).
 - **The customer.** A voice on the phone at the start — one sentence of the call (feature 0026).

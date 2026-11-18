@@ -29,6 +29,7 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
   'journal.traces': 'Traces:',
   'journal.of': 'of',
   'region.sales': 'Sales',
+  'region.marketing': 'Marketing',
   'creature.snippet-name': 'Snippet',
   'creature.snippet-text': [
     'A piece of text somebody pasted into a public',
@@ -103,6 +104,27 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'asks – without trouble.',
   ].join('\n'),
   'notice.case-solved': 'The case is solved. See the journal.',
+  'talk.marketing-source-1': [
+    'An image generator makes the visuals – in ten',
+    'minutes instead of two days, and we saved',
+    'the agency.',
+  ].join('\n'),
+  'talk.marketing-source-2': [
+    'That other logos and faces are in them,',
+    'I only saw on the poster.',
+    'Nobody checked it before it went to print.',
+  ].join('\n'),
+  'talk.marketing-after': [
+    'Thanks. From now on somebody looks at it',
+    'before it goes out – even if it is only',
+    'somebody at the next desk.',
+  ].join('\n'),
+  'case.marketing-outcome': 'Solved: images went out unchecked.',
+  'policy.marketing': [
+    'What a machine has made, a person looks at',
+    'before it leaves the house.',
+    'Image or text – rather once too often.',
+  ].join('\n'),
   'talk.sales-everyday': [
     'Three offers by tonight, and each one should',
     'sound as if I had had a week for it.',

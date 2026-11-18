@@ -405,3 +405,158 @@ describe('a solved case in the journal (0024)', () => {
     expect(renderer.calls).toStrictEqual(draw(reading('creatures', 1)).calls);
   });
 });
+
+describe('the cases tab with two regions (0028)', () => {
+  /** Five traces of Sales and five of Marketing, in the order of the floor. */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({
+        name: n < 5 ? 'trace:sales' : 'trace:marketing',
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  /** The traces with those of the given indices found. */
+  const traces = (...found: readonly number[]): TraceState[] =>
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((trace) => ({
+      trace,
+      light: 0,
+      found: found.includes(trace) ? 60 : null,
+    }));
+  const cases = (found: readonly number[], settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    const state: GameState = { ...reading('cases'), traces: traces(...found) };
+    drawJournal(renderer, state, { tab: 'cases' }, content, settings);
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+
+  it('shows Marketing alone, in the first place, while no trace of Sales is found', () => {
+    const entry = cases([5, 6]);
+    // `Marketing` 9 glyphs, `Spuren:` 7, `2`, `von` 3, `5`.
+    expect(entry).toHaveLength(9 + 7 + 1 + 3 + 1);
+    expect(entry[0]).toBe('drawSprite 45 at 16,36');
+    expect(entry[9]).toBe('drawSprite 51 at 16,48');
+    expect(entry[16]).toBe('drawSprite 18 at 64,48');
+    expect(entry[20]).toBe('drawSprite 21 at 100,48');
+  });
+
+  it('shows Sales first and Marketing second, 36 px lower, with a trace of each found', () => {
+    const both = cases([0, 9]);
+    const sales = cases([0]);
+    // The entry of Sales is what it was; the 21 glyphs of Marketing follow it.
+    expect(both.slice(0, sales.length)).toStrictEqual(sales);
+    const marketing = both.slice(sales.length);
+    expect(marketing).toHaveLength(9 + 7 + 1 + 3 + 1);
+    expect(marketing[0]).toBe('drawSprite 45 at 16,72');
+    expect(marketing[9]).toBe('drawSprite 51 at 16,84');
+    expect(marketing[16]).toBe('drawSprite 17 at 64,84');
+  });
+
+  it('reads `Marketing` and `Traces: 5 of 5` in English', () => {
+    const entry = cases([5, 6, 7, 8, 9], ENGLISH);
+    // `Marketing` 9 glyphs, `Traces:` 7, `5`, `of` 2, `5`.
+    expect(entry).toHaveLength(9 + 7 + 1 + 2 + 1);
+    expect(entry[0]).toBe('drawSprite 45 at 16,36');
+    expect(entry[9]).toBe('drawSprite 52 at 16,48');
+    expect(entry[16]).toBe('drawSprite 21 at 64,48');
+  });
+});
+
+describe('two solved cases in the journal (0028)', () => {
+  /** Five traces of Sales and five of Marketing, in the order of the floor. */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({
+        name: n < 5 ? 'trace:sales' : 'trace:marketing',
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  const MARKETING = { region: 'marketing', at: 900 };
+  const SALES = { region: 'sales', at: 950 };
+  const shown = (
+    tab: JournalTab,
+    found: readonly number[],
+    solved: GameState['solved'],
+    settings = GERMAN,
+  ): string[] => {
+    const renderer = recordingRenderer();
+    const state: GameState = {
+      ...reading(tab),
+      traces: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((trace) => ({
+        trace,
+        light: 0,
+        found: found.includes(trace) ? 60 : null,
+      })),
+      solved,
+    };
+    drawJournal(renderer, state, { tab }, content, settings);
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+  const ALL_OF_MARKETING = [5, 6, 7, 8, 9];
+
+  it('shows Marketing alone with its count and its outcome when only Marketing is solved', () => {
+    const entry = shown('cases', ALL_OF_MARKETING, [MARKETING]);
+    // `Marketing` 9, `Spuren: 5 von 5` 12, `Gelöst: Bilder gingen ungeprüft raus.` 33 glyphs.
+    expect(entry).toHaveLength(9 + 12 + 33);
+    expect(entry[0]).toBe('drawSprite 45 at 16,36');
+    expect(entry[9]).toBe('drawSprite 51 at 16,48');
+    expect(entry[16]).toBe('drawSprite 21 at 64,48');
+    expect(entry[21]).toBe('drawSprite 39 at 16,60');
+  });
+
+  it('shows Sales first and Marketing 36 px lower with one trace of Sales found too', () => {
+    const entries = shown('cases', [0, ...ALL_OF_MARKETING], [MARKETING]);
+    // `Vertrieb` 8 and `Spuren: 1 von 5` 12 glyphs, and no outcome: Sales is not solved.
+    expect(entries).toHaveLength(8 + 12 + 9 + 12 + 33);
+    expect(entries[0]).toBe('drawSprite 54 at 16,36');
+    expect(entries.slice(0, 20).some((call) => call.endsWith(',60'))).toBe(false);
+    expect(entries[20]).toBe('drawSprite 45 at 16,72');
+    expect(entries[29]).toBe('drawSprite 51 at 16,84');
+    expect(entries[41]).toBe('drawSprite 39 at 16,96');
+  });
+
+  it('draws the block of the case solved first from (16, 36) and the other from (16, 96)', () => {
+    const all = [0, 1, 2, 3, 4, ...ALL_OF_MARKETING];
+    // `Was eine Maschine …`: three lines of 35, 36 and 31 glyphs; `Jeder Text …`: 142.
+    const marketingFirst = shown('policy', all, [MARKETING, SALES]);
+    expect(marketingFirst).toHaveLength(102 + 142);
+    expect(marketingFirst[0]).toBe('drawSprite 55 at 16,36');
+    expect(marketingFirst[102]).toBe('drawSprite 42 at 16,96');
+    expect(marketingFirst.slice(0, 102).every((call) => /,(36|48|60)$/.test(call))).toBe(true);
+    expect(marketingFirst.slice(102).every((call) => /,(96|108|120|132)$/.test(call))).toBe(true);
+    const salesFirst = shown('policy', all, [
+      { region: 'sales', at: 900 },
+      { region: 'marketing', at: 950 },
+    ]);
+    expect(salesFirst).toHaveLength(142 + 102);
+    expect(salesFirst[0]).toBe('drawSprite 42 at 16,36');
+    expect(salesFirst[142]).toBe('drawSprite 55 at 16,96');
+  });
+
+  it('draws the block of Marketing alone from (16, 36) when only Marketing is solved', () => {
+    const block = shown('policy', ALL_OF_MARKETING, [MARKETING]);
+    expect(block).toHaveLength(102);
+    expect(block[0]).toBe('drawSprite 55 at 16,36');
+  });
+
+  it('draws both tabs in English with the language `en`', () => {
+    // `Solved: images went out unchecked.`: 30 glyphs; `What a machine …` and `Every text …`.
+    const cases = shown('cases', ALL_OF_MARKETING, [MARKETING], ENGLISH);
+    expect(cases).toHaveLength(9 + 11 + 30);
+    expect(cases[20]).toBe('drawSprite 51 at 16,60');
+    const blocks = shown('policy', ALL_OF_MARKETING, [MARKETING, SALES], ENGLISH);
+    expect(blocks[0]).toBe('drawSprite 55 at 16,36');
+    expect(blocks).toContain('drawSprite 37 at 16,96');
+  });
+});
