@@ -26,7 +26,9 @@ src/
                  rectangle a map holds, by the prefix of the name; game/trace.ts the traces,
                  their light test, their step and the entries of the cases tab (0022);
                  game/help.ts the help's step and when the start hint is due (0021);
-                 game/region.ts the areas of the regions and the veil of a cell (0023)
+                 game/region.ts the areas of the regions and the veil of a cell (0023);
+                 game/cases.ts the cases, when one is ready, what its source says, and the
+                 step that solves it (0024)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene); render/font.ts the glyph order and the
                  cell size of the font, render/draw-text.ts text by TextKey, line by line
@@ -93,7 +95,8 @@ render (feature 0019). It is read-only by convention; nothing in the game reads 
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
 logic steps since the start, the player, the camera, the lamp, the creatures, the movers, the
-standing shadow walls, the traces, the standing figures, the open dialogue, the open journal,
+standing shadow walls, the traces, the solved cases, the standing figures, the open dialogue,
+the open journal,
 whether the help is open, the input of the last step, the captured count, overview and the step
 of the dark; later the current map id
 and cleared regions join them. It is plain data: numbers,
@@ -229,6 +232,14 @@ again. In the dark, with the journal open and with a dialogue open no trace is s
 wake every `light` is 0 and `found` is kept. The notice of a find is derived from `found` and
 `tick` (§5) and is not in the state. A state whose `traces` is empty steps exactly as before 0022.
 
+`solved` is an array of `{ region, at }`, the solved cases in the order they were solved
+(feature 0024, `game/cases`): `region` names the case, `at` is the `tick` of the step that
+solved it. It is empty at the start, and the wake keeps it. Whether a case is **ready** and
+whether it is **solved** are rules, not fields: a case is ready when the map has at least one
+trace of its region and every one of them is found (`isReady`), and solved when its region is
+in `solved` (`isSolved`). Both read the **progress** of the cases, `progressOf(state, map)`: the
+state's `traces`, the map's traces and `solved`, derived on every call and kept nowhere.
+
 `figures` is an array of `{ figure, facing }`, one entry per standing figure of the map, in file
 order (feature 0017, `game/cast`). `figure` is the index of the figure among
 `figuresOf(map.points)`; its place stays in the map and its pages in the cast, and neither is in
@@ -248,7 +259,9 @@ of the creatures tab are the species of which at least one was captured, in `SPE
 derived from `captured` in every frame by `entriesOf`. The entries of the cases tab are the
 regions of which at least one trace is found, in the order of the world data, each with the
 number of its found traces and of all its traces on the map — derived from `traces` and the map's
-traces in every frame by `caseEntries` (feature 0022). The policy has none yet.
+traces in every frame by `caseEntries` (feature 0022). A solved case's entry also has its
+outcome, `outcomeOf`; the policy's blocks are the solved cases' blocks in the order they were
+solved, `policyBlocks` — both derived from `solved` in every frame (feature 0024).
 `help` is a boolean, `false` at the start: whether the help is open (feature 0021,
 `game/help`). The rows the help shows and whether the start hint is due are not in the state:
 the rows are constants of `render/draw-help`, and the hint is derived from `tick` in every frame
@@ -259,6 +272,11 @@ file order, then the movers of the kind `person` whose route is in `COLLEAGUES` 
 the order of `movers`; each is where it is in this step — a figure at its point, a colleague at its
 `x` and `y` in the state, not rounded. Like the figures they are rebuilt on every call and kept
 nowhere. A person whose route has no lines, a dog, a vacuum and a drone are no speakers.
+What a colleague says follows from the progress of the cases (feature 0024, `pagesIn`): the
+source of a solved case says its pages "afterwards", the source of a case that is ready and not
+solved says its answer, and everyone else says the everyday pages. `update` and the scene pass
+the same `progressOf(state, map)` to `speakersOf`, so the box never shows a page the dialogue
+does not have.
 
 A step is one of five kinds, in this order. **Dark:** with `dark` above 0 it is `stepDark`, as
 above, and sets `held`; `journal` and `help` do nothing. **Help:** with the help open, `tick`
@@ -274,7 +292,12 @@ pressed to the one before, and at either end the tab stays. Nothing else changes
 player, the lamp, the creatures, the movers, the walls, the traces or a figure. **Dialogue:**
 with a dialogue open, `tick` grows by 1, `held` is set, and a press turns to the next page or,
 on the last page, sets `dialogue` to `null`; nothing else changes — not the player, the lamp, the
-creatures, the movers, the walls or the traces — and a press of `journal` does nothing. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
+creatures, the movers, the walls or the traces — and a press of `journal` does nothing. The
+step whose press closes the source's answer of a ready case that is not solved **solves** it
+(`answeredCase`, `solve`, feature 0024): besides the above it adds `{ region, at }` with the
+step's `tick` to `solved`, and sets `overview` to `{ current: max + 1, max: max + 1 }`. It changes
+`tick`, `held`, `dialogue`, `solved` and `overview` and nothing else; no other step solves a
+case, and a solved case is not solved again. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
 the input holds: `tick` grows by 1, `held` is set, and nothing else changes in this step — a
 figure in mid-step, a push and a lamp that is on stay as they are and go on when it closes
 (`openJournal`). This comes before a press of `talk` is looked at. Otherwise a press of `talk` while the input does not
@@ -472,7 +495,10 @@ line is 10 px high and 2 px lie between two lines (feature 0017). A space is not
 takes its 6 px; a character the font does not have is drawn as `?`. There is no wrapping.
 `game/notice` knows two notices (feature 0022): the wall that holds comes first; else, while a
 trace has `found` not `null` and `tick` − `found` < `TRACE_NOTICE_STEPS` (120, two seconds),
-`notice.trace-found`. A second find starts the two seconds again. `render/draw-text` also has
+`notice.trace-found`. A second find starts the two seconds again. A third notice joins them
+(feature 0024): while a solved case has `tick` − `at` < `CASE_NOTICE_STEPS` (120, two seconds),
+`notice.case-solved`. The order is the wall that holds, then a solved case, then a found trace.
+`render/draw-text` also has
 `drawNumber(renderer, font, value, x, y)`: the decimal digits of a whole number of 0 or more,
 digit n with its top-left corner at (x + 6n, y). It takes a number and nothing else; a number is
 no text of a language and needs no key.
@@ -497,7 +523,8 @@ stands: frame facing × 5, top-left corner at (round(x) − 8 − camera.x, roun
 camera.y). The figures are rebuilt from `map.points` every frame, as in `update`. While a dialogue
 is open the dialogue box is drawn in the notice's place, on the surface and not shifted by the
 camera, and no notice is drawn. The page is the speaker's (feature 0018): the scene finds it
-among the speakers of the frame with `speakerOf`, and draws no box when the map does not have it.
+among the speakers of the frame with `speakerOf` — built with `progressOf(state, map)`, as in
+`update` (feature 0024) — and draws no box when the map does not have it.
 The box is a rectangle (8, 134, 304, 42) in `#181425` — the notice's bar
 grown upwards to three lines, with the same bottom edge —, the page's lines left-aligned from
 (12, 138), and, while ⌊tick / 30⌋ is even, the marker: three rectangles in `#ffffff`, (299, 169,
@@ -518,7 +545,12 @@ at x = 298; two entries fit, the second ending at y = 172. On the cases tab (fea
 k from 0 is two lines: the region's name, `region.<id>`, from (16, 36 + 36k), and from
 (16, 48 + 36k) four parts — `journal.traces`, the number of found traces, `journal.of`, the
 number of all the region's traces on the map — with one empty cell of 6 px between two parts:
-`Spuren: 1 von 5`, the numbers drawn by `drawNumber`. `draw-journal` imports only types
+`Spuren: 1 von 5`, the numbers drawn by `drawNumber`. A solved case (feature 0024) has a third
+line, its outcome, from (16, 60 + 36k) (`CASE_OUTCOME`), and is still 36 px high. On the policy
+tab (feature 0024) block k from 0 is the policy block of the k-th solved case, in the order
+they were solved, from (16, 36 + 60k) (`POLICY_BLOCK`, `POLICY_PITCH`) with lines 12 px apart;
+without a solved case the tab shows its line for nothing. Two blocks of four lines fit, the
+second ending at y = 142. `draw-journal` imports only types
 from `draw-scene`, and `draw-scene` imports `drawJournal`.
 
 The help (feature 0021, `render/draw-help`). While `help` is `true`, `drawScene` draws what it
@@ -986,6 +1018,7 @@ tables are the only text a player can read in `src/`.
 The notice is the first text: `game/notice` derives from the state, in every frame, which notice
 it shows, if any. While the lamp is on and a standing shadow wall has `lit` true and `light` 0 —
 a wall in the light that holds (0014) — it is `notice.shadow-too-dense`; otherwise, for two
+seconds from the step that solved a case, `notice.case-solved` (0024); otherwise, for two
 seconds from the last find of a trace, `notice.trace-found` (0022); otherwise there is none.
 The state has no field for it (INV-1). A notice stays one line.
 
@@ -1024,6 +1057,13 @@ at most 17 characters; `help.do-<what>` what it does, one line of at most 16. `H
 language, fullscreen, help; a test holds every key of the kind to the rule of its kind in both
 languages. The letter of a key is a string of the table like every other text, also where it is
 the same in both languages.
+
+The cases (feature 0024) add two kinds. `case.<region>-outcome` is a solved case's line on the
+cases tab, one line of at most 47 characters; `policy.<region>` is a case's policy block, two
+to four lines of at most 47 and no empty line. The source's answer and what it says afterwards
+are pages of the kind `talk`, `talk.<region>-source-<n>` and `talk.<region>-after`, under the
+rule of a page; `notice.case-solved` is a notice. `game/cases` names them by key in `CASES`,
+and the rule test covers both new kinds in both languages.
 
 ## 9. Tooling
 
