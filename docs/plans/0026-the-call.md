@@ -127,7 +127,7 @@ prototype.
 **Interfaces:**
 - Produces: the five text ids of the file structure, in both languages.
 
-- [ ] **Step 1: Write the failing test,** and widen the page rule to the kind `story`:
+- [x] **Step 1: Write the failing test,** and widen the page rule to the kind `story`:
 
 ```diff
 diff --git a/tests/unit/text.test.ts b/tests/unit/text.test.ts
@@ -208,10 +208,10 @@ index 7fab8db..9268cee 100644
    it('keeps a notice on one line', () => {
 ```
 
-- [ ] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 2 of 21
+- [x] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 2 of 21
   tests: the keys are not in the table, and the page rule finds no key of the kind `story`.
 
-- [ ] **Step 3: The words,** in both tables:
+- [x] **Step 3: The words,** in both tables:
 
 ```diff
 diff --git a/src/text/de.ts b/src/text/de.ts
@@ -283,10 +283,10 @@ index c7ad2e4..8c3d485 100644
      'whether we finally have a network for guests.',
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green — then `npm run check`:
+- [x] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green — then `npm run check`:
   1203 unit tests.
 
-- [ ] **Step 5: Commit** — `Add the words of the call, the first meeting and the lamp`.
+- [x] **Step 5: Commit** — `Add the words of the call, the first meeting and the lamp`.
 
 ---
 
@@ -305,7 +305,7 @@ index c7ad2e4..8c3d485 100644
   `started` 0. Every step keeps the three as they are. Nothing behaves differently after
   this task: it is the ground the next three stand on.
 
-- [ ] **Step 1: Change the tests** to the state of a game past its opening. Every lamp a
+- [x] **Step 1: Change the tests** to the state of a game past its opening. Every lamp a
   test writes out gains `owned: true, used: true`; every state a test writes out in full
   gains `started: 0`; the two recordings hash the lamp as it was recorded:
 
@@ -739,10 +739,10 @@ index a77beb2..4e8c298 100644
    shadowWalls: [],
 ```
 
-- [ ] **Step 2: Run** `npx vitest run` and `npm run typecheck`. Expected: FAIL — 9 unit
+- [x] **Step 2: Run** `npx vitest run` and `npm run typecheck`. Expected: FAIL — 9 unit
   tests, those that compare a whole lamp or a whole state, and 18 type errors in the tests.
 
-- [ ] **Step 3: The state:**
+- [x] **Step 3: The state:**
 
 ```diff
 diff --git a/src/game/state.ts b/src/game/state.ts
@@ -805,7 +805,7 @@ index 80c9bef..bf6dfd0 100644
     * The view's top-left corner in map pixels, two integers (0006). Derived from the player after
 ```
 
-- [ ] **Step 4: The steps keep the fields.** `update.ts`:
+- [x] **Step 4: The steps keep the fields.** `update.ts`:
 
 ```diff
 diff --git a/src/game/update.ts b/src/game/update.ts
@@ -903,10 +903,10 @@ index bd1a392..369de62 100644
          ? state.figures.map((standing, index) =>
 ```
 
-- [ ] **Step 5: Run** `npm run check` — green, 1203 unit tests, both recordings of 600 steps
+- [x] **Step 5: Run** `npm run check` — green, 1203 unit tests, both recordings of 600 steps
   with their hashes unchanged.
 
-- [ ] **Step 6: Commit** — `Give the lamp an owner and the game the end of its opening`.
+- [x] **Step 6: Commit** — `Give the lamp an owner and the game the end of its opening`.
   Body: the fields come first, with the values of a game past its opening, so that every
   earlier test steps as before; the game that starts without the lamp follows.
 
@@ -929,7 +929,7 @@ index bd1a392..369de62 100644
     `isFirstMeeting(dialogue: Dialogue, figures: readonly Figure[], lampOwned: boolean, meeting?: Meeting): boolean`
   - `pagesOf(dialogue: Dialogue, speakers: readonly Speaker[], scenes?: readonly Scene[]): readonly TextKey[]`
 
-- [ ] **Step 1: Write the failing tests.** `tests/unit/story.test.ts`, new:
+- [x] **Step 1: Write the failing tests.** `tests/unit/story.test.ts`, new:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -1061,11 +1061,11 @@ index 2b481e2..467193c 100644
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/story.test.ts tests/unit/cast.test.ts`.
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/story.test.ts tests/unit/cast.test.ts`.
   Expected: FAIL — `story.test.ts` does not load, `src/game/story` does not exist; 5 of the
   19 tests of `cast.test.ts` fail.
 
-- [ ] **Step 3: The scenes,** `src/game/story.ts`, new:
+- [x] **Step 3: The scenes,** `src/game/story.ts`, new:
 
 ```ts
 import { type TextKey, textKey } from '../text/text';
@@ -1098,7 +1098,7 @@ export function scenePages(index: number, scenes: readonly Scene[] = SCENES): re
 }
 ```
 
-- [ ] **Step 4: The first meeting,** in `cast.ts`:
+- [x] **Step 4: The first meeting,** in `cast.ts`:
 
 ```diff
 diff --git a/src/game/cast.ts b/src/game/cast.ts
@@ -1173,7 +1173,7 @@ index 8944dbc..18a9854 100644
 +}
 ```
 
-- [ ] **Step 5: The pages of a dialogue,** in `talk.ts`:
+- [x] **Step 5: The pages of a dialogue,** in `talk.ts`:
 
 ```diff
 --- a/src/game/talk.ts
@@ -1236,10 +1236,10 @@ index 8944dbc..18a9854 100644
      ...state,
 ```
 
-- [ ] **Step 6: Run** the two files — green — then `npm run check`: 1213 unit tests; the
+- [x] **Step 6: Run** the two files — green — then `npm run check`: 1213 unit tests; the
   architecture test now covers `src/game/story.ts`.
 
-- [ ] **Step 7: Commit** — `Add the scenes of the story and the first meeting`. Body: a scene
+- [x] **Step 7: Commit** — `Add the scenes of the story and the first meeting`. Body: a scene
   is a dialogue without a speaker on the floor, so its pages are looked up beside the
   speakers, not among them.
 
@@ -1259,7 +1259,7 @@ index 8944dbc..18a9854 100644
   the first meeting, counts `lamp` as not held without the lamp, and sets `lamp.used` in
   the first step in which the lamp is on.
 
-- [ ] **Step 1: Write the failing tests,** `tests/unit/opening.test.ts`, new:
+- [x] **Step 1: Write the failing tests,** `tests/unit/opening.test.ts`, new:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -1617,10 +1617,10 @@ describe('the lamp used for the first time (0026)', () => {
 });
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/opening.test.ts`. Expected: FAIL —
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/opening.test.ts`. Expected: FAIL —
   the file does not load: `update.ts` exports no `newGame`.
 
-- [ ] **Step 3: The step.** `update.ts` — `newGame`, what a closing step changes, and the
+- [x] **Step 3: The step.** `update.ts` — `newGame`, what a closing step changes, and the
   lamp that is not owned:
 
 ```diff
@@ -1766,7 +1766,7 @@ describe('the lamp used for the first time (0026)', () => {
      state.captured,
 ```
 
-- [ ] **Step 4: The press of `talk` without the lamp,** in `talk.ts`:
+- [x] **Step 4: The press of `talk` without the lamp,** in `talk.ts`:
 
 ```diff
 --- a/src/game/talk.ts
@@ -1797,12 +1797,12 @@ describe('the lamp used for the first time (0026)', () => {
    const { player } = state;
 ```
 
-- [ ] **Step 5: Run** `npx vitest run tests/unit/opening.test.ts` — green, 30 tests — and
+- [x] **Step 5: Run** `npx vitest run tests/unit/opening.test.ts` — green, 30 tests — and
   `npx vitest run tests/unit/cases.test.ts tests/unit/state.test.ts tests/unit/talk.test.ts`:
   the solving step of 0024 and 0025 and the dialogues of 0017 and 0018 pass unchanged. Then
   `npm run check`: 1243 unit tests.
 
-- [ ] **Step 6: Commit** — `Open a new game with the call and without the lamp`. Body:
+- [x] **Step 6: Commit** — `Open a new game with the call and without the lamp`. Body:
   `newGame` is what a player gets; `createInitialState` stays a game past its opening for
   the tests. The lamp is handed over by the step that closes the first meeting.
 
@@ -1821,7 +1821,7 @@ describe('the lamp used for the first time (0026)', () => {
   `NOTICE_LAMP`; `noticeOf` with the lamp's line in the last place; the scene draws a
   scene's page and the page of the first meeting.
 
-- [ ] **Step 1: Write the failing tests.** `help.test.ts` — criterion 15:
+- [x] **Step 1: Write the failing tests.** `help.test.ts` — criterion 15:
 
 ```diff
 --- a/tests/unit/help.test.ts
@@ -2170,10 +2170,10 @@ describe('the lamp used for the first time (0026)', () => {
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/help.test.ts tests/unit/notice.test.ts
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/help.test.ts tests/unit/notice.test.ts
   tests/unit/draw-scene.test.ts`. Expected: FAIL, 14 of 145 tests.
 
-- [ ] **Step 3: The start hint,** in `help.ts`:
+- [x] **Step 3: The start hint,** in `help.ts`:
 
 ```diff
 diff --git a/src/game/help.ts b/src/game/help.ts
@@ -2199,7 +2199,7 @@ index 0f22ff6..a4db5bc 100644
   * open, the tick grown, the input remembered. Nothing else changes, whatever else is open and
 ```
 
-- [ ] **Step 4: The lamp's line,** in `notice.ts`:
+- [x] **Step 4: The lamp's line,** in `notice.ts`:
 
 ```diff
 diff --git a/src/game/notice.ts b/src/game/notice.ts
@@ -2235,7 +2235,7 @@ index dd907a5..753c567 100644
  }
 ```
 
-- [ ] **Step 5: The scene:**
+- [x] **Step 5: The scene:**
 
 ```diff
 diff --git a/src/render/draw-scene.ts b/src/render/draw-scene.ts
@@ -2295,10 +2295,10 @@ index a9ace7a..5c6a747 100644
      renderer.fillRect(
 ```
 
-- [ ] **Step 6: Run** the three files — green, the tests of 0021 on the hint unchanged —
+- [x] **Step 6: Run** the three files — green, the tests of 0021 on the hint unchanged —
   then `npm run check`: 1262 unit tests.
 
-- [ ] **Step 7: Commit** — `Show the call, the lamp's line and the start hint after the call`.
+- [x] **Step 7: Commit** — `Show the call, the lamp's line and the start hint after the call`.
   Body: the hint's ten seconds begin when the call is closed, so the call does not hide it.
 
 ---
@@ -2312,7 +2312,7 @@ index a9ace7a..5c6a747 100644
 **Interfaces:**
 - Consumes: `newGame` (Task 4).
 
-- [ ] **Step 1: Change the smoke spec.** A new test for the start; a helper `start` that
+- [x] **Step 1: Change the smoke spec.** A new test for the start; a helper `start` that
   loads the page and reads the call to its end, used by every other test in place of
   `page.goto('/')`; and the test of 0007 turned round — without the lamp a held Space turns
   no light on and does not hold the figure:
@@ -2550,10 +2550,10 @@ index db1202b..376070e 100644
        message: 'window.shadowAi.state.solved is there and empty',
 ```
 
-- [ ] **Step 2: Run it** — `npm run test:e2e`. Expected: FAIL — the game starts without a
+- [x] **Step 2: Run it** — `npm run test:e2e`. Expected: FAIL — the game starts without a
   dialogue, so `start` times out waiting for the call.
 
-- [ ] **Step 3: The start,** in `main.ts`:
+- [x] **Step 3: The start,** in `main.ts`:
 
 ```diff
 diff --git a/src/main.ts b/src/main.ts
@@ -2580,10 +2580,10 @@ index 3e3944c..15f2200 100644
      handle.state,
 ```
 
-- [ ] **Step 4: Run** `npm run test:e2e` twice — 16 passed, 3 skipped, both times — and
+- [x] **Step 4: Run** `npm run test:e2e` twice — 16 passed, 3 skipped, both times — and
   `npm run check`: 1262 unit tests.
 
-- [ ] **Step 5: Commit** — `Start the game with the call`.
+- [x] **Step 5: Commit** — `Start the game with the call`.
 
 ---
 
@@ -2597,7 +2597,7 @@ The diffs are against `main` at `8020f24`. If a line has moved, put the text whe
 means it; do not change the words without a reason. `vision.md` §2 already allows the line
 that names the lamp's key; it is not changed here.
 
-- [ ] **Step 1: `vision.md`** §4:
+- [x] **Step 1: `vision.md`** §4:
 
 ```diff
 diff --git a/docs/spec/vision.md b/docs/spec/vision.md
@@ -2620,7 +2620,7 @@ index acf4f08..2cab999 100644
  corridors like a wall of flicker. Where the use gets dense, it condenses into creatures — one
 ```
 
-- [ ] **Step 2: `gameplay.md`** §2, §7 and §8:
+- [x] **Step 2: `gameplay.md`** §2, §7 and §8:
 
 ```diff
 diff --git a/docs/spec/gameplay.md b/docs/spec/gameplay.md
@@ -2675,7 +2675,7 @@ index 2915c11..4f030b6 100644
  
 ```
 
-- [ ] **Step 3: `world.md`** §3:
+- [x] **Step 3: `world.md`** §3:
 
 ```diff
 diff --git a/docs/spec/world.md b/docs/spec/world.md
@@ -2707,7 +2707,7 @@ index a5c8ec1..f7e9b5f 100644
  
 ```
 
-- [ ] **Step 4: `architecture.md`** §1, §2, §4, §5 and §8:
+- [x] **Step 4: `architecture.md`** §1, §2, §4, §5 and §8:
 
 ```diff
 diff --git a/docs/spec/architecture.md b/docs/spec/architecture.md
@@ -2866,7 +2866,7 @@ index 3a54d46..64a32ab 100644
  | Concern | Tool |
 ```
 
-- [ ] **Step 5: `testing.md`** §2, the rows of INV-1 and INV-4:
+- [x] **Step 5: `testing.md`** §2, the rows of INV-1 and INV-4:
 
 ```diff
 diff --git a/docs/spec/testing.md b/docs/spec/testing.md
@@ -2888,7 +2888,7 @@ index 017aa21..7b468e6 100644
  | INV-7 map truth | loader tests read the solid boxes as the union of the three tile layers, in map pixels, and the opaque boxes from the tiles that are not `low`, and reject, each with its message: an unknown layer name, a layer whose type does not match its name, a missing `ground` or `objects` layer or a name used twice, no spawn or two, a tile size other than 16x16, a map under 20x12 tiles, an infinite map or encoded, compressed or mis-sized layer data, a flipped or rotated tile, a gid outside the tileset, anything but one external `.tsj`, an animated tile in the tileset, a collision shape that is not a rectangle, a rotated one, one that is not whole pixels inside the tile, a tile that is `solid` and has collision shapes, a tile that is `low` and has no box, an orientation other than orthogonal, a spawn outside the map or in a solid box, a point object without a name, a named point outside the map or in a solid box, a `pause` that is not an `int` property (`architecture.md` §6); `game/mover` rejects a malformed route point, an unknown room, a pause outside 0–600, a number used twice or missing, a route of one or more than four points, a leg that is not straight and a ground leg across a solid box, each with its message, and a test proves every ground leg of the floor free (0015); the loader rejects an object that is neither a point nor a rectangle, a rectangle without a name, a rotated rectangle and one that is not whole pixels inside the map, and `game/rects` refuses a rectangle of no known kind (0022), `game/shadow` a region the world data does not know, a region without shadow and a box that is no strip on a cell edge, each with its message (0014), and `game/trace` a trace of a region the world data does not know and a trace that is not one cell, each with its message (0022), and `game/region` an area of a region the world data does not know and an area that is not whole cells, each with its message, and a test holds the floor's ten areas to its rooms (0023); the world-data test, `gatingFaults` on `src/game/world.ts` and on four faulty tables, proves that no density lies outside 0–3 or above what the lamp reaches and that no upgrade is earned behind a wall the lamp cannot lift before it (0014); `game/cast` refuses a figure point whose id the cast does not have and two points with the same id, each with its message, and a figure point is no route point and makes no creature (0017) |
 ```
 
-- [ ] **Step 6: `README.md`:**
+- [x] **Step 6: `README.md`:**
 
 ```diff
 diff --git a/README.md b/README.md
@@ -2908,19 +2908,19 @@ index e1293b7..ddc3ca6 100644
  
 ```
 
-- [ ] **Step 7:** `npm run check`, then commit — `Move the call into the spec`.
+- [x] **Step 7:** `npm run check`, then commit — `Move the call into the spec`.
 
 ---
 
 ### Task 8: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 16 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 16 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 8 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 8 in this file and commit —
   `Tick the full check of 0026`.
 
 ---
