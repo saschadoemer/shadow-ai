@@ -14,13 +14,12 @@ the author's and is guided one step per message; the agent never runs it on its 
 pull request is opened before it has passed. Where the session has the skill
 `superpowers:executing-plans`, it follows it for Tasks 1 to 7.
 
-**Precondition:** feature 0027 is merged into `main`. The spec's order says so, and this plan
-was written **before** that merge, at the author's word: against `main` at `58268c8`, which has
-0026 and not 0027. The branch `feature/0031-the-help-label` is cut from
-`claude/hilfetext-sichtbarkeit-579c82`, which holds the spec, its approval and this plan. Work
-on it, and merge the latest `main` into it before Task 1. The section "What 0027 changes for
-this plan" below says what to expect then. The specs of 0028 and 0029 are approved and are
-**not** built here.
+**Precondition:** feature 0027 is merged into `main` (`69f04d4`), as the spec's order asks.
+The branch `feature/0031-the-help-label` exists and holds the spec, its approval and this plan,
+with `main` at `eeefcd6` merged in. Work on it, and merge the latest `main` into it before
+Task 1. The specs of 0028 and 0029 are approved and are **not** built here. The roadmap names
+the creature of Marketing as 0032 since the merge on this branch; `main` still says 0031
+there until this feature's pull request is merged.
 
 **Goal:** a small label in the top right corner — `H Hilfe` or `H Help` — names the key of the
 help for as long as the world is on screen, and the line that named it in the bar for ten
@@ -35,19 +34,20 @@ with the container (T7), the walk (T8) and the pull request (T9). Additions come
 removals, so that no task leaves the player without a pointer to the help.
 
 **How this plan was checked:** the code and the tests of Tasks 1 to 5 were written once as a
-prototype on 2026-11-18, on the source of `main` at `58268c8`, task by task: after each of
-the five tasks typecheck and Biome were clean and the unit tests green — 1263, 1270, 1276,
-1267 and 1264 tests (1262 before). The tests of each task were run before its code and failed
-as the steps say. `npm run check` with the build passed on the whole prototype. The smoke
-spec was run with `BASE_URL` against a dev server of the prototype on a port of its own: 16
-passed, and the three tests of the container failed there, as they must without nginx;
-without `BASE_URL` they are skipped. The diffs of this file are the prototype's, taken per
-task. They were then applied from this file to a clean tree, step by step: the failures and
-the counts were the ones the steps name, and the result was the prototype's files byte for
-byte. The prototype was thrown away; nothing of it is on the branch.
-If a step does not behave as written, the cause is a difference to that state — most likely
-0027 — so stop and look; do not bend a test. The game was **not** played in a browser — that
-is the walk — and the container was **not** run with the prototype.
+prototype on 2026-11-18, task by task, the tests of each task before its code. That was on
+`main` at `58268c8`, before 0027. After 0027 merged, the diffs were applied from this file to
+a clean tree of this branch (`defef2b`, `main` at `eeefcd6` merged in), step by step: Tasks 1
+to 4 and 6 applied as written; the diffs of Task 5 that take the field out of the fixtures
+were taken anew, because 0027 had changed the lines beside them. After each of the five tasks
+typecheck and Biome were clean and the unit tests green — 1330, 1337, 1343, 1334 and 1331
+tests (1329 before) — and after each test step the tests failed as the steps say.
+`npm run check` with the build passed on the result. The smoke spec was run with `BASE_URL`
+against a dev server of that tree on a port of its own: 17 passed, and the three tests of the
+container failed there, as they must without nginx; without `BASE_URL` they are skipped. The
+trees were thrown away; nothing of them is on the branch. If a step does not behave as
+written, the cause is a difference to that state — a later merge of `main`, most likely — so
+stop and look; do not bend a test. The game was **not** played in a browser — that is the
+walk — and the container was **not** run.
 
 **Tech stack:** TypeScript strict, Vitest, Playwright, Biome. No new dependency.
 
@@ -93,32 +93,28 @@ is the walk — and the container was **not** run with the prototype.
   and the text begins at (314 − 6n, 6). German, n = 7: (269, 4, 47, 14), (270, 5, 45, 12),
   (272, 6). English, n = 6: (275, 4, 41, 14), (276, 5, 39, 12), (278, 6).
 
-## What 0027 changes for this plan
+## After a merge of `main`
 
-Feature 0027 (overview won back) was being built while this plan was written. By its spec it
-adds `GameState.rested`, `src/game/rest.ts`, three notices and their keys, and a press of
-`talk` at a rest. It does not touch the help, the hint or `started`. After the merge of
-`main`, expect this and nothing more:
+0028 and 0029 are in work in other sessions and may reach `main` while this branch is open.
+Neither touches the help, the label's corner or the bar's order by its spec. After a merge,
+expect this and nothing more:
 
-- **Counts.** Every number of tests in this plan is higher by the tests 0027 added. Run
-  `npx vitest run` once before Task 1 and note the count; the plan's counts move by the
-  difference to 1262. The differences between the tasks stay: +1, +7, +6, −9, −3.
-- **Context lines.** A diff of this plan may not apply as it stands where 0027 changed a
-  neighbouring line — in `src/game/state.ts`, in the object literals of `src/game/update.ts`
-  and `src/game/overview.ts`, in the fixtures of the tests and in the language tables. Put
-  each change where the diff means it. In Task 5 that is: take the line with `started` out of
-  every literal and every fixture and leave `rested` and everything else alone.
-- **More fixtures.** 0027 may have added test files with a fixture of a whole `GameState`.
+- **Counts.** Every number of tests in this plan is higher by the tests the merge brought.
+  The differences between the tasks stay: +1, +7, +6, −9, −3.
+- **Context lines.** A diff of this plan may not apply as it stands where a neighbouring line
+  changed — in the object literals of `src/game/update.ts` and `src/game/overview.ts`, in the
+  fixtures of the tests and in the language tables. Put each change where the diff means it.
+  In Task 5 that is: take the line with `started` out of every literal and every fixture and
+  leave everything else alone.
+- **More fixtures.** A merge may bring a test file with a fixture of a whole `GameState`.
   After Task 5 `grep -rn "started" src tests` must show two comments — the one in
   `src/game/state.ts` on where a mover started, and the one in `tests/unit/player.test.ts` on
   a walk cycle — and the new test of `tests/unit/opening.test.ts`, and nothing else.
-- **The bar.** 0027 shows its notices in the bar for two seconds. They are notices like the
-  others; `quietLine` is not asked while a notice shows, so Task 4 does not meet them.
-- **The documents.** Task 6's diffs are against the specification without 0027. Where 0027
-  added a sentence next to one of them, keep its sentence.
+- **Seven hearts.** 0028 raises the maximum of overview to seven. The label's test of Task 2
+  already holds it clear of seven hearts.
 
-If the merge shows that 0027 did something else to these files — a new reader of `started`, a
-second thing in the top right corner — stop and ask.
+If a merge shows something else in these files — a new reader of `started`, a second thing in
+the top right corner, a new line in `quietLine` — stop and ask.
 
 ## File structure
 
@@ -223,7 +219,7 @@ index 8c3d485..989a852 100644
 Run: `npx vitest run tests/unit/text.test.ts`
 Expected: all pass. The glyph test and the key test of the same file cover the new strings.
 
-- [ ] **Step 5:** `npm run check` — 1263 tests — then commit: `Add the words of the help
+- [ ] **Step 5:** `npm run check` — 1330 tests — then commit: `Add the words of the help
   label`. The body: the label names the key first, as the rows of the help do, and its rule
   keeps it to 8 characters so that it stays clear of the hearts.
 
@@ -471,7 +467,7 @@ index 1aa901c..cbad038 100644
 Run: `npx vitest run tests/unit/draw-help.test.ts`
 Expected: all pass.
 
-- [ ] **Step 5:** `npm run check` — 1270 tests — then commit: `Draw the help label`. The
+- [ ] **Step 5:** `npm run check` — 1337 tests — then commit: `Draw the help label`. The
   body: the label lives with the help's box because it shows the same thing in the same
   colours, and its place is a function of the number of characters so that both languages end
   at the same right edge.
@@ -810,7 +806,7 @@ test of `draw-scene.test.ts` fails now, it calls `drawSceneWith` directly or bui
 renderer; make it draw through the local `drawScene`. Do not add the label's calls to its
 list.
 
-- [ ] **Step 5:** `npm run check` — 1276 tests — then commit: `Show the help label over the
+- [ ] **Step 5:** `npm run check` — 1343 tests — then commit: `Show the help label over the
   world`. The body: the label is drawn with the hearts and decided by nothing in the state,
   and the earlier scene tests look past it through one helper that a test of its own holds.
 
@@ -1365,7 +1361,7 @@ Run: `npx vitest run tests/unit` and `npm run typecheck`
 Expected: all pass, typecheck clean. `tests/arch` now finds no import from `src/text/` in
 `src/game/help.ts`, and needs no change.
 
-- [ ] **Step 5:** `npm run check` — 1267 tests — then commit: `Take the start hint away`. The
+- [ ] **Step 5:** `npm run check` — 1334 tests — then commit: `Take the start hint away`. The
   body: the label of Task 3 names the key for as long as the world is on screen, so the line
   that held the bar for ten seconds says nothing new; the author found it on screen too long.
 
@@ -1483,7 +1479,7 @@ index 17010cc..45b5909 100644
 
 ```diff
 diff --git a/tests/unit/draw-scene.test.ts b/tests/unit/draw-scene.test.ts
-index 3803f9c..3fc75af 100644
+index e40893a..70b3ac4 100644
 --- a/tests/unit/draw-scene.test.ts
 +++ b/tests/unit/draw-scene.test.ts
 @@ -190,7 +190,6 @@ const state = (
@@ -1491,10 +1487,10 @@ index 3803f9c..3fc75af 100644
  ): GameState => ({
    tick: QUIET_TICK,
 -  started: 0,
+   rested: null,
    player: player(fields),
    camera,
-   lamp: { on: lampOn, strength: 1, owned: true, used: true },
-@@ -1473,11 +1472,10 @@ describe('the story in the scene (0026)', () => {
+@@ -1474,11 +1473,10 @@ describe('the story in the scene (0026)', () => {
    const BOX = 'fillRect 8,134 304x42 #181425';
    const BAR = 'fillRect 8,158 304x18 #181425';
    const NO_LAMP = { on: false, strength: 1, owned: false, used: false };
@@ -1507,7 +1503,7 @@ index 3803f9c..3fc75af 100644
      lamp: NO_LAMP,
      dialogue: { speaker: 'story', index: 0, page },
      overview: { current: 1, max: 2 },
-@@ -1544,7 +1542,7 @@ describe('the story in the scene (0026)', () => {
+@@ -1545,7 +1543,7 @@ describe('the story in the scene (0026)', () => {
  
    it('draws no cone while the lamp is not owned, whatever is held', () => {
      const renderer = recordingRenderer();
@@ -1520,7 +1516,7 @@ index 3803f9c..3fc75af 100644
 
 ```diff
 diff --git a/tests/unit/draw-help.test.ts b/tests/unit/draw-help.test.ts
-index db6f0e0..a3c23fe 100644
+index 9fe62b1..ce762ae 100644
 --- a/tests/unit/draw-help.test.ts
 +++ b/tests/unit/draw-help.test.ts
 @@ -91,7 +91,6 @@ const BAR = 'fillRect 8,158 304x18 #181425';
@@ -1528,14 +1524,14 @@ index db6f0e0..a3c23fe 100644
  const playing = (fields: Partial<GameState> = {}): GameState => ({
    tick: 700,
 -  started: 0,
+   rested: null,
    player: {
      x: 184,
-     y: 96,
 ```
 
 ```diff
 diff --git a/tests/unit/draw-journal.test.ts b/tests/unit/draw-journal.test.ts
-index 4e8c298..e33542e 100644
+index 029a4ef..8f23a05 100644
 --- a/tests/unit/draw-journal.test.ts
 +++ b/tests/unit/draw-journal.test.ts
 @@ -86,7 +86,6 @@ const ENGLISH: SceneSettings = { language: 'en', switchedAt: null };
@@ -1543,14 +1539,14 @@ index 4e8c298..e33542e 100644
  const reading = (tab: JournalTab, snippets = 0): GameState => ({
    tick: 100,
 -  started: 0,
+   rested: null,
    player: {
      x: 160,
-     y: 96,
 ```
 
 ```diff
 diff --git a/tests/unit/overview.test.ts b/tests/unit/overview.test.ts
-index 17936f4..00a0c66 100644
+index fae69b3..a1513bf 100644
 --- a/tests/unit/overview.test.ts
 +++ b/tests/unit/overview.test.ts
 @@ -162,7 +162,6 @@ describe('stepDark', () => {
@@ -1558,72 +1554,72 @@ index 17936f4..00a0c66 100644
    const FALLEN: GameState = {
      tick: 500,
 -    started: 0,
+     rested: null,
      player: figure(300, 200, 'left', { frame: 2, frameTimer: 3.5 }),
      camera: { x: 140, y: 106 },
-     lamp: { on: true, strength: 1, owned: true, used: true },
-@@ -192,7 +191,6 @@ describe('stepDark', () => {
+@@ -193,7 +192,6 @@ describe('stepDark', () => {
      expect(darkSteps(43)).toStrictEqual({
        ...FALLEN,
        tick: 543,
 -      started: 0,
+       rested: null,
        lamp: { on: false, strength: 1, owned: true, used: true },
        dark: 44,
-     });
-@@ -203,7 +201,6 @@ describe('stepDark', () => {
+@@ -205,7 +203,6 @@ describe('stepDark', () => {
      const player = figure(80, 60, 'down');
      expect(woken).toStrictEqual({
        tick: 544,
 -      started: 0,
+       rested: null,
        player,
        camera: followPlayer(player, MAP),
-       lamp: { on: false, strength: 1, owned: true, used: true },
 ```
 
 ```diff
 diff --git a/tests/unit/state.test.ts b/tests/unit/state.test.ts
-index d51d970..333db9c 100644
+index 37d37a3..54700a5 100644
 --- a/tests/unit/state.test.ts
 +++ b/tests/unit/state.test.ts
-@@ -77,7 +77,6 @@ describe('GameState (INV-1)', () => {
+@@ -79,7 +79,6 @@ describe('GameState (INV-1)', () => {
    it('starts at tick 0 with the player at the spawn, facing down, standing, the camera on it', () => {
      expect(createInitialState(MAP)).toStrictEqual({
        tick: 0,
 -      started: 0,
+       rested: null,
        player: {
          x: 136,
-         y: 120,
-@@ -146,7 +145,6 @@ describe('update', () => {
+@@ -149,7 +148,6 @@ describe('update', () => {
      const next = update(
        {
          tick: 41,
 -        started: 0,
+         rested: null,
          player,
          camera: { x: 0, y: 12 },
-         lamp: { on: false, strength: 1, owned: true, used: true },
-@@ -175,7 +173,6 @@ describe('update', () => {
+@@ -179,7 +177,6 @@ describe('update', () => {
    it('leaves its input unchanged', () => {
      const state: GameState = {
        tick: 7,
 -      started: 0,
+       rested: null,
        player,
        camera: { x: 0, y: 12 },
-       lamp: { on: false, strength: 1, owned: true, used: true },
-@@ -196,7 +193,6 @@ describe('update', () => {
+@@ -201,7 +198,6 @@ describe('update', () => {
      update(state, RIGHT, MAP);
      expect(state).toStrictEqual({
        tick: 7,
 -      started: 0,
+       rested: null,
        player,
        camera: { x: 0, y: 12 },
-       lamp: { on: false, strength: 1, owned: true, used: true },
 ```
 
 ```diff
 diff --git a/tests/e2e/smoke.spec.ts b/tests/e2e/smoke.spec.ts
-index 376070e..b50f5e4 100644
+index f533697..6bc2452 100644
 --- a/tests/e2e/smoke.spec.ts
 +++ b/tests/e2e/smoke.spec.ts
-@@ -81,21 +81,17 @@ test('the game opens with the call, without the lamp, and three presses of E clo
+@@ -86,21 +86,17 @@ test('the game opens with the call, without the lamp, and three presses of E clo
        () =>
          page.evaluate(() => {
            const state = window.shadowAi?.state;
@@ -1665,10 +1661,10 @@ field the type still asks for. That is expected.
 
 ```diff
 diff --git a/src/game/state.ts b/src/game/state.ts
-index bf6dfd0..e1e9ab4 100644
+index 12a29d6..f531ff8 100644
 --- a/src/game/state.ts
 +++ b/src/game/state.ts
-@@ -164,11 +164,6 @@ export interface Overview {
+@@ -174,11 +174,6 @@ export interface Overview {
  export interface GameState {
    /** Logic steps since the start; one step is 1/60 s (INV-3). */
    readonly tick: number;
@@ -1684,10 +1680,10 @@ index bf6dfd0..e1e9ab4 100644
 
 ```diff
 diff --git a/src/game/update.ts b/src/game/update.ts
-index 873470f..82a2d94 100644
+index 641aa07..f241fe8 100644
 --- a/src/game/update.ts
 +++ b/src/game/update.ts
-@@ -55,7 +55,6 @@ export function createInitialState(map: TileMap): GameState {
+@@ -58,7 +58,6 @@ export function createInitialState(map: TileMap): GameState {
    };
    return {
      tick: 0,
@@ -1695,7 +1691,7 @@ index 873470f..82a2d94 100644
      player,
      camera: followPlayer(player, map),
      lamp: { on: false, strength: BASE_STRENGTH, owned: true, used: true },
-@@ -77,13 +76,12 @@ export function createInitialState(map: TileMap): GameState {
+@@ -81,13 +80,12 @@ export function createInitialState(map: TileMap): GameState {
  
  /**
   * The state a played game starts with (0026): the initial state with the call open on its
@@ -1711,7 +1707,7 @@ index 873470f..82a2d94 100644
      lamp: { on: false, strength: BASE_STRENGTH, owned: false, used: false },
      dialogue: { speaker: 'story', index: OPENING_SCENE, page: 0 },
    };
-@@ -91,10 +89,9 @@ export function newGame(map: TileMap): GameState {
+@@ -95,10 +93,9 @@ export function newGame(map: TileMap): GameState {
  
  /**
   * What the step that closed a dialogue changes besides closing it (0024, 0025, 0026). Closing
@@ -1725,7 +1721,7 @@ index 873470f..82a2d94 100644
   */
  function closed(
    stepped: GameState,
-@@ -103,9 +100,7 @@ function closed(
+@@ -107,9 +104,7 @@ function closed(
    content: TileMap,
  ): GameState {
    if (dialogue.speaker === 'story') {
@@ -1736,8 +1732,8 @@ index 873470f..82a2d94 100644
    }
    if (isFirstMeeting(dialogue, figuresOf(content.points), before.lamp.owned)) {
      return { ...stepped, lamp: { ...stepped.lamp, owned: true } };
-@@ -200,7 +195,6 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
-       : applyHit(stepped, state.overview, hitter);
+@@ -208,7 +203,6 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
+       : applyHit(stepped, before, hitter);
    return {
      tick: state.tick + 1,
 -    started: state.started,
@@ -1748,7 +1744,7 @@ index 873470f..82a2d94 100644
 
 ```diff
 diff --git a/src/game/overview.ts b/src/game/overview.ts
-index ba8c851..645a6fc 100644
+index 461416c..7d02555 100644
 --- a/src/game/overview.ts
 +++ b/src/game/overview.ts
 @@ -131,7 +131,6 @@ function woken(state: GameState, map: TileMap): GameState {
@@ -1768,7 +1764,7 @@ Expected: all pass, typecheck clean. Then `grep -rn "started" src tests`: two co
 `src/game/state.ts` and in `tests/unit/player.test.ts`, and the new test of
 `opening.test.ts`. The two recordings of 600 steps pass with their hashes unchanged.
 
-- [ ] **Step 5:** `npm run check` — 1264 tests — then commit: `Take the end of the opening
+- [ ] **Step 5:** `npm run check` — 1331 tests — then commit: `Take the end of the opening
   out of the state`. The body: 0026 kept `started` for the start hint alone; with the hint
   gone nothing reads it, and a state should hold nothing that no rule and no picture needs.
   No save state exists yet, so no stored state loses a field.
@@ -1781,7 +1777,7 @@ Expected: all pass, typecheck clean. Then `grep -rn "started" src tests`: two co
 - Modify: `docs/spec/vision.md`, `docs/spec/gameplay.md`, `docs/spec/visual.md`,
   `docs/spec/architecture.md`, `docs/spec/testing.md`, `README.md`
 
-The diffs are against `main` at `58268c8`. If a line has moved, put the text where the diff
+The diffs are against this branch at `defef2b`. If a line has moved, put the text where the diff
 means it; do not change the words without a reason. The words of steps 1 to 3 are the spec's,
 from "What this settles in the specification".
 
@@ -2067,8 +2063,7 @@ index ddc3ca6..f56f0e8 100644
 ### Task 7: The full check
 
 - [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 16 passed, 3 skipped, more
-  where 0027 added smoke tests. Mind the constraint on a dev server of another worktree.
+- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 17 passed, 3 skipped. Mind the constraint on a dev server of another worktree.
 - [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
 - [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
@@ -2104,8 +2099,7 @@ index ddc3ca6..f56f0e8 100644
   the walk is run again.
 - [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`, and in `docs/plan.md` §4, in the M5 section, say that 0031 is
-  implemented too — and, if 0027 is implemented on that day, that M5 is done: 0031 was the
-  last of the seven. Commit — `Mark 0031 implemented`.
+  implemented too and that M5 is done: 0031 was the last of the seven. Commit — `Mark 0031 implemented`.
 - [ ] **Step 3:** push the branch and open the pull request against `main`, titled
   `Feature 0031: the help label`, with the walk's result and feel notes in its description,
   and one line for the features in work: `GameState.started` is gone, so a branch that holds
