@@ -100,7 +100,8 @@ The colour of a transparent pixel is not checked. The palette is data in
 **The signature colour.** One violet of the palette, `#68386c`, is reserved for the shadow and
 for nothing else in the world; the asset test rejects it in every PNG under `public/` except the
 shadow assets, a list in the test: `sprites/snippet.png` (feature 0008),
-`sprites/shadow-wall.png` (feature 0014) and `sprites/trace.png` (feature 0022).
+`sprites/shadow-wall.png` (feature 0014), `sprites/trace.png` (feature 0022) and
+`sprites/shadow-veil.png` (feature 0023).
 Every trace of shadow AI glows in
 it. The player learns in seconds what to look for, without a word of text. Because colour alone
 excludes colour-blind players, the signature colour is always accompanied by **form and
@@ -124,13 +125,35 @@ and vanishes.
 **Shadowed and cleared.** A region under shadow renders desaturated with violet dithering; a
 cleared region renders in the full palette. The world shows progress by colour (`vision.md` §5).
 
+*As built* (feature 0023). A cell in an area of a region with a density above 0 (`world.md` §1)
+is under shadow. Its tiles — `ground`, `detail` and `above` — are drawn from the shadow tileset,
+the tileset in greys, and the veil lies over it. The greys are a **ramp** of six colours of the
+palette, from dark to light: `#181425`, `#262b44`, `#3a4466`, `#5a6988`, `#8b9bb4`, `#c0cbdc`.
+The **weight** of a colour is 299 × R + 587 × G + 114 × B. The grey of a colour is the ramp
+colour nearest in weight — no colour of the palette lies exactly between two — and from there
+one step darker; `#181425` stays. So the carpet's `#8b9bb4` becomes `#5a6988`, a desk's
+`#e4a672` becomes `#8b9bb4` and white becomes `#8b9bb4`. The step darker matters: the carpet of
+the rooms is grey already, and without it only the furniture would change. The shadow tileset
+never uses the signature colour; the veil carries it.
+
+The veil is the fourth shadow asset: three 16x16 frames, one per density, a pattern in the
+signature colour that repeats every 4 px — 32, 64 and 128 of 256 pixels, dots, diagonal lines
+and a checkerboard. It stands still. It is drawn over `ground` and `detail` and under everything
+else: the cone, the shadow walls, the traces, the people, the dogs, the machines, the creatures
+and the player keep their colours and get no veil, and `above` is drawn grey without one. So a
+person in a room under shadow stands out in colour against a floor that has none. The form
+beside the colour is the grey itself and the dithering of the veil, whose density tells the
+regions apart. The reception, the break room and the corridors are not under shadow. A region
+that clears and gets its colours back comes with feature 0025.
+
 ## 5. Assets
 
 The art pipeline is stable from the first stage, whatever the art source:
 
 - In the first stage a script in the repository **generates the placeholder tiles** from code —
   in the palette, deterministic, free of licence questions. Tileset sizes, tile ids and the Tiled
-  integration are fixed by it.
+  integration are fixed by it. Beside each tileset it writes the tileset's shadow sheet, the same
+  tiles in the greys of §4, named with `-shadow` before `.png` (feature 0023).
 - Later an **art pass** replaces the generated graphics file by file — by hand, by a pixel artist
   or by the author — in the same size and the same palette, without any change to code.
 - Text is drawn with a bitmap font drawn in-house (feature 0016): one font, monospaced, white,
