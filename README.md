@@ -49,8 +49,11 @@ veil thins out over two seconds, and its shadow wall and the snippets that were 
 gone (feature 0025). The game opens with the call — three pages of story — and without the
 lamp: the data protection officer next door hands it over in the first talk (feature 0026).
 A coffee at a coffee machine wins overview back — in the break room from the start, in a
-department once its case is solved (feature 0027). Every merge to `main` is deployed to Cloud
-Run (feature 0030). The roadmap is in [docs/plan.md](docs/plan.md).
+department once its case is solved (feature 0027). M6, the second act, has begun: Marketing
+has five traces of its own, on four screens and on the printer, and the colleague in the red
+shirt is the source of the second case; the two cases can be solved in either order (feature
+0028). Every merge to `main` is deployed to Cloud Run (feature 0030).
+The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 

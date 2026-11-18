@@ -763,9 +763,9 @@ describe('traces in the state (0022)', () => {
     return state;
   };
 
-  it('starts on the floor with five traces, unseen and not found', () => {
+  it('starts on the floor with ten traces, unseen and not found (0022, 0028)', () => {
     expect(createInitialState(FLOOR_MAP).traces).toStrictEqual(
-      [0, 1, 2, 3, 4].map((trace) => ({ trace, light: 0, found: null })),
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((trace) => ({ trace, light: 0, found: null })),
     );
     expect(createInitialState(MAP).traces).toStrictEqual([]);
   });
