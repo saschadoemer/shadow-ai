@@ -240,21 +240,15 @@ lamp, `E` or `Enter` talks, `J` opens and closes the journal, `L` switches the l
 
 ## Open questions
 
-1. **The source.** The colleague in the pink shirt, who walks between the cubicles and the
-   coffee since 0015 and says since 0018 why the day is tight, is the source. No new figure.
-   Is that the person?
-2. **All five traces.** The colleague answers only when every trace of Sales is found. Fewer
-   would make the search shorter and the count on the cases tab less meaningful. I propose
-   all five.
-3. **The gesture.** `gameplay.md` §6 has the player show a matching trace, picked from the
-   journal. With one species and one case there is nothing to pick, so here the talk itself
-   is the gesture: no key, no screen, no picture. The picking comes with the second species.
-   Is that enough for Act 1?
-4. **Overview.** Solving the case raises the maximum from five to six and fills it. The
-   alternative is a maximum of six with the hearts the player has. I propose the full
-   hearts: relief is the note of a solved case.
-5. **The words.** The source's answer, "Afterwards", the outcome, the policy block and the
-   notice in the table under "The text", German and English, are my proposal.
-6. **One feature.** The talk that solves, the journal's two tabs and the overview are one
-   feature here. They can be cut in two — the solving, then the journal. I propose one: a
-   solved case with nothing to show for it cannot be walked.
+None. Six were settled on 2026-11-18, each as drafted:
+
+- The source: the colleague in the pink shirt, who walks between the cubicles and the coffee
+  since 0015 and says since 0018 why the day is tight. No new figure.
+- All five traces: the colleague answers only when every trace of Sales is found.
+- The gesture: the talk itself is the gesture — no key, no screen, no picture. Picking a
+  creature from the journal comes with the second species (M6).
+- Overview: solving the case raises the maximum from five to six and fills it.
+- The words: the source's answer, "Afterwards", the outcome, the policy block and the
+  notice as in the table under "The text", in German and English.
+- One feature: the talk that solves, the journal's two tabs and the overview are built
+  together.

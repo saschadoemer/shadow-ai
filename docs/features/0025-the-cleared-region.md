@@ -191,25 +191,15 @@ lamp, `E` or `Enter` talks.
 
 ## Open questions
 
-1. **Colour at once, the veil in three steps.** The colours come back in the frame after the
-   case is solved, and the veil thins out in two seconds. The alternatives are a change in
-   one frame, or the veil first and the colour last. I propose this order: the colour is
-   the answer, and the thinning veil is the shadow leaving.
-2. **The creatures that are left.** Creatures whose home is in the cleared region leave the
-   game without being captured, and the journal does not count them. The alternatives are
-   that they stay until the player captures them, or that they count as captured. I propose
-   that they go: the shadow they lived in is gone, and a region "cleared for good" should
-   not attack.
-3. **The corridor's snippet stays.** Its home is in the east corridor, which is no region,
-   so it stays after the case and still hits. The alternative is to give it to Sales in the
-   map. I propose to leave it: the corridor is where the flow passes, and the lamp deals
-   with it.
-4. **The wall.** A shadow wall of the cleared region that still stands goes with the case.
-   On the floor that matters first for the meeting rooms, which have two.
-5. **Who sees the shadow.** `vision.md` §4 says that with every solved case more colleagues
-   see the shadow. In this feature nothing in the game counts or shows that; what Sales
-   says since 0024 is all of it. I propose to leave the rule to M6, when there is a second
-   case to compare with.
-6. **No end card.** The first act ends in the cleared room, and the game simply goes on.
-   A card that says so belongs to the title screen of M8. Is that right for the teaser
-   until then?
+None. Six were settled on 2026-11-18, each as drafted:
+
+- Colour at once, the veil in three steps: the colours come back in the frame after the
+  case is solved, and the veil thins out in two seconds.
+- The creatures that are left: creatures whose home is in the cleared region leave the game
+  without being captured, and the journal does not count them.
+- The corridor's snippet stays: its home is in the east corridor, which is no region.
+- The wall: a shadow wall of the cleared region that still stands goes with the case.
+- Who sees the shadow: nothing in the game counts or shows it in this feature; the rule is
+  left to M6.
+- No end card: the first act ends in the cleared room and the game goes on; a card belongs
+  to the title screen of M8.

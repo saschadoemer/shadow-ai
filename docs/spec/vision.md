@@ -28,7 +28,8 @@ Two purposes, in this order:
    Tutorial text is text that explains the game: what the shadow is, what the lamp is for, what
    to do next. The game has none. The help (feature 0021) is not tutorial text: a list of keys
    the player calls up, and one line at the start that names its key. It says which key does
-   what, and nothing about why.
+   what, and nothing about why. The line that names the lamp's key when the lamp is handed
+   over (feature 0026) is of the same kind.
 
 And a third, quietly: a project the author enjoys building. That is allowed to show.
 

@@ -31,6 +31,8 @@ sprite.
 - The language table gets five keys in German and English.
 - With the implementation: `vision.md` §4; `gameplay.md` §2 and §8; `world.md` §3;
   `architecture.md` §1, §2, §4 and §8; `testing.md` §2; the README.
+- With the settled questions of this draft: `vision.md` §2 allows the one line that names
+  the lamp's key.
 
 **Out, explicitly:** the managing director and the customer as figures on the map — in the
 first act both are text; the managing director stands in Management with its map (M6) · a
@@ -241,30 +243,20 @@ begins with a reload.
 
 ## Open questions
 
-1. **Text, no figures.** The call is three pages in the dialogue box; the customer and the
-   managing director are sentences, not sprites, and the game starts in the reception as
-   before. The alternative is the managing director as a standing figure at the start. I
-   propose text: the figure has its place in Management, with its map.
-2. **The words.** The three pages of the call, the officer's second page of the first
-   meeting and the lamp's line in the table under "The text", German and English, are my
-   proposal. `Die Geschäftsführung` is chosen so that the German names nobody's gender.
-3. **The pointer.** The third page ends with the light next door at the data protection
-   officer. Without it nothing tells a new player where the lamp is. Is that the pointer,
-   or should the managing director say it?
-4. **The first meeting.** She says her first page of 0017 and then
-   `Nimm die Lampe: Sie hält fest, …` — her second page with the handing over in front, so
-   that the meeting stays three sentences. Afterwards she says the two pages of 0017 as
-   before.
-5. **The lamp's line.** `Die Lampe: Leertaste halten.` stays until the lamp is held once.
-   `vision.md` §2 wants the teaser readable without a word of tutorial text; this line is
-   one. I propose it all the same, with a change to that sentence of the vision: a visitor
-   at a booth will not open a help menu to learn the one key the game is about. The
-   alternative is no line, and the help of 0021 alone.
-6. **Hits without the lamp.** Before the first meeting the creatures hit as always and the
-   player cannot defend. On the way to the officer no creature is near; a player who walks
-   to Sales first can be hit and wakes beside her. I propose to leave it: the dark leads
-   to the lamp.
-7. **Two starts.** `newGame` is what a player gets; `createInitialState` stays a game past
-   its opening, for the tests of the earlier features and for the smoke spec. Every
-   acceptance walk after this feature begins with the call and the way to the lamp — about
-   half a minute — until M8 brings saved games.
+None. Seven were settled on 2026-11-18, each as drafted:
+
+- Text, no figures: the call is three pages in the dialogue box; the customer and the
+  managing director are sentences, and the game starts in the reception.
+- The words: the three pages of the call, the officer's second page of the first meeting
+  and the lamp's line as in the table under "The text", in German and English.
+- The pointer: the third page of the call ends with the light next door at the data
+  protection officer.
+- The first meeting: her first page of 0017, then `Nimm die Lampe: Sie hält fest, …`; three
+  sentences in all. Afterwards she says the two pages of 0017.
+- The lamp's line: `Die Lampe: Leertaste halten.` stays until the lamp is held once.
+  `vision.md` §2 is changed with this decision: it allows this one line.
+- Hits without the lamp: the creatures hit as always, and the dark wakes the player beside
+  the data protection officer.
+- Two starts: `newGame` is what a player gets, `createInitialState` stays a game past its
+  opening for the tests. Every acceptance walk begins with the call and the way to the lamp
+  until M8 brings saved games.
