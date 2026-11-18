@@ -2,19 +2,23 @@ import { SHADOW_COLOUR } from '../src/render/palette.ts';
 import { rgb } from './placeholder-tiles.ts';
 
 /**
- * The placeholder veil sheet (visual.md §4, feature 0023): the shadow over a region, three
- * 16x16 frames in one row, one per density. A frame is a pattern in the signature colour that
- * repeats every 4 px, so the frames join without a seam from cell to cell: 32, 64 and 128
- * pixels. The fourth shadow asset. Pure — it returns pixels; tools/gen-sprites.ts writes the
- * file.
+ * The placeholder veil sheet (visual.md §4, features 0023 and 0025): the shadow over a region,
+ * five 16x16 frames in one row. The first three are one per density: patterns in the signature
+ * colour that repeat every 4 px — 32, 64 and 128 pixels. The last two are the veil of a region
+ * that is clearing: 16 and 8 pixels, repeating every 8 px. So every frame joins without a seam
+ * from cell to cell. The fourth shadow asset. Pure — it returns pixels; tools/gen-sprites.ts
+ * writes the file.
  */
 
 export const VEIL_FRAME_SIZE = 16;
-export const VEIL_FRAMES = 3;
+export const VEIL_FRAMES = 5;
 export const VEIL_SHEET_WIDTH = VEIL_FRAMES * VEIL_FRAME_SIZE;
 export const VEIL_SHEET_HEIGHT = VEIL_FRAME_SIZE;
 
-/** Whether pixel (i, j) of frame `frame` is veil: frame d − 1 is the veil of density d. */
+/**
+ * Whether pixel (i, j) of frame `frame` is veil: frame d − 1 is the veil of density d; frames 3
+ * and 4 are the two parts of a clearing after the first.
+ */
 export function veilInk(frame: number, i: number, j: number): boolean {
   switch (frame) {
     case 0:
@@ -26,6 +30,12 @@ export function veilInk(frame: number, i: number, j: number): boolean {
     case 2:
       // A checkerboard: every second pixel.
       return (i + j) % 2 === 0;
+    case 3:
+      // Both multiples of 4: one pixel in sixteen.
+      return i % 4 === 0 && j % 4 === 0;
+    case 4:
+      // Every second of those, in a diamond: one pixel in thirty-two.
+      return i % 4 === 0 && j % 4 === 0 && (i + j) % 8 === 0;
     default:
       return false;
   }

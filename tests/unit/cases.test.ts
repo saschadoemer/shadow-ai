@@ -5,6 +5,7 @@ import {
   CASE_OVERVIEW,
   CASES,
   type Case,
+  clearRegion,
   isReady,
   isSolved,
   outcomeOf,
@@ -17,7 +18,7 @@ import {
 import { routesOf } from '../../src/game/mover';
 import { CASE_NOTICE_STEPS, noticeOf } from '../../src/game/notice';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
-import type { GameState, TraceState } from '../../src/game/state';
+import type { CreatureState, GameState, TraceState } from '../../src/game/state';
 import { speakerOf, speakersOf } from '../../src/game/talk';
 import type { Trace } from '../../src/game/trace';
 import { createInitialState, update } from '../../src/game/update';
@@ -322,5 +323,121 @@ describe('what the journal takes from the cases (0024)', () => {
         two,
       ),
     ).toHaveLength(2);
+  });
+});
+
+describe('what goes with the shadow of a solved region (0025)', () => {
+  const rect = (name: string, x: number, y: number, width: number, height: number): NamedRect => ({
+    name,
+    x,
+    y,
+    width,
+    height,
+  });
+  /**
+   * 20x12 cells of open floor. Sales is the cells (2, 2) to (7, 7), Marketing the cells (12, 2)
+   * to (17, 7); each has a shadow wall on the upper edge of its first cell.
+   */
+  const ROOMS: TileMap = grassMap(
+    20,
+    12,
+    { x: 160, y: 160 },
+    [],
+    [
+      rect('region:sales', 32, 32, 96, 96),
+      rect('region:marketing', 192, 32, 96, 96),
+      rect('shadow:sales', 32, 32, 16, 4),
+      rect('shadow:marketing', 192, 32, 16, 4),
+    ],
+  );
+  const snippet = (home: { x: number; y: number }, at = home): CreatureState => ({
+    species: 'snippet',
+    x: at.x,
+    y: at.y,
+    light: 0,
+    home,
+  });
+  /** At home in Sales and out of it; at home outside and standing in Sales; at home in Marketing. */
+  const LEFT_HOME = snippet({ x: 80, y: 80 }, { x: 300, y: 170 });
+  const VISITOR = snippet({ x: 160, y: 150 }, { x: 80, y: 80 });
+  const NEIGHBOUR = snippet({ x: 240, y: 80 });
+  const start: GameState = {
+    ...createInitialState(ROOMS),
+    creatures: [LEFT_HOME, VISITOR, NEIGHBOUR],
+    captured: { snippet: 2 },
+  };
+
+  it('starts with both walls standing', () => {
+    expect(start.shadowWalls.map((wall) => wall.wall)).toStrictEqual([0, 1]);
+  });
+
+  it('removes every standing wall of the region and leaves the walls of the other regions', () => {
+    expect(clearRegion(start, 'sales', ROOMS).shadowWalls).toStrictEqual([
+      { wall: 1, lit: false, light: 0 },
+    ]);
+    expect(clearRegion(start, 'marketing', ROOMS).shadowWalls).toStrictEqual([
+      { wall: 0, lit: false, light: 0 },
+    ]);
+  });
+
+  it('removes a wall that is giving way, and none where the wall was lifted before', () => {
+    const giving: GameState = { ...start, shadowWalls: [{ wall: 0, lit: true, light: 30 }] };
+    expect(clearRegion(giving, 'sales', ROOMS).shadowWalls).toStrictEqual([]);
+    const lifted: GameState = { ...start, shadowWalls: [{ wall: 1, lit: false, light: 0 }] };
+    expect(clearRegion(lifted, 'sales', ROOMS).shadowWalls).toStrictEqual(lifted.shadowWalls);
+  });
+
+  it('removes every creature at home in the region, wherever it is, and keeps the others', () => {
+    expect(clearRegion(start, 'sales', ROOMS).creatures).toStrictEqual([VISITOR, NEIGHBOUR]);
+    expect(clearRegion(start, 'marketing', ROOMS).creatures).toStrictEqual([LEFT_HOME, VISITOR]);
+  });
+
+  it('counts the left and the upper edge of the area to it, and not the right or the lower', () => {
+    const edges = [
+      snippet({ x: 32, y: 32 }),
+      snippet({ x: 127.5, y: 127.5 }),
+      snippet({ x: 128, y: 80 }),
+      snippet({ x: 80, y: 128 }),
+    ];
+    const cleared = clearRegion({ ...start, creatures: edges }, 'sales', ROOMS);
+    expect(cleared.creatures).toStrictEqual([edges[2], edges[3]]);
+  });
+
+  it('captures nothing, and changes nothing else', () => {
+    expect(clearRegion(start, 'sales', ROOMS)).toStrictEqual({
+      ...start,
+      shadowWalls: [{ wall: 1, lit: false, light: 0 }],
+      creatures: [VISITOR, NEIGHBOUR],
+    });
+    expect(clearRegion(start, 'sales', ROOMS).captured).toStrictEqual({ snippet: 2 });
+  });
+
+  it('removes the creatures of every area of a region with two', () => {
+    const two = grassMap(
+      20,
+      12,
+      { x: 160, y: 160 },
+      [],
+      [rect('region:meeting-rooms', 0, 0, 32, 32), rect('region:meeting-rooms', 64, 0, 32, 48)],
+    );
+    const creatures = [
+      snippet({ x: 8, y: 8 }),
+      snippet({ x: 48, y: 8 }),
+      snippet({ x: 72, y: 40 }),
+    ];
+    const cleared = clearRegion({ ...createInitialState(two), creatures }, 'meeting-rooms', two);
+    expect(cleared.creatures).toStrictEqual([creatures[1]]);
+  });
+
+  it('changes nothing on a map without areas and walls, or for a region the map does not have', () => {
+    const state: GameState = { ...createInitialState(MAP), creatures: [VISITOR] };
+    expect(clearRegion(state, 'sales', MAP)).toStrictEqual(state);
+    expect(clearRegion(start, 'hr', ROOMS)).toStrictEqual(start);
+  });
+
+  it('does not change its arguments', () => {
+    const before = JSON.stringify(start);
+    clearRegion(start, 'sales', ROOMS);
+    expect(JSON.stringify(start)).toBe(before);
   });
 });

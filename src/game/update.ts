@@ -1,6 +1,6 @@
 import type { TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
-import { answeredCase, progressOf, solve } from './cases';
+import { answeredCase, clearRegion, progressOf, solve } from './cases';
 import { figuresFrom, figuresOf } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
 import { openHelp, stepHelp } from './help';
@@ -71,7 +71,8 @@ export function createInitialState(map: TileMap): GameState {
  * the step is the help's and nothing else, and a press of `help` opens it over whatever is there
  * — an open journal and an open dialogue too (0021). With the journal open the step is the
  * journal's and nothing else (0020). With a dialogue open the step is the dialogue's and nothing
- * else; the step that closes the source's answer of a ready case solves the case (0024). A press of `journal` opens the journal instead of an ordinary
+ * else; the step that closes the source's answer of a ready case solves the case (0024) and
+ * removes the region's standing shadow walls and the creatures at home in it (0025). A press of `journal` opens the journal instead of an ordinary
  * step, before a press of `talk` is looked at (0020); a press of `talk` near a speaker — a
  * standing figure or a colleague — in reach and in sight opens a dialogue instead of an
  * ordinary step (0017, 0018). Otherwise: the lamp is on when the input holds
@@ -105,10 +106,13 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   const speakers = speakersOf(figuresOf(content.points), state.movers, routes, undefined, progress);
   if (state.dialogue !== null) {
     const stepped = stepDialogue(state, state.dialogue, input, speakers);
-    // The step that closes the source's answer solves its case (0024).
+    // The step that closes the source's answer solves its case (0024), and what is left of the
+    // region's shadow goes with it (0025).
     const answered =
       stepped.dialogue === null ? answeredCase(state.dialogue, state, routes, progress) : null;
-    return answered === null ? stepped : solve(stepped, answered.region);
+    return answered === null
+      ? stepped
+      : clearRegion(solve(stepped, answered.region), answered.region, content);
   }
   const journal = openJournal(state, input);
   if (journal !== null) {

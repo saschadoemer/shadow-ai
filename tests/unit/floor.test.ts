@@ -9,12 +9,13 @@ import { CASES, isReady, progressOf } from '../../src/game/cases';
 import { COLLEAGUES, figuresOf, pagesOfRoute } from '../../src/game/cast';
 import { REGION_NAME } from '../../src/game/journal';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
-import { areasOf, veilOf } from '../../src/game/region';
+import { type GameInput, NO_INPUT } from '../../src/game/player';
+import { areasOf, inArea, shadowedAreas, veilOf } from '../../src/game/region';
 import { standingWalls, wallsOf, withWalls } from '../../src/game/shadow';
-import { NO_RECOIL } from '../../src/game/state';
+import { type GameState, NO_RECOIL } from '../../src/game/state';
 import { speakerInReach, speakersOf, TALK_DISTANCE } from '../../src/game/talk';
 import { traceInLight, tracesOf } from '../../src/game/trace';
-import { createInitialState } from '../../src/game/update';
+import { createInitialState, update } from '../../src/game/update';
 import {
   areaBox,
   type CellRect,
@@ -1436,5 +1437,76 @@ describe('the case of Sales on the floor (0024)', () => {
     expect(isReady('sales', progressOf(four, floor))).toBe(false);
     const five = { ...start, traces: start.traces.map((t) => ({ ...t, found: 1 })) };
     expect(isReady('sales', progressOf(five, floor))).toBe(true);
+  });
+});
+
+describe('the cleared region on the floor (0025)', () => {
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const areas = areasOf(floor.rects);
+  const walls = wallsOf(floor.rects);
+  const start = createInitialState(floor);
+  const source = start.movers.find(
+    (mover) => routesOf(floor.points)[mover.route]?.name === 'person:sales',
+  );
+  /** Every trace found long ago, the figure 24 px below the colleague of Sales. */
+  const ready: GameState = {
+    ...start,
+    tick: 1000,
+    player: { ...start.player, x: source?.x ?? 0, y: (source?.y ?? 0) + 24 },
+    traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+  };
+  const solve = (from: GameState): GameState =>
+    [TALK, NO_INPUT, TALK, NO_INPUT, TALK].reduce(
+      (state, input) => update(state, input, floor),
+      from,
+    );
+  const regionsOf = (state: GameState): (string | undefined)[] =>
+    state.shadowWalls.map((standing) => walls[standing.wall]?.region);
+
+  it('has two of the three snippets at home in the area of Sales, and one in the east corridor', () => {
+    const sales = areas.filter((area) => area.region === 'sales');
+    expect(sales).toHaveLength(1);
+    expect(SNIPPETS.map((home) => sales.some((area) => inArea(area, home)))).toStrictEqual([
+      false,
+      true,
+      true,
+    ]);
+    // The corridor is no region: the first snippet's home lies in no area at all.
+    expect(areas.some((area) => inArea(area, SNIPPETS[0] as Point))).toBe(false);
+  });
+
+  it('solves the case of Sales from beside its source', () => {
+    expect(solve(ready).solved).toStrictEqual([{ region: 'sales', at: 1005 }]);
+  });
+
+  it('leaves one creature when nothing was captured: the one whose home is (1224, 622)', () => {
+    const solved = solve(ready);
+    expect(solved.creatures.map((creature) => creature.home)).toStrictEqual([{ x: 1224, y: 622 }]);
+    expect(solved.captured).toStrictEqual({ snippet: 0 });
+  });
+
+  it('removes none when both snippets of Sales were captured before', () => {
+    const corridor = start.creatures.slice(0, 1);
+    const solved = solve({ ...ready, creatures: corridor, captured: { snippet: 2 } });
+    expect(solved.creatures).toStrictEqual(corridor);
+    expect(solved.captured).toStrictEqual({ snippet: 2 });
+  });
+
+  it('removes the shadow wall of Sales if it still stands, and no other', () => {
+    expect(regionsOf(ready).filter((region) => region === 'sales')).toHaveLength(1);
+    const solved = solve(ready);
+    expect(regionsOf(solved)).not.toContain('sales');
+    expect(solved.shadowWalls).toHaveLength(ready.shadowWalls.length - 1);
+    const lifted = ready.shadowWalls.filter((standing) => walls[standing.wall]?.region !== 'sales');
+    expect(solve({ ...ready, shadowWalls: lifted }).shadowWalls).toStrictEqual(lifted);
+  });
+
+  it('takes the shadow from the cells of Sales and leaves it on every other region', () => {
+    const cleared = shadowedAreas(areas, solve(ready).solved);
+    const veil = (column: number, row: number): number => veilOf(cleared, column, row);
+    expect(veilOf(areas, 90, 30)).toBe(1);
+    expect(veil(90, 30)).toBe(0);
+    expect([veil(10, 70), veil(100, 70), veil(95, 5)]).toStrictEqual([1, 1, 1]);
+    expect([veil(5, 5), veil(30, 10), veil(60, 10)]).toStrictEqual([2, 2, 3]);
   });
 });

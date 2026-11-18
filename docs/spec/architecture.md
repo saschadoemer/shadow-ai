@@ -26,9 +26,10 @@ src/
                  rectangle a map holds, by the prefix of the name; game/trace.ts the traces,
                  their light test, their step and the entries of the cases tab (0022);
                  game/help.ts the help's step and when the start hint is due (0021);
-                 game/region.ts the areas of the regions and the veil of a cell (0023);
-                 game/cases.ts the cases, when one is ready, what its source says, and the
-                 step that solves it (0024)
+                 game/region.ts the areas of the regions and the veil of a cell (0023), the
+                 cleared regions and the veil of a clearing (0025);
+                 game/cases.ts the cases, when one is ready, what its source says, the
+                 step that solves it (0024) and what goes with the region's shadow (0025)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene); render/font.ts the glyph order and the
                  cell size of the font, render/draw-text.ts text by TextKey, line by line
@@ -64,8 +65,8 @@ tools/
                         orientations of eight looks (0014)
   placeholder-trace.ts  the placeholder trace sheet: three 16x16 frames, a checkerboard in
                         the signature colour in a growing square (0022)
-  placeholder-veil.ts   the placeholder veil sheet: three 16x16 frames in the signature
-                        colour, one per density (0023)
+  placeholder-veil.ts   the placeholder veil sheet: five 16x16 frames in the signature
+                        colour, one per density (0023) and two of a clearing (0025)
   placeholder-font.ts   the placeholder font: 108 glyphs of 6x10 drawn as pictures, and the
                         sheet as pure pixel data (0016)
   floor-layout.ts       the floor as pure data: the corridors and rooms, the walls and their
@@ -240,6 +241,11 @@ trace of its region and every one of them is found (`isReady`), and solved when 
 in `solved` (`isSolved`). Both read the **progress** of the cases, `progressOf(state, map)`: the
 state's `traces`, the map's traces and `solved`, derived on every call and kept nowhere.
 
+A region is **cleared** when it is in `solved` (feature 0025, `game/region`): `clearedAt(region,
+solved)` is the `at` of its entry, or `null`. The state has no field for it. Whether a cell is
+under shadow, which veil it shows and how far a clearing has come are derived from `solved`,
+`tick` and the map's areas on every call (§5, §6).
+
 `figures` is an array of `{ figure, facing }`, one entry per standing figure of the map, in file
 order (feature 0017, `game/cast`). `figure` is the index of the figure among
 `figuresOf(map.points)`; its place stays in the map and its pages in the cast, and neither is in
@@ -295,9 +301,15 @@ on the last page, sets `dialogue` to `null`; nothing else changes — not the pl
 creatures, the movers, the walls or the traces — and a press of `journal` does nothing. The
 step whose press closes the source's answer of a ready case that is not solved **solves** it
 (`answeredCase`, `solve`, feature 0024): besides the above it adds `{ region, at }` with the
-step's `tick` to `solved`, and sets `overview` to `{ current: max + 1, max: max + 1 }`. It changes
-`tick`, `held`, `dialogue`, `solved` and `overview` and nothing else; no other step solves a
-case, and a solved case is not solved again. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
+step's `tick` to `solved`, and sets `overview` to `{ current: max + 1, max: max + 1 }`. The same
+step takes what is left of the region's shadow with it (`clearRegion`, feature 0025): every
+entry of `shadowWalls` whose wall belongs to the region leaves the list, as a lifted wall does,
+and every creature whose `home` lies in an area of the region (`inArea`: inside the rectangle,
+the left and the upper edge included) leaves `creatures`, wherever it is; `captured` does not
+change, and a creature at home outside the region stays. The step changes
+`tick`, `held`, `dialogue`, `solved`, `overview`, `shadowWalls` and `creatures` and nothing
+else; no other step solves a case, and a solved case is not solved again. The wake brings back
+only the creatures still in `creatures`, so none that left this way. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
 the input holds: `tick` grows by 1, `held` is set, and nothing else changes in this step — a
 figure in mid-step, a push and a lamp that is on stay as they are and go on when it closes
 (`openJournal`). This comes before a press of `talk` is looked at. Otherwise a press of `talk` while the input does not
@@ -423,7 +435,8 @@ sprite round the same value.
 `frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48 — with its
 top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
 `render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the veil
-over the cells under shadow (feature 0023), the lamp's cone when the lamp is on, the standing shadow walls in array order (feature 0014), the traces
+over the cells under shadow (feature 0023) and over those of a region that is clearing (feature
+0025), the lamp's cone when the lamp is on, the standing shadow walls in array order (feature 0014), the traces
 the light is on in array order (feature 0022), the ground movers whose feet y is at most the player's in array order, the standing figures whose feet y is
 at most the player's (feature 0017), the creatures in array order, the player, the other
 standing figures, the other ground movers in array order, `above` (§6), the drones (feature
@@ -461,6 +474,18 @@ included. Everything after it — the cone, the walls, the traces, the movers, t
 creatures, the player, `above` — is drawn as before, so the people keep their colours in a grey
 room and `above` gets no veil. A map without areas passes no shadow to `drawLayer` and draws no
 veil: it is drawn exactly as before.
+
+The cleared region (feature 0025). The veil sheet has five frames, and the scene asks two
+questions per cell. Which tileset: `drawLayer` gets `veilOf` on `shadowedAreas(areas, solved)`,
+the areas of the regions that are not cleared, so a cell of a cleared region is drawn from the
+tileset from the frame after the solving step. Which veil: `drawVeil` gets
+`shownVeil(areas, solved, tick, column, row)` and draws, as before, the frame veil − 1. Over a
+cell under shadow that is the veil of its density, 1 to 3. Over a cell of a region cleared e =
+`tick` − `at` steps ago it is `clearingVeil(density, e)`: the density for e below 40, 4 for e
+below 80, 5 for e below 120 (`CLEAR_STEPS`), and 0 — no veil — from then on; the veils 4 and 5
+are the frames 3 and 4 of the sheet. Where a cleared area and one under shadow overlap, the
+shadow counts; of two clearing areas, the first in the file. A region without shadow has no
+veil at any time.
 
 The traces (feature 0022) lie on their devices like the walls on the floor, under every figure.
 A trace with `light` L above 0 is drawn with frame ⌊(L − 1) / 20⌋ of the trace sheet — 0, 1 or
@@ -732,7 +757,8 @@ the game before it starts; the state keeps nothing of the areas. A map without s
 has no areas, and a region without an area on a map is simply not on it. `veilOf(areas, column,
 row)` is the veil of a cell: the density of the area it lies in, the largest where areas
 overlap, 0 for a cell in no area or only in areas of density 0. A cell with a veil above 0 is
-under shadow. No coordinate of an area is in `src/` (INV-7); `tools/floor-layout.ts` builds the
+under shadow — asked of the areas that are not cleared, `shadowedAreas(areas, solved)` (feature
+0025, §5): the areas of a region whose case is solved drop out of it. No coordinate of an area is in `src/` (INV-7); `tools/floor-layout.ts` builds the
 floor's ten, `REGION_AREAS`, from its rooms, each with its upper and its left wall (`areaBox`).
 
 Flipped and rotated tiles, more than one tileset per map, embedded tilesets, encoded or
@@ -927,13 +953,16 @@ generator pixel by pixel. The art pass replaces it under the same name and frame
 | 6 | giving way, second third | `#68386c` where i + j is even and i mod 4 is 0 or 1 — 16 |
 | 7 | giving way, last third | `#68386c` where (i + j) mod 8 = 0 — 8 |
 
-`tools/placeholder-veil.ts` draws the veil sheet (feature 0023) and returns its pixels as data:
-`public/sprites/shadow-veil.png`, 48x16, three 16x16 frames in one row, frame d − 1 the veil of
-density d. Every opaque pixel is the signature colour `#68386c`; with (i, j) counted in the
+`tools/placeholder-veil.ts` draws the veil sheet (features 0023 and 0025) and returns its pixels
+as data: `public/sprites/shadow-veil.png`, 80x16, five 16x16 frames in one row, frame d − 1 the
+veil of density d and frames 3 and 4 the two thin veils of a clearing. Every opaque pixel is the signature colour `#68386c`; with (i, j) counted in the
 frame, frame 0 holds the pixels where i and j are both multiples of 4 or both 2 more than one —
 32; frame 1 those where i + j is a multiple of 4 — 64; frame 2 those where i + j is even — 128.
 Each pattern repeats every 4 px, so the frames join without a seam from cell to cell, and every
-pixel of a frame is in the next. It is the fourth shadow asset (`visual.md` §4). `npm run
+pixel of a frame is in the next. Frame 3 holds the pixels where i and j are both multiples of
+4 — 16; frame 4 those of them where i + j is a multiple of 8 — 8. These two repeat every 8 px,
+and every pixel of frame 4 is in frame 3, and every one of that in frame 0. It is the fourth
+shadow asset (`visual.md` §4). `npm run
 gen-sprites` writes it beside the others; it is committed, deterministic and tested against the
 generator pixel by pixel. The art pass replaces it under the same name and frame order.
 

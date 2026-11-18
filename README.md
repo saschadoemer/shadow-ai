@@ -44,7 +44,9 @@ the screens of Sales, and the journal counts them on its cases tab (feature 0022
 under shadow are drawn darker, without colour and under a violet veil whose density is the
 region's (feature 0023). With all five traces found, the colleague of Sales answers honestly,
 the case is solved, the journal records its outcome and the first block of the policy, and
-overview grows by one (feature 0024). The roadmap is in [docs/plan.md](docs/plan.md).
+overview grows by one (feature 0024). In the same moment the room gets its colours back, its
+veil thins out over two seconds, and its shadow wall and the snippets that were left in it are
+gone (feature 0025). The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 

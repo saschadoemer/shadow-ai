@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { parseTileMap, parseTileset, type TileMap } from '../../src/engine/tiled';
 import { followPlayer } from '../../src/game/camera';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
+import { clearingVeil } from '../../src/game/region';
 import { FACINGS, type GameState, PHASES_PER_FACING, type PlayerState } from '../../src/game/state';
 import { createInitialState, update } from '../../src/game/update';
 import { grassMap } from './grass-map';
@@ -841,5 +842,95 @@ describe('the solved cases in the state (0024)', () => {
     const closed = through(one, TALK, NONE, TALK);
     expect(closed.dialogue).toBeNull();
     expect(closed.solved).toStrictEqual([]);
+  });
+});
+
+describe('the cleared region in the state (0025)', () => {
+  const TALK: GameInput = { ...NONE, talk: true };
+  /**
+   * The fixture of 0024 with a room round its traces: Sales is the cells (8, 4) to (19, 11),
+   * with a shadow wall on its first cell and a snippet at home in it; a second snippet is at
+   * home outside, and a wall of HR stands outside.
+   */
+  const ROOM_MAP: TileMap = {
+    ...CASE_MAP,
+    points: [
+      ...CASE_MAP.points,
+      { name: 'snippet', x: 240, y: 150 },
+      { name: 'snippet', x: 40, y: 150 },
+    ],
+    rects: [
+      ...CASE_MAP.rects,
+      { name: 'region:sales', x: 128, y: 64, width: 192, height: 128 },
+      { name: 'shadow:sales', x: 128, y: 64, width: 16, height: 4 },
+      { name: 'shadow:hr', x: 16, y: 160, width: 16, height: 4 },
+    ],
+  };
+  const through = (start: GameState, ...inputs: readonly GameInput[]): GameState =>
+    inputs.reduce((state, input) => update(state, input, ROOM_MAP), start);
+  const start = createInitialState(ROOM_MAP);
+  const ready: GameState = {
+    ...start,
+    tick: 1000,
+    traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+  };
+  const OUTSIDE = { species: 'snippet', x: 40, y: 150, light: 0, home: { x: 40, y: 150 } };
+
+  it('starts with both creatures and both walls', () => {
+    expect(start.creatures.map((creature) => creature.home)).toStrictEqual([
+      { x: 240, y: 150 },
+      { x: 40, y: 150 },
+    ]);
+    expect(start.shadowWalls.map((wall) => wall.wall)).toStrictEqual([0, 1]);
+  });
+
+  it('removes the wall of the region and the creature at home in it in the step that solves the case', () => {
+    const before = through(ready, TALK, NONE, TALK, NONE);
+    expect(before.creatures).toHaveLength(2);
+    expect(before.shadowWalls).toHaveLength(2);
+    const solved = update(before, TALK, ROOM_MAP);
+    expect(solved.solved).toStrictEqual([{ region: 'sales', at: 1005 }]);
+    expect(solved.creatures).toStrictEqual([OUTSIDE]);
+    expect(solved.shadowWalls).toStrictEqual([{ wall: 1, lit: false, light: 0 }]);
+    expect(solved.captured).toStrictEqual({ snippet: 0 });
+  });
+
+  it('removes nothing in a step that solves nothing', () => {
+    const one: GameState = {
+      ...ready,
+      traces: ready.traces.map((trace, i) => (i === 0 ? trace : { ...trace, found: null })),
+    };
+    const closed = through(one, TALK, NONE, TALK);
+    expect(closed.dialogue).toBeNull();
+    expect(closed.creatures).toHaveLength(2);
+    expect(closed.shadowWalls).toHaveLength(2);
+  });
+
+  it('brings back no creature that left this way when the figure wakes (0009)', () => {
+    const solved = through(ready, TALK, NONE, TALK, NONE, TALK);
+    const woken = update({ ...solved, dark: 44 }, NONE, ROOM_MAP);
+    expect(woken.dark).toBe(45);
+    expect(woken.creatures).toStrictEqual([OUTSIDE]);
+    expect(woken.shadowWalls).toStrictEqual([{ wall: 1, lit: false, light: 0 }]);
+    expect(woken.captured).toStrictEqual({ snippet: 0 });
+  });
+
+  it('keeps them gone: 600 steps later the creature and the wall are still not there', () => {
+    let state = through(ready, TALK, NONE, TALK, NONE, TALK);
+    for (let i = 0; i < 600; i += 1) {
+      state = update(state, NONE, ROOM_MAP);
+    }
+    expect(state.creatures.map((creature) => creature.home)).toStrictEqual([{ x: 40, y: 150 }]);
+    expect(state.shadowWalls.map((wall) => wall.wall)).toStrictEqual([1]);
+  });
+
+  it('survives a JSON round trip in the middle of a clearing (INV-1)', () => {
+    let state = through(ready, TALK, NONE, TALK, NONE, TALK);
+    for (let i = 0; i < 60; i += 1) {
+      state = update(state, NONE, ROOM_MAP);
+    }
+    expect(state.tick).toBe(1065);
+    expect(clearingVeil(1, state.tick - (state.solved[0]?.at ?? 0))).toBe(4);
+    expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
   });
 });
