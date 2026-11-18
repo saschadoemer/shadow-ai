@@ -60,6 +60,25 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'Half of them in languages nobody here',
     'speaks. Somehow it always works out.',
   ].join('\n'),
+  'talk.sales-source-1': [
+    'That is from my screen, I know.',
+    'I pasted the offers into a chatbot to make',
+    'them sound better – three due by tonight.',
+  ].join('\n'),
+  'talk.sales-source-2': ['Where the text goes from there, I never', 'thought about.'].join('\n'),
+  'talk.sales-after': [
+    'Thanks for asking instead of telling me off.',
+    'Just tell me what I may use for it',
+    'next time.',
+  ].join('\n'),
+  'case.sales-outcome': 'Solved: offers went into a chatbot.',
+  'policy.sales': [
+    'Every text has a level: open, internal or',
+    'confidential. Confidential text stays in tools',
+    'we have approved. And whoever is unsure',
+    'asks – without trouble.',
+  ].join('\n'),
+  'notice.case-solved': 'The case is solved. See the journal.',
   'talk.sales-everyday': [
     'Three offers by tonight, and each one should',
     'sound as if I had had a week for it.',

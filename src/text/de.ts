@@ -64,6 +64,25 @@ export const de = {
     'Die Hälfte davon in Sprachen, die hier',
     'keiner spricht. Irgendwie geht es immer.',
   ].join('\n'),
+  'talk.sales-source-1': [
+    'Das ist von meinem Bildschirm, ich weiß.',
+    'Ich habe die Angebote in einen Chatbot kopiert,',
+    'damit sie besser klingen – drei bis zum Abend.',
+  ].join('\n'),
+  'talk.sales-source-2': ['Wohin der Text damit geht, habe ich mir nicht', 'überlegt.'].join('\n'),
+  'talk.sales-after': [
+    'Danke, dass du gefragt hast statt zu schimpfen.',
+    'Sag mir einfach, womit ich es beim nächsten Mal',
+    'machen darf.',
+  ].join('\n'),
+  'case.sales-outcome': 'Gelöst: Angebote gingen in einen Chatbot.',
+  'policy.sales': [
+    'Jeder Text hat eine Stufe: offen, intern oder',
+    'vertraulich. Vertrauliches bleibt in den',
+    'Werkzeugen, die wir freigegeben haben. Und wer',
+    'unsicher ist, fragt – ohne Ärger.',
+  ].join('\n'),
+  'notice.case-solved': 'Der Fall ist gelöst. Sieh ins Journal.',
   'talk.sales-everyday': [
     'Drei Angebote bis heute Abend, und jedes soll',
     'klingen, als hätte ich eine Woche Zeit gehabt.',
