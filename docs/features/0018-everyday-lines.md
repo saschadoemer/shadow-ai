@@ -257,7 +257,10 @@ lamp, `E` or `Enter` talks.
 - Are the four sayings right in tone and in content?
 - The world stands still while a colleague speaks who was walking a moment ago. Still right?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–22. Feel: the reach of 40 px is right, across the counter
+and in the open; the colleague walking on at once after the talk is fine, no pause wanted; one
+saying each is enough until the cases come; the four sayings are right in tone and content; the
+world standing still while a colleague speaks is still right.
 
 ## Open questions
 
