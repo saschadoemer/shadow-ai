@@ -9,6 +9,7 @@ import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
 import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from './overview';
 import { type GameInput, NO_INPUT, stepPlayer } from './player';
 import { areasOf } from './region';
+import { restsOf } from './rest';
 import { standingWalls, stepWalls, wallsOf, withWalls } from './shadow';
 import {
   type Dialogue,
@@ -43,6 +44,8 @@ export function createInitialState(map: TileMap): GameState {
   const walls = wallsOf(map.rects);
   // The areas of the regions are only drawn (0023); a map with a faulty one still does not start.
   areasOf(map.rects);
+  // Nor does a map with a rest that is not one cell (0027).
+  restsOf(map.rects);
   const figures = figuresOf(map.points);
   const player: PlayerState = {
     x: map.spawn.x,
