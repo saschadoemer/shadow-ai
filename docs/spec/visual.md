@@ -101,7 +101,7 @@ The colour of a transparent pixel is not checked. The palette is data in
 for nothing else in the world; the asset test rejects it in every PNG under `public/` except the
 shadow assets, a list in the test: `sprites/snippet.png` (feature 0008),
 `sprites/shadow-wall.png` (feature 0014), `sprites/trace.png` (feature 0022) and
-`sprites/shadow-veil.png` (feature 0023).
+`sprites/shadow-veil.png` (features 0023 and 0025).
 Every trace of shadow AI glows in
 it. The player learns in seconds what to look for, without a word of text. Because colour alone
 excludes colour-blind players, the signature colour is always accompanied by **form and
@@ -143,8 +143,18 @@ else: the cone, the shadow walls, the traces, the people, the dogs, the machines
 and the player keep their colours and get no veil, and `above` is drawn grey without one. So a
 person in a room under shadow stands out in colour against a floor that has none. The form
 beside the colour is the grey itself and the dithering of the veil, whose density tells the
-regions apart. The reception, the break room and the corridors are not under shadow. A region
-that clears and gets its colours back comes with feature 0025.
+regions apart. The reception, the break room and the corridors are not under shadow.
+
+*As built* (feature 0025). A region whose case is solved is cleared: from the frame after the
+solving step its cells are drawn from the tileset, in their colours, on all three layers. The
+veil stays a moment longer and thins out over `CLEAR_STEPS`, 120 steps or two seconds, *tune*,
+in three parts of 40 steps: first the veil of the region's density as before, then a veil of 16
+pixels a cell, then one of 8, then none. So the room does not fade: it comes clear. The colours
+come at once and the dots go in three steps. The veil's sheet has two more frames for it, after
+the three of the densities: frame 3 holds the pixels where x and y, counted in the frame, are
+both multiples of 4, and frame 4 those of them where x + y is a multiple of 8. Both are in the
+signature colour, repeat every 8 px and join without a seam. A cleared room looks like the
+reception: colours, no dots.
 
 ## 5. Assets
 

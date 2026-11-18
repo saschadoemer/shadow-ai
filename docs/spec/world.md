@@ -122,6 +122,11 @@ room are not. The corridors, the side passage, the lift, the stairwell and the d
 officer's office are no regions and have no area. Lifting the shadow wall of a doorway does not
 change the room behind it: the wall was the door, not the shadow.
 
+**As built** (feature 0025): a region whose case is solved is **cleared**, for good. Its cells
+are no longer under shadow, whatever its density in the table: the density stays what gates the
+region, and the solved case is what takes the shadow off it. Sales is the first cleared region;
+every other region with a density above 0 stays under shadow until its case is solved.
+
 | Area | Cells | Density |
 |---|---|---|
 | `region:hr` | (1, 1)–(21, 19) | 2 |
@@ -212,7 +217,10 @@ Species names, looks and behaviours are defined in the feature spec that introdu
 
 **The snippet** (*Schnipsel*, feature 0008) is the species of the Sales case: a scrap of paper
 with lines of text, because it feeds on text pasted into a public chatbot. Small, layer 1. Three
-stand on the floor: one in the east corridor in front of the Sales doorway, two in Sales. Its displayed name is *Schnipsel*, in English
+stand on the floor: one in the east corridor in front of the Sales doorway, two in Sales. The
+two of Sales have their home in the region's area and leave the game when the case of Sales is
+solved, captured or not; the one of the corridor has its home in no region and stays (feature
+0025). Its displayed name is *Schnipsel*, in English
 *Snippet*, and its journal text is fixed with feature 0020: what it is, what it lives on, and
 that it goes as soon as everyone knows which data may go where. The name is a dictionary word
 for a scrap of paper, used for a species and not for a product, a company or a tool; it is fixed
