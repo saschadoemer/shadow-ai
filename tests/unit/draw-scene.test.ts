@@ -149,9 +149,10 @@ const state = (
   lampOn = false,
 ): GameState => ({
   tick: QUIET_TICK,
+  started: 0,
   player: player(fields),
   camera,
-  lamp: { on: lampOn, strength: 1 },
+  lamp: { on: lampOn, strength: 1, owned: true, used: true },
   creatures: [],
   movers: [],
   shadowWalls: [],
@@ -725,7 +726,7 @@ describe('the notice in the scene (0016)', () => {
     for (const scene of [
       holding({ shadowWalls: [{ wall: 0, lit: true, light: 1 }] }),
       holding({ shadowWalls: [] }),
-      holding({ lamp: { on: false, strength: 1 } }),
+      holding({ lamp: { on: false, strength: 1, owned: true, used: true } }),
     ]) {
       const renderer = recordingRenderer();
       drawScene(renderer, scene, CONTENT);
@@ -1040,7 +1041,7 @@ describe('the language line in the scene (0019)', () => {
 
   it('leaves the bar to the notice of 0016, which itself changes its language', () => {
     const holding = quiet(100, {
-      lamp: { on: true, strength: 1 },
+      lamp: { on: true, strength: 1, owned: true, used: true },
       shadowWalls: [{ wall: 0, lit: true, light: 0 }],
     });
     const renderer = recordingRenderer();
@@ -1185,7 +1186,7 @@ describe('the start hint in the scene (0021)', () => {
 
   it('leaves the bar to the notice of 0016', () => {
     const holding = fresh(100, {
-      lamp: { on: true, strength: 1 },
+      lamp: { on: true, strength: 1, owned: true, used: true },
       shadowWalls: [{ wall: 0, lit: true, light: 0 }],
     });
     const renderer = recordingRenderer();
@@ -1443,7 +1444,11 @@ describe('the cleared region in the scene (0025)', () => {
 
   it('lays the thinning veil where the veil lies: after detail and before the cone', () => {
     const renderer = recordingRenderer();
-    drawScene(renderer, { ...cleared('sales', 40), lamp: { on: true, strength: 1 } }, content);
+    drawScene(
+      renderer,
+      { ...cleared('sales', 40), lamp: { on: true, strength: 1, owned: true, used: true } },
+      content,
+    );
     const detail = renderer.calls.indexOf('drawTile 4 at 16,16');
     expect(renderer.calls[detail + 1]).toBe('drawSprite 3 at 0,0');
     expect(renderer.sheets.slice(0, 7)).toStrictEqual([

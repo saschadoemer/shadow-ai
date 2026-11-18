@@ -162,7 +162,7 @@ export function openDialogue(
       frame: 0,
       frameTimer: 0,
     },
-    lamp: { on: false, strength: state.lamp.strength },
+    lamp: { ...state.lamp, on: false },
     figures:
       speaker.speaker === 'figure'
         ? state.figures.map((standing, index) =>

@@ -21,7 +21,7 @@ const HOLDS: ShadowWallState = { wall: 0, lit: true, light: 0 };
 const BASE = createInitialState(grassMap(20, 12, { x: 152, y: 96 }));
 const withWalls = (lampOn: boolean, ...shadowWalls: ShadowWallState[]): GameState => ({
   ...BASE,
-  lamp: { on: lampOn, strength: 1 },
+  lamp: { on: lampOn, strength: 1, owned: true, used: true },
   shadowWalls,
 });
 

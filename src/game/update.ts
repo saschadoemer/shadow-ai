@@ -22,7 +22,9 @@ import { BASE_STRENGTH } from './world';
  * (0015); a lamp of strength BASE_STRENGTH and every shadow wall of the map standing (0014);
  * every standing figure of the map facing down and no dialogue (0017); the journal closed and
  * no key remembered (0020); the help closed (0021); every trace of the map unseen and not found
- * (0022); no case solved (0024). A map with two wake points, a route that is malformed or crosses a solid tile, a
+ * (0022); no case solved (0024). It is a game past its opening (0026): the lamp is owned and
+ * was used, no scene is open, and the opening ended at tick 0; `newGame` is the state a player
+ * starts with. A map with two wake points, a route that is malformed or crosses a solid tile, a
  * rectangle of no known kind, a shadow wall or a trace the world data or the grid refuses, an
  * area of a region the world data does not know or of a box that is not whole cells (0023), or
  * a figure point the cast does not know or names twice is rejected here, before the game starts.
@@ -46,9 +48,10 @@ export function createInitialState(map: TileMap): GameState {
   };
   return {
     tick: 0,
+    started: 0,
     player,
     camera: followPlayer(player, map),
-    lamp: { on: false, strength: BASE_STRENGTH },
+    lamp: { on: false, strength: BASE_STRENGTH, owned: true, used: true },
     creatures: creaturesFrom(map.points),
     movers: moversFrom(routes),
     shadowWalls: standingWalls(walls),
@@ -124,8 +127,8 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     return opened;
   }
   const lamp: LampState = {
+    ...state.lamp,
     on: input.lamp && state.player.recoil.steps === 0,
-    strength: state.lamp.strength,
   };
   const walls = wallsOf(content.rects);
   // The figure, the push and the creatures meet the walls standing at the start of the step.
@@ -145,6 +148,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
       : applyHit(stepped, state.overview, hitter);
   return {
     tick: state.tick + 1,
+    started: state.started,
     player,
     camera: followPlayer(player, content),
     lamp,
