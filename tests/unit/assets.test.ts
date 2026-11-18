@@ -14,6 +14,7 @@ const SHADOW_ASSETS: ReadonlySet<string> = new Set([
   'public/sprites/snippet.png',
   'public/sprites/shadow-wall.png',
   'public/sprites/trace.png',
+  'public/sprites/shadow-veil.png',
 ]);
 const rulesFor = (file: string) => ({
   ...RULES,
@@ -90,6 +91,7 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
       'public/sprites/snippet.png',
       'public/sprites/shadow-wall.png',
       'public/sprites/trace.png',
+      'public/sprites/shadow-veil.png',
     ]);
   });
 
