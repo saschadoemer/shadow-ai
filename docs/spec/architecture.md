@@ -21,11 +21,12 @@ src/
                  check; game/shadow.ts the shadow walls, their light test and their step (0014);
                  game/notice.ts which notice a state shows (0016); game/cast.ts the cast and
                  the standing figures of a map, and the colleagues' lines (0018),
-                 game/talk.ts the rules of talking (0017, 0018)
+                 game/talk.ts the rules of talking (0017, 0018); game/journal.ts the
+                 journal's tabs, entries and step (0020)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene); render/font.ts the glyph order and the
                  cell size of the font, render/draw-text.ts text by TextKey, line by line
-                 (0016, 0017)
+                 (0016, 0017); render/draw-journal.ts the journal's screen (0020)
   text/          the language table and the TextKey type (INV-4): de.ts and en.ts hold the
                  strings, text.ts the languages, the keys and the lookup (0016)
 public/
@@ -80,9 +81,9 @@ render (feature 0019). It is read-only by convention; nothing in the game reads 
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
 logic steps since the start, the player, the camera, the lamp, the creatures, the movers, the
-standing shadow walls, the standing figures, the open dialogue, whether the talk key was held,
-the captured count, overview and the step of the dark; later the current map id, cleared
-regions and the journal join them. It is plain data: numbers,
+standing shadow walls, the standing figures, the open dialogue, the open journal, the input of
+the last step, the captured count, overview and the step of the dark; later the current map id
+and cleared regions join them. It is plain data: numbers,
 strings, booleans, arrays and plain objects. No functions, no class instances, no `Map` or `Set`,
 no `Date`. A JSON round trip reproduces it exactly, and a test proves that on a populated state.
 
@@ -204,9 +205,16 @@ the state: `update` and the scene rebuild the figures from `map.points` on every
 them nowhere. `facing` is `down` at the start and then where the figure turned the last time it
 was spoken to. A standing figure never moves and is not solid. `dialogue` is `null`, or
 `{ speaker, index, page }` (feature 0018): `speaker` is `'figure'` or `'mover'`, `index` the index
-of the speaker in `figures` or in `movers`, and `page` the page shown, from 0. `talkHeld` is
-the `talk` of the last step's input, false at the start; `talk` is **pressed** in a step when the
-input holds it and `talkHeld` is false (`game/talk`, `talkPressed`).
+of the speaker in `figures` or in `movers`, and `page` the page shown, from 0.
+
+`held` is the last step's input, a plain `GameInput`, every action false at the start
+(`NO_INPUT`); it replaced `talkHeld`, the `talk` of the last step, with feature 0020, because the
+journal needs presses of three actions. An action is **pressed** in a step when the input holds
+it and `held` does not (`game/player`, `pressed`; `talkPressed` in `game/talk` reads it for
+`talk`). `journal` is `null`, or `{ tab }` with one of `JOURNAL_TABS` — `creatures`, `cases`,
+`policy` — (feature 0020, `game/journal`). What a tab shows is not in the state: the **entries**
+of the creatures tab are the species of which at least one was captured, in `SPECIES` order,
+derived from `captured` in every frame by `entriesOf`; the cases and the policy have none yet.
 
 The **speakers** of a step (feature 0018, `speakersOf` in `game/talk`) are the standing figures in
 file order, then the movers of the kind `person` whose route is in `COLLEAGUES` (`game/cast`), in
@@ -214,10 +222,18 @@ the order of `movers`; each is where it is in this step — a figure at its poin
 `x` and `y` in the state, not rounded. Like the figures they are rebuilt on every call and kept
 nowhere. A person whose route has no lines, a dog, a vacuum and a drone are no speakers.
 
-A step is one of three kinds. **Dark:** with `dark` above 0 it is `stepDark`, as above. **Dialogue:**
-with a dialogue open, `tick` grows by 1, `talkHeld` is set, and a press turns to the next page or,
+A step is one of four kinds, in this order. **Dark:** with `dark` above 0 it is `stepDark`, as
+above, and sets `held`; `journal` does nothing. **Journal:** with the journal open, `tick` grows
+by 1 and `held` is set; a press of `journal` sets `journal` to `null`; otherwise a press of
+`right` while `left` is not pressed turns to the next tab, a press of `left` while `right` is not
+pressed to the one before, and at either end the tab stays. Nothing else changes — not the
+player, the lamp, the creatures, the movers, the walls or a figure. **Dialogue:**
+with a dialogue open, `tick` grows by 1, `held` is set, and a press turns to the next page or,
 on the last page, sets `dialogue` to `null`; nothing else changes — not the player, the lamp, the
-creatures, the movers or the walls. **Ordinary:** otherwise, a press while the input does not
+creatures, the movers or the walls — and a press of `journal` does nothing. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
+the input holds: `tick` grows by 1, `held` is set, and nothing else changes in this step — a
+figure in mid-step, a push and a lamp that is on stay as they are and go on when it closes
+(`openJournal`). This comes before a press of `talk` is looked at. Otherwise a press of `talk` while the input does not
 hold `lamp`, the player is not pushed and a speaker stands at most 40 px (`TALK_DISTANCE`) from
 the player's feet and in sight opens a dialogue with the nearest one — the first in the speakers'
 order of two equally near — on page 0, and nothing else is stepped. In sight (`inSight`) is the
@@ -227,9 +243,10 @@ is the larger one, up or down otherwise, unchanged on the same spot), the player
 0, timer 0, the lamp is off, and `tick` grows by 1. A colleague that is spoken to gets `frame` 0,
 `frameTimer` 0 and the facing toward the player, and nothing else of it changes, so `game/mover`
 steps it on unchanged after the dialogue. Without such a press the
-step is the one described above. Every step, of every kind, sets `talkHeld` from its input, so a
-key held down is pressed once. The wake keeps `figures` and `talkHeld` and has no dialogue. A
-state without speakers, in which `talk` is never held, steps exactly as before 0018.
+step is the one described above. Every step, of every kind, sets `held` from its input, so a
+key held down is pressed once. The wake keeps `figures` and `held` and has no dialogue and no
+journal. A state without speakers, in which `talk` is never held, steps exactly as before 0018;
+a state in which `journal` is never held steps exactly as before 0020.
 
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
@@ -238,7 +255,8 @@ settings are neither: the language (feature 0019) is held by `main.ts`, not save
 not shipped, and reaches only the scene (§5, §8).
 
 `update(state, input, content)` advances the state by exactly one logic step and returns the new
-state. `input` is `GameInput`: the four movement actions, `lamp` and `talk`, as booleans (§4);
+state. `input` is `GameInput`: the four movement actions, `lamp`, `talk` and `journal`, as
+booleans (§4);
 `content` is the loaded map. Whether it mutates in place or returns a copy is an implementation
 choice per module; what it may not do is read anything but its arguments or write anything but
 its result.
@@ -289,16 +307,19 @@ because no `keyup` will come for what is held. A `keydown` with `repeat` changes
 matters after a release: a key still held when the page regains focus keeps repeating, and must
 not press itself again, so the figure stands until the key is really pressed again. The keyboard
 does not keep which keys went down this step, the edge a single press needs. Talking (feature
-0017) is the first that needs a press, and the game derives it in the state: `talkHeld` remembers
-the last step's `talk` (§2). The keyboard still keeps no edge.
+0017) is the first that needs a press, and the game derives it in the state: `held` remembers
+the whole input of the last step (§2; `talkHeld`, the last step's `talk`, until feature 0020).
+The keyboard still keeps no edge, and it reads the held keys once per frame, so a key that goes
+down and up within one frame is not seen.
 
-The game reads named actions — `up`, `down`, `left`, `right`, `lamp` and `talk`, later
-`journal` — never key codes. The mapping from keys to actions lives in one table in `main.ts`:
+The game reads named actions — `up`, `down`, `left`, `right`, `lamp`, `talk` and `journal` —
+never key codes. The mapping from keys to actions lives in one table in `main.ts`:
 `up` ← ArrowUp or W, `down` ← ArrowDown or S, `left` ← ArrowLeft or A, `right` ← ArrowRight or
-D, `lamp` ← Space, `talk` ← E or Enter, `fullscreen` ← F, `language` ← L.
+D, `lamp` ← Space, `talk` ← E or Enter, `journal` ← J (feature 0020), `fullscreen` ← F,
+`language` ← L.
 Once per frame, before the steps (§3), `main.ts` resolves the held keys through the table with
 `resolveActions`, a pure function in `engine/input`: an action is on when any of its keys is
-down. The game gets the six actions as booleans and nothing else. A gamepad (deferred,
+down. The game gets the seven actions as booleans and nothing else. A gamepad (deferred,
 `docs/plan.md` §5) and remappable keys are additions to the table, not changes to the game.
 
 A bound key pressed without Ctrl, Alt or Cmd belongs to the game: `main.ts` prevents its default,
@@ -309,7 +330,7 @@ Alt or Cmd; it never reaches the game. `language` (feature 0019) is handled the 
 `keydown` of L: `main.ts` sets the language to `nextLanguage` of it, notes the state's `tick` of
 the last frame as `switchedAt`, and sets the `lang` attribute of the page's root element. A held
 key switches once; with Ctrl, Alt or Cmd the browser keeps its shortcut and the language stays;
-before the content has loaded the key does nothing. The game still gets its six actions.
+before the content has loaded the key does nothing. The game still gets its seven actions.
 
 ## 5. The renderer interface
 
@@ -406,6 +427,19 @@ grown upwards to three lines, with the same bottom edge —, the page's lines le
 (12, 138), and, while ⌊tick / 30⌋ is even, the marker: three rectangles in `#ffffff`, (299, 169,
 5, 1), (300, 170, 3, 1) and (301, 171, 1, 1), a small triangle that points down and blinks once a
 second, on every page. A line of 47 characters ends at x = 294, left of the marker.
+
+The journal (feature 0020, `render/draw-journal`). While `journal` is not `null`, `drawScene`
+draws the journal and nothing else: no tile, no figure, no heart, no notice, no language line,
+no lid. In the language of the settings it draws: the surface cleared in `#181425`; the three
+tabs, tab k from 0 a rectangle (8 + 102k, 6, 100, 16) in `#3a4466` when it is open and `#262b44`
+otherwise, with its title of n characters from (58 + 102k − 3n, 9), centred; the rule
+(8, 22, 304, 2) in `#3a4466`, the colour of the open tab; then the open tab's content. Without
+entries that is the tab's line for nothing from (16, 36). With entries, entry k from 0 is frame 2
+of the species' sheet — the creature as the light shows it, `ENTRY_FRAME`, held equal to
+`FROZEN_FRAME` by a test — with its top-left corner at (16, 32 + 72k), the name from
+(40, 35 + 72k) and the text from (16, 54 + 72k), lines 12 px apart. A line of 47 characters ends
+at x = 298; two entries fit, the second ending at y = 172. `draw-journal` imports only types
+from `draw-scene`, and `draw-scene` imports `drawJournal`.
 
 The interface exists so the implementation can change (ADR-0001 names PixiJS as the candidate)
 without touching `game/`. It is not an abstraction for its own sake: it has exactly one
@@ -808,6 +842,13 @@ empty line; the break is written in the table, and the game computes none, so a 
 decides its own breaks. A test holds every page of both languages to that rule; the glyph test
 skips the line breaks. The cast (`game/cast`) names its pages by key, and so does `COLLEAGUES`,
 the colleagues' lines by the name of their route (feature 0018).
+
+The journal (feature 0020) adds two kinds. `journal.tab-<tab>` is a tab's title, one line of at
+most 16 characters; `journal.no-<tab>` the line a tab shows while it has nothing, one line of at
+most 47. `creature.<species>-name` is a species' displayed name, one line of at most 24
+characters; `creature.<species>-text` its journal text, two to four lines of at most 47 and no
+empty line. `game/journal` names them by key in `TAB_TEXT` and `ENTRY_TEXT`, and a test holds
+every key of the two kinds to the rule of its kind in both languages.
 
 ## 9. Tooling
 
