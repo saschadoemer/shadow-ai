@@ -7,6 +7,19 @@
 export const de = {
   'notice.shadow-too-dense': 'Dieser Schatten ist zu dicht für die Lampe.',
   'notice.language': 'Sprache: Deutsch',
+  'journal.tab-creatures': 'Kreaturen',
+  'journal.tab-cases': 'Fälle',
+  'journal.tab-policy': 'Richtlinie',
+  'journal.no-creatures': 'Noch keine Kreatur gefangen.',
+  'journal.no-cases': 'Noch kein Fall aufgenommen.',
+  'journal.no-policy': 'Die Richtlinie ist noch leer.',
+  'creature.snippet-name': 'Schnipsel',
+  'creature.snippet-text': [
+    'Ein Stück Text, das jemand in einen',
+    'öffentlichen Chatbot kopiert hat. Es lebt von',
+    'allem, was dort eingefügt wird – und geht,',
+    'sobald klar ist, welche Daten wohin dürfen.',
+  ].join('\n'),
   'talk.officer-rules-1': [
     'Du siehst den Schatten also auch.',
     'Er bleibt überall dort zurück, wo Daten das',

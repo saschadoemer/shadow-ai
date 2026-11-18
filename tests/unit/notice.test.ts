@@ -13,6 +13,7 @@ const NONE: GameInput = {
   right: false,
   lamp: false,
   talk: false,
+  journal: false,
 };
 const SHINE: GameInput = { ...NONE, lamp: true };
 const HOLDS: ShadowWallState = { wall: 0, lit: true, light: 0 };

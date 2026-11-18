@@ -3,7 +3,7 @@ import type { Point, TileMap } from '../engine/tiled';
 import type { TextKey } from '../text/text';
 import { COLLEAGUES, type Colleague, type Figure, pagesOfRoute } from './cast';
 import type { Route } from './mover';
-import { BOX_HEIGHT, type GameInput } from './player';
+import { BOX_HEIGHT, type GameInput, pressed } from './player';
 import type { Dialogue, Facing, GameState, MoverState, SpeakerKind } from './state';
 
 /**
@@ -19,10 +19,10 @@ export const TALK_DISTANCE = 40;
 
 /**
  * Whether `talk` is pressed in this step: the input holds it and the last step's did not. The
- * keyboard keeps no press (architecture.md §4), so the state does, in `talkHeld`.
+ * keyboard keeps no press (architecture.md §4), so the state does, in `held`.
  */
 export function talkPressed(state: GameState, input: GameInput): boolean {
-  return input.talk && !state.talkHeld;
+  return pressed(state.held, input, 'talk');
 }
 
 /**
@@ -147,7 +147,7 @@ export function openDialogue(
   return {
     ...state,
     tick: state.tick + 1,
-    talkHeld: true,
+    held: input,
     player: {
       ...player,
       facing: facingToward(player, speaker, player.facing),
@@ -181,7 +181,7 @@ export function openDialogue(
 }
 
 /**
- * One step with a dialogue open: the tick grows, the key is remembered, and a press turns to
+ * One step with a dialogue open: the tick grows, the input is remembered, and a press turns to
  * the next page or, on the last page, closes the dialogue. Nothing else changes.
  */
 export function stepDialogue(
@@ -195,7 +195,7 @@ export function stepDialogue(
   return {
     ...state,
     tick: state.tick + 1,
-    talkHeld: input.talk,
+    held: input,
     dialogue: page < pages ? { ...dialogue, page } : null,
   };
 }

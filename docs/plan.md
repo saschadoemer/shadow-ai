@@ -99,11 +99,10 @@ is the whole feature. Then everyday lines for the four colleagues who walk the f
 0015: they have to stop and turn before they can be spoken to. The language switch after that,
 when there is enough text for English to be worth looking at; the title screen that will hold
 the switch is M8, so M4 needs an interim one. The journal after it: its three tabs are text and
-pictures, and its first content — the captured snippet — exists since 0008. 0016, 0017,
-0018 and 0019 are implemented, and 0020 is drafted.
-Help last: a box that lists every key, and a line at the start that names its own. It came out
-of the walk of 0019, and it follows the journal because it lists the journal's key and uses its
-press. 0021 is approved.
+pictures, and its first content — the captured snippet — exists since 0008. Help last: a box
+that lists every key, and a line at the start that names its own. It came out of the walk of
+0019, and it follows the journal because it lists the journal's key and uses its press. 0016 to
+0020 are implemented, and 0021 is approved.
 
 ## 5. Deferred, with reasons
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EMPTY, type TileMap } from '../../src/engine/tiled';
+import { NO_INPUT } from '../../src/game/player';
 import {
   type CreatureState,
   type FigureState,
@@ -141,7 +142,8 @@ const state = (
   shadowWalls: [],
   figures: [],
   dialogue: null,
-  talkHeld: false,
+  journal: null,
+  held: NO_INPUT,
   captured: { snippet: 0 },
   // No hearts: the call lists of the earlier features stay as they were (0009).
   overview: { current: 0, max: 0 },

@@ -1,4 +1,5 @@
 import type { Point } from '../engine/tiled';
+import type { GameInput } from './player';
 
 /** The facings in sprite-sheet order: frame index = facing × PHASES_PER_FACING + phase. */
 export const FACINGS = ['down', 'up', 'left', 'right'] as const;
@@ -112,6 +113,15 @@ export interface Dialogue {
   readonly page: number;
 }
 
+/** The tabs of the journal (gameplay.md §7), in their order on the screen (0020). */
+export const JOURNAL_TABS = ['creatures', 'cases', 'policy'] as const;
+export type JournalTab = (typeof JOURNAL_TABS)[number];
+
+/** The open journal (0020). What its tabs show is derived from the rest of the state. */
+export interface JournalState {
+  readonly tab: JournalTab;
+}
+
 /** How many creatures of each species were captured. */
 export type Captured = Readonly<Record<Species, number>>;
 
@@ -146,8 +156,10 @@ export interface GameState {
   readonly figures: readonly FigureState[];
   /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
   readonly dialogue: Dialogue | null;
-  /** Whether the last step's input held `talk`: a press is held now and not then (0017). */
-  readonly talkHeld: boolean;
+  /** The journal that is open, or null. While it is open nothing else is stepped (0020). */
+  readonly journal: JournalState | null;
+  /** The last step's input: an action is pressed when it is held now and was not then (0020). */
+  readonly held: GameInput;
   /** Captured creatures per species; the journal (M4) reads it. */
   readonly captured: Captured;
   readonly overview: Overview;

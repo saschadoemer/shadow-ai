@@ -131,12 +131,21 @@ to click except turning pages:
 
 There is no map in the journal. The map itself shows by colour what has been cleared.
 
+**As built** (feature 0020): a press of J opens the journal on the creatures, and a second press
+closes it. The left and right keys of walking turn the three tabs, one tab per press, and stop
+at either end; the journal always opens on the creatures. The game stands still while it is
+open: nothing moves, nothing can hurt the player, and everything goes on where it stood when it
+closes. A species has its entry as soon as one of it is captured: its own 16x16 picture, its
+name and two to four lines. The cases and the policy say in one line that they are empty; their
+content comes with M5. There is no count of captures and no pages within a tab yet. J does
+nothing with a dialogue open and nothing in the dark.
+
 ## 8. Controls and presentation
 
 Desktop browser with keyboard; a gamepad is deferred (`docs/plan.md` §5); touch and
 mobile are non-goals. Arrow keys or WASD walk, Space holds the lamp, E or Enter talks to a
-figure and turns the pages of what it says, F toggles fullscreen, L switches between German
-and English.
+figure and turns the pages of what it says, J opens and closes the journal, F toggles
+fullscreen, L switches between German and English.
 Scrolling camera on a 320x180 internal resolution (`visual.md`). Movement,
 collision and camera behaviour are specified in the feature that introduces them.
 

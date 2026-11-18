@@ -41,5 +41,5 @@ in two.
 | [0017](0017-talking.md) | Talking | M4 | implemented 2026-11-17 |
 | [0018](0018-everyday-lines.md) | Everyday lines | M4 | implemented 2026-11-18 |
 | [0019](0019-the-language-switch.md) | The language switch | M4 | implemented 2026-11-18 |
-| [0020](0020-the-journal.md) | The journal | M4 | draft |
+| [0020](0020-the-journal.md) | The journal | M4 | implemented 2026-11-18 |
 | [0021](0021-help.md) | Help | M4 | approved 2026-11-18 |

@@ -21,6 +21,7 @@ const NONE: GameInput = {
   right: false,
   lamp: false,
   talk: false,
+  journal: false,
 };
 
 function press(...actions: readonly (keyof MovementInput)[]): GameInput {
@@ -31,6 +32,7 @@ function press(...actions: readonly (keyof MovementInput)[]): GameInput {
     right: actions.includes('right'),
     lamp: false,
     talk: false,
+    journal: false,
   };
 }
 

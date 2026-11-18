@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseTileMap, parseTileset, type TileMap } from '../../src/engine/tiled';
 import { followPlayer } from '../../src/game/camera';
-import type { GameInput } from '../../src/game/player';
+import { type GameInput, NO_INPUT } from '../../src/game/player';
 import { FACINGS, type GameState, PHASES_PER_FACING, type PlayerState } from '../../src/game/state';
 import { createInitialState, update } from '../../src/game/update';
 import { grassMap } from './grass-map';
@@ -47,6 +47,7 @@ const NONE: GameInput = {
   right: false,
   lamp: false,
   talk: false,
+  journal: false,
 };
 const RIGHT: GameInput = { ...NONE, right: true };
 const UP_LEFT: GameInput = { ...NONE, up: true, left: true };
@@ -83,7 +84,8 @@ describe('GameState (INV-1)', () => {
       shadowWalls: [],
       figures: [],
       dialogue: null,
-      talkHeld: false,
+      journal: null,
+      held: NO_INPUT,
       captured: { snippet: 0 },
       overview: { current: 5, max: 5 },
       dark: 0,
@@ -139,7 +141,8 @@ describe('update', () => {
         shadowWalls: [],
         figures: [],
         dialogue: null,
-        talkHeld: false,
+        journal: null,
+        held: NO_INPUT,
         captured: { snippet: 0 },
         overview: { current: 3, max: 3 },
         dark: 0,
@@ -163,7 +166,8 @@ describe('update', () => {
       shadowWalls: [],
       figures: [],
       dialogue: null,
-      talkHeld: false,
+      journal: null,
+      held: NO_INPUT,
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -179,7 +183,8 @@ describe('update', () => {
       shadowWalls: [],
       figures: [],
       dialogue: null,
-      talkHeld: false,
+      journal: null,
+      held: NO_INPUT,
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -418,6 +423,7 @@ describe('movers in the state (0015)', () => {
       right: i % 240 < 60,
       lamp: i % 97 < 20,
       talk: false,
+      journal: false,
     }));
     let withMovers = createInitialState(FLOOR_MAP);
     let without: GameState = { ...withMovers, movers: [] };
@@ -577,6 +583,7 @@ describe('shadow walls in the state (0014)', () => {
       right: i % 240 < 60,
       lamp: i % 97 < 20,
       talk: false,
+      journal: false,
     }));
     const bare: TileMap = { ...FLOOR_MAP, rects: [] };
     let open: GameState = { ...createInitialState(FLOOR_MAP), shadowWalls: [] };
@@ -597,7 +604,7 @@ describe('standing figures in the state (0017)', () => {
     const state = createInitialState(FIGURES_MAP);
     expect(state.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
     expect(state.dialogue).toBeNull();
-    expect(state.talkHeld).toBe(false);
+    expect(state.held).toStrictEqual(NO_INPUT);
     expect(state.creatures).toHaveLength(1);
     expect(state.movers).toStrictEqual([]);
   });
@@ -614,12 +621,12 @@ describe('standing figures in the state (0017)', () => {
   it('remembers in every step whether talk was held: an ordinary step and a step of the dark', () => {
     const start = createInitialState(MAP);
     const held = update(start, TALK, MAP);
-    expect(held.talkHeld).toBe(true);
-    expect(update(held, NONE, MAP).talkHeld).toBe(false);
+    expect(held.held).toStrictEqual(TALK);
+    expect(update(held, NONE, MAP).held).toStrictEqual(NONE);
     const dark = update({ ...start, dark: 1 }, TALK, MAP);
     expect(dark.dark).toBe(2);
-    expect(dark.talkHeld).toBe(true);
-    expect(update(dark, NONE, MAP).talkHeld).toBe(false);
+    expect(dark.held).toStrictEqual(TALK);
+    expect(update(dark, NONE, MAP).held).toStrictEqual(NONE);
   });
 
   it('keeps the figures through the wake', () => {
@@ -664,5 +671,32 @@ describe('colleagues with lines in the state (0018)', () => {
     const opened = update(createInitialState(TALKERS_MAP), TALK, TALKERS_MAP);
     expect(opened.dialogue).not.toBeNull();
     expect(JSON.parse(JSON.stringify(opened))).toStrictEqual(opened);
+  });
+});
+
+describe('the journal in the state (0020)', () => {
+  const JOURNAL: GameInput = { ...NONE, journal: true };
+
+  it('starts closed, with no key remembered', () => {
+    const state = createInitialState(FLOOR_MAP);
+    expect(state.journal).toBeNull();
+    expect(state.held).toStrictEqual(NO_INPUT);
+    expect(NONE).toStrictEqual(NO_INPUT);
+  });
+
+  it('opens on the floor with a press and closes with the next, and nothing has moved', () => {
+    const start = createInitialState(FLOOR_MAP);
+    const open = update(start, JOURNAL, FLOOR_MAP);
+    expect(open).toStrictEqual({ ...start, tick: 1, held: JOURNAL, journal: { tab: 'creatures' } });
+    const closed = update(update(open, NONE, FLOOR_MAP), JOURNAL, FLOOR_MAP);
+    expect(closed).toStrictEqual({ ...start, tick: 3, held: JOURNAL });
+  });
+
+  it('keeps the journal closed through the wake', () => {
+    let state: GameState = { ...createInitialState(FLOOR_MAP), dark: 44 };
+    state = update(state, JOURNAL, FLOOR_MAP);
+    expect(state.dark).toBe(45);
+    expect(state.journal).toBeNull();
+    expect(state.held).toStrictEqual(JOURNAL);
   });
 });

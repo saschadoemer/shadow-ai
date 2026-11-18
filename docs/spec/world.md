@@ -179,8 +179,11 @@ Species names, looks and behaviours are defined in the feature spec that introdu
 
 **The snippet** (*Schnipsel*, feature 0008) is the species of the Sales case: a scrap of paper
 with lines of text, because it feeds on text pasted into a public chatbot. Small, layer 1. Three
-stand on the floor: one in the east corridor in front of the Sales doorway, two in Sales. Its displayed name and its journal text are fixed with the journal (M4), the name
-check of §5 included.
+stand on the floor: one in the east corridor in front of the Sales doorway, two in Sales. Its displayed name is *Schnipsel*, in English
+*Snippet*, and its journal text is fixed with feature 0020: what it is, what it lives on, and
+that it goes as soon as everyone knows which data may go where. The name is a dictionary word
+for a scrap of paper, used for a species and not for a product, a company or a tool; it is fixed
+by the author's decision on that basis, and no trademark register was searched (§5).
 
 ## 5. Names
 
