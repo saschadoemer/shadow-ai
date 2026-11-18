@@ -54,10 +54,9 @@ const spoken = (map: TileMap, state: GameState) =>
       );
 
 describe('the two starts (0026)', () => {
-  it('starts a played game with the call open, without the lamp, the opening not ended', () => {
+  it('starts a played game with the call open and without the lamp', () => {
     expect(newGame(MAP)).toStrictEqual({
       ...createInitialState(MAP),
-      started: null,
       lamp: { on: false, strength: 1, owned: false, used: false },
       dialogue: { speaker: 'story', index: 0, page: 0 },
     });
@@ -66,7 +65,6 @@ describe('the two starts (0026)', () => {
   it('keeps the initial state a game past its opening: the lamp owned and used, no dialogue', () => {
     const state = createInitialState(MAP);
     expect(state.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: true });
-    expect(state.started).toBe(0);
     expect(state.dialogue).toBeNull();
   });
 
@@ -116,10 +114,10 @@ describe('the call (0026)', () => {
     expect(spoken(MAP, second)).toStrictEqual(CALL);
   });
 
-  it('changes nothing but tick, held and dialogue while it is read, and started when it closes', () => {
+  it('changes nothing but tick, held and dialogue, also in the step that closes it (0031)', () => {
     const start = newGame(MAP);
     const closed = called(MAP);
-    expect(closed).toStrictEqual({ ...start, tick: 5, held: TALK, dialogue: null, started: 5 });
+    expect(closed).toStrictEqual({ ...start, tick: 5, held: TALK, dialogue: null });
   });
 
   it('lets the game run once it is closed', () => {
@@ -129,36 +127,23 @@ describe('the call (0026)', () => {
   });
 });
 
-describe('when the opening ended (0026)', () => {
-  it('is not known while the call is open, on any page', () => {
-    expect(newGame(MAP).started).toBeNull();
-    expect(run(MAP, newGame(MAP), TALK, NONE, TALK, NONE).started).toBeNull();
-    expect(steps(MAP, newGame(MAP), OTHERS, 900).started).toBeNull();
-  });
-
-  it('is the tick of the step that closes the call', () => {
-    expect(called(MAP).started).toBe(5);
-    const late = run(MAP, steps(MAP, newGame(MAP), NONE, 895), TALK, NONE, TALK, NONE, TALK);
-    expect(late.dialogue).toBeNull();
-    expect(late.started).toBe(900);
-  });
-
-  it('is changed by no other step: 600 steps, a talk with the officer, the dark and the wake', () => {
+describe('no record of when the opening ended (0031)', () => {
+  it('has no field `started`: not at either start, not after the call, the meeting and the wake', () => {
     const closed = called(MAP);
-    expect(steps(MAP, closed, RIGHT, 600).started).toBe(5);
     const met = run(MAP, closed, NONE, TALK, NONE, TALK, NONE, TALK);
-    expect(met.dialogue).toBeNull();
-    expect(met.started).toBe(5);
+    expect(met.lamp.owned).toBe(true);
     const woken = update({ ...met, dark: 44 }, NONE, MAP);
     expect(woken.dark).toBe(45);
-    expect(woken.started).toBe(5);
-  });
-
-  it('is 0 in a game past its opening, and stays 0', () => {
-    const state = createInitialState(MAP);
-    expect(state.started).toBe(0);
-    expect(run(MAP, state, TALK, NONE, TALK, NONE, TALK).started).toBe(0);
-    expect(update({ ...state, dark: 44 }, NONE, MAP).started).toBe(0);
+    for (const state of [
+      createInitialState(MAP),
+      newGame(MAP),
+      closed,
+      steps(MAP, closed, RIGHT, 600),
+      met,
+      woken,
+    ]) {
+      expect(Object.keys(state)).not.toContain('started');
+    }
   });
 });
 

@@ -1,14 +1,17 @@
 import type { Box, Point } from '../engine/tiled';
-import { type Language, type TextKey, textKey } from '../text/text';
+import { type Language, type TextKey, textKey, textOf } from '../text/text';
 import { drawText } from './draw-text';
+import { GLYPH_HEIGHT, GLYPH_WIDTH } from './font';
 import { PAGE_BACKGROUND, type PaletteColour } from './palette';
-import type { Renderer, SpriteSheet } from './renderer';
+import { type Renderer, type SpriteSheet, SURFACE_WIDTH } from './renderer';
 
 /**
  * The help (gameplay.md §8, visual.md §3, feature 0021): a framed box over whatever is on
  * screen, with one row per thing the player can do — the key, and what it does. It is drawn on
  * the surface, not shifted by the camera, in the language of the scene's settings. The rows
- * are what the box shows and no rule of the game reads them, so they live here.
+ * are what the box shows and no rule of the game reads them, so they live here. So does the
+ * label (feature 0031): the words in the top right corner that name the help's key for as long
+ * as the world is on screen.
  */
 
 /** A row of the help: the name of the key, and what it does. */
@@ -61,4 +64,58 @@ export function drawHelp(renderer: Renderer, font: SpriteSheet, language: Langua
     drawText(renderer, font, row.key, language, HELP_KEYS.x, HELP_KEYS.y + down);
     drawText(renderer, font, row.does, language, HELP_DOES.x, HELP_DOES.y + down);
   }
+}
+
+/** The label (0031): the key of the help and the word for it, as the rows name a key first. */
+export const HELP_LABEL: TextKey = textKey('help.label');
+/** The longest label, in characters; a test holds both languages to it. */
+export const HELP_LABEL_CAPACITY = 8;
+/** The frame is this far from the surface's right edge and from its top, as the hearts are from their corner. */
+const LABEL_MARGIN = 4;
+/** The frame's width on every side of the field. */
+const LABEL_FRAME = 1;
+/** The field left and right of the letters; a glyph's cell ends with an empty column. */
+const LABEL_PADDING_X = 2;
+/** The field above and below a glyph's cell. */
+const LABEL_PADDING_Y = 1;
+
+/** Where a label of `length` characters is drawn: its frame, the field inside it, and its words. */
+export interface HelpLabelPlace {
+  readonly frame: Box;
+  readonly field: Box;
+  readonly text: Point;
+}
+
+/**
+ * The place of a label of `length` characters: the frame (311 − 6n, 4, 6n + 5, 14), the field
+ * (312 − 6n, 5, 6n + 3, 12) and the words from (314 − 6n, 6). The right edge stays where it is
+ * in every language; the left edge moves with the words.
+ */
+export function helpLabelPlace(length: number): HelpLabelPlace {
+  // The last cell's empty column is not part of the letters.
+  const letters = length * GLYPH_WIDTH - 1;
+  const field: Box = {
+    x: SURFACE_WIDTH - LABEL_MARGIN - LABEL_FRAME - letters - 2 * LABEL_PADDING_X,
+    y: LABEL_MARGIN + LABEL_FRAME,
+    width: letters + 2 * LABEL_PADDING_X,
+    height: GLYPH_HEIGHT + 2 * LABEL_PADDING_Y,
+  };
+  return {
+    frame: {
+      x: field.x - LABEL_FRAME,
+      y: field.y - LABEL_FRAME,
+      width: field.width + 2 * LABEL_FRAME,
+      height: field.height + 2 * LABEL_FRAME,
+    },
+    field,
+    text: { x: field.x + LABEL_PADDING_X, y: field.y + LABEL_PADDING_Y },
+  };
+}
+
+/** The label in `language`: the frame, the field in it, and the words — in the help's colours. */
+export function drawHelpLabel(renderer: Renderer, font: SpriteSheet, language: Language): void {
+  const { frame, field, text } = helpLabelPlace(textOf(HELP_LABEL, language).length);
+  renderer.fillRect(frame.x, frame.y, frame.width, frame.height, HELP_FRAME_COLOUR);
+  renderer.fillRect(field.x, field.y, field.width, field.height, PAGE_BACKGROUND);
+  drawText(renderer, font, HELP_LABEL, language, text.x, text.y);
 }

@@ -284,11 +284,12 @@ E as the key to talk.
 **As built** (feature 0021): a press of H opens the help, a box over the game with seven rows —
 a key and what it does — and a second press closes it. The game stands still while it is open,
 and everything goes on where it stood when it closes. The help opens over a dialogue and over
-the journal, which keep their page and their tab, and not in the dark. For the first ten
-seconds of a game one line in the notice's bar names the key — `Hilfe: Taste H` or
-`Help: press H` — behind every other text, and it does not come back. A held key counts once.
-Since feature 0026 the ten seconds begin when the call is closed, so that the call does not
-hide the line.
+the journal, which keep their page and their tab, and not in the dark. A held key counts once.
+
+**As built** (feature 0031): a small label in the top right corner names the key of the help
+for as long as the world is on screen — `H Hilfe` or `H Help` — also during a dialogue and with
+the help open. The journal's screen does not have it. The line that named the key at the start
+is gone.
 
 ## 9. Deliberately simple in the first draft
 

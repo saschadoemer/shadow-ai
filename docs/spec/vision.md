@@ -27,8 +27,8 @@ Two purposes, in this order:
    and show a situation the visitor recognizes from their own company within the first minutes.
    Tutorial text is text that explains the game: what the shadow is, what the lamp is for, what
    to do next. The game has none. The help (feature 0021) is not tutorial text: a list of keys
-   the player calls up, and one line at the start that names its key. It says which key does
-   what, and nothing about why. The line that names the lamp's key when the lamp is handed
+   the player calls up, and a small label in a corner of the screen that names its key (feature
+   0031). It says which key does what, and nothing about why. The line that names the lamp's key when the lamp is handed
    over (feature 0026) is of the same kind.
 
 The game is presented by LMIS, and one real product stands in its world: Harmonic (§10). Both

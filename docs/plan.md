@@ -109,9 +109,9 @@ are implemented. M4 is done: 0021 was the last of the six.
 
 ### M5 — Act 1 complete
 
-Six features, each its own pull request with its own acceptance plan, in this order: 0022
+Seven features, each its own pull request with its own acceptance plan, in this order: 0022
 traces · 0023 the shadow over the regions · 0024 the case of Sales · 0025 the cleared region ·
-0026 the call · 0027 overview won back. Traces first, because finding them is the next verb of
+0026 the call · 0027 overview won back · 0031 the help label. Traces first, because finding them is the next verb of
 the game and every case begins with it: shadow residue on devices, seen only in the lamp's
 light, counted on the journal's cases tab. Then the shadow over the regions, so that a room
 under shadow looks it before the first one is cleared — `visual.md` §4 has asked for the grey
@@ -120,34 +120,43 @@ source, the trace shown to it, the entry and the policy block in the journal. Th
 region next, because it is the answer to the case and the picture the teaser ends on: colour
 returns, more colleagues see the shadow, overview grows by one. The call last of the story:
 the customer on the phone, the first sight of the shadow and the lamp handed over can be told
-once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
-has left it open since 0009. All six are implemented; the two named below are not specified
-yet.
+once there is a case to walk into. Overview won back after it; `gameplay.md` §4 has left it
+open since 0009. The help label closes the milestone: the line that named the help's key for
+ten seconds, right after the call, was on screen too long, and a small label in the corner
+that stays takes its place. It comes after 0027 because it takes a field out of the state to
+which 0027 adds one. All seven are implemented; the two named below are drafted, so M5
+stays open until they are built.
 
-Named here without a number and specified when their turn comes, both for the teaser
-(`vision.md` §10): the Harmonic station of Sales · the line that says LMIS presents the
-game, which needs a place before the title screen of M8.
+Two more, both for the teaser (`vision.md` §10): 0035 the Harmonic station — the station of
+Sales — and 0036 LMIS presents — the line that says so, on a card before the call, which
+needs a place before the title screen of M8. They are built with the features of M6 that
+make the build playable (below).
 
 ### M6 — The cases of Act 2
 
 The cases come one department at a time, and each brings what Act 2 has more than Act 1. The
 first three features, each its own pull request with its own acceptance plan: 0028 the case
-of Marketing · 0029 the wider cone · 0031 the creature of Marketing. The case first, by the
+of Marketing · 0029 the wider cone · 0032 the creature of Marketing. The case first, by the
 rules the case of Sales set — traces, the source's answer, the journal, the cleared room — so
 that a second case proves the first one's rules before anything is added to them. The wider
 cone after it, because the case of Marketing earns it and HR and Accounting open with it. The
 creature of Marketing third: every case has its species (`world.md` §4), and the second
 species brings what the journal still lacks — a choice among its entries, and pages.
 
-Three features for a build that can be played from the call to a close by somebody who was
-only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034 the close.
+Six features for a build that can be played from the call to a close by somebody who was
+only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034 the close ·
+0035 the Harmonic station · 0036 LMIS presents · 0037 the case of Support.
 The creature first, so that the second room has opposition; it is cut small — the choice
 among the journal's entries and its pages wait for a later case and the third species. The
 intern after it: the hint system `world.md` §3 has named since M1, one figure in the break
 room who says where the next step is. The close last, because it follows whatever the last
 case is: the story says once that the rest of the floor follows, and the game goes on.
+Then the two that M5 still names for the teaser — the Harmonic station of Sales, the one
+place where a real product acts in the game, and the card on which LMIS presents it — and
+last the case of Support, by the rules of the first two, so that the third open door leads
+somewhere.
 
-Named here without a number and specified when their turn comes: the case of Support · the
+Named here without a number and specified when their turn comes: the
 cases of HR and Accounting · the colour filter · the case of Development · the meeting rooms'
 side case · the vendor in every department ·
 who sees the shadow · the two keys · Management and the last case · the two Harmonic stations

@@ -60,7 +60,6 @@ export function createInitialState(map: TileMap): GameState {
   };
   return {
     tick: 0,
-    started: 0,
     player,
     camera: followPlayer(player, map),
     lamp: { on: false, strength: BASE_STRENGTH, owned: true, used: true },
@@ -84,13 +83,12 @@ export function createInitialState(map: TileMap): GameState {
 
 /**
  * The state a played game starts with (0026): the initial state with the call open on its
- * first page, the lamp not yet owned, and the opening not ended. `main.ts` starts with it; the
- * tests of the earlier features step from `createInitialState`.
+ * first page and the lamp not yet owned. `main.ts` starts with it; the tests of the earlier
+ * features step from `createInitialState`.
  */
 export function newGame(map: TileMap): GameState {
   return {
     ...createInitialState(map),
-    started: null,
     lamp: { on: false, strength: BASE_STRENGTH, owned: false, used: false },
     dialogue: { speaker: 'story', index: OPENING_SCENE, page: 0 },
   };
@@ -98,10 +96,10 @@ export function newGame(map: TileMap): GameState {
 
 /**
  * What the step that closed a dialogue changes besides closing it (0024, 0025, 0026). Closing
- * the scene a game opens with ends the opening: `started` is this step's tick. Closing the
- * first meeting hands the lamp over. Closing the source's answer of a ready case solves the
+ * the first meeting hands the lamp over. Closing the source's answer of a ready case solves the
  * case, earns the upgrade of its region if it has one (0029), and what is left of the region's
- * shadow goes with it. Every other closing changes nothing more.
+ * shadow goes with it. Every other closing — that of a scene of the story, the call among them
+ * — changes nothing more.
  */
 function closed(
   stepped: GameState,
@@ -110,9 +108,7 @@ function closed(
   content: TileMap,
 ): GameState {
   if (dialogue.speaker === 'story') {
-    return dialogue.index === OPENING_SCENE && stepped.started === null
-      ? { ...stepped, started: stepped.tick }
-      : stepped;
+    return stepped;
   }
   if (isFirstMeeting(dialogue, figuresOf(content.points), before.lamp.owned)) {
     return { ...stepped, lamp: { ...stepped.lamp, owned: true } };
@@ -215,7 +211,6 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
       : applyHit(stepped, before, hitter);
   return {
     tick: state.tick + 1,
-    started: state.started,
     player,
     camera: followPlayer(player, content),
     lamp,

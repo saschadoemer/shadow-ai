@@ -52,6 +52,10 @@ in two.
 | [0028](0028-the-case-of-marketing.md) | The case of Marketing | M6 | implemented 2026-11-18 |
 | [0029](0029-the-wider-cone.md) | The wider cone | M6 | implemented 2026-11-19 |
 | [0030](0030-cloud-run-deployment.md) | Cloud Run deployment | M8 | implemented 2026-11-18 |
+| [0031](0031-the-help-label.md) | The help label | M5 | implemented 2026-11-19 |
 | [0032](0032-the-creature-of-marketing.md) | The creature of Marketing | M6 | draft |
 | [0033](0033-the-intern.md) | The intern | M6 | draft |
 | [0034](0034-the-close.md) | The close | M6 | draft |
+| [0035](0035-the-harmonic-station.md) | The Harmonic station | M5 | draft |
+| [0036](0036-lmis-presents.md) | LMIS presents | M5 | draft |
+| [0037](0037-the-case-of-support.md) | The case of Support | M6 | draft |
