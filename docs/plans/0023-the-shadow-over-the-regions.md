@@ -104,7 +104,7 @@ new dependency.
   `veilOf(areas: readonly Area[], column: number, row: number): number` — 0 for a cell that
   is not under shadow.
 
-- [ ] **Step 1: Create `tests/unit/region.test.ts`:**
+- [x] **Step 1: Create `tests/unit/region.test.ts`:**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -245,12 +245,12 @@ describe('the veil of a cell (0023)', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and see it fail.**
+- [x] **Step 2: Run it and see it fail.**
 
 Run: `npx vitest run tests/unit/region.test.ts`
 Expected: FAIL — `src/game/region` does not exist and `REGION_PREFIX` is not exported.
 
-- [ ] **Step 3: The third kind of rectangle,** in `src/game/rects.ts`:
+- [x] **Step 3: The third kind of rectangle,** in `src/game/rects.ts`:
 
 ```diff
 --- a/src/game/rects.ts
@@ -277,7 +277,7 @@ Expected: FAIL — `src/game/region` does not exist and `REGION_PREFIX` is not e
   * The rectangles of one kind, in the order of the map. Rejects a rectangle of no known kind,
 ```
 
-- [ ] **Step 4: Create `src/game/region.ts`:**
+- [x] **Step 4: Create `src/game/region.ts`:**
 
 ```ts
 import type { Box } from '../engine/collision';
@@ -353,7 +353,7 @@ export function veilOf(areas: readonly Area[], column: number, row: number): num
 }
 ```
 
-- [ ] **Step 5: Stop the game on a faulty area,** in `src/game/update.ts`. Add to the doc
+- [x] **Step 5: Stop the game on a faulty area,** in `src/game/update.ts`. Add to the doc
   comment of `createInitialState` that an area of an unknown region or of a box that is not
   whole cells is rejected there too (0023).
 
@@ -379,13 +379,13 @@ export function veilOf(areas: readonly Area[], column: number, row: number): num
      x: map.spawn.x,
 ```
 
-- [ ] **Step 6: Run the tests.**
+- [x] **Step 6: Run the tests.**
 
 Run: `npx vitest run tests/unit/region.test.ts tests/unit/shadow.test.ts tests/unit/trace.test.ts`
 Expected: PASS — `region.test.ts` has 16 tests. Then `npm run test`: 1055 tests; the
 architecture test now also checks `region.ts`.
 
-- [ ] **Step 7:** `npm run check`, then commit — `Read the areas of the regions from the map`.
+- [x] **Step 7:** `npm run check`, then commit — `Read the areas of the regions from the map`.
 
 ---
 
@@ -399,7 +399,7 @@ architecture test now also checks `region.ts`.
 - Consumes: `areasOf`, `veilOf` of Task 1.
 - Produces, in `tools/floor-layout`: `REGION_AREAS`, `areaBox(rect: CellRect): Box`.
 
-- [ ] **Step 1: Change the floor tests.** Two tests of 0015 and 0022 learn that ten
+- [x] **Step 1: Change the floor tests.** Two tests of 0015 and 0022 learn that ten
   rectangles follow the traces, and a block of seven tests is added.
 
 ```diff
@@ -588,12 +588,12 @@ architecture test now also checks `region.ts`.
  });
 ```
 
-- [ ] **Step 2: Run and see it fail.**
+- [x] **Step 2: Run and see it fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `REGION_AREAS` and `areaBox` are not exported by the layout.
 
-- [ ] **Step 3: Build the areas from the rooms,** in `tools/floor-layout.ts`, then
+- [x] **Step 3: Build the areas from the rooms,** in `tools/floor-layout.ts`, then
   `npm run gen-floor`:
 
 ```diff
@@ -673,10 +673,10 @@ Expected: errors — `REGION_AREAS` and `areaBox` are not exported by the layout
   `git diff --stat public/maps/floor.tmj` shows one file changed: ten objects with the ids
   106 to 115 and `nextobjectid` 116, nothing else.
 
-- [ ] **Step 4: Run the tests.** `npx vitest run tests/unit/floor.test.ts` — PASS. Then
+- [x] **Step 4: Run the tests.** `npx vitest run tests/unit/floor.test.ts` — PASS. Then
   `npm run test`: 1062 tests. The game still looks as before: nothing draws the areas yet.
 
-- [ ] **Step 5:** `npm run check`, then commit — `Give every region of the floor its area`.
+- [x] **Step 5:** `npm run check`, then commit — `Give every region of the floor its area`.
 
 ---
 
@@ -692,7 +692,7 @@ Expected: errors — `REGION_AREAS` and `areaBox` are not exported by the layout
   `weightOf(colour): number`, `shadowGrey(colour): PaletteColour`,
   `renderShadowTiles(): Uint8Array`; in `tools/gen-tiles`: `encodeShadowPng(): Buffer`.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/gen-tiles.test.ts
@@ -820,13 +820,13 @@ Expected: errors — `REGION_AREAS` and `areaBox` are not exported by the layout
 +});
 ```
 
-- [ ] **Step 2: Run and see them fail.**
+- [x] **Step 2: Run and see them fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `renderShadowTiles`, `SHADOW_RAMP`, `shadowGrey`, `weightOf` and
 `encodeShadowPng` are not exported.
 
-- [ ] **Step 3: The greys,** in `tools/placeholder-tiles.ts`, above `SolidProperty`:
+- [x] **Step 3: The greys,** in `tools/placeholder-tiles.ts`, above `SolidProperty`:
 
 ```diff
 --- a/tools/placeholder-tiles.ts
@@ -894,7 +894,7 @@ Expected: errors — `renderShadowTiles`, `SHADOW_RAMP`, `shadowGrey`, `weightOf
  
 ```
 
-- [ ] **Step 4: Write the file with the tileset,** in `tools/gen-tiles.ts`, then
+- [x] **Step 4: Write the file with the tileset,** in `tools/gen-tiles.ts`, then
   `npm run gen-tiles`. `placeholder.png` and `placeholder.tsj` do not change; only
   `public/tiles/placeholder-shadow.png` is new.
 
@@ -944,13 +944,13 @@ Expected: errors — `renderShadowTiles`, `SHADOW_RAMP`, `shadowGrey`, `weightOf
  }
 ```
 
-- [ ] **Step 5: Run the tests.**
+- [x] **Step 5: Run the tests.**
 
 Run: `npx vitest run tests/unit/gen-tiles.test.ts tests/unit/assets.test.ts`
 Expected: PASS — the asset test finds the new PNG palette-only, with alpha 0 or 255, sized
 in multiples of 16. Then `npm run test`: 1071 tests.
 
-- [ ] **Step 6:** `npm run check`, then commit —
+- [x] **Step 6:** `npm run check`, then commit —
   `Render the tileset in the greys of a room under shadow`. The body says why the greys are
   one step darker: the carpet of the rooms is grey already.
 
@@ -969,7 +969,7 @@ in multiples of 16. Then `npm run test`: 1071 tests.
   `VEIL_SHEET_WIDTH`, `VEIL_SHEET_HEIGHT`, `veilInk(frame, i, j): boolean`, `renderVeil()`;
   in `tools/gen-sprites`: `encodeVeilPng()`.
 
-- [ ] **Step 1: Create `tests/unit/veil-sheet.test.ts`:**
+- [x] **Step 1: Create `tests/unit/veil-sheet.test.ts`:**
 
 ```ts
 import { readFileSync } from 'node:fs';
@@ -1076,7 +1076,7 @@ describe('the placeholder veil generator (0023)', () => {
 });
 ```
 
-- [ ] **Step 2: Add the veil to the shadow assets** of the asset test:
+- [x] **Step 2: Add the veil to the shadow assets** of the asset test:
 
 ```diff
 --- a/tests/unit/assets.test.ts
@@ -1099,13 +1099,13 @@ describe('the placeholder veil generator (0023)', () => {
  
 ```
 
-- [ ] **Step 3: Run and see it fail.**
+- [x] **Step 3: Run and see it fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `tools/placeholder-veil.ts` does not exist and `encodeVeilPng` is not
 exported.
 
-- [ ] **Step 4: Create `tools/placeholder-veil.ts`:**
+- [x] **Step 4: Create `tools/placeholder-veil.ts`:**
 
 ```ts
 import { SHADOW_COLOUR } from '../src/render/palette.ts';
@@ -1160,7 +1160,7 @@ export function renderVeil(): Uint8Array {
 }
 ```
 
-- [ ] **Step 5: Write the sheet with the others,** in `tools/gen-sprites.ts`, then
+- [x] **Step 5: Write the sheet with the others,** in `tools/gen-sprites.ts`, then
   `npm run gen-sprites`. Only `public/sprites/shadow-veil.png` is new.
 
 ```diff
@@ -1205,12 +1205,12 @@ export function renderVeil(): Uint8Array {
  }
 ```
 
-- [ ] **Step 6: Run the tests.**
+- [x] **Step 6: Run the tests.**
 
 Run: `npx vitest run tests/unit/veil-sheet.test.ts tests/unit/assets.test.ts`
 Expected: PASS. Then `npm run test`: 1079 tests.
 
-- [ ] **Step 7:** `npm run check`, then commit — `Draw the veil of the three densities`.
+- [x] **Step 7:** `npm run check`, then commit — `Draw the veil of the three densities`.
 
 ---
 
@@ -1230,7 +1230,7 @@ Expected: PASS. Then `npm run test`: 1079 tests.
 - Produces, in `render/draw-scene`: `SceneContent.shadowTileset: TilesetImage`,
   `SceneContent.veilSheet: SpriteSheet`.
 
-- [ ] **Step 1: Write the failing tests.** In `draw-scene.test.ts` the recorder also notes
+- [x] **Step 1: Write the failing tests.** In `draw-scene.test.ts` the recorder also notes
   which tileset a tile was drawn from, and a block of six tests is added. The three files
   that build a `SceneContent` give it the two new images.
 
@@ -1503,13 +1503,13 @@ Expected: PASS. Then `npm run test`: 1079 tests.
    creatureSheets: { snippet: sheet(16, 16) },
 ```
 
-- [ ] **Step 2: Run and see them fail.**
+- [x] **Step 2: Run and see them fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `drawVeil` and `Shadow` are not exported, `drawLayer` takes five
 arguments, and `shadowTileset` and `veilSheet` are no properties of `SceneContent`.
 
-- [ ] **Step 3: The layer and the veil,** in `src/render/draw-map.ts`:
+- [x] **Step 3: The layer and the veil,** in `src/render/draw-map.ts`:
 
 ```diff
 --- a/src/render/draw-map.ts
@@ -1594,7 +1594,7 @@ arguments, and `shadowTileset` and `veilSheet` are no properties of `SceneConten
 +}
 ```
 
-- [ ] **Step 4: The scene,** in `src/render/draw-scene.ts`:
+- [x] **Step 4: The scene,** in `src/render/draw-scene.ts`:
 
 ```diff
 --- a/src/render/draw-scene.ts
@@ -1667,7 +1667,7 @@ arguments, and `shadowTileset` and `veilSheet` are no properties of `SceneConten
      state.movers.filter((mover) => mover.kind === 'drone'),
 ```
 
-- [ ] **Step 5: Load the two images,** in `src/main.ts`:
+- [x] **Step 5: Load the two images,** in `src/main.ts`:
 
 ```diff
 --- a/src/main.ts
@@ -1703,13 +1703,13 @@ arguments, and `shadowTileset` and `veilSheet` are no properties of `SceneConten
        frameWidth: FRAME_WIDTH,
 ```
 
-- [ ] **Step 6: Run the tests.**
+- [x] **Step 6: Run the tests.**
 
 Run: `npm run typecheck && npx vitest run tests/unit/draw-map.test.ts tests/unit/draw-scene.test.ts`
 Expected: PASS. Then `npm run test`: 1091 tests. Every scene test of the earlier features
 passes unchanged: their maps have no areas.
 
-- [ ] **Step 7:** `npm run check`, then commit — `Draw a room under shadow grey and veiled`.
+- [x] **Step 7:** `npm run check`, then commit — `Draw a room under shadow grey and veiled`.
 
 ---
 
@@ -1718,7 +1718,7 @@ passes unchanged: their maps have no areas.
 **Files:**
 - Test: `tests/e2e/smoke.spec.ts`
 
-- [ ] **Step 1: Add the test** at the end of the file. A game that loads at all has both new
+- [x] **Step 1: Add the test** at the end of the file. A game that loads at all has both new
   images: `loadContent` fails otherwise. This test adds that the reception is not shadowed.
 
 ```diff
@@ -1751,13 +1751,13 @@ passes unchanged: their maps have no areas.
 +});
 ```
 
-- [ ] **Step 2: Run.**
+- [x] **Step 2: Run.**
 
 Run: `npm run test:e2e`
 Expected: PASS — fourteen tests, three skipped (they need the container). The test of 0015
 on the shirt of the reception's colleague still passes.
 
-- [ ] **Step 3:** `npm run check`, then commit — `Check the reception's colours in the smoke spec`.
+- [x] **Step 3:** `npm run check`, then commit — `Check the reception's colours in the smoke spec`.
 
 ---
 
@@ -1767,14 +1767,14 @@ on the shirt of the reception's colleague still passes.
 - Modify: `docs/spec/world.md`, `docs/spec/architecture.md`, `docs/spec/visual.md`,
   `docs/spec/testing.md`, `README.md`
 
-- [ ] **Step 1: `world.md` §1,** at "Shadow density": add a paragraph **As built** (feature
+- [x] **Step 1: `world.md` §1,** at "Shadow density": add a paragraph **As built** (feature
   0023): every region has an area in the map — its room as the layout knows it, with its
   upper and its left wall; the meeting rooms have two; a room whose region has a density
   above 0 is under shadow and is drawn so; the corridors, the lift, the stairwell and the
   data protection officer's office are no regions. Lifting a doorway's shadow wall does not
   change the room behind it.
 
-- [ ] **Step 2: `architecture.md`.** §1 directory list: `game/region.ts`,
+- [x] **Step 2: `architecture.md`.** §1 directory list: `game/region.ts`,
   `tools/placeholder-veil.ts`. §5: the draw order with the shadow — a cell under shadow from
   the shadow tileset on `ground`, `detail` and `above`, the veil after `detail` and before
   the cone, frame density − 1; `SceneContent.shadowTileset` and `veilSheet`; a map without
@@ -1783,34 +1783,34 @@ on the shirt of the reception's colleague still passes.
   veil of a cell and the larger density where areas overlap. §7: the shadow tileset —
   generated with the tileset, no `.tsj`, found by the name with `-shadow`; the veil's sheet.
 
-- [ ] **Step 3: `visual.md`.** §4, "Shadowed and cleared": as built (feature 0023) — the
+- [x] **Step 3: `visual.md`.** §4, "Shadowed and cleared": as built (feature 0023) — the
   ramp of six greys, the weight, nearest and one step darker; the veil's three frames with
   their pixel counts, standing still; people and everything that is no tile keep their
   colours; a cleared region is 0025. The list of shadow assets names four. §5: the generator
   writes the shadow tileset beside the tileset.
 
-- [ ] **Step 4: `testing.md` §2.** The INV-6 row names four shadow assets and the shadow
+- [x] **Step 4: `testing.md` §2.** The INV-6 row names four shadow assets and the shadow
   tileset: every opaque pixel the grey of the pixel at its place. The INV-7 row gains: an
   area of an unknown region and an area that is not whole cells are refused, each with its
   message, and a test holds the floor's ten areas to its rooms.
 
-- [ ] **Step 5: `README.md`:** one sentence after the one on the traces — the regions under
+- [x] **Step 5: `README.md`:** one sentence after the one on the traces — the regions under
   shadow are drawn darker, without colour and under a violet veil whose density is the
   region's (feature 0023).
 
-- [ ] **Step 6:** `npm run check`, then commit — `Move the shadow over the regions into the spec`.
+- [x] **Step 6:** `npm run check`, then commit — `Move the shadow over the regions into the spec`.
 
 ---
 
 ### Task 8: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 8 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 8 in this file and commit —
   `Tick the full check of 0023`.
 
 ---
