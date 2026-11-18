@@ -114,6 +114,27 @@ closed until the upgrades of M6. The two upgrades that gate the floor are earned
 the wider cone in Marketing (strength 2), the colour filter in HR (strength 3). A case spec of M6
 may move either; the gating test then guards the new place.
 
+**As built** (feature 0023): every region of the floor has an area in the map — a rectangle
+named `region:<id>` in the `objects` layer that covers its room as the layout knows it, with its
+upper and its left wall. The meeting rooms have two areas, one per room. A room whose region has
+a density above 0 is under shadow and is drawn so (`visual.md` §4); the reception and the break
+room are not. The corridors, the side passage, the lift, the stairwell and the data protection
+officer's office are no regions and have no area. Lifting the shadow wall of a doorway does not
+change the room behind it: the wall was the door, not the shadow.
+
+| Area | Cells | Density |
+|---|---|---|
+| `region:hr` | (1, 1)–(21, 19) | 2 |
+| `region:accounting` | (22, 1)–(43, 19) | 2 |
+| `region:development` | (44, 1)–(84, 19) | 3 |
+| `region:meeting-rooms` | (89, 1)–(106, 9) | 1 |
+| `region:meeting-rooms` | (89, 10)–(106, 19) | 1 |
+| `region:reception` | (1, 38)–(22, 51) | 0 |
+| `region:break-room` | (29, 26)–(48, 51) | 0 |
+| `region:sales` | (79, 26)–(106, 51) | 1 |
+| `region:marketing` | (1, 58)–(48, 78) | 1 |
+| `region:support` | (49, 58)–(106, 78) | 1 |
+
 ## 2. The cases
 
 Seven department cases and one side case. Each needs a pattern the visitor recognizes from their

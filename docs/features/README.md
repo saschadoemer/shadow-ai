@@ -44,4 +44,7 @@ in two.
 | [0020](0020-the-journal.md) | The journal | M4 | implemented 2026-11-18 |
 | [0021](0021-help.md) | Help | M4 | implemented 2026-11-18 |
 | [0022](0022-traces.md) | Traces | M5 | implemented 2026-11-18 |
-| [0023](0023-the-shadow-over-the-regions.md) | The shadow over the regions | M5 | draft |
+| [0023](0023-the-shadow-over-the-regions.md) | The shadow over the regions | M5 | implemented 2026-11-18 |
+| [0024](0024-the-case-of-sales.md) | The case of Sales | M5 | approved 2026-11-18 |
+| [0025](0025-the-cleared-region.md) | The cleared region | M5 | approved 2026-11-18 |
+| [0026](0026-the-call.md) | The call | M5 | approved 2026-11-18 |

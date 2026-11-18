@@ -44,6 +44,9 @@ const VACUUM_SHEET_URL = '/sprites/vacuum.png';
 const DRONE_SHEET_URL = '/sprites/drone.png';
 const SHADOW_WALL_SHEET_URL = '/sprites/shadow-wall.png';
 const TRACE_SHEET_URL = '/sprites/trace.png';
+const VEIL_SHEET_URL = '/sprites/shadow-veil.png';
+/** The shadow tileset lies beside the tileset's image, with this before `.png` (0023). */
+const SHADOW_SUFFIX = '-shadow';
 const FONT_SHEET_URL = '/sprites/font.png';
 
 /**
@@ -58,9 +61,18 @@ async function loadContent(): Promise<SceneContent> {
   const tileset = parseTileset(await loadJson(tilesetUrl), tilesetUrl);
   const map = parseTileMap(mapJson, tileset, MAP_URL);
   const image = await loadImage(resolvePath(tileset.image, tilesetUrl));
+  const shadowImage = await loadImage(
+    resolvePath(tileset.image.replace(/\.png$/, `${SHADOW_SUFFIX}.png`), tilesetUrl),
+  );
   return {
     map,
     tileset: { image, columns: tileset.columns },
+    shadowTileset: { image: shadowImage, columns: tileset.columns },
+    veilSheet: {
+      image: await loadImage(VEIL_SHEET_URL),
+      frameWidth: TILE_SIZE,
+      frameHeight: TILE_SIZE,
+    },
     playerSheet: {
       image: await loadImage(PLAYER_SHEET_URL),
       frameWidth: FRAME_WIDTH,

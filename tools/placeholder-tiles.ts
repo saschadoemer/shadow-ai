@@ -722,6 +722,58 @@ export function renderTiles(): Uint8Array {
   return data;
 }
 
+/** The greys a tile under shadow is drawn in (feature 0023), from dark to light. */
+export const SHADOW_RAMP: readonly PaletteColour[] = [
+  '#181425',
+  '#262b44',
+  '#3a4466',
+  '#5a6988',
+  '#8b9bb4',
+  '#c0cbdc',
+];
+
+/** How light a colour is, in whole numbers: 299 R + 587 G + 114 B. */
+export function weightOf(colour: PaletteColour): number {
+  const [r, g, b] = rgb(colour);
+  return 299 * r + 587 * g + 114 * b;
+}
+
+/**
+ * The grey of a colour under shadow: the colour of the ramp nearest in weight — the darker of
+ * two equally near — and from there one step darker; the darkest stays.
+ */
+export function shadowGrey(colour: PaletteColour): PaletteColour {
+  const weight = weightOf(colour);
+  let nearest = 0;
+  for (const [index, grey] of SHADOW_RAMP.entries()) {
+    const best = SHADOW_RAMP[nearest] ?? grey;
+    if (Math.abs(weightOf(grey) - weight) < Math.abs(weightOf(best) - weight)) {
+      nearest = index;
+    }
+  }
+  return SHADOW_RAMP[Math.max(nearest - 1, 0)] ?? colour;
+}
+
+function hex(r: number, g: number, b: number): PaletteColour {
+  return `#${[r, g, b].map((c) => c.toString(16).padStart(2, '0')).join('')}` as PaletteColour;
+}
+
+/**
+ * The shadow tileset (feature 0023): the sheet of `renderTiles` with every opaque pixel turned
+ * into its grey. Same size, same tiles at the same places, the same transparent pixels.
+ */
+export function renderShadowTiles(): Uint8Array {
+  const data = renderTiles();
+  for (let offset = 0; offset < data.length; offset += 4) {
+    if (data[offset + 3] === 0) {
+      continue;
+    }
+    const colour = hex(data[offset] ?? 0, data[offset + 1] ?? 0, data[offset + 2] ?? 0);
+    data.set(rgb(shadowGrey(colour)), offset);
+  }
+  return data;
+}
+
 interface SolidProperty {
   readonly name: 'solid';
   readonly type: 'bool';

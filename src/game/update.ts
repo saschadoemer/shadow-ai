@@ -7,6 +7,7 @@ import { openJournal, stepJournal } from './journal';
 import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
 import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from './overview';
 import { type GameInput, NO_INPUT, stepPlayer } from './player';
+import { areasOf } from './region';
 import { standingWalls, stepWalls, wallsOf, withWalls } from './shadow';
 import { type GameState, type LampState, NO_RECOIL, type PlayerState } from './state';
 import { openDialogue, speakersOf, stepDialogue } from './talk';
@@ -21,14 +22,17 @@ import { BASE_STRENGTH } from './world';
  * every standing figure of the map facing down and no dialogue (0017); the journal closed and
  * no key remembered (0020); the help closed (0021); every trace of the map unseen and not found
  * (0022). A map with two wake points, a route that is malformed or crosses a solid tile, a
- * rectangle of no known kind, a shadow wall or a trace the world data or the grid refuses, or a
- * figure point the cast does not know or names twice is rejected here, before the game starts.
+ * rectangle of no known kind, a shadow wall or a trace the world data or the grid refuses, an
+ * area of a region the world data does not know or of a box that is not whole cells (0023), or
+ * a figure point the cast does not know or names twice is rejected here, before the game starts.
  */
 export function createInitialState(map: TileMap): GameState {
   wakePoint(map);
   const routes = routesOf(map.points);
   checkRoutes(routes, map);
   const walls = wallsOf(map.rects);
+  // The areas of the regions are only drawn (0023); a map with a faulty one still does not start.
+  areasOf(map.rects);
   const figures = figuresOf(map.points);
   const player: PlayerState = {
     x: map.spawn.x,

@@ -54,19 +54,23 @@ import { solidsOf } from './solids';
 function recordingRenderer(): Renderer & {
   readonly calls: string[];
   readonly sheets: SpriteSheet[];
+  readonly tilesets: unknown[];
 } {
   const calls: string[] = [];
   const sheets: SpriteSheet[] = [];
+  const tilesets: unknown[] = [];
   return {
     calls,
     sheets,
+    tilesets,
     clear(colour) {
       calls.push(`clear ${colour}`);
     },
     fillRect(x, y, width, height, colour) {
       calls.push(`fillRect ${x},${y} ${width}x${height} ${colour}`);
     },
-    drawTile(_tileset, id, x, y) {
+    drawTile(tileset, id, x, y) {
+      tilesets.push(tileset);
       calls.push(`drawTile ${id} at ${x},${y}`);
     },
     drawSprite(sheet, frame, x, y) {
@@ -92,6 +96,8 @@ const MAP: TileMap = {
 const CONTENT: SceneContent = {
   map: MAP,
   tileset: { image: {} as ImageBitmap, columns: 7 },
+  shadowTileset: { image: {} as ImageBitmap, columns: 7 },
+  veilSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   playerSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 },
   lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
   creatureSheets: { snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 } },
@@ -1221,5 +1227,104 @@ describe('the start hint in the scene (0021)', () => {
       // The first glyph of `Hilfe: Taste H`, at its place in the bar.
       expect(renderer.calls).not.toContain('drawSprite 40 at 118,162');
     }
+  });
+});
+
+describe('the shadow over the regions in the scene (0023)', () => {
+  /** The left column of the 3x2 map is HR, density 2; the middle column is the reception. */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...MAP,
+      rects: [
+        { name: 'region:hr', x: 0, y: 0, width: 16, height: 32 },
+        { name: 'region:reception', x: 16, y: 0, width: 16, height: 32 },
+      ],
+    },
+  };
+
+  it('draws the cells under shadow from the shadow tileset on all three layers', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, state({ x: 40, y: 30 }), content);
+    const tiles = renderer.calls.filter((call) => call.startsWith('drawTile'));
+    expect(tiles).toStrictEqual([
+      'drawTile 0 at 0,0',
+      'drawTile 1 at 16,0',
+      'drawTile 2 at 0,16',
+      'drawTile 2 at 16,16',
+      'drawTile 2 at 32,16',
+      'drawTile 4 at 16,16',
+      'drawTile 6 at 0,0',
+    ]);
+    expect(renderer.tilesets).toStrictEqual([
+      content.shadowTileset,
+      content.tileset,
+      content.shadowTileset,
+      content.tileset,
+      content.tileset,
+      content.tileset,
+      content.shadowTileset,
+    ]);
+  });
+
+  it('lays the veil of the density over them after detail and before the cone', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, state({ x: 40, y: 30 }, { x: 0, y: 0 }, true), content);
+    const detail = renderer.calls.indexOf('drawTile 4 at 16,16');
+    expect(renderer.calls.slice(detail + 1, detail + 3)).toStrictEqual([
+      'drawSprite 1 at 0,0',
+      'drawSprite 1 at 0,16',
+    ]);
+    expect(renderer.sheets.slice(0, 4)).toStrictEqual([
+      content.veilSheet,
+      content.veilSheet,
+      content.lampSheet,
+      content.playerSheet,
+    ]);
+  });
+
+  it('draws no veil over a region without shadow or outside every area', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, state({ x: 40, y: 30 }), content);
+    const veils = renderer.calls.filter(
+      (_call, i) => renderer.calls[i]?.startsWith('drawSprite') === true,
+    );
+    expect(renderer.sheets.filter((sheet) => sheet === content.veilSheet)).toHaveLength(2);
+    expect(veils).not.toContain('drawSprite 1 at 16,0');
+    expect(veils).not.toContain('drawSprite 1 at 32,16');
+  });
+
+  it('shifts the veil with the camera', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, state({ x: 40, y: 30 }, { x: 5, y: 7 }), content);
+    expect(renderer.calls).toContain('drawSprite 1 at -5,-7');
+    expect(renderer.calls).toContain('drawSprite 1 at -5,9');
+  });
+
+  it('draws the player, the movers and the creatures from their own sheets, over the veil', () => {
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      {
+        ...state({ x: 8, y: 30 }),
+        movers: [mover({ kind: 'dog', x: 8, y: 10 })],
+        creatures: [{ species: 'snippet', x: 8, y: 25, light: 0, home: { x: 0, y: 0 } }],
+      },
+      content,
+    );
+    expect(renderer.sheets).toStrictEqual([
+      content.veilSheet,
+      content.veilSheet,
+      content.moverSheets.dog,
+      content.creatureSheets.snippet,
+      content.playerSheet,
+    ]);
+  });
+
+  it('draws a map without areas exactly as before: every tile from the tileset, no veil', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, state({ x: 40, y: 30 }), CONTENT);
+    expect(renderer.tilesets.every((tileset) => tileset === CONTENT.tileset)).toBe(true);
+    expect(renderer.sheets).toStrictEqual([CONTENT.playerSheet]);
   });
 });

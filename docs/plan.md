@@ -118,8 +118,8 @@ region next, because it is the answer to the case and the picture the teaser end
 returns, more colleagues see the shadow, overview grows by one. The call last of the story:
 the customer on the phone, the first sight of the shadow and the lamp handed over can be told
 once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
-has left it open since 0009. 0022 is implemented and 0023 is drafted; the others are named here and
-specified when their turn comes.
+has left it open since 0009. 0022 and 0023 are implemented; 0024, 0025
+and 0026 are approved; 0027 is named here and specified when its turn comes.
 
 ## 5. Deferred, with reasons
 

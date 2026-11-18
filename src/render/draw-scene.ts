@@ -7,6 +7,7 @@ import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
 import { DARK_STEPS } from '../game/overview';
+import { areasOf, veilOf } from '../game/region';
 import { LIFT_STEPS, wallsOf } from '../game/shadow';
 import {
   type CreatureState,
@@ -25,7 +26,7 @@ import { FIND_STEPS, tracesOf } from '../game/trace';
 import { type Language, type TextKey, textKey, textOf } from '../text/text';
 import { drawHelp } from './draw-help';
 import { drawJournal } from './draw-journal';
-import { drawLayer } from './draw-map';
+import { drawLayer, drawVeil, type Shadow } from './draw-map';
 import { drawText } from './draw-text';
 import { GLYPH_HEIGHT, GLYPH_WIDTH } from './font';
 import { PAGE_BACKGROUND, type PaletteColour } from './palette';
@@ -41,6 +42,10 @@ import {
 export interface SceneContent {
   readonly map: TileMap;
   readonly tileset: TilesetImage;
+  /** The tileset's sheet in the greys of a region under shadow: same size, same ids (0023). */
+  readonly shadowTileset: TilesetImage;
+  /** Three 16x16 frames: the veil of density 1, 2 and 3 (0023). */
+  readonly veilSheet: SpriteSheet;
   readonly playerSheet: SpriteSheet;
   /** Four 48x48 frames, one per facing in FACINGS order (0007). */
   readonly lampSheet: SpriteSheet;
@@ -339,7 +344,8 @@ export function lidHeight(dark: number): number {
 }
 
 /**
- * One frame: ground, detail, the cone when the lamp is on, the standing shadow walls in array
+ * One frame: ground and detail — a cell under shadow from the shadow tileset (0023) — the veil
+ * over the cells under shadow (0023), the cone when the lamp is on, the standing shadow walls in array
  * order (0014), the traces the light is on (0022), the ground movers whose feet are at or above
  * the player's, then the standing figures whose feet are at or above the player's (0017), the
  * creatures in array order, the player, the other standing figures, the other ground movers,
@@ -374,8 +380,16 @@ export function drawScene(
   const { language } = settings;
   const { player, camera } = state;
   renderer.clear(PAGE_BACKGROUND);
-  drawLayer(renderer, content.map, content.tileset, 'ground', camera);
-  drawLayer(renderer, content.map, content.tileset, 'detail', camera);
+  // A map without areas has no shadow, and is drawn exactly as before 0023.
+  const areas = areasOf(content.map.rects);
+  const veil = (column: number, row: number): number => veilOf(areas, column, row);
+  const shadow: Shadow | undefined =
+    areas.length === 0 ? undefined : { tileset: content.shadowTileset, veilOf: veil };
+  drawLayer(renderer, content.map, content.tileset, 'ground', camera, shadow);
+  drawLayer(renderer, content.map, content.tileset, 'detail', camera, shadow);
+  if (shadow !== undefined) {
+    drawVeil(renderer, content.map, content.veilSheet, camera, veil);
+  }
   if (state.lamp.on) {
     const origin = lampFrameOrigin(player, camera);
     renderer.drawSprite(content.lampSheet, lampFrame(player), origin.x, origin.y);
@@ -439,7 +453,7 @@ export function drawScene(
     state,
     content,
   );
-  drawLayer(renderer, content.map, content.tileset, 'above', camera);
+  drawLayer(renderer, content.map, content.tileset, 'above', camera, shadow);
   drawMovers(
     renderer,
     state.movers.filter((mover) => mover.kind === 'drone'),

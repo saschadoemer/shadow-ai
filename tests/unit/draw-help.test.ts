@@ -62,6 +62,8 @@ const sheet = (frameWidth: number, frameHeight: number): SpriteSheet => ({
 const CONTENT: SceneContent = {
   map: grassMap(20, 12, { x: 184, y: 96 }, [{ name: 'figure:officer', x: 160, y: 96 }]),
   tileset: { image: {} as ImageBitmap, columns: 7 },
+  shadowTileset: { image: {} as ImageBitmap, columns: 7 },
+  veilSheet: sheet(16, 16),
   playerSheet: sheet(16, 24),
   lampSheet: sheet(48, 48),
   creatureSheets: { snippet: sheet(16, 16) },

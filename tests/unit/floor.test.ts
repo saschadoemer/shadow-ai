@@ -8,12 +8,14 @@ import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../s
 import { COLLEAGUES, figuresOf, pagesOfRoute } from '../../src/game/cast';
 import { REGION_NAME } from '../../src/game/journal';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
+import { areasOf, veilOf } from '../../src/game/region';
 import { standingWalls, wallsOf, withWalls } from '../../src/game/shadow';
 import { NO_RECOIL } from '../../src/game/state';
 import { speakerInReach, speakersOf, TALK_DISTANCE } from '../../src/game/talk';
 import { traceInLight, tracesOf } from '../../src/game/trace';
 import { createInitialState } from '../../src/game/update';
 import {
+  areaBox,
   type CellRect,
   CLOSED_DOORS,
   CORRIDORS,
@@ -24,6 +26,7 @@ import {
   floorJson,
   HORIZONTAL_WALLS,
   POSTS,
+  REGION_AREAS,
   ROOMS,
   ROUTES,
   SHADOW_WALLS,
@@ -490,9 +493,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 105 }, (_, i) => i + 1),
+      Array.from({ length: 115 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(106);
+    expect(json.nextobjectid).toBe(116);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -1209,15 +1212,14 @@ describe('the traces of the floor (0022)', () => {
     );
   });
 
-  it('are the last five objects of the file, rectangles with the ids 101 to 105', () => {
-    const objects = floorJson().layers[3].objects;
-    expect(objects).toHaveLength(105);
-    expect(objects.slice(100).map((object) => [object.id, object.name])).toStrictEqual(
+  it('are five rectangles with the ids 101 to 105, after the objects of 0017', () => {
+    // The areas of 0023 follow them.
+    const objects = floorJson().layers[3].objects.slice(100, 105);
+    expect(objects.map((object) => [object.id, object.name])).toStrictEqual(
       [101, 102, 103, 104, 105].map((id) => [id, 'trace:sales']),
     );
-    expect(objects.slice(100).some((object) => 'point' in object)).toBe(false);
-    expect(floorJson().nextobjectid).toBe(106);
-    expect(floor.rects).toHaveLength(13);
+    expect(objects.some((object) => 'point' in object)).toBe(false);
+    expect(floor.rects.slice(8, 13).every((rect) => rect.name === 'trace:sales')).toBe(true);
     expect(floor.points).toHaveLength(91);
   });
 
@@ -1290,5 +1292,123 @@ describe('the traces of the floor (0022)', () => {
       expect(REGION_NAME[region], region).toBeDefined();
     }
     expect(createInitialState(floor).traces).toHaveLength(5);
+  });
+});
+
+describe('the areas of the regions on the floor (0023)', () => {
+  /** Region, the room's cells and its box, in file order: the spec's table. */
+  const TABLE: readonly (readonly [string, CellRect, Box, number])[] = [
+    ['hr', { c0: 1, c1: 21, r0: 1, r1: 19 }, { x: 16, y: 16, width: 336, height: 304 }, 2],
+    [
+      'accounting',
+      { c0: 22, c1: 43, r0: 1, r1: 19 },
+      { x: 352, y: 16, width: 352, height: 304 },
+      2,
+    ],
+    [
+      'development',
+      { c0: 44, c1: 84, r0: 1, r1: 19 },
+      { x: 704, y: 16, width: 656, height: 304 },
+      3,
+    ],
+    [
+      'meeting-rooms',
+      { c0: 89, c1: 106, r0: 1, r1: 9 },
+      { x: 1424, y: 16, width: 288, height: 144 },
+      1,
+    ],
+    [
+      'meeting-rooms',
+      { c0: 89, c1: 106, r0: 10, r1: 19 },
+      { x: 1424, y: 160, width: 288, height: 160 },
+      1,
+    ],
+    ['reception', { c0: 1, c1: 22, r0: 38, r1: 51 }, { x: 16, y: 608, width: 352, height: 224 }, 0],
+    [
+      'break-room',
+      { c0: 29, c1: 48, r0: 26, r1: 51 },
+      { x: 464, y: 416, width: 320, height: 416 },
+      0,
+    ],
+    ['sales', { c0: 79, c1: 106, r0: 26, r1: 51 }, { x: 1264, y: 416, width: 448, height: 416 }, 1],
+    ['marketing', { c0: 1, c1: 48, r0: 58, r1: 78 }, { x: 16, y: 928, width: 768, height: 336 }, 1],
+    [
+      'support',
+      { c0: 49, c1: 106, r0: 58, r1: 78 },
+      { x: 784, y: 928, width: 928, height: 336 },
+      1,
+    ],
+  ];
+  const areas = areasOf(floor.rects);
+
+  it('are the ten of the spec, each with its region, its box and its density', () => {
+    expect(areas).toStrictEqual(
+      TABLE.map(([region, , box, density]) => ({ region, density, box })),
+    );
+    expect(REGION_AREAS).toStrictEqual(TABLE.map(([region, cells]) => ({ region, cells })));
+    expect(REGION_AREAS.map((area) => areaBox(area.cells))).toStrictEqual(
+      TABLE.map(([, , box]) => box),
+    );
+  });
+
+  it('are the last ten objects of the file, rectangles with the ids 106 to 115', () => {
+    const objects = floorJson().layers[3].objects;
+    expect(objects).toHaveLength(115);
+    expect(objects.slice(105).map((object) => [object.id, object.name])).toStrictEqual(
+      TABLE.map(([region], i) => [106 + i, `region:${region}`]),
+    );
+    expect(objects.slice(105).some((object) => 'point' in object)).toBe(false);
+    expect(floorJson().nextobjectid).toBe(116);
+    expect(floor.rects).toHaveLength(23);
+  });
+
+  it('leave the walls and the traces as they were', () => {
+    expect(wallsOf(floor.rects)).toHaveLength(8);
+    expect(tracesOf(floor.rects)).toHaveLength(5);
+    expect(floor.points).toHaveLength(91);
+  });
+
+  it('give every room of a region its area, with exactly the cells of the room', () => {
+    const rooms = ROOMS.filter(
+      (room) => !['lift', 'stairwell', "data protection officer's office"].includes(room.name),
+    );
+    expect(rooms.map((room) => room.cells)).toStrictEqual(TABLE.map(([, cells]) => cells));
+    expect(REGION_AREAS).toHaveLength(ROOMS.length - 3);
+  });
+
+  it('put the right veil on the cells of the spec', () => {
+    const veil = (column: number, row: number): number => veilOf(areas, column, row);
+    expect([veil(90, 30), veil(10, 70), veil(100, 70), veil(95, 5)]).toStrictEqual([1, 1, 1, 1]);
+    expect([veil(5, 5), veil(30, 10)]).toStrictEqual([2, 2]);
+    expect(veil(60, 10)).toBe(3);
+    // The reception, the break room, the west corridor, the officer's office and the lift.
+    expect([veil(10, 45), veil(40, 40), veil(25, 30), veil(10, 30), veil(55, 40)]).toStrictEqual([
+      0, 0, 0, 0, 0,
+    ]);
+  });
+
+  it('leave every cell of the corridors, the lift, the stairwell and the office without a veil', () => {
+    const open = [
+      ...CORRIDORS,
+      ...ROOMS.filter((room) =>
+        ['lift', 'stairwell', "data protection officer's office"].includes(room.name),
+      ),
+    ];
+    for (const { name, cells } of open) {
+      for (let row = cells.r0; row <= cells.r1; row += 1) {
+        for (let column = cells.c0; column <= cells.c1; column += 1) {
+          expect(veilOf(areas, column, row), `${name} (${column}, ${row})`).toBe(0);
+        }
+      }
+    }
+  });
+
+  it('put a veil on every cell of a shadowed room, its upper and its left wall included', () => {
+    for (const [region, cells, , density] of TABLE) {
+      expect(veilOf(areas, cells.c0, cells.r0), region).toBe(density);
+      expect(veilOf(areas, cells.c1, cells.r1), region).toBe(density);
+    }
+    // The wall below Sales lies on the cells of the south corridor: no veil.
+    expect(veilOf(areas, 90, 52)).toBe(0);
   });
 });

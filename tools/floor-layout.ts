@@ -228,6 +228,41 @@ export const TRACES: readonly { readonly region: string; readonly cell: Point }[
   { region: 'sales', cell: { x: 98, y: 46 } },
 ];
 
+/**
+ * The areas of the regions (0023): which room of the layout belongs to which region of the
+ * world data. The meeting rooms are one region with two rooms. The corridors, the lift, the
+ * stairwell and the data protection officer's office are no regions.
+ */
+const ROOM_REGIONS: Readonly<Record<string, string>> = {
+  hr: 'hr',
+  accounting: 'accounting',
+  development: 'development',
+  'meeting room north': 'meeting-rooms',
+  'meeting room south': 'meeting-rooms',
+  reception: 'reception',
+  'break room': 'break-room',
+  sales: 'sales',
+  marketing: 'marketing',
+  support: 'support',
+};
+
+/** Per area its region and the room's cells, in the order of ROOMS: the order in the file. */
+export const REGION_AREAS: readonly { readonly region: string; readonly cells: CellRect }[] =
+  ROOMS.flatMap((room) => {
+    const region = ROOM_REGIONS[room.name];
+    return region === undefined ? [] : [{ region, cells: room.cells }];
+  });
+
+/** The box of an area in map pixels: the room's cells, with its upper and its left wall. */
+export function areaBox(rect: CellRect): Box {
+  return {
+    x: rect.c0 * TILE_SIZE,
+    y: rect.r0 * TILE_SIZE,
+    width: (rect.c1 - rect.c0 + 1) * TILE_SIZE,
+    height: (rect.r1 - rect.r0 + 1) * TILE_SIZE,
+  };
+}
+
 /** The box of a trace in map pixels: its cell. */
 export function traceBox(cell: Point): Box {
   return { x: cell.x * TILE_SIZE, y: cell.y * TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE };
@@ -1141,6 +1176,7 @@ export function floorJson(): MapJson {
   const firstWall = SNIPPETS.length + 3 + routes.length;
   const firstFigure = firstWall + SHADOW_WALLS.length;
   const firstTrace = firstFigure + FIGURES.length;
+  const firstArea = firstTrace + TRACES.length;
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1169,6 +1205,9 @@ export function floorJson(): MapJson {
           ...TRACES.map((trace, i) =>
             rectObject(firstTrace + i, `trace:${trace.region}`, traceBox(trace.cell)),
           ),
+          ...REGION_AREAS.map((area, i) =>
+            rectObject(firstArea + i, `region:${area.region}`, areaBox(area.cells)),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1178,7 +1217,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstTrace + TRACES.length,
+    nextobjectid: firstArea + REGION_AREAS.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',
