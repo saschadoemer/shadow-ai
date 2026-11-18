@@ -271,19 +271,15 @@ and closes the journal. The walk begins with a reload.
 
 ## Open questions
 
-1. **The keys.** `J` opens and closes; the left and right keys of walking turn the tabs. Are
-   these the keys?
-2. **The words.** The titles, the three lines for an empty tab, and the snippet's name and
-   text in the table under "The text" are my proposal, German and English. Are these the
-   words?
-3. **The name check.** `world.md` §5 asks that a name is checked before it is fixed.
-   `Schnipsel` and `Snippet` are dictionary words for a scrap of paper, used for a species,
-   not for a product, a company or a tool. I have not searched a trademark register and
-   cannot rule out a registered mark with this word. I propose to fix the name on that
-   basis; if you want a register search first, it comes before the approval.
-4. **Picture and count.** The entry shows the creature's own 16x16 sprite and no number of
-   captures. A larger picture is the art pass; a count needs a way to draw numbers, which I
-   propose to build with the cases tab in M5.
-5. **One feature.** The screen, the tabs and the first entry are one feature here. They can
-   be cut in two — the screen with three empty tabs, then the entry. I propose one: the
-   screen alone has nothing to show for its walk.
+None. Five were settled on 2026-11-18, each as drafted:
+
+- The keys: `J` opens and closes the journal; the left and right keys of walking turn the
+  tabs.
+- The words: the titles, the three lines for an empty tab, and the snippet's name and text
+  as in the table under "The text", in German and English.
+- The name check: `Schnipsel` and `Snippet` are fixed as dictionary words for a scrap of
+  paper, used for a species and not for a product, a company or a tool. That is the author's
+  decision on this basis; no trademark register was searched.
+- Picture and count: the entry shows the creature's own 16x16 sprite and no number of
+  captures. A larger picture is the art pass; a count comes with the cases tab in M5.
+- One feature: the screen, the tabs and the first entry are built together.

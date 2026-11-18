@@ -184,10 +184,11 @@ lamp, `E` or `Enter` talks, `L` switches the language.
 
 ## Open questions
 
-1. **The key.** `L` switches. Is that the key, or another?
-2. **Start and memory.** Every load starts in German; the game neither reads the browser's
-   language nor remembers the choice. I propose to leave both to M8, with the title screen
-   and the save states, because remembering means storing something in the browser.
-3. **The language line.** A press shows `Sprache: Deutsch` or `Language: English` for two
-   seconds where no other text is on screen, so that a press is never without an answer.
-   Without it the feature is smaller by one key and one rule.
+None. Three were settled on 2026-11-18, each as drafted:
+
+- The key: `L` switches the language.
+- Start and memory: every load starts in German; the game neither reads the browser's
+  language nor remembers the choice. Both are left to M8, with the title screen and the save
+  states.
+- The language line: a press shows `Sprache: Deutsch` or `Language: English` for two seconds
+  where no other text is on screen.
