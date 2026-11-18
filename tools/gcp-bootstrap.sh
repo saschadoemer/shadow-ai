@@ -160,6 +160,9 @@ fi
 readonly GITHUB_REPO REPOSITORY_ID PROJECT_NUMBER BILLING_ACCOUNT
 readonly POOL_NAME="projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${POOL}"
 readonly CONDITION="assertion.repository_id == '${REPOSITORY_ID}' && assertion.ref == 'refs/heads/main'"
+# A budget belongs to the billing account, not to the project: the name alone would find the
+# budget of another project on the same account. The API stores the project by its number.
+readonly BUDGET_FILTER="displayName=\"${BUDGET}\" AND budgetFilter.projects=\"projects/${PROJECT_NUMBER}\""
 
 # ---------------------------------------------------------------------------------------------
 step="image repository"
@@ -283,7 +286,7 @@ fi
 
 step="budget"
 budgets="$(read_back gcloud billing budgets list --billing-account="$BILLING_ACCOUNT" \
-  --filter="displayName=\"${BUDGET}\"" --format='value(name)')"
+  --filter="$BUDGET_FILTER" --format='value(name)')"
 if [[ -n "$budgets" ]]; then
   report exists
 else
@@ -343,5 +346,5 @@ exclusion_lines="$(read_back gcloud logging sinks describe _Default --flatten='e
   --format='value(exclusions.name,exclusions.filter)')"
 echo "log exclusion:     $(sed -n "s/^${EXCLUSION}"$'\t'"//p" <<<"$exclusion_lines")"
 echo "budget:            $(read_back gcloud billing budgets list --billing-account="$BILLING_ACCOUNT" \
-  --filter="displayName=\"${BUDGET}\"" \
+  --filter="$BUDGET_FILTER" \
   --format='value(amount.specifiedAmount.units,amount.specifiedAmount.currencyCode,thresholdRules[].thresholdPercent)') (amount, currency, thresholds as fractions)"
