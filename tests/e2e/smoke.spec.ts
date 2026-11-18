@@ -232,3 +232,24 @@ test.describe('served by the container', () => {
     expect(page.headers['content-encoding']).toBe('gzip');
   });
 });
+
+test('L switches the language once per press, and the page says which one is on', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const language = () => page.evaluate(() => window.shadowAi?.language);
+  const lang = () => page.evaluate(() => document.documentElement.lang);
+  await expect
+    .poll(language, { message: 'window.shadowAi.language is German after loading' })
+    .toBe('de');
+  expect(await lang()).toBe('de');
+  await page.keyboard.press('KeyL');
+  await expect.poll(language, { message: 'one press of L switches to English' }).toBe('en');
+  expect(await lang()).toBe('en');
+  // A second keydown without a keyup is the repeat of a held key: it switches nothing.
+  await page.keyboard.down('KeyL');
+  await page.keyboard.down('KeyL');
+  await page.keyboard.up('KeyL');
+  await expect.poll(language, { message: 'a held L switches once, back to German' }).toBe('de');
+  expect(await lang()).toBe('de');
+});
