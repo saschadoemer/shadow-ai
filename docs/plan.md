@@ -29,7 +29,7 @@ specification.
 | M8 | **Save states, title screen, polish, English complete, the custom domain** | **Distribution** |
 
 Audio arrives after M5 and before M8. A silent booth is normal; a silent distributed game is
-not. A gamepad is deferred (§5). The Dockerfile and CI exist from M2. From feature 0018 on, every
+not. A gamepad is deferred (§5). The Dockerfile and CI exist from M2. From feature 0030 on, every
 merge to `main` is deployed to Cloud Run (`docs/spec/ops.md` §5): until M8 that address is a
 preview of an unfinished game and is not announced; distribution stays with M8.
 

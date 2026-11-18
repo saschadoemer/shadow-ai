@@ -45,7 +45,7 @@ under shadow are drawn darker, without colour and under a violet veil whose dens
 region's (feature 0023). With all five traces found, the colleague of Sales answers honestly,
 the case is solved, the journal records its outcome and the first block of the policy, and
 overview grows by one (feature 0024). Every merge to `main` is deployed to Cloud Run (feature
-0018). The roadmap is in [docs/plan.md](docs/plan.md).
+0030). The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 

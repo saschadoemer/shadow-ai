@@ -48,4 +48,4 @@ in two.
 | [0024](0024-the-case-of-sales.md) | The case of Sales | M5 | implemented 2026-11-18 |
 | [0025](0025-the-cleared-region.md) | The cleared region | M5 | approved 2026-11-18 |
 | [0026](0026-the-call.md) | The call | M5 | approved 2026-11-18 |
-| [0018](0018-cloud-run-deployment.md) | Cloud Run deployment | M8 | approved 2026-11-17 |
+| [0030](0030-cloud-run-deployment.md) | Cloud Run deployment | M8 | approved 2026-11-17 |

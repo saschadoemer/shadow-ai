@@ -41,7 +41,7 @@ fi
   docker push "$IMAGE"
 
   # Creates the service on the first run and adds a revision on every later one. The settings
-  # are the table "The service" of feature 0018; they are set every time, so a change made by
+  # are the table "The service" of feature 0030; they are set every time, so a change made by
   # hand in the console does not survive the next deployment.
   gcloud run deploy "$SERVICE" \
     --region="$GCP_REGION" \

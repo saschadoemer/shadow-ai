@@ -1,6 +1,6 @@
-# 0018 — Implementation plan: Cloud Run deployment
+# 0030 — Implementation plan: Cloud Run deployment
 
-**Spec:** [`docs/features/0018-cloud-run-deployment.md`](../features/0018-cloud-run-deployment.md)
+**Spec:** [`docs/features/0030-cloud-run-deployment.md`](../features/0030-cloud-run-deployment.md)
 (approved 2026-11-17). The plan argues from the spec; where they differ, the spec wins. Read the
 spec first, then `CLAUDE.md`, then `docs/spec/ops.md` and `docs/spec/testing.md` §5.
 **Written:** 2026-11-17 on the planning model. A working document, not specification.
@@ -14,7 +14,7 @@ pull request is opened before it has passed.
 
 **Precondition:** feature 0016 is merged into `main` (`d620c07` or later). The draft, the
 approval and this plan are on the planning branch
-`claude/github-pipelines-gcloud-deploy-c5bdd3`. Cut `feature/0018-cloud-run-deployment` from
+`claude/github-pipelines-gcloud-deploy-c5bdd3`. Cut `feature/0030-cloud-run-deployment` from
 its tip, merge the latest `main` into it, and work there.
 
 **Goal:** when `ci` is green on `main`, a job `deploy` publishes the image `ci` tested to Cloud
@@ -68,7 +68,7 @@ Actions, Playwright. No new npm dependency.
 | `docs/spec/ops.md` | modified: §2, §3, §4 and §5 describe the installation |
 | `docs/spec/testing.md` | modified: §5 gains "What only exists after the merge" |
 | `docs/plan.md`, `CLAUDE.md`, `README.md` | modified: the game no longer runs only locally |
-| `docs/features/0018-cloud-run-deployment.md`, `docs/features/README.md` | modified in T7 and T8: the result, the status |
+| `docs/features/0030-cloud-run-deployment.md`, `docs/features/README.md` | modified in T7 and T8: the result, the status |
 
 ---
 
@@ -193,7 +193,7 @@ export CLOUDSDK_CORE_DISABLE_PROMPTS=1
   docker push "$IMAGE"
 
   # Creates the service on the first run and adds a revision on every later one. The settings
-  # are the table "The service" of feature 0018; they are set every time, so a change made by
+  # are the table "The service" of feature 0030; they are set every time, so a change made by
   # hand in the console does not survive the next deployment.
   gcloud run deploy "$SERVICE" \
     --region="$GCP_REGION" \
@@ -864,7 +864,7 @@ npm run check
 - [ ] **Step 7: `docs/plan.md` §2.** The M8 row becomes "**Save states, title screen, polish,
   English complete, the custom domain**"; its mark stays **Distribution**. The sentence "Until
   M8 the game runs locally from its container (`docs/spec/ops.md` §3); the Dockerfile and CI
-  exist from M2." becomes: "The Dockerfile and CI exist from M2. From feature 0018 on, every
+  exist from M2." becomes: "The Dockerfile and CI exist from M2. From feature 0030 on, every
   merge to `main` is deployed to Cloud Run (`docs/spec/ops.md` §5): until M8 that address is a
   preview of an unfinished game and is not announced; distribution stays with M8."
 
@@ -873,7 +873,7 @@ npm run check
   (`docs/spec/ops.md` §5); the same container runs locally."
 
 - [ ] **Step 9: `README.md`.** In "Status", one sentence: every merge to `main` is deployed to
-  Cloud Run (feature 0018). No address. In "Run it", after the container block:
+  Cloud Run (feature 0030). No address. In "Run it", after the container block:
 
   ````
   Every merge to `main` is deployed by the workflow. A new Google Cloud project is prepared
@@ -908,7 +908,7 @@ npm run check
 - [ ] **Step 1:** state the spec's preconditions in one message and wait until the author says
   they are met: a new Google Cloud project with a billing account linked and nothing else in
   it; `gcloud` logged in as an owner of it; `gh` logged in as an admin of the repository;
-  Docker running; a terminal in the repository root on `feature/0018-cloud-run-deployment`;
+  Docker running; a terminal in the repository root on `feature/0030-cloud-run-deployment`;
   Chrome; a second device on another network. Ask for the project ID — an identifier, not a
   secret — and for the region if it is not `europe-west1`.
 - [ ] **Step 2:** guide the author through steps 1–20 of the spec's acceptance plan, one action
@@ -922,7 +922,7 @@ npm run check
   author can decide whether to change the spec's step instead.
 - [ ] **Step 4:** after step 20 ask the two feel questions, one per message.
 - [ ] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–20`, followed by the feel
-  notes, into the spec and commit it — `Record the walk of 0018`. Steps 21–24 are not part of
+  notes, into the spec and commit it — `Record the walk of 0030`. Steps 21–24 are not part of
   this line.
 
 ---
@@ -932,9 +932,9 @@ npm run check
 - [ ] **Step 1:** merge the latest `main` again and rerun Task 6. If the merge changed code,
   the walk is run again.
 - [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
-  `docs/features/README.md`; commit — `Mark 0018 implemented`.
+  `docs/features/README.md`; commit — `Mark 0030 implemented`.
 - [ ] **Step 3:** push the branch and open the pull request against `main`, titled
-  `Feature 0018: Cloud Run deployment`, with the walk's result and feel notes in its
+  `Feature 0030: Cloud Run deployment`, with the walk's result and feel notes in its
   description, and one sentence that steps 21–24 follow the merge. CI must be green: `ci`
   passes and `deploy` shows as skipped (criterion 8). The author merges.
 - [ ] **Step 4:** when the author says the pull request is merged, guide steps 21–24 of the
