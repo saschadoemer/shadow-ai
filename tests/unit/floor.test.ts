@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { cameraFor } from '../../src/engine/camera';
 import { moveBox } from '../../src/engine/collision';
 import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../src/engine/tiled';
+import { CASES, isReady, progressOf } from '../../src/game/cases';
 import { COLLEAGUES, figuresOf, pagesOfRoute } from '../../src/game/cast';
 import { REGION_NAME } from '../../src/game/journal';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
@@ -1410,5 +1411,30 @@ describe('the areas of the regions on the floor (0023)', () => {
     }
     // The wall below Sales lies on the cells of the south corridor: no veil.
     expect(veilOf(areas, 90, 52)).toBe(0);
+  });
+});
+
+describe('the case of Sales on the floor (0024)', () => {
+  it('has a source that walks the floor and has lines, and a region with traces', () => {
+    const routes = routesOf(floor.points).map((route) => route.name);
+    const traces = tracesOf(floor.rects);
+    for (const { region, source } of CASES) {
+      expect(routes, source).toContain(source);
+      expect(pagesOfRoute(source), source).not.toHaveLength(0);
+      expect(
+        traces.some((trace) => trace.region === region),
+        region,
+      ).toBe(true);
+      expect(REGION_NAME[region], region).toBeDefined();
+    }
+  });
+
+  it('is not ready at the start, nor with four of its five traces found, and ready with five', () => {
+    const start = createInitialState(floor);
+    expect(isReady('sales', progressOf(start, floor))).toBe(false);
+    const four = { ...start, traces: start.traces.map((t, i) => (i < 4 ? { ...t, found: 1 } : t)) };
+    expect(isReady('sales', progressOf(four, floor))).toBe(false);
+    const five = { ...start, traces: start.traces.map((t) => ({ ...t, found: 1 })) };
+    expect(isReady('sales', progressOf(five, floor))).toBe(true);
   });
 });

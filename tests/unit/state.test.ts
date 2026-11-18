@@ -42,6 +42,8 @@ const TRACES_MAP = loadMap(
   'tests/fixtures/maps/traces.tmj',
   'tests/fixtures/maps/fixture-tiles.tsj',
 );
+/** The colleague of Sales and two traces of Sales on open floor, the spawn 40 px from it (0024). */
+const CASE_MAP = loadMap('tests/fixtures/maps/case.tmj', 'tests/fixtures/maps/fixture-tiles.tsj');
 /** The floor the game loads. */
 const FLOOR_MAP = loadMap('public/maps/floor.tmj', 'public/tiles/placeholder.tsj');
 
@@ -89,6 +91,7 @@ describe('GameState (INV-1)', () => {
       movers: [],
       shadowWalls: [],
       traces: [],
+      solved: [],
       figures: [],
       dialogue: null,
       journal: null,
@@ -148,6 +151,7 @@ describe('update', () => {
         movers: [],
         shadowWalls: [],
         traces: [],
+        solved: [],
         figures: [],
         dialogue: null,
         journal: null,
@@ -175,6 +179,7 @@ describe('update', () => {
       movers: [],
       shadowWalls: [],
       traces: [],
+      solved: [],
       figures: [],
       dialogue: null,
       journal: null,
@@ -194,6 +199,7 @@ describe('update', () => {
       movers: [],
       shadowWalls: [],
       traces: [],
+      solved: [],
       figures: [],
       dialogue: null,
       journal: null,
@@ -795,5 +801,45 @@ describe('traces in the state (0022)', () => {
     const talking = update(update(lit, NONE, map), TALK, map);
     expect(talking.dialogue).not.toBeNull();
     expect(stepping(map, talking, SHINE, 600).traces).toStrictEqual(talking.traces);
+  });
+});
+
+describe('the solved cases in the state (0024)', () => {
+  const TALK: GameInput = { ...NONE, talk: true };
+  const through = (start: GameState, ...inputs: readonly GameInput[]): GameState =>
+    inputs.reduce((state, input) => update(state, input, CASE_MAP), start);
+
+  it('starts with none, on the floor and on the fixture', () => {
+    expect(createInitialState(FLOOR_MAP).solved).toStrictEqual([]);
+    const state = createInitialState(CASE_MAP);
+    expect(state.solved).toStrictEqual([]);
+    expect(state.traces).toHaveLength(2);
+    expect(state.movers.map((mover) => mover.kind)).toStrictEqual(['person']);
+  });
+
+  it('solves the case of a parsed map: both traces found, three presses beside the source', () => {
+    const start = createInitialState(CASE_MAP);
+    const ready: GameState = {
+      ...start,
+      tick: 1000,
+      traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+    };
+    const solved = through(ready, TALK, NONE, TALK, NONE, TALK);
+    expect(solved.dialogue).toBeNull();
+    expect(solved.solved).toStrictEqual([{ region: 'sales', at: 1005 }]);
+    expect(solved.overview).toStrictEqual({ current: 6, max: 6 });
+    expect(JSON.parse(JSON.stringify(solved))).toStrictEqual(solved);
+  });
+
+  it('solves nothing on the same map with one trace still to find', () => {
+    const start = createInitialState(CASE_MAP);
+    const one: GameState = {
+      ...start,
+      tick: 1000,
+      traces: start.traces.map((trace, i) => (i === 0 ? { ...trace, found: 10 } : trace)),
+    };
+    const closed = through(one, TALK, NONE, TALK);
+    expect(closed.dialogue).toBeNull();
+    expect(closed.solved).toStrictEqual([]);
   });
 });

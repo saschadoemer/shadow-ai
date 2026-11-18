@@ -4,6 +4,7 @@ import { type GameState, type JournalTab, NO_RECOIL, type TraceState } from '../
 import {
   CASE_LINE,
   CASE_NAME,
+  CASE_OUTCOME,
   CASE_PITCH,
   drawJournal,
   ENTRY_FRAME,
@@ -13,6 +14,8 @@ import {
   ENTRY_PITCH,
   JOURNAL_RULE,
   NOTHING_TEXT,
+  POLICY_BLOCK,
+  POLICY_PITCH,
   TAB_CLOSED,
   TAB_OPEN,
   tabBox,
@@ -98,6 +101,7 @@ const reading = (tab: JournalTab, snippets = 0): GameState => ({
   movers: [],
   shadowWalls: [],
   traces: [],
+  solved: [],
   figures: [],
   dialogue: null,
   journal: { tab },
@@ -317,5 +321,85 @@ describe('the cases tab (0022)', () => {
       drawJournal(renderer, { ...reading(tab), traces: traces(3) }, { tab }, content, GERMAN);
       expect(renderer.calls).toStrictEqual(draw(reading(tab)).calls);
     }
+  });
+});
+
+describe('a solved case in the journal (0024)', () => {
+  /** Five traces of Sales, all found. */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: [0, 1, 2, 3, 4].map((n) => ({
+        name: 'trace:sales',
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  const all: TraceState[] = [0, 1, 2, 3, 4].map((trace) => ({ trace, light: 0, found: 60 }));
+  const shown = (tab: JournalTab, solved: boolean, settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    const state: GameState = {
+      ...reading(tab),
+      traces: all,
+      solved: solved ? [{ region: 'sales', at: 900 }] : [],
+    };
+    drawJournal(renderer, state, { tab }, content, settings);
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+
+  it('places the outcome and the blocks as the spec says', () => {
+    expect([CASE_OUTCOME, POLICY_BLOCK, POLICY_PITCH]).toStrictEqual([
+      { x: 16, y: 60 },
+      { x: 16, y: 36 },
+      60,
+    ]);
+    // Two blocks of four lines fit the surface: the second ends at y = 142.
+    expect(POLICY_BLOCK.y + POLICY_PITCH + 3 * 12 + 10).toBe(142);
+  });
+
+  it('adds the outcome as the third line of the case, under its name and its count', () => {
+    const open = shown('cases', false);
+    const solved = shown('cases', true);
+    // `Gelöst: Angebote gingen in einen Chatbot.`: 41 characters, 36 drawn; `G` is glyph 39.
+    expect(solved).toHaveLength(open.length + 36);
+    expect(solved.slice(0, open.length)).toStrictEqual(open);
+    expect(solved[open.length]).toBe('drawSprite 39 at 16,60');
+    expect(open.some((call) => call.endsWith(',60'))).toBe(false);
+  });
+
+  it('shows the block of the solved case on the policy tab, and its line for nothing before', () => {
+    expect(shown('policy', false)).toStrictEqual(
+      draw(reading('policy')).calls.slice(draw(reading('policy')).calls.indexOf(RULE) + 1),
+    );
+    const block = shown('policy', true);
+    // 45 + 40 + 46 + 33 characters with 7 + 4 + 6 + 5 spaces: 142 glyphs.
+    expect(block).toHaveLength(142);
+    expect(block[0]).toBe('drawSprite 42 at 16,36');
+    expect(block).toContain('drawSprite 86 at 16,48');
+    expect(block).toContain('drawSprite 55 at 16,60');
+    expect(block).toContain('drawSprite 85 at 16,72');
+  });
+
+  it('draws both in English with the language `en`', () => {
+    // `Solved: …` starts with glyph 51, `Every text …` with glyph 37.
+    const cases = shown('cases', true, ENGLISH);
+    expect(cases).toContain('drawSprite 51 at 16,60');
+    expect(shown('policy', true, ENGLISH)[0]).toBe('drawSprite 37 at 16,36');
+  });
+
+  it('leaves the creatures tab as it was', () => {
+    const renderer = recordingRenderer();
+    drawJournal(
+      renderer,
+      { ...reading('creatures', 1), solved: [{ region: 'sales', at: 900 }] },
+      { tab: 'creatures' },
+      content,
+      GERMAN,
+    );
+    expect(renderer.calls).toStrictEqual(draw(reading('creatures', 1)).calls);
   });
 });

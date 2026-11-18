@@ -42,8 +42,9 @@ every key, and for the first ten seconds a line at the bottom names it (feature 
 Milestones M3 and M4 are complete, and M5, the first act, has begun: the lamp finds traces on
 the screens of Sales, and the journal counts them on its cases tab (feature 0022). The regions
 under shadow are drawn darker, without colour and under a violet veil whose density is the
-region's (feature 0023). The roadmap
-is in [docs/plan.md](docs/plan.md).
+region's (feature 0023). With all five traces found, the colleague of Sales answers honestly,
+the case is solved, the journal records its outcome and the first block of the policy, and
+overview grows by one (feature 0024). The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 

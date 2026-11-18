@@ -1,5 +1,6 @@
 import type { TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
+import { answeredCase, progressOf, solve } from './cases';
 import { figuresFrom, figuresOf } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
 import { openHelp, stepHelp } from './help';
@@ -21,7 +22,7 @@ import { BASE_STRENGTH } from './world';
  * (0015); a lamp of strength BASE_STRENGTH and every shadow wall of the map standing (0014);
  * every standing figure of the map facing down and no dialogue (0017); the journal closed and
  * no key remembered (0020); the help closed (0021); every trace of the map unseen and not found
- * (0022). A map with two wake points, a route that is malformed or crosses a solid tile, a
+ * (0022); no case solved (0024). A map with two wake points, a route that is malformed or crosses a solid tile, a
  * rectangle of no known kind, a shadow wall or a trace the world data or the grid refuses, an
  * area of a region the world data does not know or of a box that is not whole cells (0023), or
  * a figure point the cast does not know or names twice is rejected here, before the game starts.
@@ -52,6 +53,7 @@ export function createInitialState(map: TileMap): GameState {
     movers: moversFrom(routes),
     shadowWalls: standingWalls(walls),
     traces: hiddenTraces(tracesOf(map.rects)),
+    solved: [],
     figures: figuresFrom(figures),
     dialogue: null,
     journal: null,
@@ -69,7 +71,7 @@ export function createInitialState(map: TileMap): GameState {
  * the step is the help's and nothing else, and a press of `help` opens it over whatever is there
  * — an open journal and an open dialogue too (0021). With the journal open the step is the
  * journal's and nothing else (0020). With a dialogue open the step is the dialogue's and nothing
- * else. A press of `journal` opens the journal instead of an ordinary
+ * else; the step that closes the source's answer of a ready case solves the case (0024). A press of `journal` opens the journal instead of an ordinary
  * step, before a press of `talk` is looked at (0020); a press of `talk` near a speaker — a
  * standing figure or a colleague — in reach and in sight opens a dialogue instead of an
  * ordinary step (0017, 0018). Otherwise: the lamp is on when the input holds
@@ -99,9 +101,14 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     return stepJournal(state, state.journal, input);
   }
   const routes = routesOf(content.points);
-  const speakers = speakersOf(figuresOf(content.points), state.movers, routes);
+  const progress = progressOf(state, content);
+  const speakers = speakersOf(figuresOf(content.points), state.movers, routes, undefined, progress);
   if (state.dialogue !== null) {
-    return stepDialogue(state, state.dialogue, input, speakers);
+    const stepped = stepDialogue(state, state.dialogue, input, speakers);
+    // The step that closes the source's answer solves its case (0024).
+    const answered =
+      stepped.dialogue === null ? answeredCase(state.dialogue, state, routes, progress) : null;
+    return answered === null ? stepped : solve(stepped, answered.region);
   }
   const journal = openJournal(state, input);
   if (journal !== null) {
@@ -150,6 +157,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
       walled,
       state.tick + 1,
     ),
+    solved: state.solved,
     figures: state.figures,
     dialogue: null,
     journal: null,

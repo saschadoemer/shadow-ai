@@ -1,6 +1,7 @@
 import { sightBlocked } from '../engine/collision';
 import type { Point, TileMap } from '../engine/tiled';
 import type { TextKey } from '../text/text';
+import { type Progress, pagesIn } from './cases';
 import { COLLEAGUES, type Colleague, type Figure, pagesOfRoute } from './cast';
 import type { Route } from './mover';
 import { BOX_HEIGHT, type GameInput, pressed } from './player';
@@ -53,13 +54,15 @@ export interface Speaker extends Point {
 /**
  * The speakers of a step (0018): the standing figures in the map's order, then the colleagues
  * — the movers of the kind `person` whose route has lines — in the order of the state's
- * movers. A person without lines, a dog, a vacuum and a drone are no speakers.
+ * movers. A person without lines, a dog, a vacuum and a drone are no speakers. With the
+ * progress of the cases, the source of a case says its answer or its "afterwards" (0024).
  */
 export function speakersOf(
   figures: readonly Figure[],
   movers: readonly MoverState[],
   routes: readonly Route[],
   colleagues: readonly Colleague[] = COLLEAGUES,
+  progress?: Progress,
 ): Speaker[] {
   const standing = figures.map(
     (figure, index): Speaker => ({
@@ -71,8 +74,13 @@ export function speakersOf(
     }),
   );
   const walking = movers.flatMap((mover, index): Speaker[] => {
+    const route = routes[mover.route]?.name ?? '';
+    const everyday = mover.kind === 'person' ? pagesOfRoute(route, colleagues) : [];
+    // What a colleague says follows from the cases (0024); without them, the everyday pages.
     const pages =
-      mover.kind === 'person' ? pagesOfRoute(routes[mover.route]?.name ?? '', colleagues) : [];
+      progress === undefined || everyday.length === 0
+        ? everyday
+        : pagesIn(progress, route, everyday);
     return pages.length === 0 ? [] : [{ speaker: 'mover', index, x: mover.x, y: mover.y, pages }];
   });
   return [...standing, ...walking];

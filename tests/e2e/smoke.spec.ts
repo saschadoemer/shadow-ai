@@ -341,3 +341,16 @@ test('the reception keeps its colours: no shadow lies over it', async ({ page })
     )
     .toStrictEqual([0x8b, 0x9b, 0xb4, 255]);
 });
+
+test('the game starts with no case solved and five hearts', async ({ page }) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.solved), {
+      message: 'window.shadowAi.state.solved is there and empty',
+    })
+    .toStrictEqual([]);
+  expect(await page.evaluate(() => window.shadowAi?.state.overview)).toStrictEqual({
+    current: 5,
+    max: 5,
+  });
+});

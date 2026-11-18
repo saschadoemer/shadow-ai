@@ -170,19 +170,82 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
-  it('holds every text of the journal to the rule of its kind (0020, 0022)', () => {
+  it('holds the words of the case of Sales in both languages (0024)', () => {
+    const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
+      textOf(textKey(id), language).split('\n');
+    expect(lines('talk.sales-source-1', 'de')).toStrictEqual([
+      'Das ist von meinem Bildschirm, ich weiß.',
+      'Ich habe die Angebote in einen Chatbot kopiert,',
+      'damit sie besser klingen – drei bis zum Abend.',
+    ]);
+    expect(lines('talk.sales-source-1', 'en')).toStrictEqual([
+      'That is from my screen, I know.',
+      'I pasted the offers into a chatbot to make',
+      'them sound better – three due by tonight.',
+    ]);
+    expect(lines('talk.sales-source-2', 'de')).toStrictEqual([
+      'Wohin der Text damit geht, habe ich mir nicht',
+      'überlegt.',
+    ]);
+    expect(lines('talk.sales-source-2', 'en')).toStrictEqual([
+      'Where the text goes from there, I never',
+      'thought about.',
+    ]);
+    expect(lines('talk.sales-after', 'de')).toStrictEqual([
+      'Danke, dass du gefragt hast statt zu schimpfen.',
+      'Sag mir einfach, womit ich es beim nächsten Mal',
+      'machen darf.',
+    ]);
+    expect(lines('talk.sales-after', 'en')).toStrictEqual([
+      'Thanks for asking instead of telling me off.',
+      'Just tell me what I may use for it',
+      'next time.',
+    ]);
+    expect(lines('case.sales-outcome', 'de')).toStrictEqual([
+      'Gelöst: Angebote gingen in einen Chatbot.',
+    ]);
+    expect(lines('case.sales-outcome', 'en')).toStrictEqual([
+      'Solved: offers went into a chatbot.',
+    ]);
+    expect(lines('policy.sales', 'de')).toStrictEqual([
+      'Jeder Text hat eine Stufe: offen, intern oder',
+      'vertraulich. Vertrauliches bleibt in den',
+      'Werkzeugen, die wir freigegeben haben. Und wer',
+      'unsicher ist, fragt – ohne Ärger.',
+    ]);
+    expect(lines('policy.sales', 'en')).toStrictEqual([
+      'Every text has a level: open, internal or',
+      'confidential. Confidential text stays in tools',
+      'we have approved. And whoever is unsure',
+      'asks – without trouble.',
+    ]);
+    expect(lines('notice.case-solved', 'de')).toStrictEqual([
+      'Der Fall ist gelöst. Sieh ins Journal.',
+    ]);
+    expect(lines('notice.case-solved', 'en')).toStrictEqual([
+      'The case is solved. See the journal.',
+    ]);
+  });
+
+  it('holds every text of the journal to the rule of its kind (0020, 0022, 0024)', () => {
     /** The most lines and the most characters per line a key may have, by what its id starts or ends with. */
     const rules: readonly (readonly [(id: string) => boolean, number, number, number])[] = [
       [(id) => id.startsWith('journal.tab-'), 1, 1, 16],
       [(id) => id.startsWith('journal.no-'), 1, 1, 47],
       [(id) => id === 'journal.traces' || id === 'journal.of', 1, 1, 16],
       [(id) => id.startsWith('region.'), 1, 1, 24],
+      [(id) => id.startsWith('case.') && id.endsWith('-outcome'), 1, 1, 47],
+      [(id) => id.startsWith('policy.'), 2, 4, 47],
       [(id) => id.startsWith('creature.') && id.endsWith('-name'), 1, 1, 24],
       [(id) => id.startsWith('creature.') && id.endsWith('-text'), 2, 4, 47],
     ];
     for (const language of LANGUAGES) {
       for (const [key, text] of Object.entries(TABLE[language])) {
-        if (!['journal.', 'creature.', 'region.'].some((kind) => key.startsWith(kind))) {
+        if (
+          !['journal.', 'creature.', 'region.', 'case.', 'policy.'].some((kind) =>
+            key.startsWith(kind),
+          )
+        ) {
           continue;
         }
         const rule = rules.find(([applies]) => applies(key));

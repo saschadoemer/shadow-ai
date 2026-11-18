@@ -88,8 +88,10 @@ closes like an eye and opens again a second and a half later: the figure stands 
 protection officer's office (feature 0010) with full overview, the creatures still in the world are back
 at their places, and what was captured stays captured. **Open:** how overview is won back
 without falling into the dark — a conversation, a place, a find — is decided when there are
-figures to talk to and rooms to enter (M4, M5). The maximum grows with the first solved case
-(M5).
+figures to talk to and rooms to enter (M4, M5).
+
+**As built** (feature 0024): the step that solves a case raises the maximum by one and fills
+overview to it, whatever it stood at — six full hearts after Sales.
 
 ## 5. Progression
 
@@ -126,6 +128,16 @@ alternative):
 
 There is no interrogation, no evidence puzzle and no choice of outcome.
 
+**As built** (feature 0024): the case of Sales. Its source is the colleague in the pink shirt
+who walks between the cubicles and the coffee. While a trace of Sales is missing, the colleague
+says the everyday line. With all five found, a talk is the gesture: the colleague answers
+honestly in two pages, and the hero says nothing. There is no key, no screen and no picture for
+the gesture. The press that closes the answer solves the case: the journal gains the outcome
+and the policy block, a notice says so for two seconds, and overview grows by one. Afterwards
+the colleague says something else, every time. The region does not clear yet, and no further
+colleague sees the shadow (0025, M6). Picking a creature from the journal comes with the second
+species (M6).
+
 ## 7. The journal
 
 The only screen besides the game itself, and the only inventory. One screen, three tabs, nothing
@@ -156,6 +168,12 @@ nothing with a dialogue open and nothing in the dark.
 the order of the world data — its name and `found of all`, as in `Vertrieb` and
 `Spuren: 1 von 5` below it. Until a trace is found it shows its line for nothing. People spoken
 to, the source and the outcome come with 0024.
+
+**As built** (feature 0024): a solved case gets a third line, its outcome, as in
+`Gelöst: Angebote gingen in einen Chatbot.` People spoken to and the source are not listed. The
+policy tab shows one block per solved case, in the order they were solved, two to four lines
+each; until a case is solved it shows its line for nothing. Two blocks fit the screen; pages
+within the tab come with the third (M6).
 
 ## 8. Controls and presentation
 

@@ -143,6 +143,7 @@ function woken(state: GameState, map: TileMap): GameState {
     movers: state.movers,
     shadowWalls: restedWalls(state.shadowWalls),
     traces: restedTraces(state.traces),
+    solved: state.solved,
     figures: state.figures,
     dialogue: null,
     journal: null,

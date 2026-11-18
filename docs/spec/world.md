@@ -155,6 +155,11 @@ own company, one creature species, and one building block of the AI policy.
 desks of Sales, at least one in every row of four. The table of `docs/features/0022-traces.md`
 is the placement until the art pass.
 
+**The case of Sales** (feature 0024): the case is solved by the talk with its source once its
+five traces are found. Its policy block, in the words of `docs/features/0024-the-case-of-sales.md`:
+every text has a level — open, internal or confidential; confidential text stays in tools we
+have approved; whoever is unsure asks, without trouble.
+
 **Order and gating.** Marketing and Support are open from the start (thin shadow). HR and
 Accounting open after the first upgrade, Development after the second. Management is last: without
 the filter nothing is visible there, and without the vendor as advisor there is no alternative
@@ -186,6 +191,9 @@ Kept as small as the story allows. About thirty figures in all.
   colleagues with hints and everyday lines.
   The colleagues of the reception, Marketing, Support and Sales walk the floor since feature
   0015. Since feature 0018 each has one everyday saying; they still have no name.
+  Since feature 0024 the colleague of Sales is the source of the first case. What the colleague
+  says follows from the case: the everyday line while a trace is missing, the honest answer
+  once all five are found, and the line afterwards once the case is solved.
 - **The managing director.** The last case.
 - **The customer.** A voice on the phone at the start. One line in the epilogue: he called again.
 

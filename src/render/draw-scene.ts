@@ -1,5 +1,6 @@
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
 import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
+import { progressOf } from '../game/cases';
 import { type Figure, figuresOf } from '../game/cast';
 import { CREATURE_SIZE } from '../game/creature';
 import { HELP_HINT, helpHintDue } from '../game/help';
@@ -471,8 +472,16 @@ export function drawScene(
   const page =
     state.dialogue === null
       ? undefined
-      : speakerOf(state.dialogue, speakersOf(figures, state.movers, routesOf(content.map.points)))
-          ?.pages[state.dialogue.page];
+      : speakerOf(
+          state.dialogue,
+          speakersOf(
+            figures,
+            state.movers,
+            routesOf(content.map.points),
+            undefined,
+            progressOf(state, content.map),
+          ),
+        )?.pages[state.dialogue.page];
   const notice = noticeOf(state);
   if (page !== undefined) {
     renderer.fillRect(

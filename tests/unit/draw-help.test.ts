@@ -101,6 +101,7 @@ const playing = (fields: Partial<GameState> = {}): GameState => ({
   movers: [],
   shadowWalls: [],
   traces: [],
+  solved: [],
   figures: [{ figure: 0, facing: 'down' }],
   dialogue: null,
   journal: null,

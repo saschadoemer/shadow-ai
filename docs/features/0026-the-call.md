@@ -28,8 +28,10 @@ sprite.
   first page and a second one that hands the lamp over; the step that closes it gives the
   lamp.
 - A fourth notice that names the lamp's key, until the lamp is held for the first time.
+- The start hint of the help (0021) counts its ten seconds from the end of the call:
+  `GameState.started`.
 - The language table gets five keys in German and English.
-- With the implementation: `vision.md` §4; `gameplay.md` §2 and §8; `world.md` §3;
+- With the implementation: `vision.md` §4; `gameplay.md` §2, §7 and §8; `world.md` §3;
   `architecture.md` §1, §2, §4 and §8; `testing.md` §2; the README.
 - With the settled questions of this draft: `vision.md` §2 allows the one line that names
   the lamp's key.
@@ -114,6 +116,24 @@ comes back. The order when several are due: a wall that holds (0016), a solved c
 a found trace (0022), the lamp's key. The first three need the lamp to have been used, so in
 practice the lamp's line stands alone.
 
+### The start hint of the help
+
+Feature 0021 shows its start hint, `Hilfe: Taste H`, for the first 600 steps of a game,
+behind every other text. With the call open from the first step, those ten seconds would run
+out under the dialogue box, and a player who reads the three pages would never see the hint.
+So the ten seconds begin when the call ends.
+
+`GameState.started` is the `tick` of the step in which the game's opening ended, or `null`
+while it has not. `newGame` has `started` `null`; the step that closes the call sets it to
+that step's `tick`. `createInitialState` has `started` 0: a game past its opening began with
+its first step, and there the hint behaves exactly as in 0021.
+
+The first condition of the hint in 0021 — `tick` < `HELP_HINT_STEPS` — becomes: `started` is
+not `null`, and `tick` − `started` < `HELP_HINT_STEPS`. Everything else of the hint is as
+0021 says: it has the last place in the bar, behind the dialogue box, every notice and the
+language line; its steps run on while the help, a dialogue or the journal is open; and it
+does not come back. The wake of 0009 keeps `started`.
+
 ### The text
 
 A slash stands for a line break.
@@ -140,9 +160,9 @@ characters, none empty. The notice is one line and fits the bar.
 1. `SCENES` holds the call with its three pages; `de` and `en` hold the five keys of the
    spec, each by its rule.
 2. `newGame` gives the state of `createInitialState` with `dialogue`
-   `{ speaker: 'story', index: 0, page: 0 }` and `lamp` `{ on: false, strength: 1,
-   owned: false, used: false }`, and survives a JSON round trip; `createInitialState` has
-   `owned` and `used` `true` and no dialogue.
+   `{ speaker: 'story', index: 0, page: 0 }`, `lamp` `{ on: false, strength: 1,
+   owned: false, used: false }` and `started` `null`, and survives a JSON round trip;
+   `createInitialState` has `owned` and `used` `true`, `started` 0 and no dialogue.
 3. With the call open, 600 steps with every key but `talk` held change nothing but `tick`
    and `held`; three presses close it, page by page, and nobody has turned.
 4. Without the lamp, 600 steps with `lamp` held leave `lamp.on` `false`, freeze no creature,
@@ -165,6 +185,11 @@ characters, none empty. The notice is one line and fits the bar.
     languages, and no cone while the lamp is not owned.
 13. A state of `createInitialState` steps exactly as before this feature: the 600 recorded
     steps of 0020 give the same digest.
+14. The step that closes the call sets `started` to its `tick`; no other step changes
+    `started`, and the wake keeps it.
+15. With the call closed at `tick` t, the start hint of 0021 is due at t and at t + 599 and
+    not at t + 600; it is not due at any `tick` while the call is open; in a state of
+    `createInitialState` it is due at 0 and at 599 and not at 600, as in 0021.
 
 ## Test plan
 
@@ -176,6 +201,10 @@ characters, none empty. The notice is one line and fits the bar.
   call is not theirs, and they do not turn; criteria 5 to 8 on the fixture of 0017.
 - **Unit, the lamp:** criterion 4 on a map with a snippet in the cone's reach, a wall and a
   trace; criterion 9 in the step after the meeting and 600 steps later.
+- **Unit, `game/help`:** criterion 15 — the hint by `tick` and `started`, with the call open,
+  closed after 40 steps and closed after 900 steps; the tests of 0021 on the hint pass on a
+  state of `createInitialState` unchanged. Criterion 14 on the closing step, on 600 further
+  steps and on the wake.
 - **Unit, `game/notice`:** criterion 10 in the four states — a new game, after the meeting,
   after the first light, a state of `createInitialState`.
 - **Unit, the wake:** criterion 11.
@@ -210,10 +239,11 @@ begins with a reload.
 9. Press `E`.
 10. Expected: the first line is `Über den Türen im Flur liegt etwas, das`.
 11. Press `E`.
-12. Expected: the box is gone, and the colleague in green starts its round within about
-    five seconds.
+12. Expected: the box is gone, and a line at the bottom says `Hilfe: Taste H`. The colleague
+    in green starts its round within about five seconds.
 13. Hold `Space` and walk right into the corridor with it held.
-14. Expected: the figure walks. No yellow cone appears, and there is no line at the bottom.
+14. Expected: the figure walks, and no yellow cone appears. About ten seconds after the box
+    went, the line `Hilfe: Taste H` is gone.
 15. Walk up the corridor to the next doorway on the left and through it into the room above
     the reception. Stand beside the colleague in the light grey shirt, hold `Space` and
     press `E`.
@@ -243,7 +273,7 @@ begins with a reload.
 
 ## Open questions
 
-None. Seven were settled on 2026-11-18, each as drafted:
+None. Seven were settled on 2026-11-18 before the approval, each as drafted:
 
 - Text, no figures: the call is three pages in the dialogue box; the customer and the
   managing director are sentences, and the game starts in the reception.
@@ -260,3 +290,9 @@ None. Seven were settled on 2026-11-18, each as drafted:
 - Two starts: `newGame` is what a player gets, `createInitialState` stays a game past its
   opening for the tests. Every acceptance walk begins with the call and the way to the lamp
   until M8 brings saved games.
+
+One was added and settled on 2026-11-18, after the approval, when feature 0021 was merged:
+
+- The help's start hint: its ten seconds begin when the call ends, not with the first step,
+  so that the call does not hide it. The section "The start hint of the help" and criteria
+  14 and 15 hold the rule.
