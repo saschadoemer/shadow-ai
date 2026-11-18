@@ -17,14 +17,16 @@ import {
   DIALOGUE_LINES,
   DIALOGUE_MARKER,
   DIALOGUE_TEXT,
-  drawScene,
+  drawScene as drawSceneWith,
   figureFrame,
   figureOrigin,
   HEART_MARGIN,
   HEART_PITCH,
   HEART_SIZE,
+  LANGUAGE_NOTICE_STEPS,
   lampFrame,
   lampFrameOrigin,
+  languageNoticeVisible,
   lidHeight,
   MARKER_BLINK_STEPS,
   markerVisible,
@@ -36,6 +38,7 @@ import {
   playerFrame,
   playerVisible,
   type SceneContent,
+  type SceneSettings,
   wallLook,
   wallSegments,
 } from '../../src/render/draw-scene';
@@ -103,8 +106,17 @@ const CONTENT: SceneContent = {
   },
   fontSheet: { image: {} as ImageBitmap, frameWidth: 6, frameHeight: 10 },
   figureSheets: { officer: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 } },
-  language: 'de',
 };
+/** The settings of a game in which the language was never switched (0019). */
+const GERMAN: SceneSettings = { language: 'de', switchedAt: null };
+const ENGLISH: SceneSettings = { language: 'en', switchedAt: null };
+/** The scene with the settings of a fresh game, unless a test hands over its own. */
+const drawScene = (
+  renderer: Renderer,
+  scene: GameState,
+  content: SceneContent,
+  settings: SceneSettings = GERMAN,
+): void => drawSceneWith(renderer, scene, content, settings);
 const player = (fields: Partial<PlayerState>): PlayerState => ({
   x: 0,
   y: 0,
@@ -682,8 +694,7 @@ describe('the notice in the scene (0016)', () => {
 
   it('draws the English line when the language is `en`', () => {
     const renderer = recordingRenderer();
-    const english: SceneContent = { ...CONTENT, language: 'en' };
-    drawScene(renderer, holding(), english);
+    drawScene(renderer, holding(), CONTENT, ENGLISH);
     const line = spritesOn(renderer, CONTENT.fontSheet);
     expect(line).toHaveLength(31);
     expect(line[0]).toBe('drawSprite 52 at 46,162');
@@ -851,7 +862,7 @@ describe('the dialogue box in the scene (0017)', () => {
 
   it('draws the page in English when the language is `en`', () => {
     const renderer = recordingRenderer();
-    drawScene(renderer, talking(0), { ...content, language: 'en' });
+    drawScene(renderer, talking(0), content, ENGLISH);
     const line = spritesOn(renderer, content.fontSheet);
     expect(line).toHaveLength(82);
     expect(line[0]).toBe('drawSprite 51 at 12,138');
@@ -924,5 +935,110 @@ describe('the dialogue box in the scene (0017)', () => {
         }
       }
     }
+  });
+});
+
+describe('the language line in the scene (0019)', () => {
+  const BAR = 'fillRect 8,158 304x18 #181425';
+  /** One full and one empty heart, no notice, no dialogue. */
+  const quiet = (tick: number, fields: Partial<GameState> = {}): GameState => ({
+    ...state({ x: 20, y: 30 }),
+    tick,
+    overview: { current: 1, max: 2 },
+    ...fields,
+  });
+  const switched = (language: SceneSettings['language'], switchedAt: number | null) => ({
+    language,
+    switchedAt,
+  });
+  const fontCalls = (renderer: ReturnType<typeof recordingRenderer>): string[] =>
+    renderer.calls
+      .filter((call) => call.startsWith('drawSprite'))
+      .filter((_call, i) => renderer.sheets[i] === CONTENT.fontSheet);
+
+  it('is due for 120 steps from the switch, and never without one', () => {
+    expect(LANGUAGE_NOTICE_STEPS).toBe(120);
+    expect([99, 100, 219, 220].map((tick) => languageNoticeVisible(tick, 100))).toStrictEqual([
+      false,
+      true,
+      true,
+      false,
+    ]);
+    expect(languageNoticeVisible(0, 0)).toBe(true);
+    expect(languageNoticeVisible(100, null)).toBe(false);
+  });
+
+  it('names the language that is on, in that language, centred in the bar after the hearts', () => {
+    const english = recordingRenderer();
+    drawScene(english, quiet(100), CONTENT, switched('en', 100));
+    const bar = english.calls.indexOf(BAR);
+    expect(bar).toBeGreaterThan(english.calls.indexOf('drawSprite 1 at 14,4'));
+    const line = english.calls.slice(bar + 1);
+    // `Language: English` has 17 characters, 16 of them drawn; `L` is glyph 44.
+    expect(line).toHaveLength(16);
+    expect(line[0]).toBe('drawSprite 44 at 109,162');
+    expect(line.at(-1)).toBe('drawSprite 72 at 205,162');
+    expect(fontCalls(english)).toStrictEqual(line);
+
+    const german = recordingRenderer();
+    drawScene(german, quiet(219), CONTENT, switched('de', 100));
+    // `Sprache: Deutsch` has 16 characters, 15 of them drawn; `S` is glyph 51.
+    const lineDe = german.calls.slice(german.calls.indexOf(BAR) + 1);
+    expect(lineDe).toHaveLength(15);
+    expect(lineDe[0]).toBe('drawSprite 51 at 112,162');
+  });
+
+  it('draws neither bar nor line before the switch, after two seconds, or without a switch', () => {
+    for (const [tick, switchedAt] of [
+      [99, 100],
+      [220, 100],
+      [100, null],
+    ] as const) {
+      const renderer = recordingRenderer();
+      drawScene(renderer, quiet(tick), CONTENT, switched('en', switchedAt));
+      expect(renderer.calls, `tick ${tick}`).not.toContain(BAR);
+      expect(fontCalls(renderer)).toStrictEqual([]);
+    }
+  });
+
+  it('leaves the bar to the notice of 0016, which itself changes its language', () => {
+    const holding = quiet(100, {
+      lamp: { on: true, strength: 1 },
+      shadowWalls: [{ wall: 0, lit: true, light: 0 }],
+    });
+    const renderer = recordingRenderer();
+    drawScene(renderer, holding, CONTENT, switched('en', 100));
+    const line = fontCalls(renderer);
+    // `This shadow is too dense for the lamp.`: 38 characters, 31 drawn, `T` is glyph 52.
+    expect(line).toHaveLength(31);
+    expect(line[0]).toBe('drawSprite 52 at 46,162');
+    expect(renderer.calls.filter((call) => call === BAR)).toHaveLength(1);
+  });
+
+  it('draws no line while a dialogue is open: the page changes its language instead', () => {
+    const content: SceneContent = {
+      ...CONTENT,
+      map: { ...MAP, points: [{ name: 'figure:officer', x: 40, y: 20 }] },
+    };
+    const talking = quiet(100, {
+      figures: [{ figure: 0, facing: 'left' }],
+      dialogue: { speaker: 'figure', index: 0, page: 0 },
+    });
+    const renderer = recordingRenderer();
+    drawScene(renderer, talking, content, switched('en', 100));
+    expect(renderer.calls).not.toContain(BAR);
+    const page = fontCalls(renderer);
+    expect(page).toHaveLength(82);
+    expect(page[0]).toBe('drawSprite 51 at 12,138');
+  });
+
+  it('closes the lids over the line', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, quiet(100, { dark: 10 }), CONTENT, switched('en', 100));
+    expect(renderer.calls).toContain(BAR);
+    expect(renderer.calls.slice(-2)).toStrictEqual([
+      'fillRect 0,0 320x30 #181425',
+      'fillRect 0,150 320x30 #181425',
+    ]);
   });
 });

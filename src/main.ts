@@ -128,7 +128,6 @@ async function loadContent(): Promise<SceneContent> {
         ]),
       ),
     ),
-    language: DEFAULT_LANGUAGE,
   };
 }
 
@@ -201,7 +200,7 @@ async function start(): Promise<void> {
       update: (state, input) => update(state, input, content.map),
       render(state) {
         handle.state = state;
-        drawScene(renderer, state, content);
+        drawScene(renderer, state, content, { language: DEFAULT_LANGUAGE, switchedAt: null });
         // Read every frame: this covers resize, zoom, fullscreen and a move to another monitor.
         renderer.present(
           computeLayout(window.innerWidth, window.innerHeight, window.devicePixelRatio),
