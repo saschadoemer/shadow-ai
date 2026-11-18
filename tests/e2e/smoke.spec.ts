@@ -430,3 +430,14 @@ test('the game starts with no rest taken', async ({ page }) => {
     })
     .toBeNull();
 });
+
+test('the game starts with no upgrade of the lamp', async ({ page }) => {
+  await start(page);
+  // One poll for the whole value: nothing is read from a page that might still be loading.
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.upgrades), {
+      message: 'window.shadowAi.state.upgrades is there and empty',
+    })
+    .toStrictEqual([]);
+  expect(await page.evaluate(() => window.shadowAi?.state.lamp.strength)).toBe(1);
+});

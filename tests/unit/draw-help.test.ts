@@ -88,6 +88,7 @@ const playing = (fields: Partial<GameState> = {}): GameState => ({
   tick: 700,
   started: 0,
   rested: null,
+  upgrades: [],
   player: {
     x: 184,
     y: 96,

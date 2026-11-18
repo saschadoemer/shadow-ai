@@ -164,6 +164,7 @@ describe('stepDark', () => {
     tick: 500,
     started: 0,
     rested: null,
+    upgrades: [],
     player: figure(300, 200, 'left', { frame: 2, frameTimer: 3.5 }),
     camera: { x: 140, y: 106 },
     lamp: { on: true, strength: 1, owned: true, used: true },
@@ -195,6 +196,7 @@ describe('stepDark', () => {
       tick: 543,
       started: 0,
       rested: null,
+      upgrades: [],
       lamp: { on: false, strength: 1, owned: true, used: true },
       dark: 44,
     });
@@ -207,6 +209,7 @@ describe('stepDark', () => {
       tick: 544,
       started: 0,
       rested: null,
+      upgrades: [],
       player,
       camera: followPlayer(player, MAP),
       lamp: { on: false, strength: 1, owned: true, used: true },

@@ -151,6 +151,7 @@ const state = (
   tick: QUIET_TICK,
   started: 0,
   rested: null,
+  upgrades: [],
   player: player(fields),
   camera,
   lamp: { on: lampOn, strength: 1, owned: true, used: true },

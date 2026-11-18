@@ -88,6 +88,7 @@ const reading = (tab: JournalTab, snippets = 0): GameState => ({
   tick: 100,
   started: 0,
   rested: null,
+  upgrades: [],
   player: {
     x: 160,
     y: 96,
