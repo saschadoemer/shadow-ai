@@ -102,6 +102,13 @@ the walk belongs to the author.
 A walk takes a few minutes, not an afternoon. If it does not fit, the feature is too big and is
 cut. A merge of `main` after the walk that changes code counts as a fix: the walk is run again.
 
+**What only exists after the merge.** A feature can end in something that only exists on
+`main` — a job that runs on a merge, for example. That part is not a step of the walk. The
+spec lists it under "After the merge"; the author checks it with the agent right after
+merging, one step per message as in the walk, and the answers are recorded as a comment on
+the pull request. A failure there is a defect and is fixed by a follow-up change.
+Everything that can be proved before the merge stays in the walk.
+
 ## 6. Test data
 
 Fixtures live beside the tests under `tests/fixtures/`: small Tiled maps built for a purpose (a

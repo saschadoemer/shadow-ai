@@ -26,11 +26,12 @@ specification.
 | M5 | **Act 1 complete** — the call, Sales, the data protection officer, the first cleared region | **Trade-fair teaser** |
 | M6 | **The cases of Act 2** — one department at a time, the upgrades and keys between them, the meeting-room side case | |
 | M7 | **Server room, core and epilogue** — the dungeon, the boss, the all-hands | |
-| M8 | **Save states, title screen, polish, English complete, the Cloud Run pipeline** | **Distribution** |
+| M8 | **Save states, title screen, polish, English complete, the custom domain** | **Distribution** |
 
 Audio arrives after M5 and before M8. A silent booth is normal; a silent distributed game is
-not. A gamepad is deferred (§5). Until M8 the game runs locally from its container
-(`docs/spec/ops.md` §3); the Dockerfile and CI exist from M2.
+not. A gamepad is deferred (§5). The Dockerfile and CI exist from M2. From feature 0018 on, every
+merge to `main` is deployed to Cloud Run (`docs/spec/ops.md` §5): until M8 that address is a
+preview of an unfinished game and is not announced; distribution stays with M8.
 
 ## 3. Content budget
 
