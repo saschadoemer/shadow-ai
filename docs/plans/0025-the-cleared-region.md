@@ -114,7 +114,7 @@ was **not** run with the prototype.
   `veilInk(4, i, j)`. The scene draws from these frames in Task 3; until then nothing uses
   them.
 
-- [ ] **Step 1: Change the test** to the sheet of criterion 6:
+- [x] **Step 1: Change the test** to the sheet of criterion 6:
 
 ```diff
 diff --git a/tests/unit/veil-sheet.test.ts b/tests/unit/veil-sheet.test.ts
@@ -230,10 +230,10 @@ index b6efc1e..9ae3472 100644
  });
 ```
 
-- [ ] **Step 2: Run it** — `npx vitest run tests/unit/veil-sheet.test.ts`. Expected: FAIL,
+- [x] **Step 2: Run it** — `npx vitest run tests/unit/veil-sheet.test.ts`. Expected: FAIL,
   4 of 11 tests: the sheet is 48x16 with 3 frames, and frame 3 is empty.
 
-- [ ] **Step 3: The generator:**
+- [x] **Step 3: The generator:**
 
 ```diff
 diff --git a/tools/placeholder-veil.ts b/tools/placeholder-veil.ts
@@ -286,13 +286,13 @@ index 6663db5..7b502de 100644
    }
 ```
 
-- [ ] **Step 4: Write the sheet** — `npm run gen-sprites`. Expected: `git status` shows
+- [x] **Step 4: Write the sheet** — `npm run gen-sprites`. Expected: `git status` shows
   `public/sprites/shadow-veil.png` changed and no other file under `public/`.
 
-- [ ] **Step 5: Run** `npx vitest run tests/unit/veil-sheet.test.ts tests/unit/assets.test.ts
+- [x] **Step 5: Run** `npx vitest run tests/unit/veil-sheet.test.ts tests/unit/assets.test.ts
   tests/unit/gen-sprites.test.ts` — green — then `npm run check`: 1132 unit tests.
 
-- [ ] **Step 6: Commit** — `Add the two frames of a clearing to the veil's sheet`. Body: the
+- [x] **Step 6: Commit** — `Add the two frames of a clearing to the veil's sheet`. Body: the
   veil of a cleared region thins out in two steps before it is gone; the sheet gets the two
   frames first, so that the scene can draw from them.
 
@@ -316,7 +316,7 @@ index 6663db5..7b502de 100644
   - `shownVeil(areas, solved, tick: number, column: number, row: number): number`
   - `veilOf` unchanged in what it returns.
 
-- [ ] **Step 1: Write the failing tests** — the imports at the top, the five new blocks at
+- [x] **Step 1: Write the failing tests** — the imports at the top, the five new blocks at
   the end of the file:
 
 ```diff
@@ -551,10 +551,10 @@ index 1ddc55b..bf870a9 100644
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/region.test.ts`. Expected: FAIL, 31
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/region.test.ts`. Expected: FAIL, 31
   of 47 tests, with `clearedAt is not a function` and the like. The 16 tests of 0023 pass.
 
-- [ ] **Step 3: The rules:**
+- [x] **Step 3: The rules:**
 
 ```diff
 diff --git a/src/game/region.ts b/src/game/region.ts
@@ -693,10 +693,10 @@ index d70ae43..656c3cc 100644
 +}
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/region.test.ts` — green, the tests of 0023
+- [x] **Step 4: Run** `npx vitest run tests/unit/region.test.ts` — green, the tests of 0023
   unchanged — then `npm run check`: 1163 unit tests.
 
-- [ ] **Step 5: Commit** — `Say when a region is cleared and which veil it shows`. Body: a
+- [x] **Step 5: Commit** — `Say when a region is cleared and which veil it shows`. Body: a
   region is cleared when its case is solved; the rules live in `game/region` and read
   `solved`, so the state needs no field for it.
 
@@ -713,7 +713,7 @@ index d70ae43..656c3cc 100644
   `drawLayer`, `drawVeil` and `Shadow` of `render/draw-map`, unchanged.
 - Produces: nothing new for later tasks.
 
-- [ ] **Step 1: Write the failing tests** — one new block at the end of the file. The block
+- [x] **Step 1: Write the failing tests** — one new block at the end of the file. The block
   of 0023 above it is not touched:
 
 ```diff
@@ -875,11 +875,11 @@ index bf21cd6..1719167 100644
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/draw-scene.test.ts`. Expected: FAIL,
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/draw-scene.test.ts`. Expected: FAIL,
   12 of 93 tests: the cleared cells are still drawn from the shadow tileset and under frame
   0. The first test of the block and the rows for 0 and 39 steps of Sales pass already.
 
-- [ ] **Step 3: The scene:**
+- [x] **Step 3: The scene:**
 
 ```diff
 diff --git a/src/render/draw-scene.ts b/src/render/draw-scene.ts
@@ -941,10 +941,10 @@ index 6456f84..a9ace7a 100644
      const origin = lampFrameOrigin(player, camera);
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/draw-scene.test.ts tests/unit/draw-map.test.ts`
+- [x] **Step 4: Run** `npx vitest run tests/unit/draw-scene.test.ts tests/unit/draw-map.test.ts`
   — green, the block of 0023 unchanged — then `npm run check`: 1181 unit tests.
 
-- [ ] **Step 5: Commit** — `Draw a cleared region in colour and thin its veil out`. Body: the
+- [x] **Step 5: Commit** — `Draw a cleared region in colour and thin its veil out`. Body: the
   tiles follow the areas that are not cleared, so the colours are back in the frame after
   the solving step; the veil follows the clearing and is gone after two seconds.
 
@@ -961,7 +961,7 @@ index 6456f84..a9ace7a 100644
   `game/shadow`; `solve` of 0024, unchanged.
 - Produces: `clearRegion(state: GameState, region: string, map: TileMap): GameState`.
 
-- [ ] **Step 1: Write the failing tests.** `cases.test.ts` — the rule on a map of two rooms:
+- [x] **Step 1: Write the failing tests.** `cases.test.ts` — the rule on a map of two rooms:
 
 ```diff
 diff --git a/tests/unit/cases.test.ts b/tests/unit/cases.test.ts
@@ -1320,11 +1320,11 @@ index 41f7b5a..dafea41 100644
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/cases.test.ts tests/unit/state.test.ts
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/cases.test.ts tests/unit/state.test.ts
   tests/unit/floor.test.ts`. Expected: FAIL, 13 of 180 tests: `clearRegion is not a
   function`, and after the solving step the creatures and the wall are still there.
 
-- [ ] **Step 3: The rule,** in `cases.ts`:
+- [x] **Step 3: The rule,** in `cases.ts`:
 
 ```diff
 diff --git a/src/game/cases.ts b/src/game/cases.ts
@@ -1367,7 +1367,7 @@ index 5f66cdf..01545a5 100644
    solved: readonly SolvedCase[],
 ```
 
-- [ ] **Step 4: The step,** in `update.ts`:
+- [x] **Step 4: The step,** in `update.ts`:
 
 ```diff
 diff --git a/src/game/update.ts b/src/game/update.ts
@@ -1410,11 +1410,11 @@ index 31b83cc..aa00b75 100644
    if (journal !== null) {
 ```
 
-- [ ] **Step 5: Run** the three files again — green, the tests of 0024 unchanged — and
+- [x] **Step 5: Run** the three files again — green, the tests of 0024 unchanged — and
   `npx vitest run tests/unit/journal.test.ts`: the digest of 0020 passes as recorded
   (criterion 11). Then `npm run check`: 1202 unit tests.
 
-- [ ] **Step 6: Commit** — `Take the region's wall and creatures with the solved case`. Body:
+- [x] **Step 6: Commit** — `Take the region's wall and creatures with the solved case`. Body:
   a cleared room has no shadow left in it; the creatures at home in it leave without being
   captured, and the one of the corridor stays because its home is in no region.
 
@@ -1429,7 +1429,7 @@ index 31b83cc..aa00b75 100644
 The diffs are against `main` at `702a0e6`. If a line has moved, put the text where the diff
 means it; do not change the words without a reason.
 
-- [ ] **Step 1: `gameplay.md`** §3 and §6:
+- [x] **Step 1: `gameplay.md`** §3 and §6:
 
 ```diff
 diff --git a/docs/spec/gameplay.md b/docs/spec/gameplay.md
@@ -1470,7 +1470,7 @@ index ecb76ee..2915c11 100644
  
 ```
 
-- [ ] **Step 2: `world.md`** §1 and §4:
+- [x] **Step 2: `world.md`** §1 and §4:
 
 ```diff
 diff --git a/docs/spec/world.md b/docs/spec/world.md
@@ -1503,7 +1503,7 @@ index 528e8c4..a5c8ec1 100644
  for a scrap of paper, used for a species and not for a product, a company or a tool; it is fixed
 ```
 
-- [ ] **Step 3: `visual.md`** §4:
+- [x] **Step 3: `visual.md`** §4:
 
 ```diff
 diff --git a/docs/spec/visual.md b/docs/spec/visual.md
@@ -1542,7 +1542,7 @@ index d2b4ee9..852db1c 100644
  
 ```
 
-- [ ] **Step 4: `architecture.md`** §1, §2, §5, §6 and §7:
+- [x] **Step 4: `architecture.md`** §1, §2, §5, §6 and §7:
 
 ```diff
 diff --git a/docs/spec/architecture.md b/docs/spec/architecture.md
@@ -1667,7 +1667,7 @@ index cb3f051..3a54d46 100644
  
 ```
 
-- [ ] **Step 5: `testing.md`** §2, the rows of INV-1 and INV-6:
+- [x] **Step 5: `testing.md`** §2, the rows of INV-1 and INV-6:
 
 ```diff
 diff --git a/docs/spec/testing.md b/docs/spec/testing.md
@@ -1691,7 +1691,7 @@ index 4129a6e..017aa21 100644
  A change to the state's shape is held against a recording: 600 steps on the floor with walking,
 ```
 
-- [ ] **Step 6: `README.md`:**
+- [x] **Step 6: `README.md`:**
 
 ```diff
 diff --git a/README.md b/README.md
@@ -1711,20 +1711,20 @@ index 9907e39..e1293b7 100644
  
 ```
 
-- [ ] **Step 7:** `npm run check`, then commit — `Move the cleared region into the spec`.
+- [x] **Step 7:** `npm run check`, then commit — `Move the cleared region into the spec`.
 
 ---
 
 ### Task 6: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green; the smoke spec is unchanged:
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green; the smoke spec is unchanged:
   15 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
   `Tick the full check of 0025`.
 
 ---
