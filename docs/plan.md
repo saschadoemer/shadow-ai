@@ -147,11 +147,14 @@ from scratch and not forgotten.
   from the vendor once he is an advisor; approving would need a matching policy block; a grey
   region could be upgraded later by returning. The attitude the game is about would become its
   mechanic, and backtracking would have a purpose. Deferred because it multiplies dialogue per
-  source and needs balancing the first draft cannot afford. Revisit after M5, when the linear
-  version has been played.
+  source and needs balancing the first draft cannot afford. Looked at again on 2026-11-18,
+  when M6 was cut and the first case had been played: Act 2 stays linear. The idea stays
+  here, without a date.
 - **The mirror case.** A case in IT itself — an admin running an unapproved model under his desk
   — so the player has to bring his own house into the light. Cut from the first draft to keep the
-  case count at seven; the humility it adds is wanted. Revisit when Act 2 is being filled.
+  case count at seven; the humility it adds is wanted. Looked at again on 2026-11-18, when M6
+  was cut: not yet. It would need a room for IT on the floor and an eighth case in the
+  budget of §3; it stays here.
 - **Environmental puzzles as resolution.** Rerouting data flows, switches, light beams. Kept as a
   *way* to the source in dense regions and the server room, not as the resolution of a case.
 - **Gamepad.** The directional pad or the left stick walks, one button holds the lamp, beside

@@ -216,17 +216,11 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 
 ## Open questions
 
-1. **Coffee.** Overview comes back with a coffee. `gameplay.md` §4 names three ways: a
-   conversation, a place, a find. I propose the place, and this one: the break room has no
-   shadow, the Sales colleague's saying already ends with `Erst mal Kaffee.`, and nobody has
-   to be asked for anything.
-2. **Machines under shadow.** Every coffee machine of the floor is a rest, but one in a room
-   under shadow gives nothing and says so. When the room is cleared, its machine works. The
-   alternative is that only the break room's two count. I propose all eight: every solved
-   case then brings a safe place nearer.
-3. **All hearts.** A coffee fills overview completely, as often as the player walks there.
-   The alternatives are one heart per coffee, or a wait between two. I propose all of it:
-   the walk is the price.
-4. **The words.** The three lines of the table, German and English, are my proposal.
-5. **The same key.** `E` talks and takes a coffee; a colleague in reach comes first. A key
-   of its own would need a row in the help. I propose `E`.
+None. Five were settled on 2026-11-18, each as drafted:
+
+- Coffee: overview comes back with a coffee — a place, not a conversation and not a find.
+- Machines under shadow: every coffee machine of the floor is a rest; one in a room under
+  shadow gives nothing and says so, and works once the room is cleared.
+- All hearts: a coffee fills overview completely, as often as the player walks there.
+- The words: the three lines of the table, in German and English.
+- The same key: `E` talks and takes a coffee; a colleague in reach comes first.

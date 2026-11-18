@@ -204,24 +204,17 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 
 ## Open questions
 
-1. **A case that is only content.** This case uses the rules of the first without a change:
-   traces, the source's answer, the journal, the cleared room. I propose that, so that the
-   second case proves the first one's rules; what a case of Act 2 has more — its species,
-   the vendor, the upgrade — comes as features of their own.
-2. **Five traces, on these devices.** Four screens and the printer of the table. Are five
-   right for Marketing too, and is the printer wanted?
-3. **The words.** The answer, "Afterwards", the outcome and the block in the table under
-   "The text", German and English, are my proposal.
-4. **Before Sales.** Nothing makes the player solve Sales first. The call (0026) sends the
-   player to Sales, but Marketing is open. I propose to leave it open, as `world.md` §2
-   says.
-5. **The cut of M6.** `docs/plan.md` §4 opens M6 with this draft and names three features:
-   0028 the case of Marketing · 0029 the wider cone · 0030 the creature of Marketing. The
-   other cases, the keys, the intern and the vendor are named there without a number.
-6. **Three outcomes per case.** `docs/plan.md` §5 deferred the three outcomes — forbid,
-   replace, approve — to be looked at again after M5, when the linear case has been played.
-   This draft is linear. Do you want to keep it linear for Act 2, or look at the three
-   outcomes before this case is built?
-7. **The mirror case.** `docs/plan.md` §5 deferred a case in IT itself, to be looked at
-   again when Act 2 is filled. The cut of M6 in this draft does not have it. Should it get a
-   place?
+None. Seven were settled on 2026-11-18, each as drafted:
+
+- A case that is only content: this case uses the rules of the first without a change. What
+  a case of Act 2 has more — its species, the vendor, the upgrade — comes as features of
+  their own.
+- Five traces, on these devices: four screens and the printer of the table.
+- The words: the answer, "Afterwards", the outcome and the block as in the table under "The
+  text", in German and English.
+- Before Sales: nothing makes the player solve Sales first.
+- The cut of M6: 0028 the case of Marketing · 0029 the wider cone · 0030 the creature of
+  Marketing; the rest is named in `docs/plan.md` §4 without a number.
+- Three outcomes per case: Act 2 stays linear. `docs/plan.md` §5 keeps the idea deferred.
+- The mirror case: not yet. It stays deferred; the budget stays at seven cases and one side
+  case.

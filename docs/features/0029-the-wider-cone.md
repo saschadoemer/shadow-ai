@@ -205,17 +205,15 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 
 ## Open questions
 
-1. **One and a half times.** The cone's slope grows from one half to three quarters: 72 px
-   wide at its end where it was 48. Its length stays. More would cover half the view.
-2. **Earned by the case, handed over by nobody.** The upgrade comes in the step that solves
-   Marketing, and a line says so. `gameplay.md` §5 says everything the player has was earned
-   by solving a case. The alternative is a person who hands it over — the data protection
-   officer, or later the vendor. I propose the case itself for now; the vendor's part is
-   M6.
-3. **Wider and stronger at once.** `gameplay.md` §2 gives the wider cone both effects, and
-   the world data gives every upgrade one step of strength. So the same moment widens the
-   cone and opens HR and Accounting.
-4. **Nothing for the two rooms yet.** HR and Accounting can be entered after this feature,
-   but they have no case, no traces and no creature of their own until their features come.
-   They are grey rooms with a dog and a vacuum. Is that acceptable for the time between?
-5. **The words.** `Die Lampe leuchtet jetzt breiter und stärker.` is my proposal.
+None. Five were settled on 2026-11-18, each as drafted:
+
+- One and a half times: the cone's slope grows from one half to three quarters, 72 px wide
+  at its end; its length stays 48 px.
+- Earned by the case: the upgrade comes in the step that solves Marketing, and a line says
+  so. Nobody hands it over; the vendor's part is M6.
+- Wider and stronger at once: the same moment widens the cone and raises the strength to 2,
+  so that HR and Accounting open.
+- The two rooms: HR and Accounting can be entered after this feature and have nothing of
+  their own until their features come. That is accepted for the time between.
+- The words: `Die Lampe leuchtet jetzt breiter und stärker.`, shown for two seconds after
+  the notice of the solved case.
