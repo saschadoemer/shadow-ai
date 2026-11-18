@@ -227,6 +227,59 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the words of the case of Marketing in both languages (0028)', () => {
+    const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
+      textOf(textKey(id), language).split('\n');
+    expect(lines('region.marketing', 'de')).toStrictEqual(['Marketing']);
+    expect(lines('region.marketing', 'en')).toStrictEqual(['Marketing']);
+    expect(lines('talk.marketing-source-1', 'de')).toStrictEqual([
+      'Die Motive macht ein Bildgenerator – in zehn',
+      'Minuten statt in zwei Tagen, und die Agentur',
+      'haben wir uns gespart.',
+    ]);
+    expect(lines('talk.marketing-source-1', 'en')).toStrictEqual([
+      'An image generator makes the visuals – in ten',
+      'minutes instead of two days, and we saved',
+      'the agency.',
+    ]);
+    expect(lines('talk.marketing-source-2', 'de')).toStrictEqual([
+      'Dass fremde Logos und Gesichter darin stecken,',
+      'habe ich erst auf dem Plakat gesehen.',
+      'Geprüft hat das vor dem Druck niemand.',
+    ]);
+    expect(lines('talk.marketing-source-2', 'en')).toStrictEqual([
+      'That other logos and faces are in them,',
+      'I only saw on the poster.',
+      'Nobody checked it before it went to print.',
+    ]);
+    expect(lines('talk.marketing-after', 'de')).toStrictEqual([
+      'Danke. Ab jetzt schaut jemand drauf, bevor',
+      'etwas rausgeht – und sei es nur jemand vom',
+      'Nachbartisch.',
+    ]);
+    expect(lines('talk.marketing-after', 'en')).toStrictEqual([
+      'Thanks. From now on somebody looks at it',
+      'before it goes out – even if it is only',
+      'somebody at the next desk.',
+    ]);
+    expect(lines('case.marketing-outcome', 'de')).toStrictEqual([
+      'Gelöst: Bilder gingen ungeprüft raus.',
+    ]);
+    expect(lines('case.marketing-outcome', 'en')).toStrictEqual([
+      'Solved: images went out unchecked.',
+    ]);
+    expect(lines('policy.marketing', 'de')).toStrictEqual([
+      'Was eine Maschine erzeugt hat, sieht sich',
+      'ein Mensch an, bevor es das Haus verlässt.',
+      'Bild oder Text – lieber einmal zu viel.',
+    ]);
+    expect(lines('policy.marketing', 'en')).toStrictEqual([
+      'What a machine has made, a person looks at',
+      'before it leaves the house.',
+      'Image or text – rather once too often.',
+    ]);
+  });
+
   it('holds every text of the journal to the rule of its kind (0020, 0022, 0024)', () => {
     /** The most lines and the most characters per line a key may have, by what its id starts or ends with. */
     const rules: readonly (readonly [(id: string) => boolean, number, number, number])[] = [
