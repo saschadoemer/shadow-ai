@@ -1836,6 +1836,116 @@
           "width": 16,
           "x": 1568,
           "y": 736
+        },
+        {
+          "height": 304,
+          "id": 106,
+          "name": "region:hr",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 336,
+          "x": 16,
+          "y": 16
+        },
+        {
+          "height": 304,
+          "id": 107,
+          "name": "region:accounting",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 352,
+          "x": 352,
+          "y": 16
+        },
+        {
+          "height": 304,
+          "id": 108,
+          "name": "region:development",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 656,
+          "x": 704,
+          "y": 16
+        },
+        {
+          "height": 144,
+          "id": 109,
+          "name": "region:meeting-rooms",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 288,
+          "x": 1424,
+          "y": 16
+        },
+        {
+          "height": 160,
+          "id": 110,
+          "name": "region:meeting-rooms",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 288,
+          "x": 1424,
+          "y": 160
+        },
+        {
+          "height": 224,
+          "id": 111,
+          "name": "region:reception",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 352,
+          "x": 16,
+          "y": 608
+        },
+        {
+          "height": 416,
+          "id": 112,
+          "name": "region:break-room",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 320,
+          "x": 464,
+          "y": 416
+        },
+        {
+          "height": 416,
+          "id": 113,
+          "name": "region:sales",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 448,
+          "x": 1264,
+          "y": 416
+        },
+        {
+          "height": 336,
+          "id": 114,
+          "name": "region:marketing",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 768,
+          "x": 16,
+          "y": 928
+        },
+        {
+          "height": 336,
+          "id": 115,
+          "name": "region:support",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 928,
+          "x": 784,
+          "y": 928
         }
       ],
       "opacity": 1,
@@ -1846,7 +1956,7 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 106,
+  "nextobjectid": 116,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",
