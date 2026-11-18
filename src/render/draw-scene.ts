@@ -17,8 +17,10 @@ import {
   type PlayerState,
   type ShadowWallState,
   type Species,
+  type TraceState,
 } from '../game/state';
 import { speakerOf, speakersOf } from '../game/talk';
+import { FIND_STEPS, tracesOf } from '../game/trace';
 import { type Language, textKey, textOf } from '../text/text';
 import { drawJournal } from './draw-journal';
 import { drawLayer } from './draw-map';
@@ -46,6 +48,8 @@ export interface SceneContent {
   readonly overviewSheet: SpriteSheet;
   /** Sixteen 16x16 frames: orientation × 8 + look (0014). */
   readonly shadowWallSheet: SpriteSheet;
+  /** Three 16x16 frames: a trace as it grows in the light (0022). */
+  readonly traceSheet: SpriteSheet;
   /** The movers' sheets (0015): one per person, the dogs' 24 frames, two frames each for the vacuum and the drone. */
   readonly moverSheets: {
     readonly person: readonly SpriteSheet[];
@@ -239,6 +243,14 @@ export function wallSegments(
   };
 }
 
+/** The trace sheet (0022) has three looks, one per third of FIND_STEPS. */
+export const TRACE_LOOKS = 3;
+
+/** The frame of a trace the light is on: ⌊(light − 1) / 20⌋ — small, larger, largest. */
+export function traceFrame(trace: TraceState): number {
+  return Math.floor(((trace.light - 1) * TRACE_LOOKS) / FIND_STEPS);
+}
+
 /** The hearts of overview (0009, 0012): 8x8, 4 px from the corner, one every 10 px. */
 export const HEART_SIZE = 8;
 export const HEART_MARGIN = 4;
@@ -310,10 +322,10 @@ export function lidHeight(dark: number): number {
 
 /**
  * One frame: ground, detail, the cone when the lamp is on, the standing shadow walls in array
- * order (0014), the ground movers whose feet are at or above the player's, then the standing
- * figures whose feet are at or above the player's (0017), the creatures in array order, the
- * player, the other standing figures, the other ground movers, above, the drones (0015), all
- * shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x,
+ * order (0014), the traces the light is on (0022), the ground movers whose feet are at or above
+ * the player's, then the standing figures whose feet are at or above the player's (0017), the
+ * creatures in array order, the player, the other standing figures, the other ground movers,
+ * above, the drones (0015), all shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x,
  * round(y) − 24 − camera.y): the feet are its bottom centre, and the camera is already whole
  * pixels (engine/camera). The cone lies under the figure, so the body hides the apex. After
  * `above` come the hearts of overview, on the surface and not shifted by the camera; then,
@@ -354,6 +366,20 @@ export function drawScene(
     for (const origin of origins) {
       renderer.drawSprite(content.shadowWallSheet, frame, origin.x, origin.y);
     }
+  }
+  const traces = tracesOf(content.map.rects);
+  for (const seen of state.traces) {
+    const trace = traces[seen.trace];
+    // A trace shows only while the light is on it; a found one never.
+    if (trace === undefined || seen.found !== null || seen.light === 0) {
+      continue;
+    }
+    renderer.drawSprite(
+      content.traceSheet,
+      traceFrame(seen),
+      trace.box.x - camera.x,
+      trace.box.y - camera.y,
+    );
   }
   const figures = figuresOf(content.map.points);
   const ground = state.movers.filter((mover) => mover.kind !== 'drone');

@@ -40,6 +40,8 @@ import {
   playerVisible,
   type SceneContent,
   type SceneSettings,
+  TRACE_LOOKS,
+  traceFrame,
   wallLook,
   wallSegments,
 } from '../../src/render/draw-scene';
@@ -95,6 +97,7 @@ const CONTENT: SceneContent = {
   creatureSheets: { snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 } },
   overviewSheet: { image: {} as ImageBitmap, frameWidth: 8, frameHeight: 8 },
   shadowWallSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
+  traceSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   moverSheets: {
     person: [0, 1, 2, 3].map(() => ({
       image: {} as ImageBitmap,
@@ -140,6 +143,7 @@ const state = (
   creatures: [],
   movers: [],
   shadowWalls: [],
+  traces: [],
   figures: [],
   dialogue: null,
   journal: null,
@@ -1042,5 +1046,64 @@ describe('the language line in the scene (0019)', () => {
       'fillRect 0,0 320x30 #181425',
       'fillRect 0,150 320x30 #181425',
     ]);
+  });
+});
+
+describe('the traces in the scene (0022)', () => {
+  /** A wall strip under cell (0, 0) and a trace on cell (1, 0) of the 3x2 map. */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...MAP,
+      rects: [
+        { name: 'shadow:marketing', x: 0, y: 16, width: 16, height: 4 },
+        { name: 'trace:sales', x: 16, y: 0, width: 16, height: 16 },
+      ],
+    },
+  };
+  const seen = (light: number, found: number | null = null): GameState => ({
+    ...state({ x: 20, y: 30 }),
+    shadowWalls: [{ wall: 0, lit: false, light: 0 }],
+    traces: [{ trace: 0, light, found }],
+    movers: [mover({ kind: 'dog', x: 60, y: 10 })],
+  });
+
+  it('has three looks, one per third of a second', () => {
+    expect(TRACE_LOOKS).toBe(3);
+    expect(
+      [1, 20, 21, 40, 41, 59].map((light) => traceFrame({ trace: 0, light, found: null })),
+    ).toStrictEqual([0, 0, 1, 1, 2, 2]);
+  });
+
+  it('draws a trace the light is on at its cell, after the walls and before the movers', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, seen(21), content);
+    expect(renderer.sheets).toStrictEqual([
+      content.shadowWallSheet,
+      content.traceSheet,
+      content.moverSheets.dog,
+      content.playerSheet,
+    ]);
+    expect(renderer.calls).toContain('drawSprite 1 at 16,0');
+  });
+
+  it('shifts it by the camera', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, { ...seen(59), camera: { x: 5, y: 7 } }, content);
+    expect(renderer.calls).toContain('drawSprite 2 at 11,-7');
+  });
+
+  it('draws no trace the light is not on, and none that is found', () => {
+    for (const scene of [seen(0), seen(0, 60)]) {
+      const renderer = recordingRenderer();
+      drawScene(renderer, scene, content);
+      expect(renderer.sheets).not.toContain(content.traceSheet);
+    }
+  });
+
+  it('draws no trace the map does not have', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, { ...seen(21), shadowWalls: [] }, CONTENT);
+    expect(renderer.sheets).not.toContain(CONTENT.traceSheet);
   });
 });

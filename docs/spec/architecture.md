@@ -22,11 +22,14 @@ src/
                  game/notice.ts which notice a state shows (0016); game/cast.ts the cast and
                  the standing figures of a map, and the colleagues' lines (0018),
                  game/talk.ts the rules of talking (0017, 0018); game/journal.ts the
-                 journal's tabs, entries and step (0020)
+                 journal's tabs, entries and step (0020); game/rects.ts the kinds of
+                 rectangle a map holds, by the prefix of the name; game/trace.ts the traces,
+                 their light test, their step and the entries of the cases tab (0022)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene); render/font.ts the glyph order and the
                  cell size of the font, render/draw-text.ts text by TextKey, line by line
-                 (0016, 0017); render/draw-journal.ts the journal's screen (0020)
+                 (0016, 0017), and whole numbers (0022); render/draw-journal.ts the
+                 journal's screen (0020)
   text/          the language table and the TextKey type (INV-4): de.ts and en.ts hold the
                  strings, text.ts the languages, the keys and the lookup (0016)
 public/
@@ -39,8 +42,9 @@ tools/
   gen-tiles.ts          writes them to public/tiles/; `npm run gen-tiles`
   placeholder-player.ts the placeholder figure as pure data: the pixels of its sprite sheet
   gen-sprites.ts        writes the figure, the lamp, the snippet, the overview sheet, the
-                        movers' seven sheets, the shadow-wall sheet, the font sheet and the
-                        officer's sheet to public/sprites/; `npm run gen-sprites`
+                        movers' seven sheets, the shadow-wall sheet, the font sheet, the
+                        officer's sheet and the trace sheet to public/sprites/;
+                        `npm run gen-sprites`
   placeholder-lamp.ts   the placeholder lamp sheet as pure data: the cone of light, one 48x48
                         frame per facing, drawn from game/lamp
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
@@ -53,12 +57,14 @@ tools/
   placeholder-drone.ts  the placeholder drone: two 16x16 frames, the rotors as bars and dots
   placeholder-shadow-wall.ts the placeholder shadow-wall sheet: sixteen 16x16 frames, two
                         orientations of eight looks (0014)
+  placeholder-trace.ts  the placeholder trace sheet: three 16x16 frames, a checkerboard in
+                        the signature colour in a growing square (0022)
   placeholder-font.ts   the placeholder font: 108 glyphs of 6x10 drawn as pictures, and the
                         sheet as pure pixel data (0016)
   floor-layout.ts       the floor as pure data: the corridors and rooms, the walls and their
                         openings, the closed doors, the spawn, the creatures' points, the
-                        wake point, the furniture, the movers' routes, the shadow walls and
-                        the standing figures (world.md §1)
+                        wake point, the furniture, the movers' routes, the shadow walls, the
+                        standing figures and the traces (world.md §1)
   gen-floor.ts          writes it to public/maps/; `npm run gen-floor`
 tests/
   unit/          Vitest, headless: engine math, game rules, map loading, assets
@@ -81,7 +87,7 @@ render (feature 0019). It is read-only by convention; nothing in the game reads 
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
 logic steps since the start, the player, the camera, the lamp, the creatures, the movers, the
-standing shadow walls, the standing figures, the open dialogue, the open journal, the input of
+standing shadow walls, the traces, the standing figures, the open dialogue, the open journal, the input of
 the last step, the captured count, overview and the step of the dark; later the current map id
 and cleared regions join them. It is plain data: numbers,
 strings, booleans, arrays and plain objects. No functions, no class instances, no `Map` or `Set`,
@@ -198,6 +204,24 @@ would reach 60 the wall leaves the array. In the dark no wall is stepped; at the
 standing wall has `lit` false and `light` 0. A state whose `shadowWalls` is empty steps exactly as
 before 0014.
 
+`traces` is an array of `{ trace, light, found }`, one entry per trace of the map, in file order,
+for the whole game (feature 0022, `game/trace`): a found trace stays in the array. `trace` is the
+index of the trace among `tracesOf(map.rects)`; its box stays in the map, and `update` and the
+scene rebuild the traces from `map.rects` on every call and keep them nowhere. `light` counts the
+steps the light has been on it without a break, 0–59; `found` is the `tick` of the step in which
+it was found, or `null` — never `undefined`. `createInitialState` reads the traces — and so
+rejects a map with a trace the world data or the grid refuses (§6) — and starts every trace
+`{ trace: n, light: 0, found: null }`. In an ordinary step, after the figure is stepped and next
+to the walls, every trace not found is stepped against the stepped figure and the map **with**
+the walls standing at the start of the step, as a creature is, so none is found through a wall.
+A trace is in the light when the lamp is on, its box meets the cone (`meetsCone`), and no opaque
+box lies on the line from (x, y − 4) to the pixel of the trace's box nearest to it. In the light
+`light` grows by 1, and in the step it would reach 60 (`FIND_STEPS`) the trace is found: `found`
+is the step's tick, `light` is 0. Out of the light `light` is 0. A found trace never changes
+again. In the dark, with the journal open and with a dialogue open no trace is stepped; at the
+wake every `light` is 0 and `found` is kept. The notice of a find is derived from `found` and
+`tick` (§5) and is not in the state. A state whose `traces` is empty steps exactly as before 0022.
+
 `figures` is an array of `{ figure, facing }`, one entry per standing figure of the map, in file
 order (feature 0017, `game/cast`). `figure` is the index of the figure among
 `figuresOf(map.points)`; its place stays in the map and its pages in the cast, and neither is in
@@ -214,7 +238,10 @@ it and `held` does not (`game/player`, `pressed`; `talkPressed` in `game/talk` r
 `talk`). `journal` is `null`, or `{ tab }` with one of `JOURNAL_TABS` — `creatures`, `cases`,
 `policy` — (feature 0020, `game/journal`). What a tab shows is not in the state: the **entries**
 of the creatures tab are the species of which at least one was captured, in `SPECIES` order,
-derived from `captured` in every frame by `entriesOf`; the cases and the policy have none yet.
+derived from `captured` in every frame by `entriesOf`. The entries of the cases tab are the
+regions of which at least one trace is found, in the order of the world data, each with the
+number of its found traces and of all its traces on the map — derived from `traces` and the map's
+traces in every frame by `caseEntries` (feature 0022). The policy has none yet.
 
 The **speakers** of a step (feature 0018, `speakersOf` in `game/talk`) are the standing figures in
 file order, then the movers of the kind `person` whose route is in `COLLEAGUES` (`game/cast`), in
@@ -227,10 +254,10 @@ above, and sets `held`; `journal` does nothing. **Journal:** with the journal op
 by 1 and `held` is set; a press of `journal` sets `journal` to `null`; otherwise a press of
 `right` while `left` is not pressed turns to the next tab, a press of `left` while `right` is not
 pressed to the one before, and at either end the tab stays. Nothing else changes — not the
-player, the lamp, the creatures, the movers, the walls or a figure. **Dialogue:**
+player, the lamp, the creatures, the movers, the walls, the traces or a figure. **Dialogue:**
 with a dialogue open, `tick` grows by 1, `held` is set, and a press turns to the next page or,
 on the last page, sets `dialogue` to `null`; nothing else changes — not the player, the lamp, the
-creatures, the movers or the walls — and a press of `journal` does nothing. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
+creatures, the movers, the walls or the traces — and a press of `journal` does nothing. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
 the input holds: `tick` grows by 1, `held` is set, and nothing else changes in this step — a
 figure in mid-step, a push and a lamp that is on stay as they are and go on when it closes
 (`openJournal`). This comes before a press of `talk` is looked at. Otherwise a press of `talk` while the input does not
@@ -354,8 +381,8 @@ sprite round the same value.
 `frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48 — with its
 top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
 `render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the lamp's
-cone when the lamp is on, the standing shadow walls in array order (feature 0014), the ground
-movers whose feet y is at most the player's in array order, the standing figures whose feet y is
+cone when the lamp is on, the standing shadow walls in array order (feature 0014), the traces
+the light is on in array order (feature 0022), the ground movers whose feet y is at most the player's in array order, the standing figures whose feet y is
 at most the player's (feature 0017), the creatures in array order, the player, the other
 standing figures, the other ground movers in array order, `above` (§6), the drones (feature
 0015), the hearts of overview, the dialogue box while a dialogue is open or else the notice
@@ -379,6 +406,12 @@ The frame is orientation × 8 + look (§7). The look: while `light` is 1–19 lo
 (density − 1) × 2, still; otherwise look (density − 1) × 2 + ⌊tick / 15⌋ mod 2, a flicker four
 times a second. A lifted wall is not drawn. The walls are rebuilt from `map.rects` every frame,
 as in `update`.
+
+The traces (feature 0022) lie on their devices like the walls on the floor, under every figure.
+A trace with `light` L above 0 is drawn with frame ⌊(L − 1) / 20⌋ of the trace sheet — 0, 1 or
+2, small, larger, largest (`traceFrame`, `TRACE_LOOKS` 3) — with its top-left corner at
+(x − camera.x, y − camera.y) of its box. A trace with `light` 0 is not drawn, and a found one
+never. The traces are rebuilt from `map.rects` every frame, as in `update`.
 
 The movers (feature 0015): a person's frame has its top-left corner at (round(x) − 8 − camera.x,
 round(y) − 24 − camera.y) and is facing × 5 + `frame`, as the figure's, in its own sheet
@@ -405,6 +438,12 @@ a sprite of the font sheet with its top-left corner at (x + 6n, y + 12k), its fr
 character's place in the glyph order (§7). A line break starts the next line, 12 px lower — a
 line is 10 px high and 2 px lie between two lines (feature 0017). A space is not drawn and only
 takes its 6 px; a character the font does not have is drawn as `?`. There is no wrapping.
+`game/notice` knows two notices (feature 0022): the wall that holds comes first; else, while a
+trace has `found` not `null` and `tick` − `found` < `TRACE_NOTICE_STEPS` (120, two seconds),
+`notice.trace-found`. A second find starts the two seconds again. `render/draw-text` also has
+`drawNumber(renderer, font, value, x, y)`: the decimal digits of a whole number of 0 or more,
+digit n with its top-left corner at (x + 6n, y). It takes a number and nothing else; a number is
+no text of a language and needs no key.
 
 `drawScene(renderer, state, content, settings)` takes the player's settings as its fourth
 argument (feature 0019): `{ language, switchedAt }`, which `main.ts` holds and hands over with
@@ -438,7 +477,11 @@ entries that is the tab's line for nothing from (16, 36). With entries, entry k 
 of the species' sheet — the creature as the light shows it, `ENTRY_FRAME`, held equal to
 `FROZEN_FRAME` by a test — with its top-left corner at (16, 32 + 72k), the name from
 (40, 35 + 72k) and the text from (16, 54 + 72k), lines 12 px apart. A line of 47 characters ends
-at x = 298; two entries fit, the second ending at y = 172. `draw-journal` imports only types
+at x = 298; two entries fit, the second ending at y = 172. On the cases tab (feature 0022) case
+k from 0 is two lines: the region's name, `region.<id>`, from (16, 36 + 36k), and from
+(16, 48 + 36k) four parts — `journal.traces`, the number of found traces, `journal.of`, the
+number of all the region's traces on the map — with one empty cell of 6 px between two parts:
+`Spuren: 1 von 5`, the numbers drawn by `drawNumber`. `draw-journal` imports only types
 from `draw-scene`, and `draw-scene` imports `drawJournal`.
 
 The interface exists so the implementation can change (ADR-0001 names PixiJS as the candidate)
@@ -456,7 +499,7 @@ Tiled like any other map.
 Fixed layer names (INV-7): `ground` and `detail` are drawn below the player, `above` is drawn
 over the player, `objects` is an object layer that holds the spawn point, named points —
 creatures and route points today, later doors, NPCs and triggers — and named rectangles, the
-shadow walls today (feature 0014). Whether a tile is solid, and which part of it,
+shadow walls (feature 0014) and the traces (feature 0022) today. Whether a tile is solid, and which part of it,
 is a property of the tile in the tileset (feature 0010): the boolean tile property `solid` makes
 the whole tile solid, the box (0, 0, 16, 16); a tile without it may carry rectangles drawn in
 Tiled's tile collision editor, its `objectgroup` in the `.tsj`, each a box in tile-local pixels.
@@ -565,16 +608,32 @@ stands; its position is the feet. It is no route point and makes no creature: `i
 point object "figure:officer"`). A map without such points has no figures; a figure of the cast
 without a point is simply not there.
 
+**Kinds of rectangle** (feature 0022). A rectangle has a kind by the prefix of its name:
+`shadow:` a shadow wall, `trace:` a trace. `game/rects` is the one place that knows the prefixes;
+`rectsOf(rects, prefix)` gives the rectangles of one kind in file order and refuses a map with a
+rectangle of no known kind (`unknown rectangle object "door"`), whichever kind is asked for.
+`game/shadow` and `game/trace` read their rectangles through it; neither imports the other's
+rectangles.
+
 **Shadow walls** (feature 0014). A rectangle named `shadow:<region>` is a shadow wall: a strip
 4 px thick on the top or the left edge of whole cells, where a doorway's wall strip is missing. A
 region may have more than one. `game/shadow` reads the walls from `map.rects` in file order as
-`{ region, density, box }`, the density from `game/world`, and, in `createInitialState`, refuses
-the map — each with its message — for a rectangle with another name (`unknown rectangle object
-"door"`), a region not in the world data (`shadow wall shadow:cellar names no region`), a region
+`{ region, density, box }`, the density from `game/world`, skipping the traces, and, in
+`createInitialState`, refuses the map — each with its message — for a rectangle of no known kind
+(`unknown rectangle object "door"`), a region not in the world data (`shadow wall shadow:cellar names no region`), a region
 of density 0 (`shadow wall shadow:reception stands in a region without shadow`), and a box whose
 `x` or `y` is no multiple of 16 or whose size is neither 4 px high and a multiple of 16 px wide
 nor 4 px wide and a multiple of 16 px high (`shadow wall shadow:sales (x, y, w, h) is no strip on
 a cell edge`). No coordinate of a wall is in `src/` (INV-7).
+
+**Traces** (feature 0022). A rectangle named `trace:<region>` is a trace: exactly one cell, 16x16
+with its corner on the grid, on the cell of the device it lies on. A region may have more than
+one. `game/trace` reads the traces from `map.rects` in file order as `{ region, box }`, skipping
+the walls, and, in `createInitialState`, refuses the map — each with its message — for a region
+not in the world data (`trace trace:cellar names no region`) and a box that is not one cell
+(`trace trace:sales (1330, 448, 16, 16) is not one cell`). A map without such rectangles has no
+traces. No coordinate of a trace is in `src/` (INV-7); `tools/floor-layout.ts` names the cells
+of the floor's five, `TRACES`.
 
 Flipped and rotated tiles, more than one tileset per map, embedded tilesets, encoded or
 compressed data and infinite maps stay rejected until a feature needs one and lifts its rule. A
@@ -739,6 +798,14 @@ and (j, i) in orientation 1. It is the second shadow asset (`visual.md` §4). `n
 gen-sprites` writes it beside the others; it is committed, deterministic and tested against the
 generator pixel by pixel. The art pass replaces it under the same name and frame order.
 
+`tools/placeholder-trace.ts` draws the trace sheet (feature 0022) and returns its pixels as
+data: `public/sprites/trace.png`, 48x16, three 16x16 frames in one row. Frame k holds a
+checkerboard in the signature colour `#68386c` — the pixels (i, j) with i + j even — inside a
+centred square of 6, 10 and 14 px: 18, 50 and 98 pixels; every other pixel is transparent, and
+every pixel of a frame is in the next. It is the third shadow asset (`visual.md` §4). `npm run
+gen-sprites` writes it beside the others; it is committed, deterministic and tested against the
+generator pixel by pixel. The art pass replaces it under the same name and frame order.
+
 | Look | Shows | Opaque pixels |
 |---|---|---|
 | 0 | density 1, phase 0 | `#68386c` where i + j is even — 32 |
@@ -782,7 +849,9 @@ snippets and `wake`, ids following theirs, with the `int` property `pause` when 
 The shadow walls (feature 0014) are `SHADOW_WALLS`, per wall its region and the doorway cells it
 closes; `shadowWallBox` makes the strip — 4 px on the top edge of a row of cells, or on the left
 edge of a column — and the walls become rectangle objects after the route points, ids following
-theirs (92–99 today, `nextobjectid` 100).
+theirs (92–99 today). The standing figure's point follows them (100), and the traces (feature
+0022) are `TRACES`, per trace its region and the cell of its device; `traceBox` makes the cell's
+box, and they become rectangle objects after the figure's point, ids 101–105, `nextobjectid` 106.
 `floor.tmj` has the layers `ground` (id 1), `detail` (id 3), `above` (id 4) and `objects` (id 2),
 in that order. Posts are
 derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper
@@ -804,7 +873,9 @@ exactly one opening and clear of every solid box, the spawn, the wake point and 
 clear of every wall, and reachability with all walls standing and with the walls of density 1,
 of 1 and 2, and all lifted; and the standing figure of 0017 — the point `figure:officer` with
 the id 100 after the rectangles, its box free of every solid box, reached from the spawn, in the
-view of the wake point, and no route leg within 24 px of it. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
+view of the wake point, and no route leg within 24 px of it; and the traces of 0022 against
+the spec's table — each on a desk with a screen in Sales, its chair on the cell below, and in the
+light of a player who looks up from every reached place on the cell below that chair. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
 test, so until the art pass the layout changes in `floor-layout.ts`. When the art pass takes the
 floor over by hand (`visual.md` §5), the layout, the generator and the determinism test are
 removed and `floor.tmj` is authored in Tiled like every other map; the layout test's
@@ -826,7 +897,8 @@ tables are the only text a player can read in `src/`.
 
 The notice is the first text: `game/notice` derives from the state, in every frame, which notice
 it shows, if any. While the lamp is on and a standing shadow wall has `lit` true and `light` 0 —
-a wall in the light that holds (0014) — it is `notice.shadow-too-dense`; otherwise there is none.
+a wall in the light that holds (0014) — it is `notice.shadow-too-dense`; otherwise, for two
+seconds from the last find of a trace, `notice.trace-found` (0022); otherwise there is none.
 The state has no field for it (INV-1). A notice stays one line.
 
 The language is a setting of the player (feature 0019), not a fact of the game. `main.ts` holds
@@ -849,6 +921,13 @@ most 47. `creature.<species>-name` is a species' displayed name, one line of at 
 characters; `creature.<species>-text` its journal text, two to four lines of at most 47 and no
 empty line. `game/journal` names them by key in `TAB_TEXT` and `ENTRY_TEXT`, and a test holds
 every key of the two kinds to the rule of its kind in both languages.
+
+The traces (feature 0022) add the kind `region`: `region.<id>` is a region's displayed name,
+one line of at most 24 characters, and every region with a trace on the floor has one
+(`REGION_NAME` in `game/journal`). `journal.traces` and `journal.of`, the words of a case's line
+(`CASE_TEXT`), are one line of at most 16 each. The rule test covers both. A number is no text
+of a language: `render/draw-text` draws it with `drawNumber`, which takes a number and nothing
+else, and it needs no key; `drawText` still takes a `TextKey` only.
 
 ## 9. Tooling
 

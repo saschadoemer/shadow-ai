@@ -130,6 +130,10 @@ own company, one creature species, and one building block of the AI policy.
 | Management *(last case)* | Strategy papers and board documents in a private account — the densest shadow in the house | Responsibility: the policy has an owner, and the owner sits at the top |
 | Meeting rooms *(side case)* | An AI note-taker somebody invites to every meeting records everything, including the confidential ones | Whoever records says so beforehand |
 
+**Traces of Sales** (feature 0022): five traces lie on the screens of five of the sixteen cubicle
+desks of Sales, at least one in every row of four. The table of `docs/features/0022-traces.md`
+is the placement until the art pass.
+
 **Order and gating.** Marketing and Support are open from the start (thin shadow). HR and
 Accounting open after the first upgrade, Development after the second. Management is last: without
 the filter nothing is visible there, and without the vendor as advisor there is no alternative

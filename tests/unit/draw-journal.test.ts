@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { NO_INPUT } from '../../src/game/player';
-import { type GameState, type JournalTab, NO_RECOIL } from '../../src/game/state';
+import { type GameState, type JournalTab, NO_RECOIL, type TraceState } from '../../src/game/state';
 import {
+  CASE_LINE,
+  CASE_NAME,
+  CASE_PITCH,
   drawJournal,
   ENTRY_FRAME,
   ENTRY_LINES,
@@ -63,6 +66,7 @@ const CONTENT: SceneContent = {
   creatureSheets: { snippet: sheet(16, 16) },
   overviewSheet: sheet(8, 8),
   shadowWallSheet: sheet(16, 16),
+  traceSheet: sheet(16, 16),
   moverSheets: {
     person: [0, 1, 2, 3].map(() => sheet(16, 24)),
     dog: sheet(16, 16),
@@ -91,6 +95,7 @@ const reading = (tab: JournalTab, snippets = 0): GameState => ({
   creatures: [],
   movers: [],
   shadowWalls: [],
+  traces: [],
   figures: [],
   dialogue: null,
   journal: { tab },
@@ -233,5 +238,81 @@ describe('the journal in the scene (0020)', () => {
     expect(scene.calls).not.toContain(RULE);
     expect(scene.sheets).toContain(CONTENT.playerSheet);
     expect(scene.sheets).toContain(CONTENT.overviewSheet);
+  });
+});
+
+describe('the cases tab (0022)', () => {
+  /** Five traces of Sales, as on the floor; where they lie does not matter to the journal. */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: [0, 1, 2, 3, 4].map((n) => ({
+        name: 'trace:sales',
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  const traces = (found: number): TraceState[] =>
+    [0, 1, 2, 3, 4].map((trace) => ({ trace, light: 0, found: trace < found ? 60 : null }));
+  const cases = (found: number, settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    const state: GameState = { ...reading('cases'), traces: traces(found) };
+    drawJournal(renderer, state, { tab: 'cases' }, content, settings);
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+
+  it('places a case as the spec says', () => {
+    expect([CASE_NAME, CASE_LINE, CASE_PITCH]).toStrictEqual([
+      { x: 16, y: 36 },
+      { x: 16, y: 48 },
+      36,
+    ]);
+  });
+
+  it('shows its line for nothing while no trace is found', () => {
+    expect(cases(0)).toStrictEqual(
+      draw(reading('cases')).calls.slice(draw(reading('cases')).calls.indexOf(RULE) + 1),
+    );
+    expect(cases(0)[0]).toBe('drawSprite 46 at 16,36');
+  });
+
+  it('shows the region and `Spuren: 1 von 5` with one of five found', () => {
+    const entry = cases(1);
+    // `Vertrieb` 8 glyphs, `Spuren:` 7, `1`, `von` 3, `5`.
+    expect(entry).toHaveLength(8 + 7 + 1 + 3 + 1);
+    expect(entry[0]).toBe('drawSprite 54 at 16,36');
+    expect(entry[8]).toBe('drawSprite 51 at 16,48');
+    expect(entry[15]).toBe('drawSprite 17 at 64,48');
+    expect(entry[16]).toBe('drawSprite 86 at 76,48');
+    expect(entry[19]).toBe('drawSprite 21 at 100,48');
+  });
+
+  it('counts up to `5 von 5`', () => {
+    const entry = cases(5);
+    expect(entry[15]).toBe('drawSprite 21 at 64,48');
+    expect(entry[19]).toBe('drawSprite 21 at 100,48');
+  });
+
+  it('reads `Sales` and `Traces: 2 of 5` in English', () => {
+    const entry = cases(2, ENGLISH);
+    // `Sales` 5 glyphs, `Traces:` 7, `2`, `of` 2, `5`.
+    expect(entry).toHaveLength(5 + 7 + 1 + 2 + 1);
+    expect(entry[0]).toBe('drawSprite 51 at 16,36');
+    expect(entry[5]).toBe('drawSprite 52 at 16,48');
+    expect(entry[12]).toBe('drawSprite 18 at 64,48');
+    expect(entry[13]).toBe('drawSprite 79 at 76,48');
+    expect(entry[15]).toBe('drawSprite 21 at 94,48');
+  });
+
+  it('leaves the creatures and the policy as they were', () => {
+    for (const tab of ['creatures', 'policy'] as const) {
+      const renderer = recordingRenderer();
+      drawJournal(renderer, { ...reading(tab), traces: traces(3) }, { tab }, content, GERMAN);
+      expect(renderer.calls).toStrictEqual(draw(reading(tab)).calls);
+    }
   });
 });

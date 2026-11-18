@@ -2,6 +2,7 @@ import { type Box, sightBlocked } from '../engine/collision';
 import { type NamedRect, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { CONE_LENGTH, type Cone, DIRECTIONS, lampCone } from './lamp';
 import { BOX_HEIGHT } from './player';
+import { rectsOf, WALL_PREFIX } from './rects';
 import type { LampState, PlayerState, ShadowWallState } from './state';
 import { densityOf } from './world';
 
@@ -14,8 +15,7 @@ import { densityOf } from './world';
  * the map's rectangles on every call and kept nowhere.
  */
 
-/** A rectangle whose name starts with this is a shadow wall; the rest of the name is its region. */
-export const WALL_PREFIX = 'shadow:';
+export { WALL_PREFIX } from './rects';
 /** A wall is as thick as a wall strip (0010). */
 export const WALL_THICKNESS = 4;
 
@@ -40,15 +40,13 @@ function isStrip(box: Box): boolean {
 }
 
 /**
- * The shadow walls of a map, in the order of its rectangles. Rejects a rectangle with another
- * name, a region the world data does not know, a region without shadow and a box that is no
- * strip on a cell edge, so that a typing mistake in the map is not a silently missing wall.
+ * The shadow walls of a map, in the order of its rectangles; the rectangles of another kind —
+ * the traces of 0022 — are skipped. Rejects a rectangle of no known kind (`rectsOf`), a region
+ * the world data does not know, a region without shadow and a box that is no strip on a cell
+ * edge, so that a typing mistake in the map is not a silently missing wall.
  */
 export function wallsOf(rects: readonly NamedRect[]): ShadowWall[] {
-  return rects.map((rect) => {
-    if (!rect.name.startsWith(WALL_PREFIX)) {
-      throw new Error(`unknown rectangle object "${rect.name}"`);
-    }
+  return rectsOf(rects, WALL_PREFIX).map((rect) => {
     const region = rect.name.slice(WALL_PREFIX.length);
     const density = densityOf(region);
     if (density === undefined) {

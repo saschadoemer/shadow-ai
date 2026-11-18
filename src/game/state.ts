@@ -92,6 +92,16 @@ export interface ShadowWallState {
   readonly light: number;
 }
 
+/** A trace of the map (0022). Its place stays in the map; all of them stay in the state for good. */
+export interface TraceState {
+  /** The index of the trace in `tracesOf(map.rects)`. */
+  readonly trace: number;
+  /** Steps the light has been on it without a break, 0–59; above 0 it is seen. */
+  readonly light: number;
+  /** The tick of the step in which it was found, or null. A found trace never changes. */
+  readonly found: number | null;
+}
+
 /** A standing figure of the cast (0017). Its place stays in the map, its pages in game/cast. */
 export interface FigureState {
   /** The index of the figure in `figuresOf(map.points)`. */
@@ -152,6 +162,8 @@ export interface GameState {
   readonly movers: readonly MoverState[];
   /** The shadow walls still standing, in the map's order (0014); a lifted wall has left it for good. */
   readonly shadowWalls: readonly ShadowWallState[];
+  /** The traces of the map, in file order (0022): found or not, all of them. */
+  readonly traces: readonly TraceState[];
   /** The standing figures of the map, in file order (0017). */
   readonly figures: readonly FigureState[];
   /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
