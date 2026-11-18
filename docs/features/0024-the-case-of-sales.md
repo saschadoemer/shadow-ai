@@ -236,7 +236,10 @@ lamp, `E` or `Enter` talks, `J` opens and closes the journal, `L` switches the l
 - Does the policy block read as something a colleague would accept, not as a slide?
 - Must it be all five traces, or would the colleague speak earlier?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–22. Feel: the author answered all five questions with
+"pass" — the traces are understood to make the colleague speak, the answer sounds like a person,
+the solving is a moment, the policy block reads as something a colleague would accept, and all
+five traces stay.
 
 ## Open questions
 
