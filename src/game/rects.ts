@@ -3,15 +3,17 @@ import type { NamedRect } from '../engine/tiled';
 /**
  * The kinds of rectangle a map may hold (architecture.md §6): what a rectangle is, is the
  * game's business, and its name says it. A shadow wall is `shadow:<region>` (0014), a trace
- * `trace:<region>` (0022). Pure.
+ * `trace:<region>` (0022), an area of a region `region:<id>` (0023). Pure.
  */
 
 /** A rectangle whose name starts with this is a shadow wall; the rest of the name is its region. */
 export const WALL_PREFIX = 'shadow:';
 /** A rectangle whose name starts with this is a trace; the rest of the name is its region. */
 export const TRACE_PREFIX = 'trace:';
+/** A rectangle whose name starts with this is an area of a region; the rest is the region (0023). */
+export const REGION_PREFIX = 'region:';
 
-const PREFIXES: readonly string[] = [WALL_PREFIX, TRACE_PREFIX];
+const PREFIXES: readonly string[] = [WALL_PREFIX, TRACE_PREFIX, REGION_PREFIX];
 
 /**
  * The rectangles of one kind, in the order of the map. Rejects a rectangle of no known kind,
