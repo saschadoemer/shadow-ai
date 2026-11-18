@@ -413,3 +413,13 @@ test('the game starts with no case solved and five hearts', async ({ page }) => 
     max: 5,
   });
 });
+
+test('the game starts with no rest taken', async ({ page }) => {
+  await start(page);
+  // One poll for the whole value: nothing is read from a page that might still be loading.
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.rested), {
+      message: 'window.shadowAi.state.rested is there and null: no coffee yet',
+    })
+    .toBeNull();
+});

@@ -303,6 +303,25 @@ describe('the language table (INV-4, 0016)', () => {
     }
   });
 
+  it('holds the words of a coffee in both languages (0027)', () => {
+    const both = (id: Parameters<typeof textKey>[0]): string[] => [
+      textOf(textKey(id), 'de'),
+      textOf(textKey(id), 'en'),
+    ];
+    expect(both('notice.rest')).toStrictEqual([
+      'Kaffee. Der Überblick ist wieder da.',
+      'Coffee. Your overview is back.',
+    ]);
+    expect(both('notice.rest-full')).toStrictEqual([
+      'Kaffee. Den Überblick hast du schon.',
+      'Coffee. You have your overview already.',
+    ]);
+    expect(both('notice.rest-shadow')).toStrictEqual([
+      'Dieser Kaffee schmeckt nach nichts.',
+      'This coffee tastes of nothing.',
+    ]);
+  });
+
   it('holds the words of the call, the first meeting and the lamp in both languages (0026)', () => {
     const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
       textOf(textKey(id), language).split('\n');

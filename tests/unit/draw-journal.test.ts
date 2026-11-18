@@ -87,6 +87,7 @@ const ENGLISH: SceneSettings = { language: 'en', switchedAt: null };
 const reading = (tab: JournalTab, snippets = 0): GameState => ({
   tick: 100,
   started: 0,
+  rested: null,
   player: {
     x: 160,
     y: 96,

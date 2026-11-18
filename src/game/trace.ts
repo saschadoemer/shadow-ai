@@ -1,8 +1,8 @@
 import { type Box, sightBlocked } from '../engine/collision';
-import { type NamedRect, TILE_SIZE, type TileMap } from '../engine/tiled';
+import type { NamedRect, TileMap } from '../engine/tiled';
 import { lampCone } from './lamp';
 import { BOX_HEIGHT } from './player';
-import { rectsOf, TRACE_PREFIX } from './rects';
+import { isCell, rectsOf, TRACE_PREFIX } from './rects';
 import { meetsCone } from './shadow';
 import type { PlayerState, TraceState } from './state';
 import { densityOf, REGIONS, type Region } from './world';
@@ -23,15 +23,6 @@ export interface Trace {
 
 /** Tune: one second of unbroken light finds a trace, as it captures a creature and lifts a wall. */
 export const FIND_STEPS = 60;
-
-function isCell(box: Box): boolean {
-  return (
-    box.x % TILE_SIZE === 0 &&
-    box.y % TILE_SIZE === 0 &&
-    box.width === TILE_SIZE &&
-    box.height === TILE_SIZE
-  );
-}
 
 /**
  * The traces of a map, in the order of its rectangles. Rejects a region the world data does

@@ -45,6 +45,8 @@ const TRACES_MAP = loadMap(
 );
 /** The colleague of Sales and two traces of Sales on open floor, the spawn 40 px from it (0024). */
 const CASE_MAP = loadMap('tests/fixtures/maps/case.tmj', 'tests/fixtures/maps/fixture-tiles.tsj');
+/** Two coffee machines on open floor, one in a room of HR, the spawn below the other (0027). */
+const RESTS_MAP = loadMap('tests/fixtures/maps/rests.tmj', 'tests/fixtures/maps/fixture-tiles.tsj');
 /** The floor the game loads. */
 const FLOOR_MAP = loadMap('public/maps/floor.tmj', 'public/tiles/placeholder.tsj');
 
@@ -78,6 +80,7 @@ describe('GameState (INV-1)', () => {
     expect(createInitialState(MAP)).toStrictEqual({
       tick: 0,
       started: 0,
+      rested: null,
       player: {
         x: 136,
         y: 120,
@@ -147,6 +150,7 @@ describe('update', () => {
       {
         tick: 41,
         started: 0,
+        rested: null,
         player,
         camera: { x: 0, y: 12 },
         lamp: { on: false, strength: 1, owned: true, used: true },
@@ -176,6 +180,7 @@ describe('update', () => {
     const state: GameState = {
       tick: 7,
       started: 0,
+      rested: null,
       player,
       camera: { x: 0, y: 12 },
       lamp: { on: false, strength: 1, owned: true, used: true },
@@ -197,6 +202,7 @@ describe('update', () => {
     expect(state).toStrictEqual({
       tick: 7,
       started: 0,
+      rested: null,
       player,
       camera: { x: 0, y: 12 },
       lamp: { on: false, strength: 1, owned: true, used: true },
@@ -946,5 +952,55 @@ describe('the cleared region in the state (0025)', () => {
     expect(state.tick).toBe(1065);
     expect(clearingVeil(1, state.tick - (state.solved[0]?.at ?? 0))).toBe(4);
     expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
+  });
+});
+
+describe('the rests in the state (0027)', () => {
+  const TALK: GameInput = { ...NONE, talk: true };
+  const start = createInitialState(RESTS_MAP);
+  const tired: GameState = { ...start, overview: { current: 2, max: 5 } };
+
+  it('starts with no rest taken, on the floor and on the fixture', () => {
+    expect(createInitialState(FLOOR_MAP).rested).toBeNull();
+    expect(start.rested).toBeNull();
+    expect(RESTS_MAP.rects.map((rect) => rect.name)).toStrictEqual([
+      'rest:coffee',
+      'rest:coffee',
+      'region:hr',
+    ]);
+  });
+
+  it('takes a coffee on a parsed map: a press below the machine fills overview', () => {
+    const drunk = update(tired, TALK, RESTS_MAP);
+    expect(drunk.overview).toStrictEqual({ current: 5, max: 5 });
+    expect(drunk.rested).toStrictEqual({ at: 1, result: 'restored' });
+  });
+
+  it('gets nothing from the machine under shadow on the same map', () => {
+    const there: GameState = { ...tired, player: { ...tired.player, x: 72, y: 112 } };
+    const drunk = update(there, TALK, RESTS_MAP);
+    expect(drunk.overview).toStrictEqual({ current: 2, max: 5 });
+    expect(drunk.rested).toStrictEqual({ at: 1, result: 'shadow' });
+  });
+
+  it('survives a JSON round trip at the start and after a coffee (INV-1)', () => {
+    const drunk = update(tired, TALK, RESTS_MAP);
+    expect(JSON.parse(JSON.stringify(start))).toStrictEqual(start);
+    expect(JSON.parse(JSON.stringify(drunk))).toStrictEqual(drunk);
+  });
+
+  it('keeps the rest through the wake (0009)', () => {
+    const drunk = update(tired, TALK, RESTS_MAP);
+    const woken = update({ ...drunk, dark: 44 }, NONE, RESTS_MAP);
+    expect(woken.dark).toBe(45);
+    expect(woken.rested).toStrictEqual({ at: 1, result: 'restored' });
+  });
+
+  it('steps a game without a press at a rest as before: rested stays null for 600 steps', () => {
+    let state = start;
+    for (let i = 0; i < 600; i += 1) {
+      state = update(state, { ...NONE, right: i < 200, lamp: i >= 300 && i < 400 }, RESTS_MAP);
+      expect(state.rested).toBeNull();
+    }
   });
 });

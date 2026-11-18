@@ -163,6 +163,7 @@ describe('stepDark', () => {
   const FALLEN: GameState = {
     tick: 500,
     started: 0,
+    rested: null,
     player: figure(300, 200, 'left', { frame: 2, frameTimer: 3.5 }),
     camera: { x: 140, y: 106 },
     lamp: { on: true, strength: 1, owned: true, used: true },
@@ -193,6 +194,7 @@ describe('stepDark', () => {
       ...FALLEN,
       tick: 543,
       started: 0,
+      rested: null,
       lamp: { on: false, strength: 1, owned: true, used: true },
       dark: 44,
     });
@@ -204,6 +206,7 @@ describe('stepDark', () => {
     expect(woken).toStrictEqual({
       tick: 544,
       started: 0,
+      rested: null,
       player,
       camera: followPlayer(player, MAP),
       lamp: { on: false, strength: 1, owned: true, used: true },
