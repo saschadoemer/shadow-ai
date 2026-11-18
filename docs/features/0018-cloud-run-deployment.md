@@ -282,7 +282,7 @@ to date with `main`; Chrome, and a second device on another network — a phone 
 8. Expected: the four variables `GCP_PROJECT_ID`, `GCP_REGION`,
    `GCP_WORKLOAD_IDENTITY_PROVIDER` and `GCP_DEPLOY_SERVICE_ACCOUNT` are there, and the tab
    Secrets holds nothing this feature added.
-9. Run `docker build -t shadow-ai .`, then
+9. Run `docker build --platform linux/amd64 -t shadow-ai .`, then
    `GCP_PROJECT_ID=<project-id> GCP_REGION=<region> tools/gcp-deploy.sh shadow-ai walk-1`.
 10. Expected: the script ends with exit code 0 and its last line is an `https://` URL.
 11. Open the URL in a private Chrome window.

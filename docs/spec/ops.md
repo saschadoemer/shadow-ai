@@ -134,7 +134,10 @@ is set; the four repository variables are identifiers, and the repository is pub
 `<region>-docker.pkg.dev/<project>/shadow-ai/shadow-ai:<tag>`, deploys it, sends all traffic to
 the new revision, and prints the service URL as its only line on standard output. On the
 author's machine it adds one line to `~/.docker/config.json`: `gcloud` as Docker's credential
-helper for the registry host. It sets, on every deployment:
+helper for the registry host. Cloud Run runs only `linux/amd64` images; a Mac with an Apple chip
+builds `arm64` by default, so an image for a deployment by hand is built with
+`docker build --platform linux/amd64 -t shadow-ai .`, and the script refuses any other platform
+before it pushes. It sets, on every deployment:
 
 | Setting | Value |
 |---|---|

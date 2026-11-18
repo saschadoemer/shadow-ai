@@ -338,8 +338,10 @@ echo "cleanup rule:      keep $(read_back gcloud artifacts repositories describe
   --location="$REGION" --format='value(cleanupPolicies.keep.mostRecentVersions.keepCount)') newest, delete others older than ${older}, dry run: $(read_back gcloud artifacts repositories describe "$REPOSITORY" \
   --location="$REGION" --format='value(cleanupPolicyDryRun)')"
 echo "user-managed keys: ${keys}"
-echo "log exclusion:     $(read_back gcloud logging sinks describe _Default --flatten='exclusions[]' \
-  --filter="exclusions.name=\"${EXCLUSION}\"" --format='value(exclusions.filter)')"
+# A describe takes no --filter: every exclusion is listed as "name<TAB>filter" and ours is picked.
+exclusion_lines="$(read_back gcloud logging sinks describe _Default --flatten='exclusions[]' \
+  --format='value(exclusions.name,exclusions.filter)')"
+echo "log exclusion:     $(sed -n "s/^${EXCLUSION}"$'\t'"//p" <<<"$exclusion_lines")"
 echo "budget:            $(read_back gcloud billing budgets list --billing-account="$BILLING_ACCOUNT" \
   --filter="displayName=\"${BUDGET}\"" \
   --format='value(amount.specifiedAmount.units,amount.specifiedAmount.currencyCode,thresholdRules[].thresholdPercent)') (amount, currency, thresholds as fractions)"

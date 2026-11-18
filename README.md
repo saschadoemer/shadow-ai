@@ -69,6 +69,7 @@ once; a deployment by hand uses the script the workflow uses:
 
 ```
 tools/gcp-bootstrap.sh <project-id>      # once: registry, keyless login, accounts, budget, repository variables
+docker build --platform linux/amd64 -t shadow-ai .
 GCP_PROJECT_ID=<project-id> GCP_REGION=europe-west1 tools/gcp-deploy.sh shadow-ai <tag>
 ```
 

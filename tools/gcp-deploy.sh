@@ -24,6 +24,15 @@ readonly RUNTIME="shadow-ai-run@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 export CLOUDSDK_CORE_PROJECT="$GCP_PROJECT_ID"
 export CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
+# Cloud Run runs linux/amd64 only, and a Mac with an Apple chip builds arm64 unless told
+# otherwise. Checked before anything is pushed, so the mistake costs nothing.
+platform="$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$LOCAL_IMAGE")"
+if [[ "$platform" != "linux/amd64" ]]; then
+  echo "${LOCAL_IMAGE} is built for ${platform}; Cloud Run needs linux/amd64:" >&2
+  echo "  docker build --platform linux/amd64 -t ${LOCAL_IMAGE} ." >&2
+  exit 1
+fi
+
 # Everything but the URL goes to standard error, so a caller can capture the URL.
 {
   # One line in ~/.docker/config.json: gcloud hands Docker a token for this registry host.
