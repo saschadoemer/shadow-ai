@@ -337,14 +337,20 @@ describe('the language table (INV-4, 0016)', () => {
     expect(both('help.do-help')).toStrictEqual(['Hilfe schließen', 'Close help']);
   });
 
-  it('holds every text of the help to the rule of its kind (0021)', () => {
+  it('holds the words of the help label in both languages (0031)', () => {
+    expect(textOf(textKey('help.label'), 'de')).toBe('H Hilfe');
+    expect(textOf(textKey('help.label'), 'en')).toBe('H Help');
+  });
+
+  it('holds every text of the help to the rule of its kind (0021, 0031)', () => {
     /** The most characters a key of the help may have, by what its id starts with. */
     const rules: readonly (readonly [string, number])[] = [
       ['help.key-', 17],
       ['help.do-', 16],
+      ['help.label', 8],
     ];
     const ids = Object.keys(TABLE.de).filter((key) => key.startsWith('help.'));
-    expect(ids).toHaveLength(14);
+    expect(ids).toHaveLength(15);
     for (const language of LANGUAGES) {
       for (const id of ids) {
         const rule = rules.find(([start]) => id.startsWith(start));

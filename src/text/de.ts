@@ -23,6 +23,7 @@ export const de = {
   'help.do-fullscreen': 'Vollbild',
   'help.key-help': 'H',
   'help.do-help': 'Hilfe schließen',
+  'help.label': 'H Hilfe',
   'journal.tab-creatures': 'Kreaturen',
   'journal.tab-cases': 'Fälle',
   'journal.tab-policy': 'Richtlinie',

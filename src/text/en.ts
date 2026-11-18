@@ -20,6 +20,7 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
   'help.do-fullscreen': 'Fullscreen',
   'help.key-help': 'H',
   'help.do-help': 'Close help',
+  'help.label': 'H Help',
   'journal.tab-creatures': 'Creatures',
   'journal.tab-cases': 'Cases',
   'journal.tab-policy': 'Policy',
