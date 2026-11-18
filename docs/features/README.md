@@ -51,3 +51,4 @@ in two.
 | [0027](0027-overview-won-back.md) | Overview won back | M5 | approved 2026-11-18 |
 | [0028](0028-the-case-of-marketing.md) | The case of Marketing | M6 | approved 2026-11-18 |
 | [0029](0029-the-wider-cone.md) | The wider cone | M6 | approved 2026-11-18 |
+| [0031](0031-the-help-label.md) | The help label | M5 | draft |
