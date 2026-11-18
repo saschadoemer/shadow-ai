@@ -143,7 +143,7 @@ everything the help shows, and the label is the smallest thing it shows.
 - Produces: the text id `help.label` in both languages — `H Hilfe`, `H Help`. `notice.help`
   stays until Task 4.
 
-- [ ] **Step 1: Write the failing test,** and give the kind `help` its third rule:
+- [x] **Step 1: Write the failing test,** and give the kind `help` its third rule:
 
 ```diff
 diff --git a/tests/unit/text.test.ts b/tests/unit/text.test.ts
@@ -175,14 +175,14 @@ index 9268cee..fc71f38 100644
          const rule = rules.find(([start]) => id.startsWith(start));
 ```
 
-- [ ] **Step 2: Run it and see it fail.**
+- [x] **Step 2: Run it and see it fail.**
 
 Run: `npx vitest run tests/unit/text.test.ts`
 Expected: 2 failed — `holds the words of the help label in both languages (0031)` with
 `expected undefined to be 'H Hilfe'`, and the rule test with `to have a length of 15 but got
 14`.
 
-- [ ] **Step 3: Add the words,** after the last row of the help in both tables:
+- [x] **Step 3: Add the words,** after the last row of the help in both tables:
 
 ```diff
 diff --git a/src/text/de.ts b/src/text/de.ts
@@ -214,12 +214,12 @@ index 8c3d485..989a852 100644
    'journal.tab-policy': 'Policy',
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npx vitest run tests/unit/text.test.ts`
 Expected: all pass. The glyph test and the key test of the same file cover the new strings.
 
-- [ ] **Step 5:** `npm run check` — 1330 tests — then commit: `Add the words of the help
+- [x] **Step 5:** `npm run check` — 1330 tests — then commit: `Add the words of the help
   label`. The body: the label names the key first, as the rows of the help do, and its rule
   keeps it to 8 characters so that it stays clear of the hearts.
 
@@ -240,7 +240,7 @@ Expected: all pass. The glyph test and the key test of the same file cover the n
   `helpLabelPlace(length: number): HelpLabelPlace`;
   `drawHelpLabel(renderer: Renderer, font: SpriteSheet, language: Language): void`.
 
-- [ ] **Step 1: Write the failing tests** — a new describe before `the help in the scene
+- [x] **Step 1: Write the failing tests** — a new describe before `the help in the scene
   (0021)`, and the imports it needs. This is criterion 2, and criterion 3 for the label
   alone:
 
@@ -366,13 +366,13 @@ index a89a7b7..a702993 100644
      const without = scene(playing());
 ```
 
-- [ ] **Step 2: Run them and see them fail.**
+- [x] **Step 2: Run them and see them fail.**
 
 Run: `npx vitest run tests/unit/draw-help.test.ts`
 Expected: the 7 tests of the new describe fail — `expected undefined to be 'help.label'`,
 `helpLabelPlace is not a function`, `drawHelpLabel is not a function`.
 
-- [ ] **Step 3: Write the label.** The numbers of the spec come out of four small constants,
+- [x] **Step 3: Write the label.** The numbers of the spec come out of four small constants,
   so that the formula can be read: the frame's right edge is 4 px from the surface's, 1 px of
   frame, 2 px of field beside the letters, 1 px of field above and below a glyph's cell.
 
@@ -462,12 +462,12 @@ index 1aa901c..cbad038 100644
 +}
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npx vitest run tests/unit/draw-help.test.ts`
 Expected: all pass.
 
-- [ ] **Step 5:** `npm run check` — 1337 tests — then commit: `Draw the help label`. The
+- [x] **Step 5:** `npm run check` — 1337 tests — then commit: `Draw the help label`. The
   body: the label lives with the help's box because it shows the same thing in the same
   colours, and its place is a function of the number of characters so that both languages end
   at the same right edge.
@@ -486,7 +486,7 @@ Expected: all pass.
   `tests/unit/draw-scene.test.ts`: `withoutLabel(renderer, language, font): Renderer`; the
   local `drawScene` now draws through it; `drawSceneWith` is the scene as it is.
 
-- [ ] **Step 1: Write the failing tests.** Three things in `draw-scene.test.ts`: the imports;
+- [x] **Step 1: Write the failing tests.** Three things in `draw-scene.test.ts`: the imports;
   `withoutLabel` and the local `drawScene` that uses it; and a new describe at the end of the
   file — criteria 3 to 6 and the test that holds `withoutLabel`. And one line in
   `draw-help.test.ts`: the last call of the world is now the label's last glyph.
@@ -743,7 +743,7 @@ index a702993..9f300a6 100644
  
 ```
 
-- [ ] **Step 2: Run them and see them fail.**
+- [x] **Step 2: Run them and see them fail.**
 
 Run: `npx vitest run tests/unit/draw-scene.test.ts tests/unit/draw-help.test.ts`
 Expected: 4 failed. In `draw-scene.test.ts` three of the new describe — `follows the last
@@ -752,7 +752,7 @@ strictly equal [ Array(8) ]`. In `draw-help.test.ts` `lies over the world …`. 
 of the new describe pass already: without a label nothing is left out and nothing is on the
 journal's screen.
 
-- [ ] **Step 3: Draw it.** One call after the loop of the hearts, and the comment of
+- [x] **Step 3: Draw it.** One call after the loop of the hearts, and the comment of
   `drawScene` says so:
 
 ```diff
@@ -798,7 +798,7 @@ index 5c6a747..c98aaeb 100644
        ? undefined
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npx vitest run tests/unit/draw-scene.test.ts tests/unit/draw-help.test.ts`
 Expected: all pass — the new ones, and every earlier list of calls unchanged. If an earlier
@@ -806,7 +806,7 @@ test of `draw-scene.test.ts` fails now, it calls `drawSceneWith` directly or bui
 renderer; make it draw through the local `drawScene`. Do not add the label's calls to its
 list.
 
-- [ ] **Step 5:** `npm run check` — 1343 tests — then commit: `Show the help label over the
+- [x] **Step 5:** `npm run check` — 1343 tests — then commit: `Show the help label over the
   world`. The body: the label is drawn with the hearts and decided by nothing in the state,
   and the earlier scene tests look past it through one helper that a test of its own holds.
 
@@ -826,7 +826,7 @@ list.
   the help is not open, else `null`. The text id `notice.help` no longer exists.
   `GameState.started` is still there and no longer read by anything; Task 5 takes it.
 
-- [ ] **Step 1: Write the tests of a game without the hint.** In `draw-scene.test.ts`: the
+- [x] **Step 1: Write the tests of a game without the hint.** In `draw-scene.test.ts`: the
   test of 0019 on the empty bar gets the ticks of the first ten seconds back, and the test
   that left the bar to the hint goes; the describe of the hint becomes
   `the bar without a start hint (0031)` — criteria 7 and 8; the test of 0026 on the hint
@@ -1220,7 +1220,7 @@ index ebee670..5ddc943 100644
    it('is no speaker of a step: the pages of its dialogue are its own, whoever stands near', () => {
 ```
 
-- [ ] **Step 2: Run them and see them fail.**
+- [x] **Step 2: Run them and see them fail.**
 
 Run: `npx vitest run tests/unit`
 Expected: 6 failed. In `draw-scene.test.ts`: `draws neither bar nor line before the switch,
@@ -1228,7 +1228,7 @@ after two seconds, or without a switch`, and the three tests of
 `the bar without a start hint (0031)`. In `help.test.ts`: the two tests of
 `what game/help knows (0031)`.
 
-- [ ] **Step 3: Take the hint away.**
+- [x] **Step 3: Take the hint away.**
 
 ```diff
 diff --git a/src/game/help.ts b/src/game/help.ts
@@ -1355,13 +1355,13 @@ index 989a852..cbda376 100644
    'help.key-lamp': 'Space',
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npx vitest run tests/unit` and `npm run typecheck`
 Expected: all pass, typecheck clean. `tests/arch` now finds no import from `src/text/` in
 `src/game/help.ts`, and needs no change.
 
-- [ ] **Step 5:** `npm run check` — 1334 tests — then commit: `Take the start hint away`. The
+- [x] **Step 5:** `npm run check` — 1334 tests — then commit: `Take the start hint away`. The
   body: the label of Task 3 names the key for as long as the world is on screen, so the line
   that held the bar for ten seconds says nothing new; the author found it on screen too long.
 
@@ -1381,7 +1381,7 @@ Expected: all pass, typecheck clean. `tests/arch` now finds no import from `src/
   with the call open and the lamp not owned, and nothing else differs. The step that closes
   the call changes `tick`, `held` and `dialogue`.
 
-- [ ] **Step 1: Write the failing tests, and take the field out of every fixture.**
+- [x] **Step 1: Write the failing tests, and take the field out of every fixture.**
   `opening.test.ts` is criterion 9: the two starts without the field, the closing step of the
   call, and one describe in place of `when the opening ended (0026)`. The other files only
   lose their `started` lines. The smoke spec reads the dialogue and the lamp and no longer
@@ -1645,7 +1645,7 @@ index f533697..6bc2452 100644
  
 ```
 
-- [ ] **Step 2: Run them and see them fail.**
+- [x] **Step 2: Run them and see them fail.**
 
 Run: `npx vitest run`
 Expected: 5 failed. Three in `opening.test.ts` — `starts a played game with the call open and
@@ -1656,7 +1656,7 @@ has lost the field the state still has: `the 44th step, dark 45, sets the world 
 `npm run typecheck` is red between this step and the next: the fixtures no longer have a
 field the type still asks for. That is expected.
 
-- [ ] **Step 3: Take the field out of the state,** and out of the four places that set or
+- [x] **Step 3: Take the field out of the state,** and out of the four places that set or
   carry it: the two starts, the closing of the call, the ordinary step and the wake.
 
 ```diff
@@ -1757,14 +1757,14 @@ index 461416c..7d02555 100644
      lamp: { ...state.lamp, on: false },
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npx vitest run` and `npm run typecheck`
 Expected: all pass, typecheck clean. Then `grep -rn "started" src tests`: two comments, in
 `src/game/state.ts` and in `tests/unit/player.test.ts`, and the new test of
 `opening.test.ts`. The two recordings of 600 steps pass with their hashes unchanged.
 
-- [ ] **Step 5:** `npm run check` — 1331 tests — then commit: `Take the end of the opening
+- [x] **Step 5:** `npm run check` — 1331 tests — then commit: `Take the end of the opening
   out of the state`. The body: 0026 kept `started` for the start hint alone; with the hint
   gone nothing reads it, and a state should hold nothing that no rule and no picture needs.
   No save state exists yet, so no stored state loses a field.
@@ -1781,7 +1781,7 @@ The diffs are against this branch at `defef2b`. If a line has moved, put the tex
 means it; do not change the words without a reason. The words of steps 1 to 3 are the spec's,
 from "What this settles in the specification".
 
-- [ ] **Step 1: `vision.md`** §2:
+- [x] **Step 1: `vision.md`** §2:
 
 ```diff
 diff --git a/docs/spec/vision.md b/docs/spec/vision.md
@@ -1801,7 +1801,7 @@ index dbd6c18..b56e701 100644
  The game is presented by LMIS, and one real product stands in its world: Harmonic (§10). Both
 ```
 
-- [ ] **Step 2: `gameplay.md`** §8 — the paragraph of 0021 loses its sentences on the line,
+- [x] **Step 2: `gameplay.md`** §8 — the paragraph of 0021 loses its sentences on the line,
   and 0031 gets its own:
 
 ```diff
@@ -1829,7 +1829,7 @@ index b75e0d7..dc6daa2 100644
  
 ```
 
-- [ ] **Step 3: `visual.md`** §3 — three things over the world, and no start hint in the
+- [x] **Step 3: `visual.md`** §3 — three things over the world, and no start hint in the
   bar:
 
 ```diff
@@ -1862,7 +1862,7 @@ index 852db1c..f758a85 100644
  and the bottom; nothing is blended, so no pixel leaves the palette.
 ```
 
-- [ ] **Step 4: `architecture.md`** §1, §2, §5 and §8 — the directory line of `game/help.ts`;
+- [x] **Step 4: `architecture.md`** §1, §2, §5 and §8 — the directory line of `game/help.ts`;
   the two starts and the state without `started`; the label's paragraph, the order of the
   scene and the bar without the hint; the kind `help` with its third rule:
 
@@ -2015,7 +2015,7 @@ index 64a32ab..192eaa3 100644
  languages. The letter of a key is a string of the table like every other text, also where it is
 ```
 
-- [ ] **Step 5: `testing.md`** §1, the row of the unit tests:
+- [x] **Step 5: `testing.md`** §1, the row of the unit tests:
 
 ```diff
 diff --git a/docs/spec/testing.md b/docs/spec/testing.md
@@ -2033,7 +2033,7 @@ index 7b468e6..aa445cc 100644
  | **Smoke** | Playwright, one spec | the page loads, the canvas exists at the full factor and unclipped, the picture's corner shows carpet `#8b9bb4`, the view's first cell at the spawn; the player starts at x = 256 with the camera at (96, 624); one second of ArrowRight moves the player and the camera right by at least 70 px and leaves the player facing right; a held Space turns the lamp on and holds the figure in place with ArrowRight held, and the release turns it off; the floor starts with three snippets and nothing captured; the floor starts with its 22 movers and the reception's person is drawn in its shirt `#3e8948`; overview is five of five and the dark is not running; the floor starts with its eight shadow walls standing and a lamp of strength 1, read from `window.shadowAi.state`; `L` switches `window.shadowAi.language` and the page's `lang` from `de` to `en` and back, once per press, a held key once (0019); `H` opens the help, the figure stands under it with `ArrowRight` held, and `H` closes it (0021) — against the dev server and against the built container; against the container (`BASE_URL`) also the four security headers, the cache headers and gzip (INV-5) |
 ```
 
-- [ ] **Step 6: `README.md`:**
+- [x] **Step 6: `README.md`:**
 
 ```diff
 diff --git a/README.md b/README.md
@@ -2052,7 +2052,7 @@ index ddc3ca6..f56f0e8 100644
  under shadow are drawn darker, without colour and under a violet veil whose density is the
 ```
 
-- [ ] **Step 7:** `grep -rn "start hint\|notice\.help\|HELP_HINT\|helpHintDue\|startHintDue"
+- [x] **Step 7:** `grep -rn "start hint\|notice\.help\|HELP_HINT\|helpHintDue\|startHintDue"
   docs/spec README.md src` shows only sentences that say the hint is gone — in
   `architecture.md` §2, §5 and §8, in `testing.md` §1 and in the comment of `quietLine`.
   `docs/features/` and `docs/plans/` are history and are not changed. Then `npm run check`,
@@ -2062,13 +2062,13 @@ index ddc3ca6..f56f0e8 100644
 
 ### Task 7: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 17 passed, 3 skipped. Mind the constraint on a dev server of another worktree.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 17 passed, 3 skipped. Mind the constraint on a dev server of another worktree.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
   `Tick the full check of 0031`.
 
 ---
