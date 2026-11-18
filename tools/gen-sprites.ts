@@ -3,7 +3,14 @@ import { PNG } from 'pngjs';
 import { DOG_SHEET_HEIGHT, DOG_SHEET_WIDTH, renderDog } from './placeholder-dog.ts';
 import { DRONE_SHEET_HEIGHT, DRONE_SHEET_WIDTH, renderDrone } from './placeholder-drone.ts';
 import { FONT_SHEET_HEIGHT, FONT_SHEET_WIDTH, renderFont } from './placeholder-font.ts';
-import { LAMP_SHEET_HEIGHT, LAMP_SHEET_WIDTH, renderLamp } from './placeholder-lamp.ts';
+import {
+  LAMP_SHEET_HEIGHT,
+  LAMP_SHEET_WIDTH,
+  renderLamp,
+  renderWideLamp,
+  WIDE_LAMP_SHEET_HEIGHT,
+  WIDE_LAMP_SHEET_WIDTH,
+} from './placeholder-lamp.ts';
 import {
   OVERVIEW_SHEET_HEIGHT,
   OVERVIEW_SHEET_WIDTH,
@@ -32,7 +39,8 @@ import { renderVeil, VEIL_SHEET_HEIGHT, VEIL_SHEET_WIDTH } from './placeholder-v
  * public/sprites/font.png of 0016 from tools/placeholder-font.ts; and public/sprites/officer.png
  * of 0017 from tools/placeholder-person.ts; and public/sprites/trace.png of 0022 from
  * tools/placeholder-trace.ts; and public/sprites/shadow-veil.png of 0023 from
- * tools/placeholder-veil.ts. Deterministic — pngjs writes no timestamp — and Node
+ * tools/placeholder-veil.ts; and public/sprites/lamp-wide.png of 0029 from
+ * tools/placeholder-lamp.ts. Deterministic — pngjs writes no timestamp — and Node
  * runs this TypeScript file directly, without a transpiler.
  */
 
@@ -45,6 +53,13 @@ export function encodePng(): Buffer {
 export function encodeLampPng(): Buffer {
   const png = new PNG({ width: LAMP_SHEET_WIDTH, height: LAMP_SHEET_HEIGHT });
   png.data = Buffer.from(renderLamp());
+  return PNG.sync.write(png);
+}
+
+/** The wider cone's sheet (0029). */
+export function encodeLampWidePng(): Buffer {
+  const png = new PNG({ width: WIDE_LAMP_SHEET_WIDTH, height: WIDE_LAMP_SHEET_HEIGHT });
+  png.data = Buffer.from(renderWideLamp());
   return PNG.sync.write(png);
 }
 
@@ -120,6 +135,7 @@ if (import.meta.main) {
   mkdirSync('public/sprites', { recursive: true });
   writeFileSync('public/sprites/player.png', encodePng());
   writeFileSync('public/sprites/lamp.png', encodeLampPng());
+  writeFileSync('public/sprites/lamp-wide.png', encodeLampWidePng());
   writeFileSync('public/sprites/snippet.png', encodeSnippetPng());
   writeFileSync('public/sprites/overview.png', encodeOverviewPng());
   for (const look of PERSON_SHIRTS.keys()) {

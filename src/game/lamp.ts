@@ -49,6 +49,20 @@ export const FRAME_APEX: Readonly<Record<Facing, Point>> = {
   right: { x: 0, y: 24 },
 };
 
+/** The side of a frame of the wider cone's sheet (0029): the cone's width at its end, 72 px. */
+export const WIDE_FRAME_SIZE = 2 * CONE_LENGTH * WIDE_SPREAD;
+
+/**
+ * Where the apex sits in a WIDE_FRAME_SIZE × WIDE_FRAME_SIZE frame of the wider cone's sheet,
+ * per facing: the middle of the edge the cone opens from, as in FRAME_APEX (0029).
+ */
+export const WIDE_FRAME_APEX: Readonly<Record<Facing, Point>> = {
+  down: { x: 36, y: 0 },
+  up: { x: 36, y: 71 },
+  left: { x: 71, y: 36 },
+  right: { x: 0, y: 36 },
+};
+
 /** The cone the figure's lamp casts: the apex LAMP_HEIGHT above the feet, in the facing. */
 export function lampCone(player: PlayerState): Cone {
   return { apex: { x: player.x, y: player.y - LAMP_HEIGHT }, facing: player.facing };
