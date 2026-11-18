@@ -12,10 +12,34 @@ export interface MovementInput {
   readonly right: boolean;
 }
 
-/** Everything the game reads from the keys: the movement actions, `lamp`, on while Space is held (0007), and `talk`, on while E or Enter is held (0017). */
+/**
+ * Everything the game reads from the keys: the movement actions, `lamp`, on while Space is held
+ * (0007), `talk`, on while E or Enter is held (0017), and `journal`, on while J is held (0020).
+ */
 export interface GameInput extends MovementInput {
   readonly lamp: boolean;
   readonly talk: boolean;
+  readonly journal: boolean;
+}
+
+/** No key held: what the state remembers before the first step. */
+export const NO_INPUT: GameInput = {
+  up: false,
+  down: false,
+  left: false,
+  right: false,
+  lamp: false,
+  talk: false,
+  journal: false,
+};
+
+/**
+ * Whether `action` is pressed in this step: the input holds it and the last step's did not. The
+ * keyboard keeps no press (architecture.md §4), so the state does: `held` is the last step's
+ * input (0020; `talkHeld` until then).
+ */
+export function pressed(held: GameInput, input: GameInput, action: keyof GameInput): boolean {
+  return input[action] && !held[action];
 }
 
 /** Tune: 80 px/s is 1.333 px per step. */

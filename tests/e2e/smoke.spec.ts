@@ -190,7 +190,7 @@ test('the floor starts with the officer standing and no dialogue open', async ({
   const state = await page.evaluate(() => window.shadowAi?.state);
   expect(state?.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
   expect(state?.dialogue).toBeNull();
-  expect(state?.talkHeld).toBe(false);
+  expect(state?.held.talk).toBe(false);
 });
 
 test('the game starts with full overview and outside the dark', async ({ page }) => {
