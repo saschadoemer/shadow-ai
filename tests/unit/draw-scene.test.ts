@@ -1329,3 +1329,151 @@ describe('the shadow over the regions in the scene (0023)', () => {
     expect(renderer.sheets).toStrictEqual([CONTENT.playerSheet]);
   });
 });
+
+describe('the cleared region in the scene (0025)', () => {
+  /**
+   * The 3x2 map in three rooms: the left column is Sales and the middle one Marketing, both of
+   * density 1; the right column is Development, density 3.
+   */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...MAP,
+      rects: [
+        { name: 'region:sales', x: 0, y: 0, width: 16, height: 32 },
+        { name: 'region:marketing', x: 16, y: 0, width: 16, height: 32 },
+        { name: 'region:development', x: 32, y: 0, width: 16, height: 32 },
+      ],
+    },
+  };
+  /** The scene `elapsed` steps after the case of `region` was solved. */
+  const cleared = (region: string, elapsed: number): GameState => ({
+    ...state({ x: 40, y: 30 }),
+    solved: [{ region, at: QUIET_TICK - elapsed }],
+  });
+  /** The frames of the veil's sheet the scene drew, each with its place. */
+  const veils = (scene: GameState): string[] => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene, content);
+    const sprites = renderer.calls.filter((call) => call.startsWith('drawSprite'));
+    return sprites.filter((_call, i) => renderer.sheets[i] === content.veilSheet);
+  };
+  /** Marketing and Development, row by row, as long as they are under shadow. */
+  const OTHERS_TOP = ['drawSprite 0 at 16,0', 'drawSprite 2 at 32,0'];
+  const OTHERS_BOTTOM = ['drawSprite 0 at 16,16', 'drawSprite 2 at 32,16'];
+
+  it('draws the three rooms under shadow before a case is solved', () => {
+    expect(veils(state({ x: 40, y: 30 }))).toStrictEqual([
+      'drawSprite 0 at 0,0',
+      ...OTHERS_TOP,
+      'drawSprite 0 at 0,16',
+      ...OTHERS_BOTTOM,
+    ]);
+  });
+
+  it('draws the cells of the cleared region from the tileset on all three layers, at once', () => {
+    for (const elapsed of [0, 39, 40, 119, 120, 5000]) {
+      const renderer = recordingRenderer();
+      drawScene(renderer, cleared('sales', elapsed), content);
+      const tiles = renderer.calls.filter((call) => call.startsWith('drawTile'));
+      expect(tiles).toStrictEqual([
+        'drawTile 0 at 0,0',
+        'drawTile 1 at 16,0',
+        'drawTile 2 at 0,16',
+        'drawTile 2 at 16,16',
+        'drawTile 2 at 32,16',
+        'drawTile 4 at 16,16',
+        'drawTile 6 at 0,0',
+      ]);
+      expect(renderer.tilesets, `${elapsed} steps`).toStrictEqual([
+        content.tileset,
+        content.shadowTileset,
+        content.tileset,
+        content.shadowTileset,
+        content.shadowTileset,
+        content.shadowTileset,
+        content.tileset,
+      ]);
+    }
+  });
+
+  it.each([
+    [0, 0],
+    [39, 0],
+    [40, 3],
+    [79, 3],
+    [80, 4],
+    [119, 4],
+  ])(
+    '%d steps after the solving it draws frame %d of the veil over the cleared cells',
+    (elapsed, frame) => {
+      expect(veils(cleared('sales', elapsed))).toStrictEqual([
+        `drawSprite ${frame} at 0,0`,
+        ...OTHERS_TOP,
+        `drawSprite ${frame} at 0,16`,
+        ...OTHERS_BOTTOM,
+      ]);
+    },
+  );
+
+  it('draws no veil over them from 120 steps on, and the other rooms as before', () => {
+    for (const elapsed of [120, 121, 5000]) {
+      expect(veils(cleared('sales', elapsed))).toStrictEqual([...OTHERS_TOP, ...OTHERS_BOTTOM]);
+    }
+  });
+
+  it.each([
+    [0, 2],
+    [39, 2],
+    [40, 3],
+    [79, 3],
+    [80, 4],
+    [119, 4],
+  ])('over a cleared region of density 3 it draws, after %d steps, frame %d', (elapsed, frame) => {
+    expect(veils(cleared('development', elapsed))).toStrictEqual([
+      'drawSprite 0 at 0,0',
+      'drawSprite 0 at 16,0',
+      `drawSprite ${frame} at 32,0`,
+      'drawSprite 0 at 0,16',
+      'drawSprite 0 at 16,16',
+      `drawSprite ${frame} at 32,16`,
+    ]);
+  });
+
+  it('lays the thinning veil where the veil lies: after detail and before the cone', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, { ...cleared('sales', 40), lamp: { on: true, strength: 1 } }, content);
+    const detail = renderer.calls.indexOf('drawTile 4 at 16,16');
+    expect(renderer.calls[detail + 1]).toBe('drawSprite 3 at 0,0');
+    expect(renderer.sheets.slice(0, 7)).toStrictEqual([
+      content.veilSheet,
+      content.veilSheet,
+      content.veilSheet,
+      content.veilSheet,
+      content.veilSheet,
+      content.veilSheet,
+      content.lampSheet,
+    ]);
+  });
+
+  it('shifts the thinning veil with the camera', () => {
+    const scene: GameState = { ...cleared('sales', 80), camera: { x: 5, y: 7 } };
+    expect(veils(scene)).toContain('drawSprite 4 at -5,-7');
+    expect(veils(scene)).toContain('drawSprite 4 at -5,9');
+  });
+
+  it('draws a scene in which every region is cleared long ago like a map without areas', () => {
+    const renderer = recordingRenderer();
+    const scene: GameState = {
+      ...state({ x: 40, y: 30 }),
+      solved: [
+        { region: 'sales', at: 0 },
+        { region: 'marketing', at: 100 },
+        { region: 'development', at: 200 },
+      ],
+    };
+    drawScene(renderer, scene, content);
+    expect(renderer.tilesets.every((tileset) => tileset === content.tileset)).toBe(true);
+    expect(renderer.sheets).toStrictEqual([content.playerSheet]);
+  });
+});
