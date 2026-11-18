@@ -94,7 +94,7 @@ prototype.
 - Produces: the text ids `talk.reception-everyday`, `talk.marketing-everyday`,
   `talk.support-everyday`, `talk.sales-everyday`, in both languages.
 
-- [ ] **Step 1: Write the failing test.** Add one test to `tests/unit/text.test.ts`, before
+- [x] **Step 1: Write the failing test.** Add one test to `tests/unit/text.test.ts`, before
   the page rule:
 
 ```diff
@@ -154,13 +154,13 @@ prototype.
        for (const [key, text] of Object.entries(TABLE[language])) {
 ```
 
-- [ ] **Step 2: Run it and see it fail.**
+- [x] **Step 2: Run it and see it fail.**
 
 Run: `npx vitest run tests/unit/text.test.ts`
 Expected: FAIL in the new test — the ids do not exist, so `textOf` returns `undefined`.
 `npm run typecheck` also fails: the four ids are no `TextId`.
 
-- [ ] **Step 3: Add the strings.** The quotes in the Marketing saying are the typographic
+- [x] **Step 3: Add the strings.** The quotes in the Marketing saying are the typographic
   ones the font has: `„` and `“` in German, `“` and `”` in English. The dash is `–`.
 
 ```diff
@@ -223,13 +223,13 @@ Expected: FAIL in the new test — the ids do not exist, so `textOf` returns `un
  };
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npx vitest run tests/unit/text.test.ts tests/unit/font.test.ts tests/unit/draw-scene.test.ts`
 Expected: PASS. The glyph test, the page rule (three lines, 47 characters) and the box test
 of 0017 cover the new pages without a change.
 
-- [ ] **Step 5:** `npm run check`, then commit — `Give the four colleagues their sayings`.
+- [x] **Step 5:** `npm run check`, then commit — `Give the four colleagues their sayings`.
 
 ---
 
@@ -246,7 +246,7 @@ of 0017 cover the new pages without a change.
   `pagesOfRoute(route: string, colleagues?: readonly Colleague[]): readonly TextKey[]` — an
   empty array for a route without lines.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
 
 ```diff
 --- a/tests/unit/cast.test.ts
@@ -296,12 +296,12 @@ of 0017 cover the new pages without a change.
 +});
 ```
 
-- [ ] **Step 2: Run them and see them fail.**
+- [x] **Step 2: Run them and see them fail.**
 
 Run: `npx vitest run tests/unit/cast.test.ts`
 Expected: FAIL — `COLLEAGUES` and `pagesOfRoute` are not exported.
 
-- [ ] **Step 3: Add the table and the lookup**, above `isFigurePoint`:
+- [x] **Step 3: Add the table and the lookup**, above `isFigurePoint`:
 
 ```diff
 --- a/src/game/cast.ts
@@ -338,9 +338,9 @@ Expected: FAIL — `COLLEAGUES` and `pagesOfRoute` are not exported.
  }
 ```
 
-- [ ] **Step 4: Run the tests.** `npx vitest run tests/unit/cast.test.ts` — PASS.
+- [x] **Step 4: Run the tests.** `npx vitest run tests/unit/cast.test.ts` — PASS.
 
-- [ ] **Step 5:** `npm run check`, then commit — `Add the colleagues' lines to the cast`.
+- [x] **Step 5:** `npm run check`, then commit — `Add the colleagues' lines to the cast`.
 
 ---
 
@@ -370,7 +370,7 @@ the scene's page lookup and their tests change in one commit; no smaller cut com
   `stepDialogue(state, dialogue, input, speakers): GameState`.
   `talkPressed` and `facingToward` are unchanged. `figureInReach` is removed.
 
-- [ ] **Step 1: Replace `tests/unit/talk.test.ts`** with the file below. The tests of 0017
+- [x] **Step 1: Replace `tests/unit/talk.test.ts`** with the file below. The tests of 0017
   stay, with three changes: the reach is 40 px, `figureInReach` became `speakerInReach`, and
   a dialogue is `{ speaker: 'figure', index, page }`. The tests of 0018 follow them.
 
@@ -1019,7 +1019,7 @@ describe('a game without speakers (0018)', () => {
 });
 ```
 
-- [ ] **Step 2: Change the scene tests.** In `tests/unit/draw-scene.test.ts` the dialogue of
+- [x] **Step 2: Change the scene tests.** In `tests/unit/draw-scene.test.ts` the dialogue of
   the box tests gets its new shape, and two tests are added before "draws no box without a
   dialogue". The German saying of the reception has 108 characters that are not spaces, and
   its first is `M`, glyph 45.
@@ -1082,13 +1082,13 @@ describe('a game without speakers (0018)', () => {
      drawScene(renderer, { ...talking(0), dialogue: null }, content);
 ```
 
-- [ ] **Step 3: Run and see them fail.**
+- [x] **Step 3: Run and see them fail.**
 
 Run: `npm run typecheck`
 Expected: errors in both test files — `speakerInReach`, `speakersOf`, `speakerOf`, `inSight`
 and `Speaker` are not exported, and `speaker` is no property of `Dialogue`.
 
-- [ ] **Step 4: Change the state.** In `src/game/state.ts`:
+- [x] **Step 4: Change the state.** In `src/game/state.ts`:
 
 ```diff
 --- a/src/game/state.ts
@@ -1114,7 +1114,7 @@ and `Speaker` are not exported, and `speaker` is no property of `Dialogue`.
  }
 ```
 
-- [ ] **Step 5: Replace `src/game/talk.ts`** with:
+- [x] **Step 5: Replace `src/game/talk.ts`** with:
 
 ```ts
 import { sightBlocked } from '../engine/collision';
@@ -1322,7 +1322,7 @@ export function stepDialogue(
 
   Biome sorts the imports; run `npx biome check --write src/game/talk.ts`.
 
-- [ ] **Step 6: Pass the speakers in `update`.** The routes are built once per step now and
+- [x] **Step 6: Pass the speakers in `update`.** The routes are built once per step now and
   used for the speakers and for the movers:
 
 ```diff
@@ -1368,7 +1368,7 @@ export function stepDialogue(
   Update the doc comment of `update` in the same file: a press of `talk` near a speaker — a
   standing figure or a colleague — in reach and in sight opens a dialogue (0017, 0018).
 
-- [ ] **Step 7: Look the page up through the speaker in the scene:**
+- [x] **Step 7: Look the page up through the speaker in the scene:**
 
 ```diff
 --- a/src/render/draw-scene.ts
@@ -1402,14 +1402,14 @@ export function stepDialogue(
      renderer.fillRect(
 ```
 
-- [ ] **Step 8: Run the tests.**
+- [x] **Step 8: Run the tests.**
 
 Run: `npx vitest run tests/unit/talk.test.ts tests/unit/draw-scene.test.ts`
 Expected: PASS — `talk.test.ts` has 51 tests. Then `npm run test`: every file green. The
 floor tests of 0017 that use `TALK_DISTANCE` still hold with 40: the wake point is 45.3 px
 from the officer, and the nearest route point is 176 px from her.
 
-- [ ] **Step 9:** `npm run check`, then commit —
+- [x] **Step 9:** `npm run check`, then commit —
   `Talk to a colleague on its round, in sight and within 40 px`. The body says why the reach
   grew (32 px across the counter) and why sight is tested (the coffee machine of Sales stands
   24 px from the north corridor).
@@ -1425,7 +1425,7 @@ tests pass as soon as they are written: they prove that Task 3 holds on parsed d
 - Create: `tests/fixtures/maps/talkers.tmj`
 - Test: `tests/unit/state.test.ts`
 
-- [ ] **Step 1: Create the fixture** from `figures.tmj` with a one-off script. Do not commit
+- [x] **Step 1: Create the fixture** from `figures.tmj` with a one-off script. Do not commit
   the script. Run from the repository root:
 
 ```bash
@@ -1469,7 +1469,7 @@ EOF
   600; `person:reception:2` (128, 48); `dog:reception:1` (40, 152); `dog:reception:2`
   (104, 152). The tile layer is that of `figures.tmj`.
 
-- [ ] **Step 2: Add the tests** to `tests/unit/state.test.ts`:
+- [x] **Step 2: Add the tests** to `tests/unit/state.test.ts`:
 
 ```diff
 --- a/tests/unit/state.test.ts
@@ -1523,9 +1523,9 @@ EOF
 +});
 ```
 
-- [ ] **Step 3: Run.** `npx vitest run tests/unit/state.test.ts` — PASS.
+- [x] **Step 3: Run.** `npx vitest run tests/unit/state.test.ts` — PASS.
 
-- [ ] **Step 4:** `npm run check`, then commit —
+- [x] **Step 4:** `npm run check`, then commit —
   `Prove a colleague's dialogue on a parsed fixture`.
 
 ---
@@ -1538,7 +1538,7 @@ written; they guard the two places for which the reach and the sight rule were m
 **Files:**
 - Test: `tests/unit/floor.test.ts`
 
-- [ ] **Step 1: Add the tests:**
+- [x] **Step 1: Add the tests:**
 
 ```diff
 --- a/tests/unit/floor.test.ts
@@ -1623,9 +1623,9 @@ written; they guard the two places for which the reach and the sight rule were m
 +});
 ```
 
-- [ ] **Step 2: Run.** `npx vitest run tests/unit/floor.test.ts` — PASS.
+- [x] **Step 2: Run.** `npx vitest run tests/unit/floor.test.ts` — PASS.
 
-- [ ] **Step 3:** `npm run check`, then commit — `Guard the counter and the coffee on the floor`.
+- [x] **Step 3:** `npm run check`, then commit — `Guard the counter and the coffee on the floor`.
 
 ---
 
@@ -1635,7 +1635,7 @@ written; they guard the two places for which the reach and the sight rule were m
 - Modify: `docs/spec/gameplay.md`, `docs/spec/world.md`, `docs/spec/architecture.md`,
   `docs/spec/testing.md`, `README.md`
 
-- [ ] **Step 1: `gameplay.md` §8.** In the paragraph **As built** (feature 0017) the reach
+- [x] **Step 1: `gameplay.md` §8.** In the paragraph **As built** (feature 0017) the reach
   becomes 40 px, with "(feature 0018; it was 24)". Add a paragraph **As built** (feature
   0018): the four colleagues who walk the floor can be spoken to; a press reaches a speaker —
   a standing figure or a colleague — at most 40 px away and in sight, that is with nothing
@@ -1644,13 +1644,13 @@ written; they guard the two places for which the reach and the sight rule were m
   page, the same every time; after it the colleague goes on its round and keeps its facing
   until it moves.
 
-- [ ] **Step 2: `world.md`.** §1, "What moves": one sentence — since feature 0018 the four
+- [x] **Step 2: `world.md`.** §1, "What moves": one sentence — since feature 0018 the four
   colleagues can be spoken to and stop where they are while they speak. §3, at "Per
   department": the colleagues of the reception, Marketing, Support and Sales have one everyday
   saying each since feature 0018; they still have no name. At the data protection officer:
   nothing but the distance changed for her.
 
-- [ ] **Step 3: `architecture.md`.** §1 directory list: `game/cast.ts` also holds the
+- [x] **Step 3: `architecture.md`.** §1 directory list: `game/cast.ts` also holds the
   colleagues' lines (0018). §2: `dialogue` is `null` or `{ speaker, index, page }` —
   `speaker` is `'figure'` or `'mover'`, `index` the index in `figures` or in `movers`; the
   speakers of a step (`speakersOf`): the standing figures in file order, then the movers of
@@ -1664,27 +1664,27 @@ written; they guard the two places for which the reach and the sight rule were m
   sentence for speakers and 0018. §5, where the dialogue box is described: the page is the
   speaker's. §8: the cast names its pages by key, and so does `COLLEAGUES`.
 
-- [ ] **Step 4: `testing.md`.** §2: the INV-1 row gains the round trip with a colleague
+- [x] **Step 4: `testing.md`.** §2: the INV-1 row gains the round trip with a colleague
   speaking (0018). §6: `talkers.tmj`, if the section lists the fixtures.
 
-- [ ] **Step 5: `README.md`:** one sentence after the one on the data protection officer —
+- [x] **Step 5: `README.md`:** one sentence after the one on the data protection officer —
   the four colleagues who walk the floor can be spoken to as well, across the counter too,
   and each has a saying (feature 0018).
 
-- [ ] **Step 6:** `npm run check`, then commit — `Move the everyday lines into the spec`.
+- [x] **Step 6:** `npm run check`, then commit — `Move the everyday lines into the spec`.
 
 ---
 
 ### Task 7: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green. The smoke spec is unchanged:
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green. The smoke spec is unchanged:
   after loading `state.dialogue` is `null`.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
   `Tick the full check of 0018`.
 
 ---
