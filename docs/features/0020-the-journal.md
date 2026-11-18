@@ -1,6 +1,6 @@
 # 0020 — The journal
 
-**Status:** draft
+**Status:** approved 2026-11-18
 **Milestone:** M4
 **Drafted:** 2026-11-17
 
