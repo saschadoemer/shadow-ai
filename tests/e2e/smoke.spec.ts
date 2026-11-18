@@ -283,3 +283,30 @@ test('J opens the journal on the creatures and closes it again', async ({ page }
   await expect.poll(journal, { message: 'a second press of J closes it' }).toBeNull();
   await page.keyboard.up('KeyJ');
 });
+
+test('H opens the help, the game stands still under it, and H closes it again', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const help = () => page.evaluate(() => window.shadowAi?.state.help);
+  await expect
+    .poll(help, { message: 'window.shadowAi.state.help is there: the game runs, the help closed' })
+    .toBe(false);
+  // The game reads the held keys once per frame, so a key stays down until the state shows it.
+  await page.keyboard.down('KeyH');
+  await expect.poll(help, { message: 'H opens the help' }).toBe(true);
+  await page.keyboard.up('KeyH');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.held.help), {
+      message: 'H was let go',
+    })
+    .toBe(false);
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(300);
+  await page.keyboard.up('ArrowRight');
+  expect(await page.evaluate(() => window.shadowAi?.state.player.x)).toBe(256);
+  expect(await help()).toBe(true);
+  await page.keyboard.down('KeyH');
+  await expect.poll(help, { message: 'a second press of H closes it' }).toBe(false);
+  await page.keyboard.up('KeyH');
+});
