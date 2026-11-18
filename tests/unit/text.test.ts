@@ -156,17 +156,33 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
-  it('holds every text of the journal to the rule of its kind (0020)', () => {
+  it('holds the words of the traces in both languages (0022)', () => {
+    const both = (id: Parameters<typeof textKey>[0]): string[] => [
+      textOf(textKey(id), 'de'),
+      textOf(textKey(id), 'en'),
+    ];
+    expect(both('region.sales')).toStrictEqual(['Vertrieb', 'Sales']);
+    expect(both('journal.traces')).toStrictEqual(['Spuren:', 'Traces:']);
+    expect(both('journal.of')).toStrictEqual(['von', 'of']);
+    expect(both('notice.trace-found')).toStrictEqual([
+      'Spur gefunden. Sie steht im Journal.',
+      'Trace found. It is in the journal.',
+    ]);
+  });
+
+  it('holds every text of the journal to the rule of its kind (0020, 0022)', () => {
     /** The most lines and the most characters per line a key may have, by what its id starts or ends with. */
     const rules: readonly (readonly [(id: string) => boolean, number, number, number])[] = [
       [(id) => id.startsWith('journal.tab-'), 1, 1, 16],
       [(id) => id.startsWith('journal.no-'), 1, 1, 47],
+      [(id) => id === 'journal.traces' || id === 'journal.of', 1, 1, 16],
+      [(id) => id.startsWith('region.'), 1, 1, 24],
       [(id) => id.startsWith('creature.') && id.endsWith('-name'), 1, 1, 24],
       [(id) => id.startsWith('creature.') && id.endsWith('-text'), 2, 4, 47],
     ];
     for (const language of LANGUAGES) {
       for (const [key, text] of Object.entries(TABLE[language])) {
-        if (!key.startsWith('journal.') && !key.startsWith('creature.')) {
+        if (!['journal.', 'creature.', 'region.'].some((kind) => key.startsWith(kind))) {
           continue;
         }
         const rule = rules.find(([applies]) => applies(key));
