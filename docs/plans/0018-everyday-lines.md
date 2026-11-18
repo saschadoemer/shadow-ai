@@ -1710,9 +1710,9 @@ written; they guard the two places for which the reach and the sight rule were m
 
 ### Task 9: The pull request
 
-- [ ] **Step 1:** merge the latest `main` again and rerun Task 7. If the merge changed code,
+- [x] **Step 1:** merge the latest `main` again and rerun Task 7. If the merge changed code,
   the walk is run again.
-- [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
+- [x] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`, and in `docs/plan.md` §4 change "0018 is approved" to say that
   0018 is implemented; commit — `Mark 0018 implemented`. The rows of 0019 and 0020 stay
   `draft`.
