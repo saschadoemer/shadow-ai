@@ -216,6 +216,24 @@ export const FIGURES: readonly { readonly id: string; readonly at: Point }[] = [
 ];
 
 /**
+ * The traces (0022): per trace its region and the cell of the device it lies on. Five in
+ * Sales, each on the desk with a screen of a cubicle, spread over the room with at least one
+ * in every row of cubicles. The order is the order in the file.
+ */
+export const TRACES: readonly { readonly region: string; readonly cell: Point }[] = [
+  { region: 'sales', cell: { x: 83, y: 28 } },
+  { region: 'sales', cell: { x: 98, y: 28 } },
+  { region: 'sales', cell: { x: 93, y: 34 } },
+  { region: 'sales', cell: { x: 88, y: 40 } },
+  { region: 'sales', cell: { x: 98, y: 46 } },
+];
+
+/** The box of a trace in map pixels: its cell. */
+export function traceBox(cell: Point): Box {
+  return { x: cell.x * TILE_SIZE, y: cell.y * TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE };
+}
+
+/**
  * The routes of the movers (0015): per route its points as [column, row, pause in steps]; a
  * cell stands for its middle, (16c + 8, 16r + 8). The order is the order in the file.
  */
@@ -1122,6 +1140,7 @@ export function floorJson(): MapJson {
   const routes = routePoints();
   const firstWall = SNIPPETS.length + 3 + routes.length;
   const firstFigure = firstWall + SHADOW_WALLS.length;
+  const firstTrace = firstFigure + FIGURES.length;
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1147,6 +1166,9 @@ export function floorJson(): MapJson {
           ...FIGURES.map((figure, i) =>
             pointObject(firstFigure + i, `figure:${figure.id}`, figure.at),
           ),
+          ...TRACES.map((trace, i) =>
+            rectObject(firstTrace + i, `trace:${trace.region}`, traceBox(trace.cell)),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1156,7 +1178,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstFigure + FIGURES.length,
+    nextobjectid: firstTrace + TRACES.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

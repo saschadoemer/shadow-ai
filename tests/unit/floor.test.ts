@@ -6,9 +6,12 @@ import { cameraFor } from '../../src/engine/camera';
 import { moveBox } from '../../src/engine/collision';
 import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../src/engine/tiled';
 import { COLLEAGUES, figuresOf, pagesOfRoute } from '../../src/game/cast';
+import { REGION_NAME } from '../../src/game/journal';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
 import { standingWalls, wallsOf, withWalls } from '../../src/game/shadow';
+import { NO_RECOIL } from '../../src/game/state';
 import { speakerInReach, speakersOf, TALK_DISTANCE } from '../../src/game/talk';
+import { traceInLight, tracesOf } from '../../src/game/trace';
 import { createInitialState } from '../../src/game/update';
 import {
   type CellRect,
@@ -27,6 +30,8 @@ import {
   SNIPPETS,
   SPAWN,
   shadowWallBox,
+  TRACES,
+  traceBox,
   VERTICAL_WALLS,
   WAKE,
 } from '../../tools/floor-layout.ts';
@@ -485,9 +490,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 100 }, (_, i) => i + 1),
+      Array.from({ length: 105 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(101);
+    expect(json.nextobjectid).toBe(106);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -923,7 +928,8 @@ describe('the shadow walls of the floor (0014)', () => {
     a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 
   it('holds the eight rectangles of the spec after the 91 points, with the ids 92–99', () => {
-    expect(floor.rects).toStrictEqual(
+    // The walls are the first eight rectangles; the traces of 0022 follow them.
+    expect(floor.rects.slice(0, 8)).toStrictEqual(
       TABLE.map(([region, , box]) => ({ name: `shadow:${region}`, ...box })),
     );
     const objects = floorJson().layers[3].objects;
@@ -1066,16 +1072,15 @@ describe('the standing figures of the floor (0017)', () => {
     expect(FIGURES).toStrictEqual([{ id: 'officer', at: OFFICER }]);
     expect(floor.points.at(-1)).toStrictEqual({ name: 'figure:officer', ...OFFICER });
     const objects = floorJson().layers[3].objects;
-    expect(objects).toHaveLength(100);
-    const last = objects.at(-1);
-    expect([last?.id, last?.name, last?.x, last?.y]).toStrictEqual([
+    // The hundredth object; the traces of 0022 follow it.
+    const hers = objects[99];
+    expect([hers?.id, hers?.name, hers?.x, hers?.y]).toStrictEqual([
       100,
       'figure:officer',
       264,
       472,
     ]);
-    expect(last !== undefined && 'point' in last).toBe(true);
-    expect(floorJson().nextobjectid).toBe(101);
+    expect(hers !== undefined && 'point' in hers).toBe(true);
   });
 
   it('gives the floor one figure, the officer, with her two pages', () => {
@@ -1180,5 +1185,110 @@ describe('the colleagues of the floor and their lines (0018)', () => {
       speaker: 'mover',
       index: 3,
     });
+  });
+});
+
+describe('the traces of the floor (0022)', () => {
+  /** Region, cell and box, in file order: the spec's table. */
+  const TABLE: readonly (readonly [string, number, number, Box])[] = [
+    ['sales', 83, 28, { x: 1328, y: 448, width: 16, height: 16 }],
+    ['sales', 98, 28, { x: 1568, y: 448, width: 16, height: 16 }],
+    ['sales', 93, 34, { x: 1488, y: 544, width: 16, height: 16 }],
+    ['sales', 88, 40, { x: 1408, y: 640, width: 16, height: 16 }],
+    ['sales', 98, 46, { x: 1568, y: 736, width: 16, height: 16 }],
+  ];
+  const traces = tracesOf(floor.rects);
+
+  it('are five, all of Sales, on the cells of the spec', () => {
+    expect(traces).toStrictEqual(TABLE.map(([region, , , box]) => ({ region, box })));
+    expect(TRACES.map((trace) => [trace.region, trace.cell.x, trace.cell.y])).toStrictEqual(
+      TABLE.map(([region, column, row]) => [region, column, row]),
+    );
+    expect(TRACES.map((trace) => traceBox(trace.cell))).toStrictEqual(
+      TABLE.map(([, , , box]) => box),
+    );
+  });
+
+  it('are the last five objects of the file, rectangles with the ids 101 to 105', () => {
+    const objects = floorJson().layers[3].objects;
+    expect(objects).toHaveLength(105);
+    expect(objects.slice(100).map((object) => [object.id, object.name])).toStrictEqual(
+      [101, 102, 103, 104, 105].map((id) => [id, 'trace:sales']),
+    );
+    expect(objects.slice(100).some((object) => 'point' in object)).toBe(false);
+    expect(floorJson().nextobjectid).toBe(106);
+    expect(floor.rects).toHaveLength(13);
+    expect(floor.points).toHaveLength(91);
+  });
+
+  it('lie in Sales, each on a desk with a screen whose chair stands on the cell below', () => {
+    const sales = ROOMS.find((room) => room.name === 'sales');
+    for (const [, column, row] of TABLE) {
+      expect(sales !== undefined && column >= sales.cells.c0 && column <= sales.cells.c1).toBe(
+        true,
+      );
+      expect(sales !== undefined && row >= sales.cells.r0 && row <= sales.cells.r1).toBe(true);
+      expect(floor.detail[cell(column, row)], `(${column}, ${row})`).toBe(DESK_MONITOR_PARTITION);
+      expect(floor.detail[cell(column, row + 1)], `(${column}, ${row + 1})`).toBe(CHAIR);
+      expect(floor.detail[cell(column, row + 2)], `(${column}, ${row + 2})`).toBe(EMPTY);
+    }
+  });
+
+  it('are in the light of a player who looks up from any place on the cell below the chair', () => {
+    for (const [, column, row] of TABLE) {
+      const trace = traces.find(
+        (candidate) => candidate.box.x === column * 16 && candidate.box.y === row * 16,
+      );
+      let places = 0;
+      for (let x = column * 16; x <= column * 16 + 16; x += 2) {
+        for (let y = (row + 2) * 16 + 2; y <= (row + 3) * 16; y += 2) {
+          if (!reached({ x, y })) {
+            continue;
+          }
+          places += 1;
+          const player = {
+            x,
+            y,
+            facing: 'up',
+            frame: 0,
+            frameTimer: 0,
+            grace: 0,
+            recoil: NO_RECOIL,
+          } as const;
+          expect(
+            trace !== undefined && traceInLight(trace, player, true, floor),
+            `(${column}, ${row}) from (${x}, ${y})`,
+          ).toBe(true);
+        }
+      }
+      expect(places, `(${column}, ${row})`).toBe(54);
+    }
+  });
+
+  it('leave eleven of the sixteen screens of Sales without a trace, and no row without one', () => {
+    const screens: [number, number][] = [];
+    for (let row = 26; row <= 51; row += 1) {
+      for (let column = 79; column <= 106; column += 1) {
+        if (floor.detail[cell(column, row)] === DESK_MONITOR_PARTITION) {
+          screens.push([column, row]);
+        }
+      }
+    }
+    expect(screens).toHaveLength(16);
+    const rows = [...new Set(screens.map(([, row]) => row))];
+    expect(rows).toStrictEqual([28, 34, 40, 46]);
+    for (const row of rows) {
+      expect(
+        TABLE.some(([, , traceRow]) => traceRow === row),
+        `row ${row}`,
+      ).toBe(true);
+    }
+  });
+
+  it('have a name for their region, and start unseen in the state', () => {
+    for (const { region } of traces) {
+      expect(REGION_NAME[region], region).toBeDefined();
+    }
+    expect(createInitialState(floor).traces).toHaveLength(5);
   });
 });

@@ -140,6 +140,7 @@ const state = (
   creatures: [],
   movers: [],
   shadowWalls: [],
+  traces: [],
   figures: [],
   dialogue: null,
   journal: null,
