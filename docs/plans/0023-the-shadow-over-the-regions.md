@@ -1838,9 +1838,9 @@ on the shirt of the reception's colleague still passes.
 
 ### Task 10: The pull request
 
-- [ ] **Step 1:** merge the latest `main` again and rerun Task 8. If the merge changed code,
+- [x] **Step 1:** merge the latest `main` again and rerun Task 8. If the merge changed code,
   the walk is run again.
-- [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
+- [x] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`, and in `docs/plan.md` §4, in the M5 section, say that 0022 and
   0023 are implemented and 0024, 0025 and 0026 approved; commit — `Mark 0023 implemented`.
 - [ ] **Step 3:** push the branch and open the pull request against `main`, titled
