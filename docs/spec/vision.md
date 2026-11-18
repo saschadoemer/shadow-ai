@@ -52,6 +52,13 @@ offer in the answer of a public AI chatbot. The managing director stands in your
 how that could happen. On the way to Sales, where the offer came from, you see the shadow for the
 first time.
 
+*As built* (feature 0026): the trigger is three pages of text before the first step — the
+customer's call, the managing director's order, the first sight of the shadow. The customer and
+the managing director say one sentence each and are not on the map in the first act. The
+managing director stops the player at the reception, where the game begins: the floor has no
+room of the player's own, so nobody can stand in its door. The third page points next door, to
+the data protection officer, who hands the lamp over in the first talk.
+
 **The shadow.** A residue, not a being. Wherever data leaves the house without anybody watching,
 something stays behind and grows with the flow. It darkens rooms, lies over screens, blocks
 corridors like a wall of flicker. Where the use gets dense, it condenses into creatures — one
