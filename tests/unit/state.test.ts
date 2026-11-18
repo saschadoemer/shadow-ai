@@ -4,10 +4,11 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseTileMap, parseTileset, type TileMap } from '../../src/engine/tiled';
 import { followPlayer } from '../../src/game/camera';
+import { NOTICE_SHADOW_TOO_DENSE, noticeOf } from '../../src/game/notice';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
 import { clearingVeil } from '../../src/game/region';
 import { FACINGS, type GameState, PHASES_PER_FACING, type PlayerState } from '../../src/game/state';
-import { createInitialState, update } from '../../src/game/update';
+import { createInitialState, newGame, update } from '../../src/game/update';
 import { grassMap } from './grass-map';
 
 /** The test map's size and spawn, in memory: 20x12 tiles, spawn at (136, 120). */
@@ -80,6 +81,7 @@ describe('GameState (INV-1)', () => {
     expect(createInitialState(MAP)).toStrictEqual({
       tick: 0,
       rested: null,
+      upgrades: [],
       player: {
         x: 136,
         y: 120,
@@ -149,6 +151,7 @@ describe('update', () => {
       {
         tick: 41,
         rested: null,
+        upgrades: [],
         player,
         camera: { x: 0, y: 12 },
         lamp: { on: false, strength: 1, owned: true, used: true },
@@ -178,6 +181,7 @@ describe('update', () => {
     const state: GameState = {
       tick: 7,
       rested: null,
+      upgrades: [],
       player,
       camera: { x: 0, y: 12 },
       lamp: { on: false, strength: 1, owned: true, used: true },
@@ -199,6 +203,7 @@ describe('update', () => {
     expect(state).toStrictEqual({
       tick: 7,
       rested: null,
+      upgrades: [],
       player,
       camera: { x: 0, y: 12 },
       lamp: { on: false, strength: 1, owned: true, used: true },
@@ -998,5 +1003,162 @@ describe('the rests in the state (0027)', () => {
       state = update(state, { ...NONE, right: i < 200, lamp: i >= 300 && i < 400 }, RESTS_MAP);
       expect(state.rested).toBeNull();
     }
+  });
+});
+
+describe('the upgrades in the state (0029)', () => {
+  /** The start of a map with the wider cone earned: the upgrade, and a strength of 2. */
+  const upgraded = (map: TileMap): GameState => {
+    const start = createInitialState(map);
+    return { ...start, upgrades: ['wide-cone'], lamp: { ...start.lamp, strength: 2 } };
+  };
+  const run = (start: GameState, map: TileMap, input: GameInput, count: number): GameState => {
+    let state = start;
+    for (let step = 0; step < count; step += 1) {
+      state = update(state, input, map);
+    }
+    return state;
+  };
+
+  it('starts with no upgrade and a strength of 1, in a played game too', () => {
+    expect(createInitialState(MAP).upgrades).toStrictEqual([]);
+    expect(createInitialState(MAP).lamp.strength).toBe(1);
+    expect(newGame(MAP).upgrades).toStrictEqual([]);
+    expect(newGame(MAP).lamp.strength).toBe(1);
+    expect(createInitialState(FLOOR_MAP).upgrades).toStrictEqual([]);
+  });
+
+  it('survives a JSON round trip at the start and with the wider cone earned (INV-1)', () => {
+    const start = createInitialState(MAP);
+    expect(JSON.parse(JSON.stringify(start))).toStrictEqual(start);
+    const earned = update(upgraded(MAP), SHINE, MAP);
+    expect(earned.upgrades).toStrictEqual(['wide-cone']);
+    expect(JSON.parse(JSON.stringify(earned))).toStrictEqual(earned);
+  });
+
+  it('keeps the upgrades and the strength in every kind of step', () => {
+    const start = upgraded(TALKERS_MAP);
+    const steps: readonly GameState[] = [
+      update(start, RIGHT, TALKERS_MAP),
+      update(start, SHINE, TALKERS_MAP),
+      update(start, { ...NONE, talk: true }, TALKERS_MAP),
+      update(start, { ...NONE, journal: true }, TALKERS_MAP),
+      update(start, { ...NONE, help: true }, TALKERS_MAP),
+      update({ ...start, journal: { tab: 'cases' } }, NONE, TALKERS_MAP),
+      update({ ...start, help: true }, NONE, TALKERS_MAP),
+      update({ ...start, dark: 10 }, NONE, TALKERS_MAP),
+    ];
+    for (const [n, state] of steps.entries()) {
+      expect(state.upgrades, `step ${n}`).toStrictEqual(['wide-cone']);
+      expect(state.lamp.strength, `step ${n}`).toBe(2);
+    }
+    expect(steps[2]?.dialogue).not.toBeNull();
+  });
+
+  it('keeps the upgrades and the strength through the wake (0009)', () => {
+    const woken = update({ ...upgraded(MAP), dark: 44 }, NONE, MAP);
+    expect(woken.dark).toBe(45);
+    expect(woken.upgrades).toStrictEqual(['wide-cone']);
+    expect(woken.lamp.strength).toBe(2);
+    expect(run(woken, MAP, NONE, 45).upgrades).toStrictEqual(['wide-cone']);
+  });
+
+  /**
+   * The spawn (100, 60) looks down: the apex is (100, 48). The snippet's body is 40 px along
+   * the axis and 28 px beside it — outside the narrow cone, inside the wider.
+   */
+  const SNIPPET_MAP = grassMap(20, 12, { x: 100, y: 60 }, [{ name: 'snippet', x: 128, y: 96 }]);
+
+  it('freezes a creature 28 px beside the axis at 40 px with the wider cone, and captures it in the 60th step', () => {
+    const lit = update(upgraded(SNIPPET_MAP), SHINE, SNIPPET_MAP);
+    expect(lit.creatures).toStrictEqual([
+      { species: 'snippet', x: 128, y: 96, light: 1, home: { x: 128, y: 96 } },
+    ]);
+    const almost = run(upgraded(SNIPPET_MAP), SNIPPET_MAP, SHINE, 59);
+    expect(almost.creatures[0]?.light).toBe(59);
+    expect(almost.captured).toStrictEqual({ snippet: 0 });
+    const captured = update(almost, SHINE, SNIPPET_MAP);
+    expect(captured.creatures).toStrictEqual([]);
+    expect(captured.captured).toStrictEqual({ snippet: 1 });
+  });
+
+  it('does not light the same creature without the wider cone: it comes nearer', () => {
+    const dark = update(createInitialState(SNIPPET_MAP), SHINE, SNIPPET_MAP);
+    expect(dark.creatures[0]?.light).toBe(0);
+    expect(dark.creatures[0]?.x).toBeLessThan(128);
+    expect(dark.captured).toStrictEqual({ snippet: 0 });
+  });
+
+  /**
+   * The spawn (102, 100) looks down: the apex is (102, 88). The rectangle on cell (8, 8) begins
+   * 40 px along the axis and 26 px beside it — a strip of a wall, or the cell of a trace.
+   */
+  const EDGE_WALL = grassMap(
+    20,
+    12,
+    { x: 102, y: 100 },
+    [],
+    [{ name: 'shadow:marketing', x: 128, y: 128, width: 16, height: 4 }],
+  );
+  const EDGE_TRACE = grassMap(
+    20,
+    12,
+    { x: 102, y: 100 },
+    [],
+    [{ name: 'trace:sales', x: 128, y: 128, width: 16, height: 16 }],
+  );
+
+  it('lights a wall at the wider edge with the wider cone only, and lifts it in the 60th step', () => {
+    expect(update(upgraded(EDGE_WALL), SHINE, EDGE_WALL).shadowWalls).toStrictEqual([
+      { wall: 0, lit: true, light: 1 },
+    ]);
+    expect(run(upgraded(EDGE_WALL), EDGE_WALL, SHINE, 60).shadowWalls).toStrictEqual([]);
+    expect(run(createInitialState(EDGE_WALL), EDGE_WALL, SHINE, 60).shadowWalls).toStrictEqual([
+      { wall: 0, lit: false, light: 0 },
+    ]);
+  });
+
+  it('finds a trace at the wider edge with the wider cone only', () => {
+    expect(update(upgraded(EDGE_TRACE), SHINE, EDGE_TRACE).traces).toStrictEqual([
+      { trace: 0, light: 1, found: null },
+    ]);
+    expect(run(upgraded(EDGE_TRACE), EDGE_TRACE, SHINE, 60).traces).toStrictEqual([
+      { trace: 0, light: 0, found: 60 },
+    ]);
+    expect(run(createInitialState(EDGE_TRACE), EDGE_TRACE, SHINE, 60).traces).toStrictEqual([
+      { trace: 0, light: 0, found: null },
+    ]);
+  });
+
+  /** A strip of the given region straight ahead of the spawn (152, 96), 28 px along the axis. */
+  const ahead = (region: string): TileMap =>
+    grassMap(
+      20,
+      12,
+      { x: 152, y: 96 },
+      [],
+      [{ name: `shadow:${region}`, x: 144, y: 112, width: 16, height: 4 }],
+    );
+
+  it('lifts a wall of density 2 with a strength of 2 in the 60th lit step', () => {
+    const hr = ahead('hr');
+    const almost = run(upgraded(hr), hr, SHINE, 59);
+    expect(almost.shadowWalls).toStrictEqual([{ wall: 0, lit: true, light: 59 }]);
+    expect(noticeOf(almost)).toBeNull();
+    expect(update(almost, SHINE, hr).shadowWalls).toStrictEqual([]);
+  });
+
+  it('holds a wall of density 3 against a strength of 2, with the notice of 0016', () => {
+    const development = ahead('development');
+    const held = run(upgraded(development), development, SHINE, 600);
+    expect(held.shadowWalls).toStrictEqual([{ wall: 0, lit: true, light: 0 }]);
+    expect(noticeOf(held)).toBe(NOTICE_SHADOW_TOO_DENSE);
+  });
+
+  it('holds the wall of density 2 against a strength of 1, as before', () => {
+    const hr = ahead('hr');
+    const held = run(createInitialState(hr), hr, SHINE, 600);
+    expect(held.shadowWalls).toStrictEqual([{ wall: 0, lit: true, light: 0 }]);
+    expect(noticeOf(held)).toBe(NOTICE_SHADOW_TOO_DENSE);
   });
 });

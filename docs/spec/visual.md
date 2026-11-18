@@ -59,6 +59,12 @@ The drone has no drop shadow: a dark patch on the floor would read as the shadow
 like a colleague, drawn from the figure's frames in a shirt no one else wears, so it is told from
 the colleagues at a glance. The data protection officer's shirt is `#c0cbdc`, light grey.
 
+**The lamp's cone** (features 0007, 0029) is a yellow checkerboard, `#fee761`, on the floor
+under every figure: a 48x48 frame per facing, as wide at its end as it is long. With the wider
+cone it is a 72x72 frame per facing from a sheet of its own, `lamp-wide.png`: 72 px wide at
+its end and still 48 px long, so a third of the frame along the facing stays empty. Either
+frame is placed by its apex pixel, the middle of the edge the cone opens from.
+
 **The display.** Three things are drawn over the world. The row of overview hearts in the
 top-left corner (features 0009, 0012): 8x8, 4 px from the corner, one every 10 px, one per point
 of the maximum. The help label in the top-right corner (feature 0031): the words `H Hilfe` or

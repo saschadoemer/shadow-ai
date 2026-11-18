@@ -5,6 +5,7 @@ import { areasOf, inArea } from './region';
 import { wallsOf } from './shadow';
 import type { Dialogue, GameState, SolvedCase, TraceState } from './state';
 import { type Trace, tracesOf } from './trace';
+import { strengthAfter, UPGRADES, type Upgrade } from './world';
 
 /**
  * The cases (gameplay.md §6, world.md §2, features 0024 and 0028). A case belongs to a region
@@ -126,6 +127,29 @@ export function solve(state: GameState, region: string): GameState {
     ...state,
     solved: [...state.solved, { region, at: state.tick }],
     overview: { current: max, max },
+  };
+}
+
+/**
+ * The state with the upgrade of a region earned (0029): when the world data has an upgrade
+ * that is earned in the region and the player does not have it yet, its id joins `upgrades`,
+ * and the lamp's strength is the base strength plus the number of upgrades. Otherwise the
+ * state itself: a region without an upgrade earns nothing, and no upgrade is earned twice.
+ */
+export function earn(
+  state: GameState,
+  region: string,
+  upgrades: readonly Upgrade[] = UPGRADES,
+): GameState {
+  const mine = upgrades.find((upgrade) => upgrade.earnedIn === region);
+  if (mine === undefined || state.upgrades.includes(mine.id)) {
+    return state;
+  }
+  const earned = [...state.upgrades, mine.id];
+  return {
+    ...state,
+    upgrades: earned,
+    lamp: { ...state.lamp, strength: strengthAfter(earned.length) },
   };
 }
 

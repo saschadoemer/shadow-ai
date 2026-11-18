@@ -1,10 +1,11 @@
 import type { TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
-import { answeredCase, clearRegion, progressOf, solve } from './cases';
+import { answeredCase, clearRegion, earn, progressOf, solve } from './cases';
 import { figuresFrom, figuresIn, figuresOf, isFirstMeeting } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
 import { openHelp, stepHelp } from './help';
 import { openJournal, stepJournal } from './journal';
+import { spreadOf } from './lamp';
 import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
 import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from './overview';
 import { type GameInput, NO_INPUT, stepPlayer } from './player';
@@ -30,9 +31,10 @@ import { BASE_STRENGTH } from './world';
  * (0015); a lamp of strength BASE_STRENGTH and every shadow wall of the map standing (0014);
  * every standing figure of the map facing down and no dialogue (0017); the journal closed and
  * no key remembered (0020); the help closed (0021); every trace of the map unseen and not found
- * (0022); no case solved (0024). It is a game past its opening (0026): the lamp is owned and
- * was used, no scene is open, and the opening ended at tick 0; `newGame` is the state a player
- * starts with. A map with two wake points, a route that is malformed or crosses a solid tile, a
+ * (0022); no case solved (0024); no upgrade earned (0029). It is a game past its opening
+ * (0026): the lamp is owned and was used, no scene is open, and the opening ended at tick 0;
+ * `newGame` is the state a player starts with.
+ * A map with two wake points, a route that is malformed or crosses a solid tile, a
  * rectangle of no known kind, a shadow wall or a trace the world data or the grid refuses, an
  * area of a region the world data does not know or of a box that is not whole cells (0023), or
  * a figure point the cast does not know or names twice is rejected here, before the game starts.
@@ -61,6 +63,7 @@ export function createInitialState(map: TileMap): GameState {
     player,
     camera: followPlayer(player, map),
     lamp: { on: false, strength: BASE_STRENGTH, owned: true, used: true },
+    upgrades: [],
     creatures: creaturesFrom(map.points),
     movers: moversFrom(routes),
     shadowWalls: standingWalls(walls),
@@ -94,8 +97,9 @@ export function newGame(map: TileMap): GameState {
 /**
  * What the step that closed a dialogue changes besides closing it (0024, 0025, 0026). Closing
  * the first meeting hands the lamp over. Closing the source's answer of a ready case solves the
- * case, and what is left of the region's shadow goes with it. Every other closing — that of a
- * scene of the story, the call among them — changes nothing more.
+ * case, earns the upgrade of its region if it has one (0029), and what is left of the region's
+ * shadow goes with it. Every other closing — that of a scene of the story, the call among them
+ * — changes nothing more.
  */
 function closed(
   stepped: GameState,
@@ -117,7 +121,7 @@ function closed(
   );
   return answered === null
     ? stepped
-    : clearRegion(solve(stepped, answered.region), answered.region, content);
+    : clearRegion(earn(solve(stepped, answered.region), answered.region), answered.region, content);
 }
 
 /**
@@ -185,6 +189,9 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   const before = rest === null ? state.overview : rest.overview;
   const on = acting.lamp && state.player.recoil.steps === 0;
   const lamp: LampState = { ...state.lamp, on, used: state.lamp.used || on };
+  // The cone is as wide as the upgrades make it (0029): for the creatures, the walls and the
+  // traces.
+  const spread = spreadOf(state.upgrades);
   const walls = wallsOf(content.rects);
   // The figure, the push and the creatures meet the walls standing at the start of the step.
   const walled = withWalls(content, walls, state.shadowWalls);
@@ -195,6 +202,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     stepped,
     lamp.on,
     walled,
+    spread,
   );
   const hitter = hittingCreature(creatures, stepped);
   const { player, overview, dark } =
@@ -206,10 +214,11 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     player,
     camera: followPlayer(player, content),
     lamp,
+    upgrades: state.upgrades,
     creatures,
     movers: stepMovers(state.movers, routes, player),
     // The light on a wall is tested against the map as loaded: a wall does not block itself.
-    shadowWalls: stepWalls(state.shadowWalls, walls, stepped, lamp, content),
+    shadowWalls: stepWalls(state.shadowWalls, walls, stepped, lamp, content, spread),
     // A trace is tested against the map with the walls standing: none is found through one.
     traces: stepTraces(
       state.traces,
@@ -218,6 +227,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
       lamp.on,
       walled,
       state.tick + 1,
+      spread,
     ),
     solved: state.solved,
     rested,

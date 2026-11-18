@@ -52,10 +52,11 @@ tools/
   placeholder-player.ts the placeholder figure as pure data: the pixels of its sprite sheet
   gen-sprites.ts        writes the figure, the lamp, the snippet, the overview sheet, the
                         movers' seven sheets, the shadow-wall sheet, the font sheet, the
-                        officer's sheet, the trace sheet and the veil sheet to
-                        public/sprites/; `npm run gen-sprites`
-  placeholder-lamp.ts   the placeholder lamp sheet as pure data: the cone of light, one 48x48
-                        frame per facing, drawn from game/lamp
+                        officer's sheet, the trace sheet, the veil sheet and the wider
+                        cone's sheet to public/sprites/; `npm run gen-sprites`
+  placeholder-lamp.ts   the placeholder lamp sheets as pure data: the cone of light, one 48x48
+                        frame per facing, and the wider cone, one 72x72 frame per facing
+                        (0029), drawn from game/lamp
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
   placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames,
                         a full and an empty heart
@@ -98,7 +99,7 @@ render (feature 0019). It is read-only by convention; nothing in the game reads 
 ## 2. The state model
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
-logic steps since the start, the player, the camera, the lamp, the creatures, the movers, the
+logic steps since the start, the player, the camera, the lamp, the upgrades, the creatures, the movers, the
 standing shadow walls, the traces, the solved cases, the standing figures, the open dialogue,
 the open journal,
 whether the help is open, the input of the last step, the captured count, overview and the step
@@ -159,6 +160,20 @@ The cone is `game/lamp`: the apex 12 px above the feet, the facing's unit vector
 half-open, opening with slope 1/2 to each side; `inCone(point, cone)` is the one test the game
 makes on it, and `FRAME_APEX` names where the apex sits in a 48x48 frame of the lamp sheet, per
 facing.
+
+`upgrades` is an array of the ids of the upgrades the player has earned, in the order they
+were earned (feature 0029); the ids are those of `UPGRADES` in `game/world`. It is empty at the
+start, and the wake keeps it. The step that solves a case also earns the upgrade of its region
+(`earn` in `game/cases`): when `UPGRADES` has an upgrade that is earned in the region and
+`upgrades` does not hold it, its id is appended and `lamp.strength` becomes
+`strengthAfter(upgrades.length)`, the base strength plus the number of upgrades. No other step
+changes either. Solving Sales earns nothing; solving Marketing earns `wide-cone` and a strength
+of 2. The cone's **spread** is its slope to each side and is derived, not stored
+(`spreadOf(upgrades)` in `game/lamp`): `SPREAD`, 1/2, without `wide-cone` and `WIDE_SPREAD`,
+3/4, with it. `update` derives it once per ordinary step and hands it to the step of the
+creatures, the walls and the traces; `inCone(point, cone, spread)` and
+`meetsCone(box, cone, spread)` take it as their last argument, and without it they test the
+narrow cone. A state whose `upgrades` is empty steps exactly as before 0029.
 
 `creatures` is an array of `{ species, x, y, light, home }` in the order of the map's points
 (feature 0008). `home` is the point the creature was made from; it never changes (feature 0009). `x` and `y` are the feet in map pixels, floating point, the bottom centre of a 16x16
@@ -228,7 +243,7 @@ every cell it covers, on a copy of the grids); then every standing wall is stepp
 stepped figure and the map **as loaded**, so a wall does not block its own light. A wall is in
 the light when the lamp is on, its box meets the cone (`meetsCone`, closed form: in the cone's
 coordinates, near = max(d0, 0), far = min(d1, 48), and the gap from 0 across the facing to the
-box is at most far / 2, with near ≤ far and near < 48), and no opaque box lies on the line from
+box is at most far × spread — far / 2 for the narrow cone —, with near ≤ far and near < 48), and no opaque box lies on the line from
 (x, y − 4) to the point of the wall's box nearest to it — along the wall the box ends at its last
 pixel. Not in the light: `lit` false, `light` 0. In the light with `lamp.strength` below the
 wall's density: `lit` true, `light` 0, it holds. Otherwise `light` grows by 1, and in the step it
@@ -337,6 +352,7 @@ creatures, the movers, the walls or the traces — and a press of `journal` does
 step whose press closes the source's answer of a ready case that is not solved **solves** it
 (`answeredCase`, `solve`, feature 0024): besides the above it adds `{ region, at }` with the
 step's `tick` to `solved`, and sets `overview` to `{ current: max + 1, max: max + 1 }`. The same
+step earns the upgrade of the region, if it has one (`earn`, feature 0029). The same
 step takes what is left of the region's shadow with it (`clearRegion`, feature 0025): every
 entry of `shadowWalls` whose wall belongs to the region leaves the list, as a lifted wall does,
 and every creature whose `home` lies in an area of the region (`inArea`: inside the rectangle,
@@ -483,7 +499,7 @@ figure sits at screen (152, 70) for every fractional position, because the camer
 sprite round the same value.
 
 `drawSprite(sheet, frame, x, y)` draws frame `frame` of a sprite sheet — frames of the sheet's own
-`frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48 — with its
+`frameWidth × frameHeight` in one row; the figure's are 16x24, the lamp's 48x48, the wider cone's 72x72 — with its
 top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off.
 `render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the veil
 over the cells under shadow (feature 0023) and over those of a region that is clearing (feature
@@ -500,7 +516,10 @@ facing × 5 + phase (§7). The cone's frame is drawn with its top-left corner at
 (round(x), round(y) − 12), minus the frame's apex pixel (`game/lamp`, `FRAME_APEX`: down (24, 0),
 up (24, 47), left (47, 24), right (0, 24)), minus the camera; its frame is the facing's index.
 Cone and figure round the same values, so they agree pixel for pixel, and the cone lies under the
-figure. A creature's frame has its top-left corner at (round(x) − 8 − camera.x, round(y) − 16 −
+figure. While `upgrades` holds `wide-cone` (feature 0029) the cone is drawn from
+`lampWideSheet` instead, at the same place in the order, its 72x72 frame placed by
+`WIDE_FRAME_APEX` — down (36, 0), up (36, 71), left (71, 36), right (0, 36) — in the same way
+(`lampFrameOrigin(player, camera, apexes)`). A creature's frame has its top-left corner at (round(x) − 8 − camera.x, round(y) − 16 −
 camera.y); its frame is 2 while `light` is above 0, else ⌊tick / 15⌋ mod 2 (feature 0008).
 
 The shadow walls (feature 0014) lie on the floor like the cone, under every figure. A wall whose
@@ -969,6 +988,13 @@ hand-drawn PNG replaces the file under the same name, frame order and apex pixel
 generator and its tests go; the frame size and the apex pixels stay, because the renderer places
 the frame by them.
 
+The same file draws the wider cone's sheet (feature 0029): `public/sprites/lamp-wide.png`,
+288x72, four 72x72 frames in the same order, each the checkerboard cut to the cone of spread
+3/4 from the frame's apex pixel (`WIDE_FRAME_APEX`), drawn from `inCone` with `WIDE_SPREAD`.
+The cone is 48 px long, so 24 px of each frame along the facing are empty. A unit test fails
+when the committed file and the generator disagree, re-derives every pixel from `inCone` and
+counts 852 opaque pixels per frame.
+
 `tools/placeholder-snippet.ts` draws the snippet sheet (feature 0008) and returns its pixels as
 data: `public/sprites/snippet.png`, 48x16, three 16x16 frames in one row — the scrap, the scrap
 2 px higher, the scrap with white paper. Border and lines of text are `#68386c`, the paper
@@ -1130,7 +1156,9 @@ tables are the only text a player can read in `src/`.
 The notice is the first text: `game/notice` derives from the state, in every frame, which notice
 it shows, if any. While the lamp is on and a standing shadow wall has `lit` true and `light` 0 —
 a wall in the light that holds (0014) — it is `notice.shadow-too-dense`; otherwise, for two
-seconds from the step that solved a case, `notice.case-solved` (0024); otherwise, for two
+seconds from the step that solved a case, `notice.case-solved` (0024); otherwise, for the two
+seconds after those (`UPGRADE_NOTICE_STEPS`, 120), the line of the upgrade the case earned, if
+the player has it — `notice.upgrade-wide-cone` (0029, `NOTICE_UPGRADE`); otherwise, for two
 seconds from the last find of a trace, `notice.trace-found` (0022); otherwise, for two seconds
 (`REST_NOTICE_STEPS`, 120) from a press at a rest, the line of its result — `notice.rest`,
 `notice.rest-full` or `notice.rest-shadow` (0027, `NOTICE_REST`); otherwise, while the lamp is

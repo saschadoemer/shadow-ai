@@ -3,7 +3,7 @@ import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { progressOf } from '../game/cases';
 import { type Figure, figuresIn, figuresOf } from '../game/cast';
 import { CREATURE_SIZE } from '../game/creature';
-import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
+import { FRAME_APEX, LAMP_HEIGHT, WIDE_CONE, WIDE_FRAME_APEX } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
 import { DARK_STEPS } from '../game/overview';
@@ -12,6 +12,7 @@ import { LIFT_STEPS, wallsOf } from '../game/shadow';
 import {
   type CreatureState,
   FACINGS,
+  type Facing,
   type FigureState,
   type GameState,
   type MoverState,
@@ -49,6 +50,8 @@ export interface SceneContent {
   readonly playerSheet: SpriteSheet;
   /** Four 48x48 frames, one per facing in FACINGS order (0007). */
   readonly lampSheet: SpriteSheet;
+  /** Four 72x72 frames, one per facing: the cone with the upgrade `wide-cone` (0029). */
+  readonly lampWideSheet: SpriteSheet;
   /** One sheet per species: three 16x16 frames — two free, one frozen (0008). */
   readonly creatureSheets: Readonly<Record<Species, SpriteSheet>>;
   /** Two 8x8 frames: a full heart, an empty heart (0009, 0012). */
@@ -94,10 +97,15 @@ export function lampFrame(player: PlayerState): number {
 /**
  * The top-left corner of the lamp frame on the surface (0007): the apex, (round(x),
  * round(y) − 12), rounded as the figure's sprite rounds, minus the frame's apex pixel, minus
- * the camera — so cone and figure agree pixel for pixel.
+ * the camera — so cone and figure agree pixel for pixel. `apexes` are the apex pixels of the
+ * sheet the frame is from: FRAME_APEX, or WIDE_FRAME_APEX for the wider cone (0029).
  */
-export function lampFrameOrigin(player: PlayerState, camera: Point): Point {
-  const apex = FRAME_APEX[player.facing];
+export function lampFrameOrigin(
+  player: PlayerState,
+  camera: Point,
+  apexes: Readonly<Record<Facing, Point>> = FRAME_APEX,
+): Point {
+  const apex = apexes[player.facing];
   return {
     x: Math.round(player.x) - apex.x - camera.x,
     y: Math.round(player.y) - LAMP_HEIGHT - apex.y - camera.y,
@@ -397,8 +405,11 @@ export function drawScene(
     );
   }
   if (state.lamp.on) {
-    const origin = lampFrameOrigin(player, camera);
-    renderer.drawSprite(content.lampSheet, lampFrame(player), origin.x, origin.y);
+    // With the upgrade the cone is drawn from its own sheet, placed by its own apex (0029).
+    const wide = state.upgrades.includes(WIDE_CONE);
+    const origin = lampFrameOrigin(player, camera, wide ? WIDE_FRAME_APEX : FRAME_APEX);
+    const sheet = wide ? content.lampWideSheet : content.lampSheet;
+    renderer.drawSprite(sheet, lampFrame(player), origin.x, origin.y);
   }
   const walls = wallsOf(content.map.rects);
   for (const standing of state.shadowWalls) {

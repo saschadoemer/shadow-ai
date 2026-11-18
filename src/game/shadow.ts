@@ -1,6 +1,6 @@
 import { type Box, sightBlocked } from '../engine/collision';
 import { type NamedRect, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
-import { CONE_LENGTH, type Cone, DIRECTIONS, lampCone } from './lamp';
+import { CONE_LENGTH, type Cone, DIRECTIONS, lampCone, SPREAD } from './lamp';
 import { BOX_HEIGHT } from './player';
 import { rectsOf, WALL_PREFIX } from './rects';
 import type { LampState, PlayerState, ShadowWallState } from './state';
@@ -77,12 +77,12 @@ function gapTo(from: number, to: number): number {
  * Whether a box, its edges included, meets the cone. In the cone's own coordinates the box
  * spans d0 to d1 along the facing and s0 to s1 across it. With near = max(d0, 0), far =
  * min(d1, CONE_LENGTH) and gap the distance from 0 to [s0, s1], it meets the cone when
- * near ≤ far, near < CONE_LENGTH and gap ≤ far / 2: every case in which a point of the box
- * lies in the cone (lamp.inCone), and the limiting case in which the box touches the cone's
+ * near ≤ far, near < CONE_LENGTH and gap ≤ far × spread: every case in which a point of the
+ * box lies in the cone (lamp.inCone), and the limiting case in which the box touches the cone's
  * end. A sample of points would miss a figure flush below a wall, whose apex lies on the
  * wall's far edge.
  */
-export function meetsCone(box: Box, cone: Cone): boolean {
+export function meetsCone(box: Box, cone: Cone, spread: number = SPREAD): boolean {
   const direction = DIRECTIONS[cone.facing];
   const left = box.x - cone.apex.x;
   const right = left + box.width;
@@ -97,7 +97,7 @@ export function meetsCone(box: Box, cone: Cone): boolean {
   const d1 = forward ? a1 : 0 - a0;
   const near = Math.max(d0, 0);
   const far = Math.min(d1, CONE_LENGTH);
-  return near <= far && near < CONE_LENGTH && gapTo(s0, s1) <= far / 2;
+  return near <= far && near < CONE_LENGTH && gapTo(s0, s1) <= far * spread;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -122,14 +122,16 @@ function sightTarget(box: Box, from: Point): Point {
  * lies on the line from the centre of the figure's collision box to the nearest point of the
  * wall's box. `map` is the map as loaded, without the standing walls: against the map with
  * walls, a wall would block its own light, and other walls do not count on that line.
+ * `spread` is the cone's (0029).
  */
 export function wallInLight(
   wall: ShadowWall,
   player: PlayerState,
   lampOn: boolean,
   map: TileMap,
+  spread: number = SPREAD,
 ): boolean {
-  if (!lampOn || !meetsCone(wall.box, lampCone(player))) {
+  if (!lampOn || !meetsCone(wall.box, lampCone(player), spread)) {
     return false;
   }
   const centre = { x: player.x, y: player.y - BOX_HEIGHT / 2 };
@@ -165,11 +167,12 @@ export function stepWalls(
   player: PlayerState,
   lamp: LampState,
   map: TileMap,
+  spread: number = SPREAD,
 ): ShadowWallState[] {
   const next: ShadowWallState[] = [];
   for (const state of standing) {
     const wall = walls[state.wall];
-    if (wall === undefined || !wallInLight(wall, player, lamp.on, map)) {
+    if (wall === undefined || !wallInLight(wall, player, lamp.on, map, spread)) {
       next.push({ wall: state.wall, lit: false, light: 0 });
     } else if (lamp.strength < wall.density) {
       next.push({ wall: state.wall, lit: true, light: 0 });

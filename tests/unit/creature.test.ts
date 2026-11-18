@@ -13,6 +13,7 @@ import {
   stepCreatures,
   TOUCH_DISTANCE,
 } from '../../src/game/creature';
+import { SPREAD, WIDE_SPREAD } from '../../src/game/lamp';
 import { type CreatureState, type Facing, NO_RECOIL, type PlayerState } from '../../src/game/state';
 import { grassMap } from './grass-map';
 import { pictureMap } from './picture-map';
@@ -314,5 +315,39 @@ describe('creaturesFrom', () => {
 
   it('starts every count at 0', () => {
     expect(noCaptures()).toStrictEqual({ snippet: 0 });
+  });
+});
+
+describe('a creature and the wider cone (0029)', () => {
+  /** The apex is (100, 88). The body of the creature is 40 px along the axis and 28 px beside it. */
+  const PLAYER = figure(100, 100, 'down');
+  const BESIDE = snippet(128, 136);
+
+  it('is lit 28 px beside the axis at 40 px in the wider cone, and not in the narrow one', () => {
+    expect(isLit(BESIDE, PLAYER, true, OPEN, WIDE_SPREAD)).toBe(true);
+    expect(isLit(BESIDE, PLAYER, true, OPEN, SPREAD)).toBe(false);
+    expect(isLit(BESIDE, PLAYER, true, OPEN)).toBe(false);
+    expect(isLit(BESIDE, PLAYER, false, OPEN, WIDE_SPREAD)).toBe(false);
+  });
+
+  it('freezes there and is captured in the 60th step', () => {
+    let creature: CreatureState | null = BESIDE;
+    for (let step = 1; step < CAPTURE_STEPS; step += 1) {
+      creature = creature === null ? null : stepCreature(creature, PLAYER, true, OPEN, WIDE_SPREAD);
+      expect(creature).toStrictEqual({ ...BESIDE, light: step });
+    }
+    expect(
+      creature === null ? null : stepCreature(creature, PLAYER, true, OPEN, WIDE_SPREAD),
+    ).toBeNull();
+  });
+
+  it('is counted by the step of all creatures with the wider cone only', () => {
+    const almost = { ...BESIDE, light: CAPTURE_STEPS - 1 };
+    const wide = stepCreatures([almost], noCaptures(), PLAYER, true, OPEN, WIDE_SPREAD);
+    expect(wide).toStrictEqual({ creatures: [], captured: { snippet: 1 } });
+    const narrow = stepCreatures([almost], noCaptures(), PLAYER, true, OPEN);
+    expect(narrow.captured).toStrictEqual({ snippet: 0 });
+    expect(narrow.creatures).toHaveLength(1);
+    expect(narrow.creatures[0]?.light).toBe(0);
   });
 });

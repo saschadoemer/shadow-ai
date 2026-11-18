@@ -104,6 +104,7 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'asks – without trouble.',
   ].join('\n'),
   'notice.case-solved': 'The case is solved. See the journal.',
+  'notice.upgrade-wide-cone': 'The lamp now shines wider and stronger.',
   'talk.marketing-source-1': [
     'An image generator makes the visuals – in ten',
     'minutes instead of two days, and we saved',

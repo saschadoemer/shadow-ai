@@ -4,13 +4,14 @@ import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../../src/engine/sprite';
-import { FRAME_APEX, inCone } from '../../src/game/lamp';
+import { FRAME_APEX, inCone, WIDE_FRAME_APEX, WIDE_SPREAD } from '../../src/game/lamp';
 import { FACINGS, PHASES_PER_FACING } from '../../src/game/state';
 import { type PaletteColour, SHADOW_COLOUR } from '../../src/render/palette';
 import {
   encodeDogPng,
   encodeDronePng,
   encodeLampPng,
+  encodeLampWidePng,
   encodeOfficerPng,
   encodeOverviewPng,
   encodePersonPng,
@@ -27,6 +28,10 @@ import {
   LAMP_SHEET_HEIGHT,
   LAMP_SHEET_WIDTH,
   renderLamp,
+  renderWideLamp,
+  WIDE_LAMP_FRAME_SIZE,
+  WIDE_LAMP_SHEET_HEIGHT,
+  WIDE_LAMP_SHEET_WIDTH,
 } from '../../tools/placeholder-lamp.ts';
 import {
   OVERVIEW_EMPTY,
@@ -256,6 +261,84 @@ describe('the placeholder lamp generator (0007)', () => {
     expect(LAMP[lampOffset(right, 47, 1) + 3]).toBe(255); // 47 + 1 is even
     expect(LAMP[lampOffset(right, 47, 47) + 3]).toBe(255);
     expect(LAMP[lampOffset(right, 47, 0) + 3]).toBe(0);
+  });
+});
+
+const LAMP_WIDE_FILE = join(ROOT, 'public/sprites/lamp-wide.png');
+const LAMP_WIDE = renderWideLamp();
+
+/** The byte offset of pixel (i, j) of frame `index` of the wider cone's sheet. */
+function wideOffset(index: number, i: number, j: number): number {
+  return (j * WIDE_LAMP_SHEET_WIDTH + index * WIDE_LAMP_FRAME_SIZE + i) * 4;
+}
+
+describe('the sheet of the wider cone (0029)', () => {
+  it('is deterministic: two runs give byte-identical files', () => {
+    expect(encodeLampWidePng().equals(encodeLampWidePng())).toBe(true);
+  });
+
+  it('matches the committed file', () => {
+    const committed = PNG.sync.read(readFileSync(LAMP_WIDE_FILE));
+    expect([committed.width, committed.height]).toStrictEqual([288, 72]);
+    expect(Buffer.from(LAMP_WIDE).equals(committed.data)).toBe(true);
+  });
+
+  it('is 288x72: four 72x72 frames in one row, one per facing', () => {
+    expect([WIDE_LAMP_SHEET_WIDTH, WIDE_LAMP_SHEET_HEIGHT]).toStrictEqual([288, 72]);
+    expect(WIDE_LAMP_FRAME_SIZE).toBe(72);
+    expect(LAMP_WIDE).toHaveLength(288 * 72 * 4);
+  });
+
+  it("lights exactly the checkerboard inside each frame's cone of three quarters, pixel by pixel", () => {
+    const [r, g, b] = [0xfe, 0xe7, 0x61];
+    expect(LAMP_COLOUR).toBe('#fee761');
+    for (const [index, facing] of FACINGS.entries()) {
+      const cone = { apex: WIDE_FRAME_APEX[facing], facing };
+      for (let j = 0; j < WIDE_LAMP_FRAME_SIZE; j += 1) {
+        for (let i = 0; i < WIDE_LAMP_FRAME_SIZE; i += 1) {
+          const lit = (i + j) % 2 === 0 && inCone({ x: i, y: j }, cone, WIDE_SPREAD);
+          const o = wideOffset(index, i, j);
+          expect(
+            [LAMP_WIDE[o], LAMP_WIDE[o + 1], LAMP_WIDE[o + 2], LAMP_WIDE[o + 3]],
+            `${facing} (${i}, ${j})`,
+          ).toStrictEqual(lit ? [r, g, b, 255] : [0, 0, 0, 0]);
+        }
+      }
+    }
+  });
+
+  it('has exactly 852 opaque pixels per frame', () => {
+    const counts = FACINGS.map((_facing, index) => {
+      let opaque = 0;
+      for (let j = 0; j < WIDE_LAMP_FRAME_SIZE; j += 1) {
+        for (let i = 0; i < WIDE_LAMP_FRAME_SIZE; i += 1) {
+          opaque += LAMP_WIDE[wideOffset(index, i, j) + 3] === 255 ? 1 : 0;
+        }
+      }
+      return opaque;
+    });
+    expect(counts).toStrictEqual([852, 852, 852, 852]);
+  });
+
+  it('starts the right-facing cone at the apex alone and ends it 71 rows wide', () => {
+    const right = FACINGS.indexOf('right');
+    expect(LAMP_WIDE[wideOffset(right, 0, 36) + 3]).toBe(255);
+    expect(LAMP_WIDE[wideOffset(right, 0, 35) + 3]).toBe(0);
+    expect(LAMP_WIDE[wideOffset(right, 0, 37) + 3]).toBe(0);
+    expect(LAMP_WIDE[wideOffset(right, 47, 1) + 3]).toBe(255); // 47 + 1 is even
+    expect(LAMP_WIDE[wideOffset(right, 47, 71) + 3]).toBe(255);
+    expect(LAMP_WIDE[wideOffset(right, 47, 0) + 3]).toBe(0);
+    // The cone is 48 px long: the frame's last 24 columns are empty.
+    for (let i = 48; i < 72; i += 1) {
+      for (let j = 0; j < 72; j += 1) {
+        expect(LAMP_WIDE[wideOffset(right, i, j) + 3], `(${i}, ${j})`).toBe(0);
+      }
+    }
+  });
+
+  it('leaves the lamp sheet of 0007 as it was', () => {
+    const committed = PNG.sync.read(readFileSync(LAMP_FILE));
+    expect(Buffer.from(renderLamp()).equals(committed.data)).toBe(true);
   });
 });
 

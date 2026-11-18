@@ -69,6 +69,15 @@ partition are low and do not stop the light. When a trace is found, the line at 
 `Spur gefunden. Sie steht im Journal.` for two seconds; a wall that holds says its own line
 first.
 
+**As built** (feature 0029): the wider cone is the first upgrade. It comes with the step that
+solves the case of Marketing; nobody hands it over. From then on the cone opens with slope 3/4
+to each side instead of 1/2 — 72 px wide at its end, one and a half times as wide, *tune* —
+and stays 48 px long. Everything the light does, it does in the wider cone: a creature
+freezes, a wall is lit and a trace is seen. The same step raises the lamp's strength to 2. A
+line at the bottom says `Die Lampe leuchtet jetzt breiter und stärker.` for two seconds, after
+the two seconds of the solved case's line. Larger creatures that only the wider cone captures
+come with the first of them.
+
 ## 3. Three layers of opposition
 
 Combat matters but is never the whole answer. Every piece of shadow belongs to one layer:
@@ -127,6 +136,14 @@ the lamp's base strength of 1, and the upgrades in the order they are earned, ea
 it is earned in and each raising the strength by 1. `gatingFaults` checks the order: no density
 outside 0–3, none above what the lamp reaches with every upgrade, and no upgrade earned in a region
 the lamp cannot open before it. Nothing earns an upgrade before M6.
+
+**As built** (feature 0029): the step that solves a case earns the upgrade of its region, when
+the table has one and the player does not have it yet. The upgrades the player has are in the
+state, in the order they were earned, and the lamp's strength is the base strength plus their
+number. Solving Marketing earns the wider cone and a strength of 2: the shadow walls of HR and
+Accounting give way after one second of light, and the wall of Development still holds.
+Solving Sales earns nothing. The rooms of HR and Accounting can be entered from then on; their
+cases come with their own features.
 
 Two keys where the story demands them: the keycard to the server room, handed over by the
 convinced managing director, and one further door chosen in the case specs.

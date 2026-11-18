@@ -182,6 +182,11 @@ export interface GameState {
   readonly camera: Point;
   /** Derived from the input every step and kept here so the renderer knows what to draw. */
   readonly lamp: LampState;
+  /**
+   * The ids of the upgrades the player has earned, in the order they were earned (0029). The
+   * lamp's strength and the cone's spread follow from it.
+   */
+  readonly upgrades: readonly string[];
   /** The creatures still in the world, in the order of the map's points (0008). */
   readonly creatures: readonly CreatureState[];
   /** The movers on their routes, in route order (0015). */

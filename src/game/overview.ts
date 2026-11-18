@@ -134,6 +134,7 @@ function woken(state: GameState, map: TileMap): GameState {
     player,
     camera: followPlayer(player, map),
     lamp: { ...state.lamp, on: false },
+    upgrades: state.upgrades,
     creatures: state.creatures.map((creature) => ({
       ...creature,
       x: creature.home.x,

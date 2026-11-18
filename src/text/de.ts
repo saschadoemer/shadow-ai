@@ -108,6 +108,7 @@ export const de = {
     'unsicher ist, fragt – ohne Ärger.',
   ].join('\n'),
   'notice.case-solved': 'Der Fall ist gelöst. Sieh ins Journal.',
+  'notice.upgrade-wide-cone': 'Die Lampe leuchtet jetzt breiter und stärker.',
   'talk.marketing-source-1': [
     'Die Motive macht ein Bildgenerator – in zehn',
     'Minuten statt in zwei Tagen, und die Agentur',

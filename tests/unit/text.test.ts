@@ -280,6 +280,15 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the line of the wider cone in both languages (0029)', () => {
+    expect(textOf(textKey('notice.upgrade-wide-cone'), 'de')).toBe(
+      'Die Lampe leuchtet jetzt breiter und stärker.',
+    );
+    expect(textOf(textKey('notice.upgrade-wide-cone'), 'en')).toBe(
+      'The lamp now shines wider and stronger.',
+    );
+  });
+
   it('holds every text of the journal to the rule of its kind (0020, 0022, 0024)', () => {
     /** The most lines and the most characters per line a key may have, by what its id starts or ends with. */
     const rules: readonly (readonly [(id: string) => boolean, number, number, number])[] = [
