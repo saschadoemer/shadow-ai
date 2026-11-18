@@ -122,7 +122,7 @@ a browser — that is the walk — and the container was **not** run with the pr
 - Produces: the text ids `notice.rest`, `notice.rest-full`, `notice.rest-shadow`, in both
   languages.
 
-- [ ] **Step 1: Write the failing test:**
+- [x] **Step 1: Write the failing test:**
 
 ```diff
 diff --git a/tests/unit/text.test.ts b/tests/unit/text.test.ts
@@ -157,10 +157,10 @@ index 9268cee..0486d5d 100644
        textOf(textKey(id), language).split('\n');
 ```
 
-- [ ] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 22
+- [x] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 22
   tests.
 
-- [ ] **Step 3: The words,** in both tables:
+- [x] **Step 3: The words,** in both tables:
 
 ```diff
 diff --git a/src/text/de.ts b/src/text/de.ts
@@ -196,11 +196,11 @@ index 8c3d485..d074707 100644
      'whether we finally have a network for guests.',
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/text.test.ts tests/unit/draw-scene.test.ts` —
+- [x] **Step 4: Run** `npx vitest run tests/unit/text.test.ts tests/unit/draw-scene.test.ts` —
   green; the scene test that holds every notice to the bar's 49 characters covers the three —
   then `npm run check`: 1263 unit tests.
 
-- [ ] **Step 5: Commit** — `Add the words of a coffee`.
+- [x] **Step 5: Commit** — `Add the words of a coffee`.
 
 ---
 
@@ -220,7 +220,7 @@ index 8c3d485..d074707 100644
   - `restUnderShadow(rest: Rest, rects: readonly NamedRect[], solved: readonly SolvedCase[]): boolean`
   - `createInitialState` refuses a map with a rest that is not one cell.
 
-- [ ] **Step 1: Write the failing tests,** `tests/unit/rest.test.ts`, new:
+- [x] **Step 1: Write the failing tests,** `tests/unit/rest.test.ts`, new:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -431,10 +431,10 @@ describe('a rest under shadow (0027)', () => {
 });
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/rest.test.ts`. Expected: FAIL — the
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/rest.test.ts`. Expected: FAIL — the
   file does not load: `src/game/rest` does not exist.
 
-- [ ] **Step 3: The fourth kind,** in `rects.ts`, with the test for one cell:
+- [x] **Step 3: The fourth kind,** in `rects.ts`, with the test for one cell:
 
 ```diff
 diff --git a/src/game/rects.ts b/src/game/rects.ts
@@ -515,7 +515,7 @@ index ca6b870..6c706db 100644
   * not know and a box that is not one cell.
 ```
 
-- [ ] **Step 4: The rests,** `src/game/rest.ts`, new:
+- [x] **Step 4: The rests,** `src/game/rest.ts`, new:
 
 ```ts
 import { type Box, sightBlocked } from '../engine/collision';
@@ -599,7 +599,7 @@ export function restUnderShadow(
 }
 ```
 
-- [ ] **Step 5: A faulty rest stops the game,** in `update.ts`:
+- [x] **Step 5: A faulty rest stops the game,** in `update.ts`:
 
 ```diff
 diff --git a/src/game/update.ts b/src/game/update.ts
@@ -625,11 +625,11 @@ index 873470f..3a60b38 100644
      x: map.spawn.x,
 ```
 
-- [ ] **Step 6: Run** `npx vitest run tests/unit/rest.test.ts tests/unit/trace.test.ts
+- [x] **Step 6: Run** `npx vitest run tests/unit/rest.test.ts tests/unit/trace.test.ts
   tests/unit/region.test.ts` — green, the tests of 0022 and 0023 unchanged — then
   `npm run check`: 1289 unit tests; the architecture test now covers `src/game/rest.ts`.
 
-- [ ] **Step 7: Commit** — `Read the rests of a map and say which one is in reach`. Body: a
+- [x] **Step 7: Commit** — `Read the rests of a map and say which one is in reach`. Body: a
   rest is a rectangle like a trace; it is reached from inside its room and not through the
   wall behind it.
 
@@ -646,7 +646,7 @@ index 873470f..3a60b38 100644
 - Produces: `RESTS` in `tools/floor-layout.ts`; eight rectangles `rest:coffee` in the floor
   with the ids 116 to 123.
 
-- [ ] **Step 1: Write the failing tests.** Two tests of 0015 and 0023 get their new numbers,
+- [x] **Step 1: Write the failing tests.** Two tests of 0015 and 0023 get their new numbers,
   and one block is added at the end of the file:
 
 ```diff
@@ -806,10 +806,10 @@ index dafea41..83f2af6 100644
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/floor.test.ts`. Expected: FAIL, 6 of
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/floor.test.ts`. Expected: FAIL, 6 of
   85 tests.
 
-- [ ] **Step 3: The layout:**
+- [x] **Step 3: The layout:**
 
 ```diff
 diff --git a/tools/floor-layout.ts b/tools/floor-layout.ts
@@ -867,16 +867,16 @@ index 4b1a07a..15c688d 100644
      tiledversion: '1.11.2',
 ```
 
-- [ ] **Step 4: Write the floor** — `npm run gen-floor`. Expected: `git status` shows
+- [x] **Step 4: Write the floor** — `npm run gen-floor`. Expected: `git status` shows
   `public/maps/floor.tmj` changed and nothing else under `public/`; its diff adds eight
   objects after the last area and changes `nextobjectid` from 116 to 124, and nothing else.
   SHA-256 of the file:
   `e3407f270c769beb2097165559d5037452a793c65e615c04635801ef065e70e5`.
 
-- [ ] **Step 5: Run** `npx vitest run tests/unit/floor.test.ts` — green — then
+- [x] **Step 5: Run** `npx vitest run tests/unit/floor.test.ts` — green — then
   `npm run check`: 1297 unit tests.
 
-- [ ] **Step 6: Commit** — `Make every coffee machine of the floor a rest`.
+- [x] **Step 6: Commit** — `Make every coffee machine of the floor a rest`.
 
 ---
 
@@ -897,7 +897,7 @@ index 4b1a07a..15c688d 100644
   - `takeRest(state: GameState, input: GameInput, map: TileMap): Pick<GameState, 'overview' | 'rested'> | null`
   - `update` takes a rest in the ordinary step; the wake keeps `rested`.
 
-- [ ] **Step 1: Make the fixture.** `tests/fixtures/maps/rests.tmj` is `figures.tmj` with other
+- [x] **Step 1: Make the fixture.** `tests/fixtures/maps/rests.tmj` is `figures.tmj` with other
   objects: the spawn at (168, 112), two rectangles `rest:coffee` on the cells (10, 5) and
   (4, 5), and a rectangle `region:hr` over the cells (2, 3) to (6, 7). Run this once from the
   repository root, and do not keep the script:
@@ -938,7 +938,7 @@ EOF
   Expected: `git status` shows the new file; its SHA-256 is
   `7a12d03729bda626146e86a6d4ab8b56c18a7c46b9b96dee2017cce6fad6be33`.
 
-- [ ] **Step 2: Write the failing tests.** `rest.test.ts` gains the press, step by step:
+- [x] **Step 2: Write the failing tests.** `rest.test.ts` gains the press, step by step:
 
 ```diff
 --- a/tests/unit/rest.test.ts
@@ -1333,10 +1333,10 @@ index 4e8c298..029a4ef 100644
      y: 96,
 ```
 
-- [ ] **Step 3: Run** `npx vitest run` and `npm run typecheck`. Expected: FAIL — 25 unit tests
+- [x] **Step 3: Run** `npx vitest run` and `npm run typecheck`. Expected: FAIL — 25 unit tests
   and 30 type errors in the tests.
 
-- [ ] **Step 4: The state:**
+- [x] **Step 4: The state:**
 
 ```diff
 diff --git a/src/game/state.ts b/src/game/state.ts
@@ -1371,7 +1371,7 @@ index bf6dfd0..12a29d6 100644
    /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
 ```
 
-- [ ] **Step 5: The press,** in `rest.ts`:
+- [x] **Step 5: The press,** in `rest.ts`:
 
 ```diff
 --- a/src/game/rest.ts
@@ -1435,7 +1435,7 @@ index bf6dfd0..12a29d6 100644
 +}
 ```
 
-- [ ] **Step 6: The step,** in `update.ts`, and the wake in `overview.ts`:
+- [x] **Step 6: The step,** in `update.ts`, and the wake in `overview.ts`:
 
 ```diff
 --- a/src/game/update.ts
@@ -1504,12 +1504,12 @@ index ba8c851..461416c 100644
      journal: null,
 ```
 
-- [ ] **Step 7: Run** `npx vitest run tests/unit/rest.test.ts tests/unit/state.test.ts` —
+- [x] **Step 7: Run** `npx vitest run tests/unit/rest.test.ts tests/unit/state.test.ts` —
   green — and `npx vitest run tests/unit/journal.test.ts tests/unit/help.test.ts`: both
   recordings of 600 steps pass with their hashes unchanged (criterion 13). Then
   `npm run check`: 1321 unit tests.
 
-- [ ] **Step 8: Commit** — `Fill overview with a coffee where no shadow lies`. Body: the press
+- [x] **Step 8: Commit** — `Fill overview with a coffee where no shadow lies`. Body: the press
   is part of an ordinary step, so the world goes on and a hit in the same step still counts.
 
 ---
@@ -1525,7 +1525,7 @@ index ba8c851..461416c 100644
 - Produces: `NOTICE_REST: Readonly<Record<RestResult, TextKey>>`, `REST_NOTICE_STEPS = 120`;
   `noticeOf` with the rest after the trace and before the lamp's line.
 
-- [ ] **Step 1: Write the failing tests** — the imports, and one block at the end:
+- [x] **Step 1: Write the failing tests** — the imports, and one block at the end:
 
 ```diff
 diff --git a/tests/unit/notice.test.ts b/tests/unit/notice.test.ts
@@ -1633,10 +1633,10 @@ index d82fad2..c7e1a7d 100644
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/notice.test.ts`. Expected: FAIL, 7 of
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/notice.test.ts`. Expected: FAIL, 7 of
   23 tests.
 
-- [ ] **Step 3: The notice:**
+- [x] **Step 3: The notice:**
 
 ```diff
 diff --git a/src/game/notice.ts b/src/game/notice.ts
@@ -1689,10 +1689,10 @@ index 753c567..f282aae 100644
  }
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/notice.test.ts` — green, the tests of 0016,
+- [x] **Step 4: Run** `npx vitest run tests/unit/notice.test.ts` — green, the tests of 0016,
   0022, 0024 and 0026 unchanged — then `npm run check`: 1329 unit tests.
 
-- [ ] **Step 5: Commit** — `Answer every coffee with a line`. Body: the line of a rest comes
+- [x] **Step 5: Commit** — `Answer every coffee with a line`. Body: the line of a rest comes
   before the line that names the lamp's key, which has no time and would hide it.
 
 ---
@@ -1702,7 +1702,7 @@ index 753c567..f282aae 100644
 **Files:**
 - Test: `tests/e2e/smoke.spec.ts`
 
-- [ ] **Step 1: Add the test:**
+- [x] **Step 1: Add the test:**
 
 ```diff
 diff --git a/tests/e2e/smoke.spec.ts b/tests/e2e/smoke.spec.ts
@@ -1725,9 +1725,9 @@ index 376070e..a0a4315 100644
 +});
 ```
 
-- [ ] **Step 2: Run** `npm run test:e2e` twice — 17 passed, 3 skipped, both times.
+- [x] **Step 2: Run** `npm run test:e2e` twice — 17 passed, 3 skipped, both times.
 
-- [ ] **Step 3: Commit** — `Check the start without a rest in the smoke spec`.
+- [x] **Step 3: Commit** — `Check the start without a rest in the smoke spec`.
 
 ---
 
@@ -1741,7 +1741,7 @@ The diffs are against `main` at `fcb55b7`. If a line has moved, put the text whe
 means it; do not change the words without a reason. `gameplay.md` §4 loses its **Open**
 sentence: this feature closes it.
 
-- [ ] **Step 1: `gameplay.md`** §4 and §8:
+- [x] **Step 1: `gameplay.md`** §4 and §8:
 
 ```diff
 diff --git a/docs/spec/gameplay.md b/docs/spec/gameplay.md
@@ -1784,7 +1784,7 @@ index 4f030b6..f98e9a5 100644
  and everything goes on where it stood when it closes. The help opens over a dialogue and over
 ```
 
-- [ ] **Step 2: `world.md`** §1:
+- [x] **Step 2: `world.md`** §1:
 
 ```diff
 diff --git a/docs/spec/world.md b/docs/spec/world.md
@@ -1808,7 +1808,7 @@ index f7e9b5f..d578aa2 100644
  | `region:hr` | (1, 1)–(21, 19) | 2 |
 ```
 
-- [ ] **Step 3: `architecture.md`** §1, §2, §6 and §8:
+- [x] **Step 3: `architecture.md`** §1, §2, §6 and §8:
 
 ```diff
 diff --git a/docs/spec/architecture.md b/docs/spec/architecture.md
@@ -1907,7 +1907,7 @@ index 64a32ab..67377dc 100644
  The state has no field for it (INV-1). A notice stays one line.
 ```
 
-- [ ] **Step 4: `testing.md`** §2 and §6:
+- [x] **Step 4: `testing.md`** §2 and §6:
 
 ```diff
 diff --git a/docs/spec/testing.md b/docs/spec/testing.md
@@ -1943,7 +1943,7 @@ index 7b468e6..7c131d9 100644
  change to the floor map cannot silently change what a test proves.
 ```
 
-- [ ] **Step 5: `README.md`:**
+- [x] **Step 5: `README.md`:**
 
 ```diff
 diff --git a/README.md b/README.md
@@ -1961,19 +1961,19 @@ index ddc3ca6..acda8e5 100644
  ## Run it
 ```
 
-- [ ] **Step 6:** `npm run check`, then commit — `Move the coffee into the spec`.
+- [x] **Step 6:** `npm run check`, then commit — `Move the coffee into the spec`.
 
 ---
 
 ### Task 8: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 17 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 17 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 8 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 8 in this file and commit —
   `Tick the full check of 0027`.
 
 ---
