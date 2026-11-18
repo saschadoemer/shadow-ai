@@ -248,7 +248,13 @@ lamp.
 - The people keep their colours in a grey room. Right, or should they lose theirs too?
 - The veil stands still. Should it move?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–20. Feel:
+
+- Dark enough or too dark, can everything be found: answered "pass".
+- Shadow or display fault: answered "pass".
+- The three densities at a glance: answered "pass".
+- People in colour in a grey room: answered "pass".
+- A veil that moves: "nein, sollte er nicht" — no, it should not; the veil stays still.
 
 ## Open questions
 
