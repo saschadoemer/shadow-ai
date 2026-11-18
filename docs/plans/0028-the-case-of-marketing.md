@@ -121,7 +121,7 @@ was **not** run with the prototype.
   `talk.marketing-source-2`, `talk.marketing-after`, `case.marketing-outcome` and
   `policy.marketing`, in both languages.
 
-- [ ] **Step 1: Write the failing test:**
+- [x] **Step 1: Write the failing test:**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -188,11 +188,11 @@ was **not** run with the prototype.
      const rules: readonly (readonly [(id: string) => boolean, number, number, number])[] = [
 ```
 
-- [ ] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 23
+- [x] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 23
   tests. `npx tsc --noEmit` reports twelve errors, all in this test: the six ids are not ids
   of the table yet.
 
-- [ ] **Step 3: The words,** in both tables:
+- [x] **Step 3: The words,** in both tables:
 
 ```diff
 --- a/src/text/de.ts
@@ -276,11 +276,11 @@ was **not** run with the prototype.
      'sound as if I had had a week for it.',
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green. The tests that hold
+- [x] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green. The tests that hold
   every key to the rule of its kind — a region's name, a case's outcome, a policy block, a
   page of talk — cover the six without a change. Then `npm run check`: 1330 unit tests.
 
-- [ ] **Step 5: Commit** — `Add the words of the case of Marketing`.
+- [x] **Step 5: Commit** — `Add the words of the case of Marketing`.
 
 ---
 
@@ -299,7 +299,7 @@ was **not** run with the prototype.
   - `TRACES` with ten entries, `FIRST_TRACES = 5` in `tools/floor-layout.ts`
   - `floor.tmj` with the rectangles 124 to 128, `trace:marketing`, after the rests
 
-- [ ] **Step 1: Write the failing tests.** In `tests/unit/floor.test.ts` six older tests
+- [x] **Step 1: Write the failing tests.** In `tests/unit/floor.test.ts` six older tests
   change their numbers, as the global constraints say, and one block is new, at the end:
 
 ```diff
@@ -664,7 +664,7 @@ was **not** run with the prototype.
  test('H opens the help, the game stands still under it, and H closes it again', async ({
 ```
 
-- [ ] **Step 2: Run them** —
+- [x] **Step 2: Run them** —
   `npx vitest run tests/unit/floor.test.ts tests/unit/state.test.ts tests/unit/draw-journal.test.ts`.
   Expected: FAIL, 14 tests: 10 of 93 in `floor.test.ts`, 1 of 74 in `state.test.ts`, 3 of 25
   in `draw-journal.test.ts`. `npx tsc --noEmit` reports one error: `floor-layout.ts` has no
@@ -675,7 +675,7 @@ was **not** run with the prototype.
   feature. Then `npx playwright test -g "ten traces"`. Expected: FAIL, the page holds five
   traces.
 
-- [ ] **Step 3: The name of the region:**
+- [x] **Step 3: The name of the region:**
 
 ```diff
 --- a/src/game/journal.ts
@@ -690,7 +690,7 @@ was **not** run with the prototype.
  /** The entries of the creatures tab: every species captured at least once, in SPECIES order. */
 ```
 
-- [ ] **Step 4: The layout.** Five entries of `TRACES`, `FIRST_TRACES`, and the generator
+- [x] **Step 4: The layout.** Five entries of `TRACES`, `FIRST_TRACES`, and the generator
   writes the later traces after the rests:
 
 ```diff
@@ -774,17 +774,17 @@ was **not** run with the prototype.
      tiledversion: '1.11.2',
 ```
 
-- [ ] **Step 5: Regenerate the floor** — `npm run gen-floor`. Then
+- [x] **Step 5: Regenerate the floor** — `npm run gen-floor`. Then
   `shasum -a 256 public/maps/floor.tmj` gives
   `767e4b60108e95d1d2aa7b21520af7b97e68c68b2fdb1f7452ece09337f3883f`, and
   `git diff --stat public/maps/floor.tmj` says 56 insertions and 1 deletion: five rectangles
   at the end of the `objects` layer and `nextobjectid`. If the diff touches anything else,
   stop.
 
-- [ ] **Step 6: Run** the three test files of Step 2 — green — then `npm run check`: 1341
+- [x] **Step 6: Run** the three test files of Step 2 — green — then `npm run check`: 1341
   unit tests, and `npm run test:e2e`: 17 passed, 3 skipped.
 
-- [ ] **Step 7: Commit** — `Lay five traces in Marketing`. Body: the new rectangles are
+- [x] **Step 7: Commit** — `Lay five traces in Marketing`. Body: the new rectangles are
   written at the end of the file, so that no object of an earlier feature changes its id.
 
 ---
@@ -802,7 +802,7 @@ was **not** run with the prototype.
 - Produces: `CASES[1]`, the case of Marketing: `region` `'marketing'`, `source`
   `'person:marketing'`, `answer` of two pages, `after` of one, `outcome`, `policy`.
 
-- [ ] **Step 1: Write the failing tests.** In `tests/unit/cases.test.ts` two older tests
+- [x] **Step 1: Write the failing tests.** In `tests/unit/cases.test.ts` two older tests
   change — the case of Sales is the first entry, and the colleague of Marketing leaves the
   list of bystanders — and one block is new, at the end:
 
@@ -1173,7 +1173,7 @@ was **not** run with the prototype.
  });
 ```
 
-- [ ] **Step 2: Run them** —
+- [x] **Step 2: Run them** —
   `npx vitest run tests/unit/cases.test.ts tests/unit/floor.test.ts tests/unit/draw-journal.test.ts`.
   Expected: FAIL, 16 tests: 6 of 41 in `cases.test.ts`, 5 of 99 in `floor.test.ts`, 5 of 30
   in `draw-journal.test.ts`. `npx tsc --noEmit` is clean. Three tests of the diff are green
@@ -1181,7 +1181,7 @@ was **not** run with the prototype.
   `has a source that stands free at the start, with room 24 px below it`, which checks what
   the other tests of its block stand on.
 
-- [ ] **Step 3: The case:**
+- [x] **Step 3: The case:**
 
 ```diff
 --- a/src/game/cases.ts
@@ -1220,12 +1220,12 @@ was **not** run with the prototype.
  /** Solving a case raises the maximum of overview by this much, and fills it. */
 ```
 
-- [ ] **Step 4: Run** the three test files of Step 2 — green. The test of 0024 that asks
+- [x] **Step 4: Run** the three test files of Step 2 — green. The test of 0024 that asks
   every case for a source on the floor, lines, traces and a name for its region covers the
   new case without a change. Then `npm run check`: 1358 unit tests, the two recorded digests
   among them, unchanged.
 
-- [ ] **Step 5: Commit** — `Make Marketing the second case`. Body: the case uses the rules of
+- [x] **Step 5: Commit** — `Make Marketing the second case`. Body: the case uses the rules of
   the first without a change; the two cases do not depend on each other.
 
 ---
@@ -1242,7 +1242,7 @@ list of documents; it is changed all the same, in four places, because it would 
 something false otherwise: that the floor has five traces, and that `nextobjectid` follows
 the traces of 0022.
 
-- [ ] **Step 1: `world.md`** §2 and §3:
+- [x] **Step 1: `world.md`** §2 and §3:
 
 ```diff
 --- a/docs/spec/world.md
@@ -1277,7 +1277,7 @@ the traces of 0022.
  - **The customer.** A voice on the phone at the start — one sentence of the call (feature 0026).
 ```
 
-- [ ] **Step 2: `gameplay.md`** §6 and §7:
+- [x] **Step 2: `gameplay.md`** §6 and §7:
 
 ```diff
 --- a/docs/spec/gameplay.md
@@ -1322,7 +1322,7 @@ the traces of 0022.
  
 ```
 
-- [ ] **Step 3: `architecture.md`** §6, §7 and §8:
+- [x] **Step 3: `architecture.md`** §6, §7 and §8:
 
 ```diff
 --- a/docs/spec/architecture.md
@@ -1372,7 +1372,7 @@ the traces of 0022.
  the rule of a page of talk — at most three lines of at most 47 characters, none empty — and the
 ```
 
-- [ ] **Step 4: `testing.md`** §2:
+- [x] **Step 4: `testing.md`** §2:
 
 ```diff
 --- a/docs/spec/testing.md
@@ -1398,7 +1398,7 @@ the traces of 0022.
  
 ```
 
-- [ ] **Step 5: `README.md`:**
+- [x] **Step 5: `README.md`:**
 
 ```diff
 --- a/README.md
@@ -1417,19 +1417,19 @@ the traces of 0022.
  ## Run it
 ```
 
-- [ ] **Step 6:** `npm run check`, then commit — `Move the case of Marketing into the spec`.
+- [x] **Step 6:** `npm run check`, then commit — `Move the case of Marketing into the spec`.
 
 ---
 
 ### Task 5: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 17 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 17 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 5 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 5 in this file and commit —
   `Tick the full check of 0028`.
 
 ---
