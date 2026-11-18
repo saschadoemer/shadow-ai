@@ -132,7 +132,7 @@ game, which needs a place before the title screen of M8.
 
 The cases come one department at a time, and each brings what Act 2 has more than Act 1. The
 first three features, each its own pull request with its own acceptance plan: 0028 the case
-of Marketing · 0029 the wider cone · 0030 the creature of Marketing. The case first, by the
+of Marketing · 0029 the wider cone · 0031 the creature of Marketing. The case first, by the
 rules the case of Sales set — traces, the source's answer, the journal, the cleared room — so
 that a second case proves the first one's rules before anything is added to them. The wider
 cone after it, because the case of Marketing earns it and HR and Accounting open with it. The
