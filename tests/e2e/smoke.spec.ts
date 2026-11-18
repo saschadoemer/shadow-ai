@@ -253,3 +253,33 @@ test('L switches the language once per press, and the page says which one is on'
   await expect.poll(language, { message: 'a held L switches once, back to German' }).toBe('de');
   expect(await lang()).toBe('de');
 });
+
+test('J opens the journal on the creatures and closes it again', async ({ page }) => {
+  await page.goto('/');
+  const journal = () => page.evaluate(() => window.shadowAi?.state.journal);
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.held.journal), {
+      message: 'window.shadowAi.state.held is there: the game runs, and J is not held',
+    })
+    .toBe(false);
+  expect(await journal()).toBeNull();
+  // The game reads the held keys once per frame, so a key stays down until the state shows it.
+  await page.keyboard.down('KeyJ');
+  await expect.poll(journal, { message: 'J opens the journal' }).toStrictEqual({
+    tab: 'creatures',
+  });
+  await page.keyboard.up('KeyJ');
+  await page.keyboard.down('ArrowRight');
+  await expect.poll(journal, { message: 'the right arrow turns to the cases' }).toStrictEqual({
+    tab: 'cases',
+  });
+  await page.keyboard.up('ArrowRight');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.held.journal), {
+      message: 'J was let go',
+    })
+    .toBe(false);
+  await page.keyboard.down('KeyJ');
+  await expect.poll(journal, { message: 'a second press of J closes it' }).toBeNull();
+  await page.keyboard.up('KeyJ');
+});
