@@ -1,6 +1,8 @@
 import type { TileMap } from '../engine/tiled';
 import { type TextKey, textKey } from '../text/text';
 import type { Route } from './mover';
+import { areasOf, inArea } from './region';
+import { wallsOf } from './shadow';
 import type { Dialogue, GameState, SolvedCase, TraceState } from './state';
 import { type Trace, tracesOf } from './trace';
 
@@ -116,6 +118,24 @@ export function solve(state: GameState, region: string): GameState {
     ...state,
     solved: [...state.solved, { region, at: state.tick }],
     overview: { current: max, max },
+  };
+}
+
+/**
+ * What goes with the shadow of a region whose case was solved in this step (0025): every
+ * shadow wall of the region that still stands leaves `shadowWalls`, as a lifted wall does, and
+ * every creature whose home lies in an area of the region leaves `creatures`, wherever it is.
+ * Such a creature is not captured: `captured` does not change. Nothing else changes.
+ */
+export function clearRegion(state: GameState, region: string, map: TileMap): GameState {
+  const walls = wallsOf(map.rects);
+  const areas = areasOf(map.rects).filter((area) => area.region === region);
+  return {
+    ...state,
+    shadowWalls: state.shadowWalls.filter((standing) => walls[standing.wall]?.region !== region),
+    creatures: state.creatures.filter(
+      (creature) => !areas.some((area) => inArea(area, creature.home)),
+    ),
   };
 }
 

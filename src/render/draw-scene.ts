@@ -8,7 +8,7 @@ import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
 import { DARK_STEPS } from '../game/overview';
-import { areasOf, veilOf } from '../game/region';
+import { areasOf, shadowedAreas, shownVeil, veilOf } from '../game/region';
 import { LIFT_STEPS, wallsOf } from '../game/shadow';
 import {
   type CreatureState,
@@ -45,7 +45,7 @@ export interface SceneContent {
   readonly tileset: TilesetImage;
   /** The tileset's sheet in the greys of a region under shadow: same size, same ids (0023). */
   readonly shadowTileset: TilesetImage;
-  /** Three 16x16 frames: the veil of density 1, 2 and 3 (0023). */
+  /** Five 16x16 frames: the veil of density 1, 2 and 3 (0023), and the two of a clearing (0025). */
   readonly veilSheet: SpriteSheet;
   readonly playerSheet: SpriteSheet;
   /** Four 48x48 frames, one per facing in FACINGS order (0007). */
@@ -346,7 +346,8 @@ export function lidHeight(dark: number): number {
 
 /**
  * One frame: ground and detail — a cell under shadow from the shadow tileset (0023) — the veil
- * over the cells under shadow (0023), the cone when the lamp is on, the standing shadow walls in array
+ * over the cells under shadow (0023) and, thinning, over those of a region cleared less than two
+ * seconds ago (0025), the cone when the lamp is on, the standing shadow walls in array
  * order (0014), the traces the light is on (0022), the ground movers whose feet are at or above
  * the player's, then the standing figures whose feet are at or above the player's (0017), the
  * creatures in array order, the player, the other standing figures, the other ground movers,
@@ -383,13 +384,21 @@ export function drawScene(
   renderer.clear(PAGE_BACKGROUND);
   // A map without areas has no shadow, and is drawn exactly as before 0023.
   const areas = areasOf(content.map.rects);
-  const veil = (column: number, row: number): number => veilOf(areas, column, row);
+  // A cleared region is in colour at once (0025); its veil thins out for two seconds more.
+  const shadowed = shadowedAreas(areas, state.solved);
   const shadow: Shadow | undefined =
-    areas.length === 0 ? undefined : { tileset: content.shadowTileset, veilOf: veil };
+    areas.length === 0
+      ? undefined
+      : {
+          tileset: content.shadowTileset,
+          veilOf: (column, row) => veilOf(shadowed, column, row),
+        };
   drawLayer(renderer, content.map, content.tileset, 'ground', camera, shadow);
   drawLayer(renderer, content.map, content.tileset, 'detail', camera, shadow);
   if (shadow !== undefined) {
-    drawVeil(renderer, content.map, content.veilSheet, camera, veil);
+    drawVeil(renderer, content.map, content.veilSheet, camera, (column, row) =>
+      shownVeil(areas, state.solved, state.tick, column, row),
+    );
   }
   if (state.lamp.on) {
     const origin = lampFrameOrigin(player, camera);

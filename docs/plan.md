@@ -119,8 +119,24 @@ region next, because it is the answer to the case and the picture the teaser end
 returns, more colleagues see the shadow, overview grows by one. The call last of the story:
 the customer on the phone, the first sight of the shadow and the lamp handed over can be told
 once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
-has left it open since 0009. 0022, 0023 and 0024 are implemented; 0025
-and 0026 are approved; 0027 is named here and specified when its turn comes.
+has left it open since 0009. 0022, 0023, 0024 and 0025 are implemented;
+0026 and 0027 are approved.
+
+### M6 — The cases of Act 2
+
+The cases come one department at a time, and each brings what Act 2 has more than Act 1. The
+first three features, each its own pull request with its own acceptance plan: 0028 the case
+of Marketing · 0029 the wider cone · 0030 the creature of Marketing. The case first, by the
+rules the case of Sales set — traces, the source's answer, the journal, the cleared room — so
+that a second case proves the first one's rules before anything is added to them. The wider
+cone after it, because the case of Marketing earns it and HR and Accounting open with it. The
+creature of Marketing third: every case has its species (`world.md` §4), and the second
+species brings what the journal still lacks — a choice among its entries, and pages.
+
+Named here without a number and specified when their turn comes: the case of Support · the
+cases of HR and Accounting · the colour filter · the case of Development · the meeting rooms'
+side case · the vendor in every department · the intern in the break room and the hints ·
+who sees the shadow · the two keys · Management and the last case. 0028 and 0029 are approved.
 
 ## 5. Deferred, with reasons
 
@@ -132,11 +148,14 @@ from scratch and not forgotten.
   from the vendor once he is an advisor; approving would need a matching policy block; a grey
   region could be upgraded later by returning. The attitude the game is about would become its
   mechanic, and backtracking would have a purpose. Deferred because it multiplies dialogue per
-  source and needs balancing the first draft cannot afford. Revisit after M5, when the linear
-  version has been played.
+  source and needs balancing the first draft cannot afford. Looked at again on 2026-11-18,
+  when M6 was cut and the first case had been played: Act 2 stays linear. The idea stays
+  here, without a date.
 - **The mirror case.** A case in IT itself — an admin running an unapproved model under his desk
   — so the player has to bring his own house into the light. Cut from the first draft to keep the
-  case count at seven; the humility it adds is wanted. Revisit when Act 2 is being filled.
+  case count at seven; the humility it adds is wanted. Looked at again on 2026-11-18, when M6
+  was cut: not yet. It would need a room for IT on the floor and an eighth case in the
+  budget of §3; it stays here.
 - **Environmental puzzles as resolution.** Rerouting data flows, switches, light beams. Kept as a
   *way* to the source in dense regions and the server room, not as the resolution of a case.
 - **Gamepad.** The directional pad or the left stick walks, one button holds the lamp, beside

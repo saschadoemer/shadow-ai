@@ -74,6 +74,12 @@ Combat matters but is never the whole answer. Every piece of shadow belongs to o
    browser window — and then the lamp.
 3. **The source** of a case gives way only to the conversation with the person behind it.
 
+**As built** (feature 0025): when a case is solved, what is left of its region's shadow goes
+with it. The creatures whose home is in the region and that were not captured leave the game
+in that step — they are not captured, and the journal does not count them — and so does the
+region's shadow wall if it still stands. A creature whose home is outside the region stays,
+wherever it is at that moment: the snippet of the east corridor is still there after Sales.
+
 ## 4. Overview
 
 Health is called **overview**. Hits from creatures take it. At zero the player is in the dark and
@@ -134,9 +140,15 @@ says the everyday line. With all five found, a talk is the gesture: the colleagu
 honestly in two pages, and the hero says nothing. There is no key, no screen and no picture for
 the gesture. The press that closes the answer solves the case: the journal gains the outcome
 and the policy block, a notice says so for two seconds, and overview grows by one. Afterwards
-the colleague says something else, every time. The region does not clear yet, and no further
-colleague sees the shadow (0025, M6). Picking a creature from the journal comes with the second
-species (M6).
+the colleague says something else, every time. Picking a creature from the journal comes with
+the second species (M6).
+
+**As built** (feature 0025): the solved case clears its region for good. In the frame after
+the press the room is in its colours again, and the violet veil over it thins out in three
+parts over two seconds and is gone (`visual.md` §4). The game goes on while it happens. A
+region is cleared exactly when its case is solved; nothing else is stored about it. More
+colleagues who see the shadow, as a rule of the game, come with M6, and the first act has no
+end card: it ends in the cleared room, and the game goes on.
 
 ## 7. The journal
 
