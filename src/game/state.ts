@@ -34,11 +34,18 @@ export interface PlayerState {
   readonly recoil: Recoil;
 }
 
-/** The lamp (0007, 0014): on in every step whose input holds `lamp`. Later field: charge (M6). */
+/**
+ * The lamp (0007, 0014, 0026): on in every step whose input holds `lamp`, once the player has
+ * it. Later field: charge (M6).
+ */
 export interface LampState {
   readonly on: boolean;
   /** Against a region's density (gameplay.md §5): BASE_STRENGTH plus the upgrades earned. */
   readonly strength: number;
+  /** Whether the player has the lamp (0026). Without it the input's `lamp` counts as not held. */
+  readonly owned: boolean;
+  /** Whether the lamp was on in any step since it was owned (0026). It never goes back. */
+  readonly used: boolean;
 }
 
 /** The creature species (world.md §4), in journal order. 0008 brings the first. */
@@ -116,14 +123,17 @@ export interface FigureState {
   readonly facing: Facing;
 }
 
-/** Who speaks in a dialogue (0018): a standing figure of the cast, or a colleague on its round. */
-export const SPEAKER_KINDS = ['figure', 'mover'] as const;
+/**
+ * Who speaks in a dialogue: a standing figure of the cast, a colleague on its round (0018), or
+ * the story itself — a scene of `game/story`, with no figure (0026).
+ */
+export const SPEAKER_KINDS = ['figure', 'mover', 'story'] as const;
 export type SpeakerKind = (typeof SPEAKER_KINDS)[number];
 
-/** An open dialogue (0017, 0018). */
+/** An open dialogue (0017, 0018, 0026). */
 export interface Dialogue {
   readonly speaker: SpeakerKind;
-  /** The index of the speaker in `GameState.figures` or in `GameState.movers`. */
+  /** The index of the speaker in `GameState.figures`, in `GameState.movers` or in `SCENES`. */
   readonly index: number;
   /** The page shown, from 0. */
   readonly page: number;
@@ -154,6 +164,11 @@ export interface Overview {
 export interface GameState {
   /** Logic steps since the start; one step is 1/60 s (INV-3). */
   readonly tick: number;
+  /**
+   * The tick of the step in which the game's opening ended — the step that closed the call — or
+   * null while it has not (0026). The start hint of the help counts from it.
+   */
+  readonly started: number | null;
   readonly player: PlayerState;
   /**
    * The view's top-left corner in map pixels, two integers (0006). Derived from the player after

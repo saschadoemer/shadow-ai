@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 
 /** Set when the spec runs against the container; the header checks need nginx. */
 const containerUrl = process.env.BASE_URL;
@@ -45,8 +45,62 @@ function container(): string {
   return containerUrl.replace(/\/$/, '');
 }
 
-test('the page loads with its title, its canvas and the dark background', async ({ page }) => {
+/** The call on its page, as the state holds it (0026). */
+const call = (page: number) => ({ speaker: 'story', index: 0, page });
+
+/**
+ * Loads the game and reads the call to its end (0026): three presses of E. The game reads the
+ * held keys once per frame, so a key stays down until the state shows the page it turned to, and
+ * the next press waits until the state has seen the key let go.
+ */
+async function start(page: Page): Promise<void> {
   await page.goto('/');
+  const dialogue = () => page.evaluate(() => window.shadowAi?.state.dialogue);
+  await expect
+    .poll(dialogue, { message: 'the game opens with the call on its first page' })
+    .toStrictEqual(call(0));
+  for (const next of [call(1), call(2), null]) {
+    await page.keyboard.down('KeyE');
+    await expect.poll(dialogue, { message: 'E turns the page of the call' }).toStrictEqual(next);
+    await page.keyboard.up('KeyE');
+    await expect
+      .poll(() => page.evaluate(() => window.shadowAi?.state.held.talk), {
+        message: 'E was let go',
+      })
+      .toBe(false);
+  }
+}
+
+test('the game opens with the call, without the lamp, and three presses of E close it', async ({
+  page,
+}) => {
+  await page.goto('/');
+  // One poll for the whole value: nothing is read from a page that might still be loading.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const state = window.shadowAi?.state;
+          return state === undefined
+            ? undefined
+            : { dialogue: state.dialogue, lamp: state.lamp, started: state.started };
+        }),
+      { message: 'a new game: the call on page 0, no lamp, the opening not ended' },
+    )
+    .toStrictEqual({
+      dialogue: call(0),
+      lamp: { on: false, strength: 1, owned: false, used: false },
+      started: null,
+    });
+  await start(page);
+  const state = await page.evaluate(() => window.shadowAi?.state);
+  expect(state?.dialogue).toBeNull();
+  expect(state?.started).toBeGreaterThan(0);
+  expect(state?.lamp.owned).toBe(false);
+});
+
+test('the page loads with its title, its canvas and the dark background', async ({ page }) => {
+  await start(page);
   await expect(page).toHaveTitle('Shadow AI');
   await expect(page.locator('canvas#game')).toHaveCount(1);
   const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
@@ -55,7 +109,7 @@ test('the page loads with its title, its canvas and the dark background', async 
 });
 
 test('the map is drawn at the full factor, unclipped', async ({ page }) => {
-  await page.goto('/');
+  await start(page);
   const canvas = page.locator('canvas#game');
   // Desktop Chrome in Playwright: a 1280x720 page area at device pixel ratio 1, so factor 4.
   await expect
@@ -80,7 +134,7 @@ test('the map is drawn at the full factor, unclipped', async ({ page }) => {
 test('one second of ArrowRight moves the figure and the camera right by at least 70 px', async ({
   page,
 }) => {
-  await page.goto('/');
+  await start(page);
   // The handle appears with the first frame; the figure starts at the floor's spawn, x = 256.
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.player.x), {
@@ -101,30 +155,35 @@ test('one second of ArrowRight moves the figure and the camera right by at least
   expect(state?.player.facing).toBe('right');
 });
 
-test('a held Space turns the lamp on and holds the figure in place', async ({ page }) => {
-  await page.goto('/');
+test('without the lamp a held Space turns no light on and does not hold the figure', async ({
+  page,
+}) => {
+  await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.player.x), {
       message: 'window.shadowAi.state.player.x is the spawn: the game runs',
     })
     .toBe(256);
   await page.keyboard.down('Space');
-  await expect.poll(() => page.evaluate(() => window.shadowAi?.state.lamp.on)).toBe(true);
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.held.lamp), {
+      message: 'the state has seen Space held',
+    })
+    .toBe(true);
   await page.keyboard.down('ArrowRight');
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(500);
   const held = await page.evaluate(() => window.shadowAi?.state);
-  // Nothing moves while the lamp is on; the direction key only turns the figure.
-  expect(held?.player.x).toBe(256);
+  // The player has no lamp before the first meeting (0026): Space counts as not held. The lamp
+  // that shines and holds the figure is covered by the unit tests.
+  expect(held?.lamp).toStrictEqual({ on: false, strength: 1, owned: false, used: false });
+  expect(held?.player.x).toBeGreaterThanOrEqual(256 + 20);
   expect(held?.player.facing).toBe('right');
-  expect(held?.player.frame).toBe(0);
-  expect(held?.lamp.on).toBe(true);
-  await page.keyboard.up('Space');
-  await expect.poll(() => page.evaluate(() => window.shadowAi?.state.lamp.on)).toBe(false);
   await page.keyboard.up('ArrowRight');
+  await page.keyboard.up('Space');
 });
 
 test('the floor starts with three snippets and nothing captured', async ({ page }) => {
-  await page.goto('/');
+  await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.creatures.length), {
       message: 'window.shadowAi.state.creatures holds the three snippets of the floor',
@@ -144,7 +203,7 @@ test('the floor starts with three snippets and nothing captured', async ({ page 
 test('the floor starts with its 22 movers and draws the person of the reception', async ({
   page,
 }) => {
-  await page.goto('/');
+  await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.movers.length), {
       message: 'window.shadowAi.state.movers holds the 22 movers of the floor',
@@ -167,7 +226,7 @@ test('the floor starts with its 22 movers and draws the person of the reception'
 test('the floor starts with its eight shadow walls standing and a lamp of strength 1', async ({
   page,
 }) => {
-  await page.goto('/');
+  await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.shadowWalls.length), {
       message: 'window.shadowAi.state.shadowWalls holds the eight walls of the floor',
@@ -181,7 +240,7 @@ test('the floor starts with its eight shadow walls standing and a lamp of streng
 });
 
 test('the floor starts with the officer standing and no dialogue open', async ({ page }) => {
-  await page.goto('/');
+  await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.figures.length), {
       message: 'window.shadowAi.state.figures holds the one figure of the floor',
@@ -194,7 +253,7 @@ test('the floor starts with the officer standing and no dialogue open', async ({
 });
 
 test('the game starts with full overview and outside the dark', async ({ page }) => {
-  await page.goto('/');
+  await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.overview), {
       message: 'window.shadowAi.state.overview is five of five',
@@ -236,7 +295,7 @@ test.describe('served by the container', () => {
 test('L switches the language once per press, and the page says which one is on', async ({
   page,
 }) => {
-  await page.goto('/');
+  await start(page);
   const language = () => page.evaluate(() => window.shadowAi?.language);
   const lang = () => page.evaluate(() => document.documentElement.lang);
   await expect
@@ -255,7 +314,7 @@ test('L switches the language once per press, and the page says which one is on'
 });
 
 test('J opens the journal on the creatures and closes it again', async ({ page }) => {
-  await page.goto('/');
+  await start(page);
   const journal = () => page.evaluate(() => window.shadowAi?.state.journal);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.held.journal), {
@@ -285,7 +344,7 @@ test('J opens the journal on the creatures and closes it again', async ({ page }
 });
 
 test('the floor starts with its five traces, none seen and none found', async ({ page }) => {
-  await page.goto('/');
+  await start(page);
   // One poll for the whole value: nothing is read from a page that might still be loading.
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.traces), {
@@ -297,7 +356,7 @@ test('the floor starts with its five traces, none seen and none found', async ({
 test('H opens the help, the game stands still under it, and H closes it again', async ({
   page,
 }) => {
-  await page.goto('/');
+  await start(page);
   const help = () => page.evaluate(() => window.shadowAi?.state.help);
   await expect
     .poll(help, { message: 'window.shadowAi.state.help is there: the game runs, the help closed' })
@@ -322,7 +381,7 @@ test('H opens the help, the game stands still under it, and H closes it again', 
 });
 
 test('the reception keeps its colours: no shadow lies over it', async ({ page }) => {
-  await page.goto('/');
+  await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.camera), {
       message: 'the first view is the reception',
@@ -343,7 +402,7 @@ test('the reception keeps its colours: no shadow lies over it', async ({ page })
 });
 
 test('the game starts with no case solved and five hearts', async ({ page }) => {
-  await page.goto('/');
+  await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.solved), {
       message: 'window.shadowAi.state.solved is there and empty',

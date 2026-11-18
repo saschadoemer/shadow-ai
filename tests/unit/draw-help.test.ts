@@ -86,6 +86,7 @@ const BAR = 'fillRect 8,158 304x18 #181425';
 /** A game past the start hint with five hearts and the officer standing; the help as `fields` say. */
 const playing = (fields: Partial<GameState> = {}): GameState => ({
   tick: 700,
+  started: 0,
   player: {
     x: 184,
     y: 96,
@@ -96,7 +97,7 @@ const playing = (fields: Partial<GameState> = {}): GameState => ({
     recoil: NO_RECOIL,
   },
   camera: { x: 0, y: 0 },
-  lamp: { on: false, strength: 1 },
+  lamp: { on: false, strength: 1, owned: true, used: true },
   creatures: [],
   movers: [],
   shadowWalls: [],
@@ -253,7 +254,7 @@ describe('the help in the scene (0021)', () => {
   it('leaves the notice of 0016 under it', () => {
     const holding = playing({
       help: true,
-      lamp: { on: true, strength: 1 },
+      lamp: { on: true, strength: 1, owned: true, used: true },
       shadowWalls: [{ wall: 0, lit: true, light: 0 }],
     });
     const calls = scene(holding);

@@ -149,9 +149,10 @@ const state = (
   lampOn = false,
 ): GameState => ({
   tick: QUIET_TICK,
+  started: 0,
   player: player(fields),
   camera,
-  lamp: { on: lampOn, strength: 1 },
+  lamp: { on: lampOn, strength: 1, owned: true, used: true },
   creatures: [],
   movers: [],
   shadowWalls: [],
@@ -725,7 +726,7 @@ describe('the notice in the scene (0016)', () => {
     for (const scene of [
       holding({ shadowWalls: [{ wall: 0, lit: true, light: 1 }] }),
       holding({ shadowWalls: [] }),
-      holding({ lamp: { on: false, strength: 1 } }),
+      holding({ lamp: { on: false, strength: 1, owned: true, used: true } }),
     ]) {
       const renderer = recordingRenderer();
       drawScene(renderer, scene, CONTENT);
@@ -1040,7 +1041,7 @@ describe('the language line in the scene (0019)', () => {
 
   it('leaves the bar to the notice of 0016, which itself changes its language', () => {
     const holding = quiet(100, {
-      lamp: { on: true, strength: 1 },
+      lamp: { on: true, strength: 1, owned: true, used: true },
       shadowWalls: [{ wall: 0, lit: true, light: 0 }],
     });
     const renderer = recordingRenderer();
@@ -1185,7 +1186,7 @@ describe('the start hint in the scene (0021)', () => {
 
   it('leaves the bar to the notice of 0016', () => {
     const holding = fresh(100, {
-      lamp: { on: true, strength: 1 },
+      lamp: { on: true, strength: 1, owned: true, used: true },
       shadowWalls: [{ wall: 0, lit: true, light: 0 }],
     });
     const renderer = recordingRenderer();
@@ -1443,7 +1444,11 @@ describe('the cleared region in the scene (0025)', () => {
 
   it('lays the thinning veil where the veil lies: after detail and before the cone', () => {
     const renderer = recordingRenderer();
-    drawScene(renderer, { ...cleared('sales', 40), lamp: { on: true, strength: 1 } }, content);
+    drawScene(
+      renderer,
+      { ...cleared('sales', 40), lamp: { on: true, strength: 1, owned: true, used: true } },
+      content,
+    );
     const detail = renderer.calls.indexOf('drawTile 4 at 16,16');
     expect(renderer.calls[detail + 1]).toBe('drawSprite 3 at 0,0');
     expect(renderer.sheets.slice(0, 7)).toStrictEqual([
@@ -1476,5 +1481,144 @@ describe('the cleared region in the scene (0025)', () => {
     drawScene(renderer, scene, content);
     expect(renderer.tilesets.every((tileset) => tileset === content.tileset)).toBe(true);
     expect(renderer.sheets).toStrictEqual([content.playerSheet]);
+  });
+});
+
+describe('the story in the scene (0026)', () => {
+  const BOX = 'fillRect 8,134 304x42 #181425';
+  const BAR = 'fillRect 8,158 304x18 #181425';
+  const NO_LAMP = { on: false, strength: 1, owned: false, used: false };
+  /** A new game on the 3x2 map: the call open on `page`, no lamp, the opening not ended. */
+  const calling = (page: number, tick = 0): GameState => ({
+    ...state({ x: 20, y: 30 }),
+    tick,
+    started: null,
+    lamp: NO_LAMP,
+    dialogue: { speaker: 'story', index: 0, page },
+    overview: { current: 1, max: 2 },
+  });
+  const fontCalls = (
+    renderer: ReturnType<typeof recordingRenderer>,
+    content: SceneContent = CONTENT,
+  ): string[] =>
+    renderer.calls
+      .filter((call) => call.startsWith('drawSprite'))
+      .filter((_call, i) => renderer.sheets[i] === content.fontSheet);
+
+  it("draws the call's first page in the dialogue box, on a map without any figure", () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, calling(0), CONTENT);
+    const box = renderer.calls.indexOf(BOX);
+    expect(box).toBeGreaterThan(renderer.calls.indexOf('drawSprite 1 at 14,4'));
+    const line = fontCalls(renderer);
+    // `Montagmorgen. Das Telefon – ein Kunde:` — `M` is glyph 45; the second line opens with `„`.
+    expect(line[0]).toBe('drawSprite 45 at 12,138');
+    expect(line[33]).toBe('drawSprite 102 at 12,150');
+    // 33, 42 and 39 glyphs on its three lines.
+    expect(line).toHaveLength(114);
+    expect(renderer.calls).not.toContain(BAR);
+  });
+
+  it('draws it in English when the language is `en`', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, calling(0), CONTENT, ENGLISH);
+    const line = fontCalls(renderer);
+    // `Monday morning. The phone – a customer:` — the second line opens with `“`.
+    expect(line[0]).toBe('drawSprite 45 at 12,138');
+    expect(line[33]).toBe('drawSprite 103 at 12,150');
+    // 33, 39 and 27 glyphs.
+    expect(line).toHaveLength(99);
+  });
+
+  it('draws the second and the third page, and the marker of 0017', () => {
+    const second = recordingRenderer();
+    drawScene(second, calling(1), CONTENT);
+    // `Die Geschäftsführung …`: `D` is glyph 36.
+    expect(fontCalls(second)[0]).toBe('drawSprite 36 at 12,138');
+    expect(second.calls.slice(-3)).toStrictEqual([
+      'fillRect 299,169 5x1 #ffffff',
+      'fillRect 300,170 3x1 #ffffff',
+      'fillRect 301,171 1x1 #ffffff',
+    ]);
+    const third = recordingRenderer();
+    drawScene(third, calling(2, 30), CONTENT);
+    // `Über den Türen …`: `Ü` is glyph 97. No marker in the second half second.
+    expect(fontCalls(third)[0]).toBe('drawSprite 97 at 12,138');
+    expect(third.calls.some((call) => call.endsWith('#ffffff'))).toBe(false);
+  });
+
+  it('draws no box for a scene the story does not have', () => {
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      { ...calling(0), dialogue: { speaker: 'story', index: 4, page: 0 } },
+      CONTENT,
+    );
+    expect(renderer.calls).not.toContain(BOX);
+  });
+
+  it('shows no start hint while the opening has not ended, and counts it from the end of the call', () => {
+    const quiet = (tick: number, started: number | null): string[] => {
+      const renderer = recordingRenderer();
+      drawScene(renderer, { ...calling(0, tick), started, dialogue: null }, CONTENT);
+      return fontCalls(renderer);
+    };
+    expect(quiet(10, null)).toStrictEqual([]);
+    expect(quiet(5000, null)).toStrictEqual([]);
+    // `Hilfe: Taste H`, as in 0021, for 600 steps from the step that closed the call.
+    expect(quiet(900, 900)[0]).toBe('drawSprite 40 at 118,162');
+    expect(quiet(1499, 900)).toHaveLength(12);
+    expect(quiet(1500, 900)).toStrictEqual([]);
+  });
+
+  it('draws no cone while the lamp is not owned, whatever is held', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, { ...calling(0), dialogue: null, started: 5 }, CONTENT);
+    expect(renderer.sheets).not.toContain(CONTENT.lampSheet);
+    const owned = recordingRenderer();
+    drawScene(owned, state({ x: 20, y: 30 }, { x: 0, y: 0 }, true), CONTENT);
+    expect(owned.sheets).toContain(CONTENT.lampSheet);
+  });
+
+  it('draws the page that hands the lamp over while the lamp is not owned, and her own page after', () => {
+    const content: SceneContent = {
+      ...CONTENT,
+      map: { ...MAP, points: [{ name: 'figure:officer', x: 40, y: 20 }] },
+    };
+    const meeting = (lamp: GameState['lamp']): GameState => ({
+      ...state({ x: 20, y: 30 }),
+      lamp,
+      figures: [{ figure: 0, facing: 'left' }],
+      dialogue: { speaker: 'figure', index: 0, page: 1 },
+    });
+    const first = recordingRenderer();
+    drawScene(first, meeting(NO_LAMP), content);
+    // `Nimm die Lampe: …`: `N` is glyph 46.
+    expect(fontCalls(first, content)[0]).toBe('drawSprite 46 at 12,138');
+    const english = recordingRenderer();
+    drawScene(english, meeting(NO_LAMP), content, ENGLISH);
+    // `Take the lamp: …`: `T` is glyph 52.
+    expect(fontCalls(english, content)[0]).toBe('drawSprite 52 at 12,138');
+    const later = recordingRenderer();
+    drawScene(later, meeting({ ...NO_LAMP, owned: true }), content);
+    // `Mit der Lampe hältst du fest, …`: `M` is glyph 45.
+    expect(fontCalls(later, content)[0]).toBe('drawSprite 45 at 12,138');
+  });
+
+  it("shows the lamp's line in the bar from the hand-over until the lamp was held once", () => {
+    const waiting: GameState = {
+      ...state({ x: 20, y: 30 }),
+      lamp: { on: false, strength: 1, owned: true, used: false },
+    };
+    const renderer = recordingRenderer();
+    drawScene(renderer, waiting, CONTENT);
+    expect(renderer.calls.filter((call) => call === BAR)).toHaveLength(1);
+    // `Die Lampe: Leertaste halten.`: 28 characters, 25 drawn, `D` is glyph 36.
+    const line = fontCalls(renderer);
+    expect(line).toHaveLength(25);
+    expect(line[0]).toBe('drawSprite 36 at 76,162');
+    const used = recordingRenderer();
+    drawScene(used, { ...waiting, lamp: { ...waiting.lamp, used: true } }, CONTENT);
+    expect(used.calls).not.toContain(BAR);
   });
 });
