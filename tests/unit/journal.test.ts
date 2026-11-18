@@ -318,6 +318,7 @@ describe('a game in which the journal is never opened (0020)', () => {
     right: within(i, 300, 400),
     down: within(i, 450, 500),
     journal: false,
+    help: false,
   });
   /** Everything of the state but what this feature added or replaced. */
   const world = (state: GameState): unknown => [

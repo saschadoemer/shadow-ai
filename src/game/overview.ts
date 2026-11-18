@@ -144,6 +144,7 @@ function woken(state: GameState, map: TileMap): GameState {
     figures: state.figures,
     dialogue: null,
     journal: null,
+    help: false,
     held: state.held,
     captured: state.captured,
     overview: { current: state.overview.max, max: state.overview.max },

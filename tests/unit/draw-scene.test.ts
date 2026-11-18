@@ -143,6 +143,7 @@ const state = (
   figures: [],
   dialogue: null,
   journal: null,
+  help: false,
   held: NO_INPUT,
   captured: { snippet: 0 },
   // No hearts: the call lists of the earlier features stay as they were (0009).

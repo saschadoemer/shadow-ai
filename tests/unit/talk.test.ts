@@ -27,6 +27,7 @@ const NONE: GameInput = {
   lamp: false,
   talk: false,
   journal: false,
+  help: false,
 };
 const TALK: GameInput = { ...NONE, talk: true };
 const RIGHT: GameInput = { ...NONE, right: true };
@@ -260,6 +261,7 @@ describe('the world while a dialogue is open (0017)', () => {
     lamp: true,
     talk: false,
     journal: false,
+    help: false,
   };
 
   it('is not stepped in the step that opens it', () => {
@@ -301,6 +303,7 @@ describe('a game without figures (0017)', () => {
       lamp: i % 97 < 20,
       talk: false,
       journal: false,
+      help: false,
     }));
     let a = createInitialState(withFigure);
     let b = createInitialState(without);
@@ -520,6 +523,7 @@ describe('a colleague during and after its saying (0018)', () => {
     lamp: true,
     talk: false,
     journal: false,
+    help: false,
   };
 
   it('stands still for 600 steps with every other key held: only the tick grows', () => {
@@ -631,6 +635,7 @@ describe('a game without speakers (0018)', () => {
       lamp: i % 97 < 20,
       talk: false,
       journal: false,
+      help: false,
     }));
     let a = createInitialState(withSpeakers);
     let b = createInitialState(without);
