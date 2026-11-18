@@ -20,6 +20,7 @@ import {
 } from '../game/state';
 import { speakerOf, speakersOf } from '../game/talk';
 import { type Language, textKey, textOf } from '../text/text';
+import { drawJournal } from './draw-journal';
 import { drawLayer } from './draw-map';
 import { drawText } from './draw-text';
 import { GLYPH_HEIGHT, GLYPH_WIDTH } from './font';
@@ -320,7 +321,8 @@ export function lidHeight(dark: number): number {
  * (0017), else the notice — the bar and its line (0016) — else, for two seconds after a switch
  * of the language, the language line in the same bar (0019); all on the surface and not
  * shifted by the camera; and last the two lids of the dark (0009). Every text is drawn in the
- * language of the settings. A safe figure blinks; its cone and the movers do not.
+ * language of the settings. A safe figure blinks; its cone and the movers do not. While the
+ * journal is open the frame is the journal's alone (0020, render/draw-journal).
  */
 export function drawScene(
   renderer: Renderer,
@@ -328,6 +330,10 @@ export function drawScene(
   content: SceneContent,
   settings: SceneSettings,
 ): void {
+  if (state.journal !== null) {
+    drawJournal(renderer, state, state.journal, content, settings);
+    return;
+  }
   const { language } = settings;
   const { player, camera } = state;
   renderer.clear(PAGE_BACKGROUND);

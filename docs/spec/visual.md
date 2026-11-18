@@ -71,6 +71,12 @@ in `#181425`, red `#e43b44` when full and
 `#3a4466` when empty. The screen of the dark is two rectangles in `#181425` that close from the top
 and the bottom; nothing is blended, so no pixel leaves the palette.
 
+**The journal** (feature 0020) is drawn instead of the world, not over it: a dark screen in
+`#181425` with three tabs along the top in two blues — `#3a4466` for the open tab, `#262b44` for
+the other two — each with its title centred in white, and under them a rule in the open tab's
+colour, so that the open tab stands on it. A captured species shows its own 16x16 picture, the
+frame the light shows, with its name beside it and its lines below.
+
 ## 4. Palette
 
 Every colour in the game comes from **Endesga 32** — thirty-two colours, warm, enough for office

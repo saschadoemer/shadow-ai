@@ -1,6 +1,6 @@
 # 0020 — The journal
 
-**Status:** draft
+**Status:** implemented 2026-11-18
 **Milestone:** M4
 **Drafted:** 2026-11-17
 
@@ -267,7 +267,15 @@ and closes the journal. The walk begins with a reload.
 - Is something missing on the screen: how many were captured, a hint which key closes?
 - The game stands still while the journal is open. Right?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–26. Feel:
+
+- The keys: `J` is the key to look for, and the arrows are right for the tabs.
+- The screen: the dark screen with its two blues reads as a journal.
+- The picture: the creature's own 16x16 sprite is large enough beside the text.
+- The words: the four lines on the snippet say what it is and what makes it go, without
+  lecturing.
+- Nothing is missing on the screen: no count and no hint on the keys are wanted now.
+- The game standing still while the journal is open is right.
 
 ## Open questions
 

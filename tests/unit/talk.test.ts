@@ -26,6 +26,7 @@ const NONE: GameInput = {
   right: false,
   lamp: false,
   talk: false,
+  journal: false,
 };
 const TALK: GameInput = { ...NONE, talk: true };
 const RIGHT: GameInput = { ...NONE, right: true };
@@ -112,7 +113,7 @@ describe('opening a dialogue (0017)', () => {
     expect(opened).toStrictEqual({
       ...start,
       tick: 1,
-      talkHeld: true,
+      held: TALK,
       player: { ...start.player, facing: 'left' },
       figures: [{ figure: 0, facing: 'right' }],
       dialogue: { speaker: 'figure', index: 0, page: 0 },
@@ -123,7 +124,7 @@ describe('opening a dialogue (0017)', () => {
     const map = mapAt(200.1, 96);
     const next = update(createInitialState(map), TALK, map);
     expect(next.dialogue).toBeNull();
-    expect(next.talkHeld).toBe(true);
+    expect(next.held).toStrictEqual(TALK);
     expect(next.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
     expect(next.player.facing).toBe('down');
   });
@@ -209,7 +210,7 @@ describe('the pages of a dialogue (0017)', () => {
     });
     const released = update(opened, NONE, map);
     expect(released.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
-    expect(released.talkHeld).toBe(false);
+    expect(released.held).toStrictEqual(NONE);
     expect(update(released, TALK, map).dialogue).toStrictEqual({
       speaker: 'figure',
       index: 0,
@@ -258,6 +259,7 @@ describe('the world while a dialogue is open (0017)', () => {
     right: true,
     lamp: true,
     talk: false,
+    journal: false,
   };
 
   it('is not stepped in the step that opens it', () => {
@@ -274,7 +276,7 @@ describe('the world while a dialogue is open (0017)', () => {
     for (let step = 0; step < 600; step += 1) {
       state = update(state, ALL_BUT_TALK, map);
     }
-    expect(state).toStrictEqual({ ...opened, tick: opened.tick + 600, talkHeld: false });
+    expect(state).toStrictEqual({ ...opened, tick: opened.tick + 600, held: ALL_BUT_TALK });
   });
 
   it('moves again once it is closed', () => {
@@ -298,6 +300,7 @@ describe('a game without figures (0017)', () => {
       right: i % 240 < 60,
       lamp: i % 97 < 20,
       talk: false,
+      journal: false,
     }));
     let a = createInitialState(withFigure);
     let b = createInitialState(without);
@@ -402,7 +405,7 @@ describe('in sight (0018)', () => {
     const map = boxed(mapAt(184, 96), 'solids', 'opaque');
     const next = update(createInitialState(map), TALK, map);
     expect(next.dialogue).toBeNull();
-    expect(next.talkHeld).toBe(true);
+    expect(next.held).toStrictEqual(TALK);
     expect(next.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
   });
 
@@ -431,7 +434,7 @@ describe('talking to a colleague (0018)', () => {
     expect(opened).toStrictEqual({
       ...start,
       tick: 1,
-      talkHeld: true,
+      held: TALK,
       player: { ...start.player, facing: 'left' },
       movers: [{ ...start.movers[0], facing: 'right' }],
       dialogue: MOVER_TALK,
@@ -478,7 +481,7 @@ describe('talking to a colleague (0018)', () => {
     ]);
     const next = update(createInitialState(silent), TALK, silent);
     expect(next.dialogue).toBeNull();
-    expect(next.talkHeld).toBe(true);
+    expect(next.held).toStrictEqual(TALK);
     const dog = mapAt(74, 48, [
       { name: 'dog:reception:1', x: 64, y: 48, pause: 600 },
       { name: 'dog:reception:2', x: 128, y: 48 },
@@ -516,6 +519,7 @@ describe('a colleague during and after its saying (0018)', () => {
     right: true,
     lamp: true,
     talk: false,
+    journal: false,
   };
 
   it('stands still for 600 steps with every other key held: only the tick grows', () => {
@@ -541,7 +545,7 @@ describe('a colleague during and after its saying (0018)', () => {
     for (let step = 0; step < 600; step += 1) {
       state = update(state, ALL_BUT_TALK, map);
     }
-    expect(state).toStrictEqual({ ...opened, tick: opened.tick + 600, talkHeld: false });
+    expect(state).toStrictEqual({ ...opened, tick: opened.tick + 600, held: ALL_BUT_TALK });
   });
 
   it('closes with the first press after the opening: a saying has one page', () => {
@@ -626,6 +630,7 @@ describe('a game without speakers (0018)', () => {
       right: i % 240 < 60,
       lamp: i % 97 < 20,
       talk: false,
+      journal: false,
     }));
     let a = createInitialState(withSpeakers);
     let b = createInitialState(without);

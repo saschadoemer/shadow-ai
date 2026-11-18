@@ -36,7 +36,8 @@ English. The data protection officer stands in her office beside the reception a
 spoken to with `E` or `Enter` (feature 0017): a box shows what she says, page by page, and the
 world stands still while it is open. The four colleagues who walk the floor can be spoken to as
 well, across the counter too, and each has a saying (feature 0018). `L` switches the game between
-German and English at any moment (feature 0019). Milestone M3 is complete. The roadmap is in [docs/plan.md](docs/plan.md).
+German and English at any moment (feature 0019). `J` opens the journal with its three tabs;
+a captured snippet has its entry there (feature 0020). Milestones M3 and M4 are complete. The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 

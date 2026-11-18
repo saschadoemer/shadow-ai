@@ -2,9 +2,10 @@ import type { TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
 import { figuresFrom, figuresOf } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
+import { openJournal, stepJournal } from './journal';
 import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
 import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from './overview';
-import { type GameInput, stepPlayer } from './player';
+import { type GameInput, NO_INPUT, stepPlayer } from './player';
 import { standingWalls, stepWalls, wallsOf, withWalls } from './shadow';
 import { type GameState, type LampState, NO_RECOIL, type PlayerState } from './state';
 import { openDialogue, speakersOf, stepDialogue } from './talk';
@@ -15,8 +16,8 @@ import { BASE_STRENGTH } from './world';
  * pushed and not safe; the camera on it; the lamp off; one creature per named point of the map
  * (0008); overview full and the dark not running (0009); one mover per route on its point 1
  * (0015); a lamp of strength BASE_STRENGTH and every shadow wall of the map standing (0014);
- * every standing figure of the map facing down, no dialogue and the talk key not held (0017). A
- * map with two wake points, a route that is malformed or crosses a solid tile, a rectangle that
+ * every standing figure of the map facing down and no dialogue (0017); the journal closed and
+ * no key remembered (0020). A map with two wake points, a route that is malformed or crosses a solid tile, a rectangle that
  * is no shadow wall, or a figure point the cast does not know or names twice is rejected here,
  * before the game starts.
  */
@@ -45,7 +46,8 @@ export function createInitialState(map: TileMap): GameState {
     shadowWalls: standingWalls(walls),
     figures: figuresFrom(figures),
     dialogue: null,
-    talkHeld: false,
+    journal: null,
+    held: NO_INPUT,
     captured: noCaptures(),
     overview: initialOverview(),
     dark: 0,
@@ -54,27 +56,36 @@ export function createInitialState(map: TileMap): GameState {
 
 /**
  * Advances the game by exactly one logic step and returns the new state; its arguments are not
- * mutated. In the dark the step is the dark sequence and nothing else (0009). With a dialogue
- * open the step is the dialogue's and nothing else; a press of `talk` near a speaker — a
- * standing figure or a colleague — in reach and in sight opens one instead of an ordinary step
- * (0017, 0018). Otherwise: the lamp is on when the input holds
+ * mutated. In the dark the step is the dark sequence and nothing else (0009). With the journal
+ * open the step is the journal's and nothing else (0020). With a dialogue open the step is the
+ * dialogue's and nothing else. A press of `journal` opens the journal instead of an ordinary
+ * step, before a press of `talk` is looked at (0020); a press of `talk` near a speaker — a
+ * standing figure or a colleague — in reach and in sight opens a dialogue instead of an
+ * ordinary step (0017, 0018). Otherwise: the lamp is on when the input holds
  * it and the figure is not being pushed; the figure is stepped; each creature is stepped
  * against the stepped figure (0008); the first free creature within reach of a figure that is
  * not safe hits; the camera follows the figure; each mover is stepped against the figure after
  * the hit, on routes rebuilt from the map's points (0015). The figure and the creatures are
  * stepped against the map with the walls standing at the start of the step; then every
  * standing wall is stepped against the stepped figure, on walls rebuilt from the map's
- * rectangles (0014). Every step, the dark's included, remembers whether the input held
- * `talk`, so that the next step can tell a press from a held key (0017).
+ * rectangles (0014). Every step, the dark's included, remembers the whole input in `held`, so
+ * that the next step can tell a press from a held key (0017, 0020).
  */
 export function update(state: GameState, input: GameInput, content: TileMap): GameState {
   if (state.dark > 0) {
-    return { ...stepDark(state, content), talkHeld: input.talk };
+    return { ...stepDark(state, content), held: input };
+  }
+  if (state.journal !== null) {
+    return stepJournal(state, state.journal, input);
   }
   const routes = routesOf(content.points);
   const speakers = speakersOf(figuresOf(content.points), state.movers, routes);
   if (state.dialogue !== null) {
     return stepDialogue(state, state.dialogue, input, speakers);
+  }
+  const journal = openJournal(state, input);
+  if (journal !== null) {
+    return journal;
   }
   // In sight is tested against the map as loaded: a shadow wall does not stop a conversation.
   const opened = openDialogue(state, input, speakers, content);
@@ -112,7 +123,8 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     shadowWalls: stepWalls(state.shadowWalls, walls, stepped, lamp, content),
     figures: state.figures,
     dialogue: null,
-    talkHeld: input.talk,
+    journal: null,
+    held: input,
     captured,
     overview,
     dark,
