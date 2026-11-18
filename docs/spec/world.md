@@ -183,6 +183,9 @@ Kept as small as the story allows. About thirty figures in all.
   same two pages every time, until M5 brings the first meeting. She has no name yet and is not
   solid: the player walks through her. Feature 0018 changed nothing for her but the distance
   from which she can be spoken to: 40 px, and in sight.
+  Feature 0026 brings the first meeting: while the player has no lamp she says her first page
+  and then `Nimm die Lampe: …` — three sentences in all — and the press that closes it hands
+  the lamp over. From then on she says the two pages of 0017.
 - **The vendor.** See `vision.md` §4. Recurring in every department, never an enemy, changing
   over the game from seller to advisor. As advisor he supplies the approved alternatives that
   solve the later cases. They are fictional products; Harmonic is not his, and no Harmonic
@@ -200,8 +203,10 @@ Kept as small as the story allows. About thirty figures in all.
   Since feature 0024 the colleague of Sales is the source of the first case. What the colleague
   says follows from the case: the everyday line while a trace is missing, the honest answer
   once all five are found, and the line afterwards once the case is solved.
-- **The managing director.** The last case.
-- **The customer.** A voice on the phone at the start. One line in the epilogue: he called again.
+- **The managing director.** The last case. In the first act a sentence of the call (feature
+  0026); a figure with the map of Management (M6).
+- **The customer.** A voice on the phone at the start — one sentence of the call (feature 0026).
+  One line in the epilogue: he called again.
 
 ## 4. The creatures
 

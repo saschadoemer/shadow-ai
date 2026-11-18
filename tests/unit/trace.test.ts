@@ -278,7 +278,7 @@ describe('the notice of a find (0022)', () => {
   it('gives way to the notice of a wall that holds', () => {
     const state: GameState = {
       ...found,
-      lamp: { on: true, strength: 1 },
+      lamp: { on: true, strength: 1, owned: true, used: true },
       shadowWalls: [{ wall: 0, lit: true, light: 0 }],
     };
     expect(noticeOf(state)).toBe(textKey('notice.shadow-too-dense'));

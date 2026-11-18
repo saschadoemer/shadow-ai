@@ -49,6 +49,27 @@ export const de = {
     'regt – nicht um es zu vertreiben, sondern um',
     'es zu verstehen.',
   ].join('\n'),
+  'talk.officer-meeting-2': [
+    'Nimm die Lampe: Sie hält fest, was sich darin',
+    'regt – nicht um es zu vertreiben, sondern um',
+    'es zu verstehen.',
+  ].join('\n'),
+  'story.call-1': [
+    'Montagmorgen. Das Telefon – ein Kunde:',
+    '„Sätze aus unserem vertraulichen Angebot stehen',
+    'in der Antwort eines öffentlichen Chatbots.“',
+  ].join('\n'),
+  'story.call-2': [
+    'Die Geschäftsführung fängt dich am Empfang ab:',
+    '„Das Angebot kam aus dem Vertrieb. Finde',
+    'heraus, wie das passieren konnte.“',
+  ].join('\n'),
+  'story.call-3': [
+    'Über den Türen im Flur liegt etwas, das',
+    'vorher nicht da war. Nebenan, bei der',
+    'Datenschutzbeauftragten, brennt Licht.',
+  ].join('\n'),
+  'notice.lamp': 'Die Lampe: Leertaste halten.',
   'talk.reception-everyday': [
     'Morgen! Heute haben schon drei Leute gefragt,',
     'ob wir endlich ein WLAN für Gäste haben.',

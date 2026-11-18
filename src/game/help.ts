@@ -24,6 +24,16 @@ export function helpHintDue(tick: number): boolean {
 }
 
 /**
+ * Whether the start hint is due in a state (0026): the game's opening has ended, and fewer
+ * than HELP_HINT_STEPS steps have passed since. While the call is open it is not due, so the
+ * call does not use its ten seconds up. A game past its opening started at 0, and there this
+ * is `helpHintDue(tick)`.
+ */
+export function startHintDue(state: Pick<GameState, 'tick' | 'started'>): boolean {
+  return state.started !== null && helpHintDue(state.tick - state.started);
+}
+
+/**
  * The state after a press that opens the help, or null when `help` is not pressed: the help
  * open, the tick grown, the input remembered. Nothing else changes, whatever else is open and
  * whatever else the input holds: a dialogue keeps its page, the journal its tab, and a figure

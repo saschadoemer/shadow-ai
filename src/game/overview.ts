@@ -131,9 +131,10 @@ function woken(state: GameState, map: TileMap): GameState {
   };
   return {
     tick: state.tick,
+    started: state.started,
     player,
     camera: followPlayer(player, map),
-    lamp: { on: false, strength: state.lamp.strength },
+    lamp: { ...state.lamp, on: false },
     creatures: state.creatures.map((creature) => ({
       ...creature,
       x: creature.home.x,
@@ -165,7 +166,7 @@ export function stepDark(state: GameState, map: TileMap): GameState {
   const next: GameState = {
     ...state,
     tick: state.tick + 1,
-    lamp: { on: false, strength: state.lamp.strength },
+    lamp: { ...state.lamp, on: false },
     dark: dark >= DARK_STEPS ? 0 : dark,
   };
   return dark === WAKE_STEP ? woken(next, map) : next;

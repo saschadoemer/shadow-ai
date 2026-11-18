@@ -35,6 +35,13 @@ the chest, 12 px above the feet, is 48 px long — three tiles — and opens wit
 side, so it is as wide at its end as it is long; both numbers *tune*. It is drawn as a yellow
 checkerboard under the figure. The battery arrives with M6.
 
+**As built** (feature 0026): the player starts without the lamp. Until the data protection
+officer hands it over, Space does nothing: no cone, nothing freezes, no wall is lit, no trace is
+seen, and the figure walks with the key held. The creatures hit as always, and the dark wakes
+the figure in her office — beside her. From the step that closes the first meeting a line at
+the bottom says `Die Lampe: Leertaste halten.`, until the lamp is held once; it does not come
+back.
+
 **As built** (feature 0008): a creature whose body is in the cone, with no solid tile between it
 and the figure, freezes. After one second of unbroken light — 60 steps, *tune* — it is captured
 and gone. A break starts the second again. Solid tiles block the light: walls, and fences and
@@ -187,6 +194,9 @@ policy tab shows one block per solved case, in the order they were solved, two t
 each; until a case is solved it shows its line for nothing. Two blocks fit the screen; pages
 within the tab come with the third (M6).
 
+**As built** (feature 0026): the journal does not open while the call is read, like under any
+dialogue. After it, J opens it with or without the lamp.
+
 ## 8. Controls and presentation
 
 Desktop browser with keyboard; a gamepad is deferred (`docs/plan.md` §5); touch and
@@ -218,12 +228,21 @@ language, for two seconds: `Sprache: Deutsch` or `Language: English`. A held key
 Every load starts in German, and nothing is remembered. The title screen of M8 will hold the
 switch.
 
+**As built** (feature 0026): the game opens with the call — three pages in the dialogue box
+that the story itself says, with no figure speaking. E or Enter turns the page and closes the
+third; until then the world stands still and the other keys do nothing, as with every dialogue.
+There is no way to skip it before M8. In the first meeting the data protection officer says her
+first page and then the page that hands the lamp over; afterwards she says her two pages of
+0017. A press of E opens a dialogue with Space held as long as the player has no lamp.
+
 **As built** (feature 0021): a press of H opens the help, a box over the game with seven rows —
 a key and what it does — and a second press closes it. The game stands still while it is open,
 and everything goes on where it stood when it closes. The help opens over a dialogue and over
 the journal, which keep their page and their tab, and not in the dark. For the first ten
 seconds of a game one line in the notice's bar names the key — `Hilfe: Taste H` or
 `Help: press H` — behind every other text, and it does not come back. A held key counts once.
+Since feature 0026 the ten seconds begin when the call is closed, so that the call does not
+hide the line.
 
 ## 9. Deliberately simple in the first draft
 
