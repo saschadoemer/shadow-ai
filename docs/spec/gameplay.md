@@ -140,6 +140,9 @@ to click except turning pages:
 
 There is no map in the journal. The map itself shows by colour what has been cleared.
 
+The help (feature 0021) is no second screen: it is a box over whatever is on screen, as the
+dialogue box is.
+
 **As built** (feature 0020): a press of J opens the journal on the creatures, and a second press
 closes it. The left and right keys of walking turn the three tabs, one tab per press, and stop
 at either end; the journal always opens on the creatures. The game stands still while it is
@@ -159,7 +162,7 @@ to, the source and the outcome come with 0024.
 Desktop browser with keyboard; a gamepad is deferred (`docs/plan.md` §5); touch and
 mobile are non-goals. Arrow keys or WASD walk, Space holds the lamp, E or Enter talks to a
 figure and turns the pages of what it says, J opens and closes the journal, F toggles
-fullscreen, L switches between German and English.
+fullscreen, L switches between German and English, H opens and closes the help.
 Scrolling camera on a 320x180 internal resolution (`visual.md`). Movement,
 collision and camera behaviour are specified in the feature that introduces them.
 
@@ -184,6 +187,13 @@ Where no text is on screen, a line in the notice's bar names the language that i
 language, for two seconds: `Sprache: Deutsch` or `Language: English`. A held key switches once.
 Every load starts in German, and nothing is remembered. The title screen of M8 will hold the
 switch.
+
+**As built** (feature 0021): a press of H opens the help, a box over the game with seven rows —
+a key and what it does — and a second press closes it. The game stands still while it is open,
+and everything goes on where it stood when it closes. The help opens over a dialogue and over
+the journal, which keep their page and their tab, and not in the dark. For the first ten
+seconds of a game one line in the notice's bar names the key — `Hilfe: Taste H` or
+`Help: press H` — behind every other text, and it does not come back. A held key counts once.
 
 ## 9. Deliberately simple in the first draft
 

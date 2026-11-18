@@ -53,6 +53,7 @@ const NONE: GameInput = {
   lamp: false,
   talk: false,
   journal: false,
+  help: false,
 };
 const RIGHT: GameInput = { ...NONE, right: true };
 const UP_LEFT: GameInput = { ...NONE, up: true, left: true };
@@ -91,6 +92,7 @@ describe('GameState (INV-1)', () => {
       figures: [],
       dialogue: null,
       journal: null,
+      help: false,
       held: NO_INPUT,
       captured: { snippet: 0 },
       overview: { current: 5, max: 5 },
@@ -149,6 +151,7 @@ describe('update', () => {
         figures: [],
         dialogue: null,
         journal: null,
+        help: false,
         held: NO_INPUT,
         captured: { snippet: 0 },
         overview: { current: 3, max: 3 },
@@ -175,6 +178,7 @@ describe('update', () => {
       figures: [],
       dialogue: null,
       journal: null,
+      help: false,
       held: NO_INPUT,
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
@@ -193,6 +197,7 @@ describe('update', () => {
       figures: [],
       dialogue: null,
       journal: null,
+      help: false,
       held: NO_INPUT,
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
@@ -433,6 +438,7 @@ describe('movers in the state (0015)', () => {
       lamp: i % 97 < 20,
       talk: false,
       journal: false,
+      help: false,
     }));
     let withMovers = createInitialState(FLOOR_MAP);
     let without: GameState = { ...withMovers, movers: [] };
@@ -593,6 +599,7 @@ describe('shadow walls in the state (0014)', () => {
       lamp: i % 97 < 20,
       talk: false,
       journal: false,
+      help: false,
     }));
     // Without its walls; the traces of 0022 are rectangles too, and they stay.
     const bare: TileMap = {

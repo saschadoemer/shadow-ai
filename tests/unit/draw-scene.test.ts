@@ -131,12 +131,17 @@ const player = (fields: Partial<PlayerState>): PlayerState => ({
   recoil: NO_RECOIL,
   ...fields,
 });
+/**
+ * A tick past the start hint (0021). 600 is a multiple of every period a frame is chosen by —
+ * 4, 15, 30 and 60 steps — so a scene at 600 + n shows the frames of tick n.
+ */
+const QUIET_TICK = 600;
 const state = (
   fields: Partial<PlayerState>,
   camera = { x: 0, y: 0 },
   lampOn = false,
 ): GameState => ({
-  tick: 0,
+  tick: QUIET_TICK,
   player: player(fields),
   camera,
   lamp: { on: lampOn, strength: 1 },
@@ -147,6 +152,7 @@ const state = (
   figures: [],
   dialogue: null,
   journal: null,
+  help: false,
   held: NO_INPUT,
   captured: { snippet: 0 },
   // No hearts: the call lists of the earlier features stay as they were (0009).
@@ -293,7 +299,7 @@ describe('the creatures in the scene (0008)', () => {
       renderer,
       {
         ...state({ x: 20.4, y: 30.6, facing: 'left', frame: 3 }, camera, true),
-        tick: 15,
+        tick: QUIET_TICK + 15,
         creatures: [snippet(40.4, 50.6), snippet(60, 40, 5)],
       },
       CONTENT,
@@ -495,7 +501,7 @@ describe('the movers in the scene (0015)', () => {
       renderer,
       {
         ...base,
-        tick: 30,
+        tick: QUIET_TICK + 30,
         creatures: [{ species: 'snippet', x: 40, y: 20, light: 0, home: { x: 40, y: 20 } }],
         overview: { current: 1, max: 1 },
         movers: [
@@ -923,7 +929,7 @@ describe('the dialogue box in the scene (0017)', () => {
 
   it('draws no box without a dialogue', () => {
     const renderer = recordingRenderer();
-    drawScene(renderer, { ...talking(0), dialogue: null }, content);
+    drawScene(renderer, { ...talking(0, QUIET_TICK), dialogue: null }, content);
     expect(renderer.calls).not.toContain(BOX);
     expect(spritesOn(renderer, content.fontSheet)).toStrictEqual([]);
   });
@@ -995,6 +1001,20 @@ describe('the language line in the scene (0019)', () => {
   });
 
   it('draws neither bar nor line before the switch, after two seconds, or without a switch', () => {
+    // Past the start hint (0021): the ticks of 0019, 600 later.
+    for (const [tick, switchedAt] of [
+      [699, 700],
+      [820, 700],
+      [700, null],
+    ] as const) {
+      const renderer = recordingRenderer();
+      drawScene(renderer, quiet(tick), CONTENT, switched('en', switchedAt));
+      expect(renderer.calls, `tick ${tick}`).not.toContain(BAR);
+      expect(fontCalls(renderer)).toStrictEqual([]);
+    }
+  });
+
+  it('leaves the bar to the start hint where the line is not due in the first ten seconds (0021)', () => {
     for (const [tick, switchedAt] of [
       [99, 100],
       [220, 100],
@@ -1002,8 +1022,11 @@ describe('the language line in the scene (0019)', () => {
     ] as const) {
       const renderer = recordingRenderer();
       drawScene(renderer, quiet(tick), CONTENT, switched('en', switchedAt));
-      expect(renderer.calls, `tick ${tick}`).not.toContain(BAR);
-      expect(fontCalls(renderer)).toStrictEqual([]);
+      expect(renderer.calls.filter((call) => call === BAR)).toHaveLength(1);
+      // `Help: press H`: 13 characters, 11 of them drawn; `H` is glyph 40.
+      const line = fontCalls(renderer);
+      expect(line, `tick ${tick}`).toHaveLength(11);
+      expect(line[0]).toBe('drawSprite 40 at 121,162');
     }
   });
 
@@ -1105,5 +1128,98 @@ describe('the traces in the scene (0022)', () => {
     const renderer = recordingRenderer();
     drawScene(renderer, { ...seen(21), shadowWalls: [] }, CONTENT);
     expect(renderer.sheets).not.toContain(CONTENT.traceSheet);
+  });
+});
+
+describe('the start hint in the scene (0021)', () => {
+  const BAR = 'fillRect 8,158 304x18 #181425';
+  /** One full and one empty heart, no notice, no dialogue, at `tick`. */
+  const fresh = (tick: number, fields: Partial<GameState> = {}): GameState => ({
+    ...state({ x: 20, y: 30 }),
+    tick,
+    overview: { current: 1, max: 2 },
+    ...fields,
+  });
+  const fontCalls = (renderer: ReturnType<typeof recordingRenderer>): string[] =>
+    renderer.calls
+      .filter((call) => call.startsWith('drawSprite'))
+      .filter((_call, i) => renderer.sheets[i] === CONTENT.fontSheet);
+
+  it('names the key of the help for the first 600 steps, centred in the bar after the hearts', () => {
+    for (const tick of [0, 599]) {
+      const german = recordingRenderer();
+      drawScene(german, fresh(tick), CONTENT);
+      const bar = german.calls.indexOf(BAR);
+      expect(bar).toBeGreaterThan(german.calls.indexOf('drawSprite 1 at 14,4'));
+      const line = german.calls.slice(bar + 1);
+      // `Hilfe: Taste H` has 14 characters, 12 of them drawn; `H` is glyph 40.
+      expect(line, `tick ${tick}`).toHaveLength(12);
+      expect(line[0]).toBe('drawSprite 40 at 118,162');
+      expect(line.at(-1)).toBe('drawSprite 40 at 196,162');
+      expect(fontCalls(german)).toStrictEqual(line);
+
+      const english = recordingRenderer();
+      drawScene(english, fresh(tick), CONTENT, ENGLISH);
+      // `Help: press H` has 13 characters, 11 of them drawn.
+      const lineEn = english.calls.slice(english.calls.indexOf(BAR) + 1);
+      expect(lineEn, `tick ${tick}`).toHaveLength(11);
+      expect(lineEn[0]).toBe('drawSprite 40 at 121,162');
+      expect(lineEn.at(-1)).toBe('drawSprite 40 at 193,162');
+    }
+  });
+
+  it('is gone at step 600', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, fresh(600), CONTENT);
+    expect(renderer.calls).not.toContain(BAR);
+    expect(fontCalls(renderer)).toStrictEqual([]);
+  });
+
+  it('leaves the bar to the notice of 0016', () => {
+    const holding = fresh(100, {
+      lamp: { on: true, strength: 1 },
+      shadowWalls: [{ wall: 0, lit: true, light: 0 }],
+    });
+    const renderer = recordingRenderer();
+    drawScene(renderer, holding, CONTENT);
+    // `Dieser Schatten ist zu dicht für die Lampe.`: 43 characters, 36 drawn, `D` is glyph 36.
+    const line = fontCalls(renderer);
+    expect(line).toHaveLength(36);
+    expect(line[0]).toBe('drawSprite 36 at 31,162');
+    expect(renderer.calls.filter((call) => call === BAR)).toHaveLength(1);
+  });
+
+  it('leaves the bar to the language line, and has it back when the two seconds are over', () => {
+    const settings: SceneSettings = { language: 'en', switchedAt: 50 };
+    const line = recordingRenderer();
+    drawScene(line, fresh(169), CONTENT, settings);
+    // `Language: English`: 16 glyphs, `L` is glyph 44.
+    expect(fontCalls(line)).toHaveLength(16);
+    expect(fontCalls(line)[0]).toBe('drawSprite 44 at 109,162');
+    const hint = recordingRenderer();
+    drawScene(hint, fresh(170), CONTENT, settings);
+    expect(fontCalls(hint)).toHaveLength(11);
+    expect(fontCalls(hint)[0]).toBe('drawSprite 40 at 121,162');
+  });
+
+  it('is not drawn with a dialogue open, with the journal open or with the help open', () => {
+    const content: SceneContent = {
+      ...CONTENT,
+      map: { ...MAP, points: [{ name: 'figure:officer', x: 40, y: 20 }] },
+    };
+    for (const fields of [
+      {
+        figures: [{ figure: 0, facing: 'left' }],
+        dialogue: { speaker: 'figure', index: 0, page: 0 },
+      },
+      { journal: { tab: 'creatures' } },
+      { help: true },
+    ] as const satisfies readonly Partial<GameState>[]) {
+      const renderer = recordingRenderer();
+      drawScene(renderer, fresh(100, fields), content);
+      expect(renderer.calls, Object.keys(fields).join()).not.toContain(BAR);
+      // The first glyph of `Hilfe: Taste H`, at its place in the bar.
+      expect(renderer.calls).not.toContain('drawSprite 40 at 118,162');
+    }
   });
 });

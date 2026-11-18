@@ -99,6 +99,7 @@ const reading = (tab: JournalTab, snippets = 0): GameState => ({
   figures: [],
   dialogue: null,
   journal: { tab },
+  help: false,
   held: NO_INPUT,
   captured: { snippet: snippets },
   overview: { current: 5, max: 5 },

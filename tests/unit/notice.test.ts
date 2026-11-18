@@ -14,6 +14,7 @@ const NONE: GameInput = {
   lamp: false,
   talk: false,
   journal: false,
+  help: false,
 };
 const SHINE: GameInput = { ...NONE, lamp: true };
 const HOLDS: ShadowWallState = { wall: 0, lit: true, light: 0 };

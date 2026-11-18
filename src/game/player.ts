@@ -14,12 +14,14 @@ export interface MovementInput {
 
 /**
  * Everything the game reads from the keys: the movement actions, `lamp`, on while Space is held
- * (0007), `talk`, on while E or Enter is held (0017), and `journal`, on while J is held (0020).
+ * (0007), `talk`, on while E or Enter is held (0017), `journal`, on while J is held (0020), and
+ * `help`, on while H is held (0021).
  */
 export interface GameInput extends MovementInput {
   readonly lamp: boolean;
   readonly talk: boolean;
   readonly journal: boolean;
+  readonly help: boolean;
 }
 
 /** No key held: what the state remembers before the first step. */
@@ -31,6 +33,7 @@ export const NO_INPUT: GameInput = {
   lamp: false,
   talk: false,
   journal: false,
+  help: false,
 };
 
 /**

@@ -2,6 +2,7 @@ import type { TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
 import { figuresFrom, figuresOf } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
+import { openHelp, stepHelp } from './help';
 import { openJournal, stepJournal } from './journal';
 import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
 import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from './overview';
@@ -18,10 +19,10 @@ import { BASE_STRENGTH } from './world';
  * (0008); overview full and the dark not running (0009); one mover per route on its point 1
  * (0015); a lamp of strength BASE_STRENGTH and every shadow wall of the map standing (0014);
  * every standing figure of the map facing down and no dialogue (0017); the journal closed and
- * no key remembered (0020); every trace of the map unseen and not found (0022). A map with two
- * wake points, a route that is malformed or crosses a solid tile, a rectangle of no known kind,
- * a shadow wall or a trace the world data or the grid refuses, or a figure point the cast does
- * not know or names twice is rejected here, before the game starts.
+ * no key remembered (0020); the help closed (0021); every trace of the map unseen and not found
+ * (0022). A map with two wake points, a route that is malformed or crosses a solid tile, a
+ * rectangle of no known kind, a shadow wall or a trace the world data or the grid refuses, or a
+ * figure point the cast does not know or names twice is rejected here, before the game starts.
  */
 export function createInitialState(map: TileMap): GameState {
   wakePoint(map);
@@ -50,6 +51,7 @@ export function createInitialState(map: TileMap): GameState {
     figures: figuresFrom(figures),
     dialogue: null,
     journal: null,
+    help: false,
     held: NO_INPUT,
     captured: noCaptures(),
     overview: initialOverview(),
@@ -59,9 +61,11 @@ export function createInitialState(map: TileMap): GameState {
 
 /**
  * Advances the game by exactly one logic step and returns the new state; its arguments are not
- * mutated. In the dark the step is the dark sequence and nothing else (0009). With the journal
- * open the step is the journal's and nothing else (0020). With a dialogue open the step is the
- * dialogue's and nothing else. A press of `journal` opens the journal instead of an ordinary
+ * mutated. In the dark the step is the dark sequence and nothing else (0009). With the help open
+ * the step is the help's and nothing else, and a press of `help` opens it over whatever is there
+ * — an open journal and an open dialogue too (0021). With the journal open the step is the
+ * journal's and nothing else (0020). With a dialogue open the step is the dialogue's and nothing
+ * else. A press of `journal` opens the journal instead of an ordinary
  * step, before a press of `talk` is looked at (0020); a press of `talk` near a speaker — a
  * standing figure or a colleague — in reach and in sight opens a dialogue instead of an
  * ordinary step (0017, 0018). Otherwise: the lamp is on when the input holds
@@ -79,6 +83,13 @@ export function createInitialState(map: TileMap): GameState {
 export function update(state: GameState, input: GameInput, content: TileMap): GameState {
   if (state.dark > 0) {
     return { ...stepDark(state, content), held: input };
+  }
+  if (state.help) {
+    return stepHelp(state, input);
+  }
+  const help = openHelp(state, input);
+  if (help !== null) {
+    return help;
   }
   if (state.journal !== null) {
     return stepJournal(state, state.journal, input);
@@ -138,6 +149,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     figures: state.figures,
     dialogue: null,
     journal: null,
+    help: false,
     held: input,
     captured,
     overview,

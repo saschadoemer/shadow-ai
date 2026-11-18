@@ -37,9 +37,11 @@ spoken to with `E` or `Enter` (feature 0017): a box shows what she says, page by
 world stands still while it is open. The four colleagues who walk the floor can be spoken to as
 well, across the counter too, and each has a saying (feature 0018). `L` switches the game between
 German and English at any moment (feature 0019). `J` opens the journal with its three tabs;
-a captured snippet has its entry there (feature 0020). Milestones M3 and M4 are complete, and
-M5, the first act, has begun: the lamp finds traces on the screens of Sales, and the journal
-counts them on its cases tab (feature 0022). The roadmap is in [docs/plan.md](docs/plan.md).
+a captured snippet has its entry there (feature 0020). `H` opens the help, a box that lists
+every key, and for the first ten seconds a line at the bottom names it (feature 0021).
+Milestones M3 and M4 are complete, and M5, the first act, has begun: the lamp finds traces on
+the screens of Sales, and the journal counts them on its cases tab (feature 0022). The roadmap
+is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 

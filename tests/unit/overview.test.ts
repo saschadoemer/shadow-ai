@@ -172,6 +172,7 @@ describe('stepDark', () => {
     figures: [],
     dialogue: null,
     journal: null,
+    help: false,
     held: NO_INPUT,
     captured: { snippet: 2 },
     overview: { current: 0, max: 3 },
@@ -209,6 +210,7 @@ describe('stepDark', () => {
       figures: [],
       dialogue: null,
       journal: null,
+      help: false,
       held: NO_INPUT,
       captured: { snippet: 2 },
       overview: { current: 3, max: 3 },
@@ -242,6 +244,7 @@ describe('overview in update', () => {
     lamp: false,
     talk: false,
     journal: false,
+    help: false,
   };
   const SHINE: GameInput = { ...NONE, lamp: true };
   const LEFT_SHINE: GameInput = { ...NONE, left: true, lamp: true };
@@ -253,6 +256,7 @@ describe('overview in update', () => {
     lamp: true,
     talk: false,
     journal: false,
+    help: false,
   };
   /** The figure at (160, 100) facing right, with these creatures. */
   const game = (

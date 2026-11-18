@@ -170,6 +170,11 @@ export interface GameState {
   readonly dialogue: Dialogue | null;
   /** The journal that is open, or null. While it is open nothing else is stepped (0020). */
   readonly journal: JournalState | null;
+  /**
+   * Whether the help is open (0021). While it is, nothing else is stepped — not the world, not
+   * an open dialogue and not the open journal: it lies over whatever is there.
+   */
+  readonly help: boolean;
   /** The last step's input: an action is pressed when it is held now and was not then (0020). */
   readonly held: GameInput;
   /** Captured creatures per species; the journal (M4) reads it. */
