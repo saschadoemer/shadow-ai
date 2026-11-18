@@ -101,8 +101,8 @@ when there is enough text for English to be worth looking at; the title screen t
 the switch is M8, so M4 needs an interim one. The journal after it: its three tabs are text and
 pictures, and its first content — the captured snippet — exists since 0008. Help last: a box
 that lists every key, and a line at the start that names its own. It came out of the walk of
-0019, and it follows the journal because it lists the journal's key and uses its press. 0016 to
-0020 are implemented, and 0021 is approved.
+0019, and it follows the journal because it lists the journal's key and uses its press. All six
+are implemented. M4 is done: 0021 was the last of the six.
 
 ### M5 — Act 1 complete
 

@@ -42,6 +42,6 @@ in two.
 | [0018](0018-everyday-lines.md) | Everyday lines | M4 | implemented 2026-11-18 |
 | [0019](0019-the-language-switch.md) | The language switch | M4 | implemented 2026-11-18 |
 | [0020](0020-the-journal.md) | The journal | M4 | implemented 2026-11-18 |
-| [0021](0021-help.md) | Help | M4 | approved 2026-11-18 |
+| [0021](0021-help.md) | Help | M4 | implemented 2026-11-18 |
 | [0022](0022-traces.md) | Traces | M5 | implemented 2026-11-18 |
 | [0023](0023-the-shadow-over-the-regions.md) | The shadow over the regions | M5 | draft |
