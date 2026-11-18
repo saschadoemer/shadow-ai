@@ -317,7 +317,9 @@ describe('the help in the scene (0021)', () => {
   it('lies over the world: everything the scene draws without it, then the help, and nothing after', () => {
     const without = scene(playing());
     expect(without).not.toContain(FRAME);
-    expect(without.at(-1)).toBe('drawSprite 0 at 44,4');
+    // The last heart, and after it the help label (0031), whose last glyph is the `e` of `Hilfe`.
+    expect(without).toContain('drawSprite 0 at 44,4');
+    expect(without.at(-1)).toBe('drawSprite 69 at 308,6');
     expect(scene(playing({ help: true }))).toStrictEqual([...without, ...help('de')]);
   });
 

@@ -10,6 +10,7 @@ import {
   type PlayerState,
   type ShadowWallState,
 } from '../../src/game/state';
+import { drawHelpLabel, HELP_LABEL, helpLabelPlace } from '../../src/render/draw-help';
 import {
   creatureFrame,
   creatureOrigin,
@@ -47,7 +48,7 @@ import {
 } from '../../src/render/draw-scene';
 import { GLYPH_WIDTH } from '../../src/render/font';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
-import { LANGUAGES, TABLE } from '../../src/text/text';
+import { LANGUAGES, TABLE, textOf } from '../../src/text/text';
 import { solidsOf } from './solids';
 
 /** A renderer that only records what it was asked to draw, one line per call. */
@@ -121,13 +122,53 @@ const CONTENT: SceneContent = {
 /** The settings of a game in which the language was never switched (0019). */
 const GERMAN: SceneSettings = { language: 'de', switchedAt: null };
 const ENGLISH: SceneSettings = { language: 'en', switchedAt: null };
-/** The scene with the settings of a fresh game, unless a test hands over its own. */
+/**
+ * A renderer that passes everything on to `renderer` but the help label (0031): its frame, its
+ * field and its glyphs. The scene draws the label in every frame of the world, so the tests of
+ * the earlier features, which compare whole lists of calls, look at the scene through this.
+ * The last describe of this file holds it to the label's calls and to nothing else.
+ */
+function withoutLabel(
+  renderer: Renderer,
+  language: SceneSettings['language'],
+  font: SpriteSheet,
+): Renderer {
+  const { frame, field, text } = helpLabelPlace(textOf(HELP_LABEL, language).length);
+  const ofLabel = (x: number, y: number, width: number, height: number): boolean =>
+    [frame, field].some(
+      (box) => box.x === x && box.y === y && box.width === width && box.height === height,
+    );
+  return {
+    clear: (colour) => renderer.clear(colour),
+    fillRect: (x, y, width, height, colour) => {
+      if (!ofLabel(x, y, width, height)) {
+        renderer.fillRect(x, y, width, height, colour);
+      }
+    },
+    drawTile: (tileset, id, x, y) => renderer.drawTile(tileset, id, x, y),
+    drawSprite: (sheet, index, x, y) => {
+      if (!(sheet === font && y === text.y && x >= text.x)) {
+        renderer.drawSprite(sheet, index, x, y);
+      }
+    },
+  };
+}
+/**
+ * The scene with the settings of a fresh game, unless a test hands over its own — and without
+ * the help label (0031), which the last describe of this file looks at through `drawSceneWith`.
+ */
 const drawScene = (
   renderer: Renderer,
   scene: GameState,
   content: SceneContent,
   settings: SceneSettings = GERMAN,
-): void => drawSceneWith(renderer, scene, content, settings);
+): void =>
+  drawSceneWith(
+    withoutLabel(renderer, settings.language, content.fontSheet),
+    scene,
+    content,
+    settings,
+  );
 const player = (fields: Partial<PlayerState>): PlayerState => ({
   x: 0,
   y: 0,
@@ -1621,5 +1662,155 @@ describe('the story in the scene (0026)', () => {
     const used = recordingRenderer();
     drawScene(used, { ...waiting, lamp: { ...waiting.lamp, used: true } }, CONTENT);
     expect(used.calls).not.toContain(BAR);
+  });
+});
+
+describe('the help label in the scene (0031)', () => {
+  const BAR = 'fillRect 8,158 304x18 #181425';
+  const BOX = 'fillRect 8,134 304x42 #181425';
+  const HELP_FRAME = 'fillRect 48,30 224x98 #3a4466';
+  const LAST_HEART = 'drawSprite 0 at 44,4';
+  const GERMAN_LABEL = [
+    'fillRect 269,4 47x14 #3a4466',
+    'fillRect 270,5 45x12 #181425',
+    'drawSprite 40 at 272,6',
+    'drawSprite 40 at 284,6',
+    'drawSprite 73 at 290,6',
+    'drawSprite 76 at 296,6',
+    'drawSprite 70 at 302,6',
+    'drawSprite 69 at 308,6',
+  ];
+  const ENGLISH_LABEL = [
+    'fillRect 275,4 41x14 #3a4466',
+    'fillRect 276,5 39x12 #181425',
+    'drawSprite 40 at 278,6',
+    'drawSprite 40 at 290,6',
+    'drawSprite 69 at 296,6',
+    'drawSprite 76 at 302,6',
+    'drawSprite 80 at 308,6',
+  ];
+  /** The officer on the 3x2 map, so that a dialogue has its speaker. */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: { ...MAP, points: [{ name: 'figure:officer', x: 40, y: 20 }] },
+  };
+  /** Five full hearts, nothing else on the surface. */
+  const playing = (fields: Partial<GameState> = {}): GameState => ({
+    ...state({ x: 20, y: 30 }),
+    overview: { current: 5, max: 5 },
+    figures: [{ figure: 0, facing: 'left' }],
+    ...fields,
+  });
+  /** Every call of the scene as it is, the label among them. */
+  const whole = (scene: GameState, settings: SceneSettings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    drawSceneWith(renderer, scene, content, settings);
+    return renderer.calls;
+  };
+  /** The calls from the label's frame to its last glyph, or none where there is no frame. */
+  const labelIn = (calls: readonly string[], label: readonly string[]): string[] => {
+    const from = calls.indexOf(label[0] ?? '');
+    return from < 0 ? [] : calls.slice(from, from + label.length);
+  };
+
+  it('is what render/draw-help draws', () => {
+    for (const [language, label] of [
+      ['de', GERMAN_LABEL],
+      ['en', ENGLISH_LABEL],
+    ] as const) {
+      const renderer = recordingRenderer();
+      drawHelpLabel(renderer, CONTENT.fontSheet, language);
+      expect(renderer.calls, language).toStrictEqual(label);
+    }
+  });
+
+  it('follows the last heart: the frame, the field and the words, and nothing after them', () => {
+    const german = whole(playing());
+    expect(german.slice(german.indexOf(LAST_HEART) + 1)).toStrictEqual(GERMAN_LABEL);
+    const english = whole(playing(), ENGLISH);
+    expect(english.slice(english.indexOf(LAST_HEART) + 1)).toStrictEqual(ENGLISH_LABEL);
+  });
+
+  it('is there at every tick and does not move with the camera', () => {
+    for (const tick of [0, 599, 600, 100000]) {
+      expect(labelIn(whole(playing({ tick })), GERMAN_LABEL), `tick ${tick}`).toStrictEqual(
+        GERMAN_LABEL,
+      );
+    }
+    const moved = whole(playing({ camera: { x: 48, y: 32 } }));
+    expect(labelIn(moved, GERMAN_LABEL)).toStrictEqual(GERMAN_LABEL);
+  });
+
+  it('stays under the call, a dialogue, a notice, the language line, the help and the dark, and comes before each', () => {
+    const cases: readonly (readonly [string, GameState, SceneSettings, string])[] = [
+      [
+        'the call',
+        playing({
+          lamp: { on: false, strength: 1, owned: false, used: false },
+          dialogue: { speaker: 'story', index: 0, page: 0 },
+        }),
+        GERMAN,
+        BOX,
+      ],
+      ['a dialogue', playing({ dialogue: { speaker: 'figure', index: 0, page: 0 } }), GERMAN, BOX],
+      [
+        'a notice',
+        playing({
+          lamp: { on: true, strength: 1, owned: true, used: true },
+          shadowWalls: [{ wall: 0, lit: true, light: 0 }],
+        }),
+        GERMAN,
+        BAR,
+      ],
+      ['the language line', playing({ tick: 700 }), { language: 'de', switchedAt: 700 }, BAR],
+      ['the help', playing({ help: true }), GERMAN, HELP_FRAME],
+      ['the dark', playing({ dark: 30 }), GERMAN, 'fillRect 0,0 320x90 #181425'],
+    ];
+    for (const [name, scene, settings, next] of cases) {
+      const calls = whole(scene, settings);
+      expect(labelIn(calls, GERMAN_LABEL), name).toStrictEqual(GERMAN_LABEL);
+      expect(calls.indexOf(next), `${name}: what lies over the world is drawn`).toBeGreaterThan(-1);
+      expect(calls.indexOf(next), `${name}: after the label`).toBeGreaterThan(
+        calls.indexOf(GERMAN_LABEL[0] ?? ''),
+      );
+      expect(calls.indexOf(GERMAN_LABEL[0] ?? ''), `${name}: after the hearts`).toBeGreaterThan(
+        calls.indexOf(LAST_HEART),
+      );
+    }
+  });
+
+  it('is not on the screen of the journal, with or without the help over it', () => {
+    for (const help of [false, true]) {
+      const calls = whole(playing({ journal: { tab: 'policy' }, help }));
+      for (const call of GERMAN_LABEL) {
+        expect(calls, `help ${help}: ${call}`).not.toContain(call);
+      }
+    }
+  });
+
+  it('is all that `drawScene` of this file leaves out, in both languages', () => {
+    for (const [settings, label] of [
+      [GERMAN, GERMAN_LABEL],
+      [ENGLISH, ENGLISH_LABEL],
+    ] as const) {
+      for (const scene of [
+        playing(),
+        playing({ dialogue: { speaker: 'figure', index: 0, page: 0 } }),
+        playing({ help: true }),
+        playing({ journal: { tab: 'cases' } }),
+      ]) {
+        const seen = recordingRenderer();
+        drawScene(seen, scene, content, settings);
+        const all = recordingRenderer();
+        drawSceneWith(all, scene, content, settings);
+        const from = all.calls.indexOf(label[0] ?? '');
+        const rest =
+          from < 0
+            ? all.calls
+            : [...all.calls.slice(0, from), ...all.calls.slice(from + label.length)];
+        expect(seen.calls).toStrictEqual(rest);
+        expect(all.sheets.length - seen.sheets.length).toBe(from < 0 ? 0 : label.length - 2);
+      }
+    }
   });
 });
