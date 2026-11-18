@@ -1,6 +1,6 @@
 # 0029 — The wider cone
 
-**Status:** draft
+**Status:** approved 2026-11-18
 **Milestone:** M6
 **Drafted:** 2026-11-18
 

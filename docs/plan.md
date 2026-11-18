@@ -118,8 +118,8 @@ region next, because it is the answer to the case and the picture the teaser end
 returns, more colleagues see the shadow, overview grows by one. The call last of the story:
 the customer on the phone, the first sight of the shadow and the lamp handed over can be told
 once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
-has left it open since 0009. 0022, 0023 and 0024 are implemented; 0025
-and 0026 are approved; 0027 is drafted.
+has left it open since 0009. 0022, 0023 and 0024 are implemented; 0025,
+0026 and 0027 are approved.
 
 ### M6 — The cases of Act 2
 
@@ -135,7 +135,7 @@ species brings what the journal still lacks — a choice among its entries, and 
 Named here without a number and specified when their turn comes: the case of Support · the
 cases of HR and Accounting · the colour filter · the case of Development · the meeting rooms'
 side case · the vendor in every department · the intern in the break room and the hints ·
-who sees the shadow · the two keys · Management and the last case. 0028 and 0029 are drafted.
+who sees the shadow · the two keys · Management and the last case. 0028 and 0029 are approved.
 
 ## 5. Deferred, with reasons
 
