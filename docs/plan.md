@@ -106,9 +106,9 @@ are implemented. M4 is done: 0021 was the last of the six.
 
 ### M5 — Act 1 complete
 
-Six features, each its own pull request with its own acceptance plan, in this order: 0022
+Seven features, each its own pull request with its own acceptance plan, in this order: 0022
 traces · 0023 the shadow over the regions · 0024 the case of Sales · 0025 the cleared region ·
-0026 the call · 0027 overview won back. Traces first, because finding them is the next verb of
+0026 the call · 0027 overview won back · 0031 the help label. Traces first, because finding them is the next verb of
 the game and every case begins with it: shadow residue on devices, seen only in the lamp's
 light, counted on the journal's cases tab. Then the shadow over the regions, so that a room
 under shadow looks it before the first one is cleared — `visual.md` §4 has asked for the grey
@@ -117,9 +117,12 @@ source, the trace shown to it, the entry and the policy block in the journal. Th
 region next, because it is the answer to the case and the picture the teaser ends on: colour
 returns, more colleagues see the shadow, overview grows by one. The call last of the story:
 the customer on the phone, the first sight of the shadow and the lamp handed over can be told
-once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
-has left it open since 0009. 0022, 0023, 0024, 0025 and 0026 are
-implemented; 0027 is approved.
+once there is a case to walk into. Overview won back after it; `gameplay.md` §4 has left it
+open since 0009. The help label closes the milestone: the line that named the help's key for
+ten seconds, right after the call, was on screen too long, and a small label in the corner
+that stays takes its place. It comes after 0027 because it takes a field out of the state to
+which 0027 adds one. 0022, 0023, 0024, 0025 and 0026 are implemented; 0027 and 0031 are
+approved.
 
 ### M6 — The cases of Act 2
 

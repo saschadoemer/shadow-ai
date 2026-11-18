@@ -1,6 +1,6 @@
 # 0031 — The help label
 
-**Status:** draft
+**Status:** approved 2026-11-18
 **Milestone:** M5
 **Drafted:** 2026-11-18
 
@@ -262,17 +262,17 @@ WASD walk, `E` or `Enter` talks, `J` opens and closes the journal, `L` switches 
 
 ## Open questions
 
-Five, each with the answer this draft is written to:
+None. Five were settled on 2026-11-18, each as drafted:
 
-1. **The words.** `H Hilfe` and `H Help`, the key first and no colon — or `H: Hilfe`, or
-   `Hilfe: H`? Drafted: `H Hilfe`.
-2. **The look.** A field in `#181425` with a frame of 1 px in `#3a4466`, 47x14, 4 px from
-   the top right corner — or the field without a frame, as the notice's bar has none?
-   Drafted: with the frame, as the help's box.
-3. **Where it shows.** Whenever the world is on screen, also during a dialogue, with the
-   help open and under the call; not on the journal's screen. Drafted so.
-4. **The start hint.** It goes entirely, and `notice.help` and `GameState.started` go with
-   it — or a shorter line stays at the start beside the label? Drafted: it goes.
-5. **The milestone and the order.** M5, as its seventh feature, built after 0027 has merged
-   — 0027 adds a field to the state while this feature takes one away, so one after the
-   other spares a conflict. Drafted so.
+- The words: `H Hilfe` and `H Help`, the key first and no colon. Not `H: Hilfe` and not
+  `Hilfe: H`.
+- The look: a field in `#181425` with a frame of 1 px in `#3a4466`, 47x14 in German, 4 px
+  from the top right corner. With the frame, as the help's box has one, and not a bare field
+  like the notice's bar.
+- Where it shows: whenever the world is on screen, also during a dialogue, with the help
+  open and under the call; not on the journal's screen.
+- The start hint: it goes entirely, and `notice.help` and `GameState.started` go with it. No
+  shorter line stays at the start beside the label.
+- The milestone and the order: M5, as its seventh feature, built after 0027 has merged —
+  0027 adds a field to the state while this feature takes one away, so one after the other
+  spares a conflict.
