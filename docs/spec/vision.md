@@ -130,7 +130,8 @@ Dialogue and descriptions are written by many hands, some of them agents. This i
 
 German first, English second. Both complete before distribution. Every visible string goes
 through a key and a language table from the first line of text; no literal text in code. The
-language is switched on the title screen. Code, comments, documentation and asset names are
+language is switched on the title screen; until the title screen exists (M8), `L` switches it
+while playing (feature 0019). Code, comments, documentation and asset names are
 English.
 
 ## 8. Non-goals of the vision
