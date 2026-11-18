@@ -1,6 +1,6 @@
 # 0030 — Cloud Run deployment
 
-**Status:** approved 2026-11-17
+**Status:** implemented 2026-11-18
 **Milestone:** M8, pulled forward
 **Drafted:** 2026-11-17
 
