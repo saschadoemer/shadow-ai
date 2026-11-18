@@ -216,9 +216,11 @@ export const FIGURES: readonly { readonly id: string; readonly at: Point }[] = [
 ];
 
 /**
- * The traces (0022): per trace its region and the cell of the device it lies on. Five in
+ * The traces (0022, 0028): per trace its region and the cell of the device it lies on. Five in
  * Sales, each on the desk with a screen of a cubicle, spread over the room with at least one
- * in every row of cubicles. The order is the order in the file.
+ * in every row of cubicles. Five in Marketing: four on a screen of a desk island, three in the
+ * upper row and one in the lower, and one on the printer at the lower wall. The order is the
+ * order in the file.
  */
 export const TRACES: readonly { readonly region: string; readonly cell: Point }[] = [
   { region: 'sales', cell: { x: 83, y: 28 } },
@@ -226,7 +228,19 @@ export const TRACES: readonly { readonly region: string; readonly cell: Point }[
   { region: 'sales', cell: { x: 93, y: 34 } },
   { region: 'sales', cell: { x: 88, y: 40 } },
   { region: 'sales', cell: { x: 98, y: 46 } },
+  { region: 'marketing', cell: { x: 6, y: 62 } },
+  { region: 'marketing', cell: { x: 15, y: 62 } },
+  { region: 'marketing', cell: { x: 41, y: 62 } },
+  { region: 'marketing', cell: { x: 5, y: 70 } },
+  { region: 'marketing', cell: { x: 27, y: 78 } },
 ];
+
+/**
+ * How many traces stand before the areas in the file: the five of 0022. Every later trace is
+ * written at the end of the file, so that no object of an earlier feature changes its id
+ * (0028).
+ */
+export const FIRST_TRACES = 5;
 
 /**
  * The areas of the regions (0023): which room of the layout belongs to which region of the
@@ -1191,8 +1205,10 @@ export function floorJson(): MapJson {
   const firstWall = SNIPPETS.length + 3 + routes.length;
   const firstFigure = firstWall + SHADOW_WALLS.length;
   const firstTrace = firstFigure + FIGURES.length;
-  const firstArea = firstTrace + TRACES.length;
+  const firstArea = firstTrace + FIRST_TRACES;
   const firstRest = firstArea + REGION_AREAS.length;
+  const firstLaterTrace = firstRest + RESTS.length;
+  const laterTraces = TRACES.slice(FIRST_TRACES);
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1218,7 +1234,7 @@ export function floorJson(): MapJson {
           ...FIGURES.map((figure, i) =>
             pointObject(firstFigure + i, `figure:${figure.id}`, figure.at),
           ),
-          ...TRACES.map((trace, i) =>
+          ...TRACES.slice(0, FIRST_TRACES).map((trace, i) =>
             rectObject(firstTrace + i, `trace:${trace.region}`, traceBox(trace.cell)),
           ),
           ...REGION_AREAS.map((area, i) =>
@@ -1226,6 +1242,9 @@ export function floorJson(): MapJson {
           ),
           ...RESTS.map((rest, i) =>
             rectObject(firstRest + i, `rest:${rest.what}`, traceBox(rest.cell)),
+          ),
+          ...laterTraces.map((trace, i) =>
+            rectObject(firstLaterTrace + i, `trace:${trace.region}`, traceBox(trace.cell)),
           ),
         ],
         opacity: 1,
@@ -1236,7 +1255,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstRest + RESTS.length,
+    nextobjectid: firstLaterTrace + laterTraces.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

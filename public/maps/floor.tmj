@@ -2034,6 +2034,61 @@
           "width": 16,
           "x": 832,
           "y": 1248
+        },
+        {
+          "height": 16,
+          "id": 124,
+          "name": "trace:marketing",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 96,
+          "y": 992
+        },
+        {
+          "height": 16,
+          "id": 125,
+          "name": "trace:marketing",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 240,
+          "y": 992
+        },
+        {
+          "height": 16,
+          "id": 126,
+          "name": "trace:marketing",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 656,
+          "y": 992
+        },
+        {
+          "height": 16,
+          "id": 127,
+          "name": "trace:marketing",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 80,
+          "y": 1120
+        },
+        {
+          "height": 16,
+          "id": 128,
+          "name": "trace:marketing",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 432,
+          "y": 1248
         }
       ],
       "opacity": 1,
@@ -2044,7 +2099,7 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 124,
+  "nextobjectid": 129,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",

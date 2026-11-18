@@ -405,3 +405,64 @@ describe('a solved case in the journal (0024)', () => {
     expect(renderer.calls).toStrictEqual(draw(reading('creatures', 1)).calls);
   });
 });
+
+describe('the cases tab with two regions (0028)', () => {
+  /** Five traces of Sales and five of Marketing, in the order of the floor. */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({
+        name: n < 5 ? 'trace:sales' : 'trace:marketing',
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  /** The traces with those of the given indices found. */
+  const traces = (...found: readonly number[]): TraceState[] =>
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((trace) => ({
+      trace,
+      light: 0,
+      found: found.includes(trace) ? 60 : null,
+    }));
+  const cases = (found: readonly number[], settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    const state: GameState = { ...reading('cases'), traces: traces(...found) };
+    drawJournal(renderer, state, { tab: 'cases' }, content, settings);
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+
+  it('shows Marketing alone, in the first place, while no trace of Sales is found', () => {
+    const entry = cases([5, 6]);
+    // `Marketing` 9 glyphs, `Spuren:` 7, `2`, `von` 3, `5`.
+    expect(entry).toHaveLength(9 + 7 + 1 + 3 + 1);
+    expect(entry[0]).toBe('drawSprite 45 at 16,36');
+    expect(entry[9]).toBe('drawSprite 51 at 16,48');
+    expect(entry[16]).toBe('drawSprite 18 at 64,48');
+    expect(entry[20]).toBe('drawSprite 21 at 100,48');
+  });
+
+  it('shows Sales first and Marketing second, 36 px lower, with a trace of each found', () => {
+    const both = cases([0, 9]);
+    const sales = cases([0]);
+    // The entry of Sales is what it was; the 21 glyphs of Marketing follow it.
+    expect(both.slice(0, sales.length)).toStrictEqual(sales);
+    const marketing = both.slice(sales.length);
+    expect(marketing).toHaveLength(9 + 7 + 1 + 3 + 1);
+    expect(marketing[0]).toBe('drawSprite 45 at 16,72');
+    expect(marketing[9]).toBe('drawSprite 51 at 16,84');
+    expect(marketing[16]).toBe('drawSprite 17 at 64,84');
+  });
+
+  it('reads `Marketing` and `Traces: 5 of 5` in English', () => {
+    const entry = cases([5, 6, 7, 8, 9], ENGLISH);
+    // `Marketing` 9 glyphs, `Traces:` 7, `5`, `of` 2, `5`.
+    expect(entry).toHaveLength(9 + 7 + 1 + 2 + 1);
+    expect(entry[0]).toBe('drawSprite 45 at 16,36');
+    expect(entry[9]).toBe('drawSprite 52 at 16,48');
+    expect(entry[16]).toBe('drawSprite 21 at 64,48');
+  });
+});

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,6 +24,7 @@ import {
   CLOSED_DOORS,
   CORRIDORS,
   FIGURES,
+  FIRST_TRACES,
   FLOOR_HEIGHT,
   FLOOR_WIDTH,
   FURNITURE,
@@ -497,9 +499,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 123 }, (_, i) => i + 1),
+      Array.from({ length: 128 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(124);
+    expect(json.nextobjectid).toBe(129);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -1206,12 +1208,13 @@ describe('the traces of the floor (0022)', () => {
   ];
   const traces = tracesOf(floor.rects);
 
-  it('are five, all of Sales, on the cells of the spec', () => {
-    expect(traces).toStrictEqual(TABLE.map(([region, , , box]) => ({ region, box })));
-    expect(TRACES.map((trace) => [trace.region, trace.cell.x, trace.cell.y])).toStrictEqual(
-      TABLE.map(([region, column, row]) => [region, column, row]),
-    );
-    expect(TRACES.map((trace) => traceBox(trace.cell))).toStrictEqual(
+  it('are five, all of Sales, on the cells of the spec: the first five of the floor', () => {
+    // The five of Marketing follow them (0028).
+    expect(traces.slice(0, 5)).toStrictEqual(TABLE.map(([region, , , box]) => ({ region, box })));
+    expect(
+      TRACES.slice(0, 5).map((trace) => [trace.region, trace.cell.x, trace.cell.y]),
+    ).toStrictEqual(TABLE.map(([region, column, row]) => [region, column, row]));
+    expect(TRACES.slice(0, 5).map((trace) => traceBox(trace.cell))).toStrictEqual(
       TABLE.map(([, , , box]) => box),
     );
   });
@@ -1295,7 +1298,8 @@ describe('the traces of the floor (0022)', () => {
     for (const { region } of traces) {
       expect(REGION_NAME[region], region).toBeDefined();
     }
-    expect(createInitialState(floor).traces).toHaveLength(5);
+    // Five of Sales and, since 0028, five of Marketing.
+    expect(createInitialState(floor).traces).toHaveLength(10);
   });
 });
 
@@ -1366,7 +1370,8 @@ describe('the areas of the regions on the floor (0023)', () => {
 
   it('leave the walls and the traces as they were', () => {
     expect(wallsOf(floor.rects)).toHaveLength(8);
-    expect(tracesOf(floor.rects)).toHaveLength(5);
+    // The five of 0022; the five of 0028 came later.
+    expect(tracesOf(floor.rects)).toHaveLength(10);
     expect(floor.points).toHaveLength(91);
   });
 
@@ -1537,20 +1542,19 @@ describe('the rests of the floor (0027)', () => {
     );
   });
 
-  it('are the last eight objects of the file, rectangles with the ids 116 to 123', () => {
+  it('are eight rectangles with the ids 116 to 123, after the areas and before the traces of 0028', () => {
     const objects = floorJson().layers[3].objects;
-    expect(objects).toHaveLength(123);
-    expect(objects.slice(115).map((object) => [object.id, object.name])).toStrictEqual(
+    expect(objects.slice(115, 123).map((object) => [object.id, object.name])).toStrictEqual(
       TABLE.map((_row, i) => [116 + i, 'rest:coffee']),
     );
-    expect(objects.slice(115).some((object) => 'point' in object)).toBe(false);
-    expect(floorJson().nextobjectid).toBe(124);
-    expect(floor.rects).toHaveLength(31);
+    expect(objects.slice(115, 123).some((object) => 'point' in object)).toBe(false);
+    expect(floor.rects.slice(23, 31).every((rect) => rect.name === 'rest:coffee')).toBe(true);
   });
 
   it('leave the objects of 0023 and before as they were', () => {
     expect(wallsOf(floor.rects)).toHaveLength(8);
-    expect(tracesOf(floor.rects)).toHaveLength(5);
+    // The five of 0022; the five of 0028 came later.
+    expect(tracesOf(floor.rects)).toHaveLength(10);
     expect(areas).toHaveLength(10);
     expect(floor.points).toHaveLength(91);
   });
@@ -1606,5 +1610,145 @@ describe('the rests of the floor (0027)', () => {
       expect(restUnderShadow(sales, floor.rects, [])).toBe(true);
       expect(restUnderShadow(sales, floor.rects, [{ region: 'sales', at: 1005 }])).toBe(false);
     }
+  });
+});
+
+describe('the traces of Marketing on the floor (0028)', () => {
+  /** Cell, box and the tile of the device, in file order: the spec's table. */
+  const TABLE: readonly (readonly [number, number, Box, number])[] = [
+    [6, 62, { x: 96, y: 992, width: 16, height: 16 }, DESK_MONITOR],
+    [15, 62, { x: 240, y: 992, width: 16, height: 16 }, DESK_MONITOR],
+    [41, 62, { x: 656, y: 992, width: 16, height: 16 }, DESK_MONITOR],
+    [5, 70, { x: 80, y: 1120, width: 16, height: 16 }, DESK_MONITOR],
+    [27, 78, { x: 432, y: 1248, width: 16, height: 16 }, PRINTER],
+  ];
+  const traces = tracesOf(floor.rects);
+  const start = createInitialState(floor);
+  /** The state with the traces of the given indices found. */
+  const found = (...indices: readonly number[]): GameState => ({
+    ...start,
+    traces: start.traces.map((trace, i) => (indices.includes(i) ? { ...trace, found: 1 } : trace)),
+  });
+
+  it('are five, on the cells of the spec, after the five of Sales', () => {
+    expect(FIRST_TRACES).toBe(5);
+    expect(traces).toHaveLength(10);
+    expect(traces.slice(0, 5).every((trace) => trace.region === 'sales')).toBe(true);
+    expect(traces.slice(5)).toStrictEqual(TABLE.map(([, , box]) => ({ region: 'marketing', box })));
+    expect(TRACES.slice(5)).toStrictEqual(
+      TABLE.map(([x, y]) => ({ region: 'marketing', cell: { x, y } })),
+    );
+  });
+
+  it('are the last five objects of the file, rectangles with the ids 124 to 128', () => {
+    const objects = floorJson().layers[3].objects;
+    expect(objects).toHaveLength(128);
+    expect(objects.slice(123).map((object) => [object.id, object.name])).toStrictEqual(
+      [124, 125, 126, 127, 128].map((id) => [id, 'trace:marketing']),
+    );
+    expect(objects.slice(123).some((object) => 'point' in object)).toBe(false);
+    expect(floorJson().nextobjectid).toBe(129);
+    expect(floor.rects).toHaveLength(36);
+    expect(floor.points).toHaveLength(91);
+  });
+
+  it('leave the 123 objects of 0027 and before exactly as they were', () => {
+    // SHA-256 over the first 123 objects, recorded from the generator before this feature.
+    const before = JSON.stringify(floorJson().layers[3].objects.slice(0, 123));
+    expect(createHash('sha256').update(before).digest('hex')).toBe(
+      '958d049dff30dc32799e5239794ad7c18aabafe0f9f81d984eb503b392a14cbb',
+    );
+  });
+
+  it('lie in the area of Marketing, four on a desk with a screen and one on the printer', () => {
+    const marketing = areasOf(floor.rects).filter((area) => area.region === 'marketing');
+    expect(marketing).toHaveLength(1);
+    const mine = traces.filter((trace) => trace.region === 'marketing');
+    expect(mine).toHaveLength(5);
+    for (const [i, { box }] of mine.entries()) {
+      const column = box.x / 16;
+      const row = box.y / 16;
+      expect(
+        marketing.some((area) => inArea(area, { x: box.x, y: box.y })),
+        `(${column}, ${row})`,
+      ).toBe(true);
+      expect(floor.detail[cell(column, row)], `(${column}, ${row})`).toBe(TABLE[i]?.[3]);
+      // The cell above the device is free: the player stands there.
+      expect(floor.detail[cell(column, row - 1)], `(${column}, ${row - 1})`).toBe(EMPTY);
+    }
+  });
+
+  it('are in the light of a player who looks down from any place on the cell above', () => {
+    for (const [column, row] of TABLE) {
+      const trace = traces.find(
+        (candidate) => candidate.box.x === column * 16 && candidate.box.y === row * 16,
+      );
+      let places = 0;
+      for (let x = column * 16; x <= column * 16 + 16; x += 2) {
+        for (let y = (row - 1) * 16 + 2; y <= row * 16; y += 2) {
+          if (!reached({ x, y })) {
+            continue;
+          }
+          places += 1;
+          const player = {
+            x,
+            y,
+            facing: 'down',
+            frame: 0,
+            frameTimer: 0,
+            grace: 0,
+            recoil: NO_RECOIL,
+          } as const;
+          expect(
+            trace !== undefined && traceInLight(trace, player, true, floor),
+            `(${column}, ${row}) from (${x}, ${y})`,
+          ).toBe(true);
+        }
+      }
+      expect(places, `(${column}, ${row})`).toBe(72);
+    }
+  });
+
+  it('leave twelve of the sixteen screens of Marketing without a trace, and it has one printer', () => {
+    const room = ROOMS.find((candidate) => candidate.name === 'marketing');
+    const { c0, c1, r0, r1 } = room?.cells ?? { c0: 0, c1: -1, r0: 0, r1: -1 };
+    const count = (tile: number): number => {
+      let cells = 0;
+      for (let row = r0; row <= r1; row += 1) {
+        for (let column = c0; column <= c1; column += 1) {
+          cells += floor.detail[cell(column, row)] === tile ? 1 : 0;
+        }
+      }
+      return cells;
+    };
+    expect(count(DESK_MONITOR)).toBe(16);
+    expect(count(PRINTER)).toBe(1);
+  });
+
+  it('start unseen in the state: ten traces, none found, Sales 0 to 4 and Marketing 5 to 9', () => {
+    expect(start.traces).toStrictEqual(
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((trace) => ({ trace, light: 0, found: null })),
+    );
+    expect(start.traces.map((state) => traces[state.trace]?.region)).toStrictEqual([
+      ...Array.from({ length: 5 }, () => 'sales'),
+      ...Array.from({ length: 5 }, () => 'marketing'),
+    ]);
+    expect(REGION_NAME.marketing).toBeDefined();
+  });
+
+  it('make Marketing ready exactly when its five are found, whatever is found in Sales', () => {
+    const ready = (state: GameState): boolean[] => [
+      isReady('sales', progressOf(state, floor)),
+      isReady('marketing', progressOf(state, floor)),
+    ];
+    expect(ready(start)).toStrictEqual([false, false]);
+    // Five: those of Sales, or those of Marketing.
+    expect(ready(found(0, 1, 2, 3, 4))).toStrictEqual([true, false]);
+    expect(ready(found(5, 6, 7, 8, 9))).toStrictEqual([false, true]);
+    // Nine: all but one of Marketing, or all but one of Sales.
+    expect(ready(found(0, 1, 2, 3, 4, 5, 6, 7, 8))).toStrictEqual([true, false]);
+    expect(ready(found(1, 2, 3, 4, 5, 6, 7, 8, 9))).toStrictEqual([false, true]);
+    // Ten.
+    expect(ready(found(0, 1, 2, 3, 4, 5, 6, 7, 8, 9))).toStrictEqual([true, true]);
   });
 });
