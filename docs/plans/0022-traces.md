@@ -111,7 +111,7 @@ new dependency.
   `notice.trace-found`; in `game/journal`: `CASE_TEXT: { traces: TextKey; of: TextKey }` and
   `REGION_NAME: Readonly<Partial<Record<string, TextKey>>>`.
 
-- [ ] **Step 1: Write the failing test,** and widen the rule test of 0020 to the two new
+- [x] **Step 1: Write the failing test,** and widen the rule test of 0020 to the two new
   keys of the kind `journal` and to the kind `region`:
 
 ```diff
@@ -155,12 +155,12 @@ new dependency.
          const rule = rules.find(([applies]) => applies(key));
 ```
 
-- [ ] **Step 2: Run it and see it fail.**
+- [x] **Step 2: Run it and see it fail.**
 
 Run: `npx vitest run tests/unit/text.test.ts`
 Expected: the new test FAILS — the ids do not exist. `npm run typecheck` fails too.
 
-- [ ] **Step 3: Add the strings.**
+- [x] **Step 3: Add the strings.**
 
 ```diff
 --- a/src/text/de.ts
@@ -206,7 +206,7 @@ Expected: the new test FAILS — the ids do not exist. `npm run typecheck` fails
      'A piece of text somebody pasted into a public',
 ```
 
-- [ ] **Step 4: Name them in `src/game/journal.ts`,** above `entriesOf`:
+- [x] **Step 4: Name them in `src/game/journal.ts`,** above `entriesOf`:
 
 ```diff
 --- a/src/game/journal.ts
@@ -231,13 +231,13 @@ Expected: the new test FAILS — the ids do not exist. `npm run typecheck` fails
    return SPECIES.filter((species) => captured[species] > 0);
 ```
 
-- [ ] **Step 5: Run the tests.**
+- [x] **Step 5: Run the tests.**
 
 Run: `npx vitest run tests/unit/text.test.ts tests/unit/font.test.ts tests/unit/draw-scene.test.ts`
 Expected: PASS — the notice fits the bar, every character has a glyph. `npm run test`: 928
 tests.
 
-- [ ] **Step 6:** `npm run check`, then commit — `Give the traces their words`.
+- [x] **Step 6:** `npm run check`, then commit — `Give the traces their words`.
 
 ---
 
@@ -273,7 +273,7 @@ does not draw them yet, and the journal does not list them.
 - Produces, in `game/notice`: `NOTICE_TRACE_FOUND`, `TRACE_NOTICE_STEPS = 120`.
 - Produces, in `tools/floor-layout`: `TRACES`, `traceBox(cell: Point): Box`.
 
-- [ ] **Step 1: Create the fixture** `tests/fixtures/maps/traces.tmj` from `figures.tmj` with
+- [x] **Step 1: Create the fixture** `tests/fixtures/maps/traces.tmj` from `figures.tmj` with
   a one-off script. Do not commit the script. Run from the repository root:
 
 ```bash
@@ -312,7 +312,7 @@ EOF
   rectangle `trace:sales` (160, 80, 16, 16) and the rectangle `shadow:marketing`
   (144, 112, 48, 4) between the two.
 
-- [ ] **Step 2: Create `tests/unit/trace.test.ts`:**
+- [x] **Step 2: Create `tests/unit/trace.test.ts`:**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -636,7 +636,7 @@ describe('the cases the traces open (0022)', () => {
 });
 ```
 
-- [ ] **Step 3: Change the tests that build a state, and add the floor's and the state's
+- [x] **Step 3: Change the tests that build a state, and add the floor's and the state's
   tests.** Every `GameState` literal gets `traces: []` after `shadowWalls`. In
   `floor.test.ts` three tests of 0014, 0015 and 0017 learn that five rectangles follow the
   officer's point, and a block of six tests is added. In `state.test.ts` the test of 0014
@@ -1025,13 +1025,13 @@ describe('the cases the traces open (0022)', () => {
  });
 ```
 
-- [ ] **Step 4: Run and see it fail.**
+- [x] **Step 4: Run and see it fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `src/game/rects` and `src/game/trace` do not exist, `traces` is no
 property of `GameState`, and `TRACES` and `traceBox` are not exported by the layout.
 
-- [ ] **Step 5: Create `src/game/rects.ts`:**
+- [x] **Step 5: Create `src/game/rects.ts`:**
 
 ```ts
 import type { NamedRect } from '../engine/tiled';
@@ -1063,7 +1063,7 @@ export function rectsOf(rects: readonly NamedRect[], prefix: string): NamedRect[
 }
 ```
 
-- [ ] **Step 6: Let `wallsOf` read through it,** in `src/game/shadow.ts`. The message for a
+- [x] **Step 6: Let `wallsOf` read through it,** in `src/game/shadow.ts`. The message for a
   rectangle of no known kind stays word for word, so the tests of 0014 hold:
 
 ```diff
@@ -1110,7 +1110,7 @@ export function rectsOf(rects: readonly NamedRect[], prefix: string): NamedRect[
      if (density === undefined) {
 ```
 
-- [ ] **Step 7: The state,** in `src/game/state.ts`:
+- [x] **Step 7: The state,** in `src/game/state.ts`:
 
 ```diff
 --- a/src/game/state.ts
@@ -1143,7 +1143,7 @@ export function rectsOf(rects: readonly NamedRect[], prefix: string): NamedRect[
    /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
 ```
 
-- [ ] **Step 8: Create `src/game/trace.ts`:**
+- [x] **Step 8: Create `src/game/trace.ts`:**
 
 ```ts
 import { type Box, sightBlocked } from '../engine/collision';
@@ -1296,7 +1296,7 @@ export function caseEntries(
 }
 ```
 
-- [ ] **Step 9: Start, step and rest the traces,** in `src/game/update.ts` and
+- [x] **Step 9: Start, step and rest the traces,** in `src/game/update.ts` and
   `src/game/overview.ts`. Update the two doc comments of `update.ts` too: the initial state
   has every trace of the map unseen and not found; an ordinary step steps the traces against
   the stepped figure, on the map with the walls standing at the start of the step (0022).
@@ -1359,7 +1359,7 @@ export function caseEntries(
      journal: null,
 ```
 
-- [ ] **Step 10: The notice of a find,** in `src/game/notice.ts`:
+- [x] **Step 10: The notice of a find,** in `src/game/notice.ts`:
 
 ```diff
 --- a/src/game/notice.ts
@@ -1401,7 +1401,7 @@ export function caseEntries(
  }
 ```
 
-- [ ] **Step 11: The five traces of the floor,** in `tools/floor-layout.ts`, then
+- [x] **Step 11: The five traces of the floor,** in `tools/floor-layout.ts`, then
   `npm run gen-floor`. The generator appends five rectangles after the figure's point.
 
 ```diff
@@ -1465,14 +1465,14 @@ export function caseEntries(
   `git diff --stat public/maps/floor.tmj` shows one file changed: the five objects with the
   ids 101 to 105 and `nextobjectid` 106, nothing else.
 
-- [ ] **Step 12: Run the tests.**
+- [x] **Step 12: Run the tests.**
 
 Run: `npm run typecheck && npx vitest run tests/unit/trace.test.ts tests/unit/floor.test.ts tests/unit/state.test.ts`
 Expected: PASS — `trace.test.ts` has 30 tests. Then `npm run test`: 972 tests, every file
 green. The digest test of 0020 in `journal.test.ts` still holds: the traces change nothing
 else in the world.
 
-- [ ] **Step 13:** `npm run check`, then commit —
+- [x] **Step 13:** `npm run check`, then commit —
   `Find the traces of Sales with the lamp`. The body says that the rectangles of a map now
   have kinds, and that a trace is tested against the walls standing, so that none is found
   through one.
@@ -1496,7 +1496,7 @@ else in the world.
 - Produces, in `render/draw-scene`: `SceneContent.traceSheet`, `TRACE_LOOKS = 3`,
   `traceFrame(trace: TraceState): number`.
 
-- [ ] **Step 1: Create `tests/unit/trace-sheet.test.ts`:**
+- [x] **Step 1: Create `tests/unit/trace-sheet.test.ts`:**
 
 ```ts
 import { readFileSync } from 'node:fs';
@@ -1596,7 +1596,7 @@ describe('the placeholder trace generator (0022)', () => {
 });
 ```
 
-- [ ] **Step 2: Change the asset test and the scene tests.** The trace sheet joins the list
+- [x] **Step 2: Change the asset test and the scene tests.** The trace sheet joins the list
   of shadow assets; both scene test files give their content a `traceSheet`; a block of five
   tests is added to `draw-scene.test.ts`.
 
@@ -1731,14 +1731,14 @@ describe('the placeholder trace generator (0022)', () => {
  });
 ```
 
-- [ ] **Step 3: Run and see it fail.**
+- [x] **Step 3: Run and see it fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `tools/placeholder-trace.ts` does not exist, `encodeTracePng`,
 `TRACE_LOOKS` and `traceFrame` are not exported, `traceSheet` is no property of
 `SceneContent`.
 
-- [ ] **Step 4: Create `tools/placeholder-trace.ts`:**
+- [x] **Step 4: Create `tools/placeholder-trace.ts`:**
 
 ```ts
 import { SHADOW_COLOUR } from '../src/render/palette.ts';
@@ -1786,7 +1786,7 @@ export function renderTrace(): Uint8Array {
 }
 ```
 
-- [ ] **Step 5: Write the sheet with the others,** in `tools/gen-sprites.ts`, then
+- [x] **Step 5: Write the sheet with the others,** in `tools/gen-sprites.ts`, then
   `npm run gen-sprites`. Only `public/sprites/trace.png` is new; no other sheet changes.
 
 ```diff
@@ -1831,7 +1831,7 @@ export function renderTrace(): Uint8Array {
  }
 ```
 
-- [ ] **Step 6: Draw the traces,** in `src/render/draw-scene.ts`, and load the sheet in
+- [x] **Step 6: Draw the traces,** in `src/render/draw-scene.ts`, and load the sheet in
   `src/main.ts`:
 
 ```diff
@@ -1930,12 +1930,12 @@ export function renderTrace(): Uint8Array {
          PERSON_SHEET_URLS.map(async (url) => ({
 ```
 
-- [ ] **Step 7: Run the tests.**
+- [x] **Step 7: Run the tests.**
 
 Run: `npm run typecheck && npx vitest run tests/unit/trace-sheet.test.ts tests/unit/assets.test.ts tests/unit/draw-scene.test.ts`
 Expected: PASS. Then `npm run test`: 983 tests.
 
-- [ ] **Step 8:** `npm run check`, then commit — `Show a trace while the light is on it`.
+- [x] **Step 8:** `npm run check`, then commit — `Show a trace while the light is on it`.
 
 ---
 
@@ -1951,7 +1951,7 @@ Expected: PASS. Then `npm run test`: 983 tests.
   `drawNumber(renderer, font: SpriteSheet, value: number, x: number, y: number): void`.
 - Produces, in `render/draw-journal`: `CASE_NAME`, `CASE_LINE`, `CASE_PITCH`.
 
-- [ ] **Step 1: Write the failing tests.** The digits 0 to 9 are the glyphs 16 to 25.
+- [x] **Step 1: Write the failing tests.** The digits 0 to 9 are the glyphs 16 to 25.
 
 ```diff
 --- a/tests/unit/draw-text.test.ts
@@ -2091,12 +2091,12 @@ Expected: PASS. Then `npm run test`: 983 tests.
 +});
 ```
 
-- [ ] **Step 2: Run and see them fail.**
+- [x] **Step 2: Run and see them fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `drawNumber`, `CASE_NAME`, `CASE_LINE` and `CASE_PITCH` are not exported.
 
-- [ ] **Step 3: Add `drawNumber`,** at the end of `src/render/draw-text.ts`:
+- [x] **Step 3: Add `drawNumber`,** at the end of `src/render/draw-text.ts`:
 
 ```diff
 --- a/src/render/draw-text.ts
@@ -2125,7 +2125,7 @@ Expected: errors — `drawNumber`, `CASE_NAME`, `CASE_LINE` and `CASE_PITCH` are
 +}
 ```
 
-- [ ] **Step 4: Draw the cases,** in `src/render/draw-journal.ts`:
+- [x] **Step 4: Draw the cases,** in `src/render/draw-journal.ts`:
 
 ```diff
 --- a/src/render/draw-journal.ts
@@ -2200,12 +2200,12 @@ Expected: errors — `drawNumber`, `CASE_NAME`, `CASE_LINE` and `CASE_PITCH` are
      const { name, text } = ENTRY_TEXT[species];
 ```
 
-- [ ] **Step 5: Run the tests.**
+- [x] **Step 5: Run the tests.**
 
 Run: `npm run typecheck && npx vitest run tests/unit/draw-text.test.ts tests/unit/draw-journal.test.ts`
 Expected: PASS. Then `npm run test`: 992 tests.
 
-- [ ] **Step 6:** `npm run check`, then commit — `Count the found traces on the cases tab`.
+- [x] **Step 6:** `npm run check`, then commit — `Count the found traces on the cases tab`.
 
 ---
 
@@ -2214,7 +2214,7 @@ Expected: PASS. Then `npm run test`: 992 tests.
 **Files:**
 - Test: `tests/e2e/smoke.spec.ts`
 
-- [ ] **Step 1: Add the test** at the end of the file. It reads the whole value in one
+- [x] **Step 1: Add the test** at the end of the file. It reads the whole value in one
   poll, so that nothing is read from a page that might still be loading:
 
 ```diff
@@ -2237,13 +2237,13 @@ Expected: PASS. Then `npm run test`: 992 tests.
  });
 ```
 
-- [ ] **Step 2: Run.**
+- [x] **Step 2: Run.**
 
 Run: `npm run test:e2e`
 Expected: PASS — twelve tests, three skipped (they need the container). This test passes at
 once: Task 2 built what it checks.
 
-- [ ] **Step 3:** `npm run check`, then commit — `Check the floor's traces in the smoke spec`.
+- [x] **Step 3:** `npm run check`, then commit — `Check the floor's traces in the smoke spec`.
 
 ---
 
@@ -2253,7 +2253,7 @@ once: Task 2 built what it checks.
 - Modify: `docs/spec/gameplay.md`, `docs/spec/world.md`, `docs/spec/architecture.md`,
   `docs/spec/visual.md`, `docs/spec/testing.md`, `README.md`
 
-- [ ] **Step 1: `gameplay.md`.** §2: add a paragraph **As built** (feature 0022): a trace is
+- [x] **Step 1: `gameplay.md`.** §2: add a paragraph **As built** (feature 0022): a trace is
   residue on a device, unseen until the lamp's light is on it; in the light it shows and
   grows; after one second of unbroken light — 60 steps, the number of a capture — it is found
   and gone from the world; a break starts the second again; a trace is not found through a
@@ -2262,11 +2262,11 @@ once: Task 2 built what it checks.
   every department of which a trace is found — its name and `found of all` — and shows its
   line for nothing until then; the rest of a case comes with 0024.
 
-- [ ] **Step 2: `world.md` §2,** at Sales: five traces lie on the screens of five of its
+- [x] **Step 2: `world.md` §2,** at Sales: five traces lie on the screens of five of its
   sixteen cubicle desks, at least one in every row (feature 0022); the table of the spec is
   the placement until the art pass.
 
-- [ ] **Step 3: `architecture.md`.** §1 directory list: `game/rects.ts`, `game/trace.ts`,
+- [x] **Step 3: `architecture.md`.** §1 directory list: `game/rects.ts`, `game/trace.ts`,
   `tools/placeholder-trace.ts`. §2: `traces` — one entry per trace of the map for the whole
   game, `{ trace, light, found }`; the step of a trace and when it is found; the wake rests
   them; the notice of a find is derived from `found` and `tick`. §5: the traces in the draw
@@ -2276,34 +2276,34 @@ once: Task 2 built what it checks.
   §7: `trace.png`. §8: the kind `region` and its rule; a number is drawn by `drawNumber` and
   needs no key.
 
-- [ ] **Step 4: `visual.md`.** §4: `sprites/trace.png` is the third shadow asset; the trace
+- [x] **Step 4: `visual.md`.** §4: `sprites/trace.png` is the third shadow asset; the trace
   is a checkerboard in the signature colour that grows in three looks while the light is on
   it, and is not drawn otherwise — form and motion beside the colour. §3, at the journal:
   the cases tab shows a department's name and its count in two lines.
 
-- [ ] **Step 5: `testing.md` §2.** The INV-1 row gains the round trip with a trace found.
+- [x] **Step 5: `testing.md` §2.** The INV-1 row gains the round trip with a trace found.
   The INV-4 row gains the rules of the kind `region` and of the two new `journal` keys. The
   INV-6 row names three shadow assets. The INV-7 row gains: a rectangle of no known kind, a
   trace of an unknown region and a trace that is not one cell are refused, each with its
   message. §6: `traces.tmj`, if the section lists the fixtures.
 
-- [ ] **Step 6: `README.md`:** one sentence after the one on the journal — the lamp finds
+- [x] **Step 6: `README.md`:** one sentence after the one on the journal — the lamp finds
   traces on the screens of Sales, and the journal counts them (feature 0022). Say that M5
   has begun where the README names the milestone.
 
-- [ ] **Step 7:** `npm run check`, then commit — `Move the traces into the spec`.
+- [x] **Step 7:** `npm run check`, then commit — `Move the traces into the spec`.
 
 ---
 
 ### Task 7: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
   `Tick the full check of 0022`.
 
 ---
