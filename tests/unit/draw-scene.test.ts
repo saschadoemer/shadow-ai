@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EMPTY, type TileMap } from '../../src/engine/tiled';
+import { WIDE_FRAME_APEX } from '../../src/game/lamp';
 import { NO_INPUT } from '../../src/game/player';
 import {
   type CreatureState,
@@ -101,6 +102,7 @@ const CONTENT: SceneContent = {
   veilSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   playerSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 },
   lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
+  lampWideSheet: { image: {} as ImageBitmap, frameWidth: 72, frameHeight: 72 },
   creatureSheets: { snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 } },
   overviewSheet: { image: {} as ImageBitmap, frameWidth: 8, frameHeight: 8 },
   shadowWallSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
@@ -1622,5 +1624,87 @@ describe('the story in the scene (0026)', () => {
     const used = recordingRenderer();
     drawScene(used, { ...waiting, lamp: { ...waiting.lamp, used: true } }, CONTENT);
     expect(used.calls).not.toContain(BAR);
+  });
+});
+
+describe('the wider cone in the scene (0029)', () => {
+  const camera = { x: 5, y: 7 };
+  const feet = { x: 20.4, y: 30.6 };
+  /** The lamp on, with the wider cone earned or not. */
+  const shining = (facing: PlayerState['facing'], wide: boolean): GameState => ({
+    ...state({ ...feet, facing }, camera, true),
+    upgrades: wide ? ['wide-cone'] : [],
+  });
+  const cone = (scene: GameState): { call: string | undefined; sheet: unknown } => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene, CONTENT);
+    return {
+      call: renderer.calls.find((call) => call.startsWith('drawSprite')),
+      sheet: renderer.sheets[0],
+    };
+  };
+
+  it('places a frame of the wide sheet by its own apex: feet (20.4, 30.6), camera (5, 7)', () => {
+    // The apex is (20, 19) on the map: (15, 12) on the surface.
+    const origin = (facing: PlayerState['facing']) =>
+      lampFrameOrigin(player({ ...feet, facing }), camera, WIDE_FRAME_APEX);
+    expect(origin('down')).toStrictEqual({ x: -21, y: 12 });
+    expect(origin('up')).toStrictEqual({ x: -21, y: -59 });
+    expect(origin('left')).toStrictEqual({ x: -56, y: -24 });
+    expect(origin('right')).toStrictEqual({ x: 15, y: -24 });
+  });
+
+  it('draws the cone from the wide sheet, by the facing, when the player has the wider cone', () => {
+    expect(cone(shining('down', true))).toStrictEqual({
+      call: 'drawSprite 0 at -21,12',
+      sheet: CONTENT.lampWideSheet,
+    });
+    expect(cone(shining('up', true))).toStrictEqual({
+      call: 'drawSprite 1 at -21,-59',
+      sheet: CONTENT.lampWideSheet,
+    });
+    expect(cone(shining('left', true))).toStrictEqual({
+      call: 'drawSprite 2 at -56,-24',
+      sheet: CONTENT.lampWideSheet,
+    });
+    expect(cone(shining('right', true))).toStrictEqual({
+      call: 'drawSprite 3 at 15,-24',
+      sheet: CONTENT.lampWideSheet,
+    });
+  });
+
+  it('draws the cone from the lamp sheet as in 0007 without it', () => {
+    expect(cone(shining('down', false))).toStrictEqual({
+      call: 'drawSprite 0 at -9,12',
+      sheet: CONTENT.lampSheet,
+    });
+    expect(cone(shining('left', false))).toStrictEqual({
+      call: 'drawSprite 2 at -32,-12',
+      sheet: CONTENT.lampSheet,
+    });
+    expect(CONTENT.lampWideSheet).not.toStrictEqual(CONTENT.lampSheet);
+  });
+
+  it('draws it where the narrow cone is drawn: after detail and before the player', () => {
+    const calls = (wide: boolean): string[] => {
+      const renderer = recordingRenderer();
+      drawScene(renderer, shining('left', wide), CONTENT);
+      return renderer.calls;
+    };
+    const narrow = calls(false);
+    const wide = calls(true);
+    expect(wide).toHaveLength(narrow.length);
+    const at = narrow.indexOf('drawSprite 2 at -32,-12');
+    expect(wide[at]).toBe('drawSprite 2 at -56,-24');
+    expect(wide.filter((_call, n) => n !== at)).toStrictEqual(
+      narrow.filter((_call, n) => n !== at),
+    );
+  });
+
+  it('draws no cone with the lamp off, whatever the upgrades', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, { ...shining('down', true), lamp: state({}).lamp }, CONTENT);
+    expect(renderer.sheets).not.toContain(CONTENT.lampWideSheet);
+    expect(renderer.sheets).not.toContain(CONTENT.lampSheet);
   });
 });

@@ -66,6 +66,7 @@ const CONTENT: SceneContent = {
   veilSheet: sheet(16, 16),
   playerSheet: sheet(16, 24),
   lampSheet: sheet(48, 48),
+  lampWideSheet: sheet(72, 72),
   creatureSheets: { snippet: sheet(16, 16) },
   overviewSheet: sheet(8, 8),
   shadowWallSheet: sheet(16, 16),

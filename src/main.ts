@@ -5,7 +5,7 @@ import { FRAME_HEIGHT, FRAME_WIDTH } from './engine/sprite';
 import { parseTileMap, parseTileset, TILE_SIZE, tilesetSource } from './engine/tiled';
 import { CAST } from './game/cast';
 import { CREATURE_SIZE } from './game/creature';
-import { CONE_LENGTH } from './game/lamp';
+import { CONE_LENGTH, WIDE_FRAME_SIZE } from './game/lamp';
 import { MOVER_SIZE } from './game/mover';
 import type { GameInput } from './game/player';
 import type { GameState } from './game/state';
@@ -30,6 +30,7 @@ declare global {
 const MAP_URL = '/maps/floor.tmj';
 const PLAYER_SHEET_URL = '/sprites/player.png';
 const LAMP_SHEET_URL = '/sprites/lamp.png';
+const LAMP_WIDE_SHEET_URL = '/sprites/lamp-wide.png';
 const SNIPPET_SHEET_URL = '/sprites/snippet.png';
 const OVERVIEW_SHEET_URL = '/sprites/overview.png';
 /** The movers' sheets (0015): a person of look n is person-(n + 1).png. */
@@ -82,6 +83,11 @@ async function loadContent(): Promise<SceneContent> {
       image: await loadImage(LAMP_SHEET_URL),
       frameWidth: CONE_LENGTH,
       frameHeight: CONE_LENGTH,
+    },
+    lampWideSheet: {
+      image: await loadImage(LAMP_WIDE_SHEET_URL),
+      frameWidth: WIDE_FRAME_SIZE,
+      frameHeight: WIDE_FRAME_SIZE,
     },
     creatureSheets: {
       snippet: {
