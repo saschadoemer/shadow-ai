@@ -1752,3 +1752,86 @@ describe('the traces of Marketing on the floor (0028)', () => {
     expect(ready(found(0, 1, 2, 3, 4, 5, 6, 7, 8, 9))).toStrictEqual([true, true]);
   });
 });
+
+describe('the case of Marketing on the floor (0028)', () => {
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const areas = areasOf(floor.rects);
+  const walls = wallsOf(floor.rects);
+  const routes = routesOf(floor.points);
+  const start = createInitialState(floor);
+  const sourceOf = (route: string) =>
+    start.movers.find((mover) => routes[mover.route]?.name === route);
+  /** The figure 24 px below the colleague of the given route, where it stands at the start. */
+  const beside = (state: GameState, route: string): GameState => ({
+    ...state,
+    player: {
+      ...state.player,
+      x: sourceOf(route)?.x ?? 0,
+      y: (sourceOf(route)?.y ?? 0) + 24,
+    },
+  });
+  /** Every trace of the floor found long ago. */
+  const ready: GameState = {
+    ...start,
+    tick: 1000,
+    traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+  };
+  const answer = (from: GameState): GameState =>
+    [TALK, NO_INPUT, TALK, NO_INPUT, TALK, NO_INPUT].reduce(
+      (state, input) => update(state, input, floor),
+      from,
+    );
+  const regionsOf = (state: GameState): (string | undefined)[] =>
+    state.shadowWalls.map((standing) => walls[standing.wall]?.region);
+  const marketing = answer(beside(ready, 'person:marketing'));
+
+  it('has a source that stands free at the start, with room 24 px below it', () => {
+    expect(sourceOf('person:marketing')).toBeDefined();
+    expect(reached(beside(ready, 'person:marketing').player)).toBe(true);
+  });
+
+  it('is solved from beside its source, before Sales: six of six', () => {
+    expect(marketing.solved).toStrictEqual([{ region: 'marketing', at: 1005 }]);
+    expect(marketing.overview).toStrictEqual({ current: 6, max: 6 });
+  });
+
+  it('takes the shadow from the cells of Marketing and leaves it on Sales', () => {
+    const cleared = shadowedAreas(areas, marketing.solved);
+    expect(veilOf(areas, 10, 70)).toBe(1);
+    expect(veilOf(cleared, 10, 70)).toBe(0);
+    expect(veilOf(cleared, 90, 30)).toBe(1);
+    expect([veilOf(cleared, 100, 70), veilOf(cleared, 5, 5)]).toStrictEqual([1, 2]);
+  });
+
+  it('removes the shadow wall of Marketing, and no other and no creature', () => {
+    expect(regionsOf(ready).filter((region) => region === 'marketing')).toHaveLength(1);
+    expect(regionsOf(marketing)).not.toContain('marketing');
+    expect(regionsOf(marketing)).toContain('sales');
+    expect(marketing.shadowWalls).toHaveLength(ready.shadowWalls.length - 1);
+    // No creature is at home in Marketing yet: its species comes with its own feature.
+    expect(marketing.creatures).toStrictEqual(ready.creatures);
+  });
+
+  it('is followed by Sales: both solved in that order, seven of seven, both rooms clear', () => {
+    const both = answer(beside(marketing, 'person:sales'));
+    expect(both.solved).toStrictEqual([
+      { region: 'marketing', at: 1005 },
+      { region: 'sales', at: 1011 },
+    ]);
+    expect(both.overview).toStrictEqual({ current: 7, max: 7 });
+    const cleared = shadowedAreas(areas, both.solved);
+    expect([veilOf(cleared, 10, 70), veilOf(cleared, 90, 30)]).toStrictEqual([0, 0]);
+    expect(
+      regionsOf(both).filter((region) => region === 'sales' || region === 'marketing'),
+    ).toStrictEqual([]);
+  });
+
+  it('gives the machine of Marketing its use once Marketing is solved', () => {
+    const machine = restsOf(floor.rects)[6];
+    expect(machine).toBeDefined();
+    if (machine !== undefined) {
+      expect(restUnderShadow(machine, floor.rects, [])).toBe(true);
+      expect(restUnderShadow(machine, floor.rects, marketing.solved)).toBe(false);
+    }
+  });
+});
