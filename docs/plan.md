@@ -143,7 +143,7 @@ Named here without a number and specified when their turn comes: the case of Sup
 cases of HR and Accounting · the colour filter · the case of Development · the meeting rooms'
 side case · the vendor in every department · the intern in the break room and the hints ·
 who sees the shadow · the two keys · Management and the last case · the two Harmonic stations
-of Act 2, each in its case spec. 0028 and 0029 are approved.
+of Act 2, each in its case spec. 0028 is implemented; 0029 is approved.
 
 ## 5. Deferred, with reasons
 
