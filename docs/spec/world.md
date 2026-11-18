@@ -188,7 +188,8 @@ Kept as small as the story allows. About thirty figures in all.
   the lamp over. From then on she says the two pages of 0017.
 - **The vendor.** See `vision.md` §4. Recurring in every department, never an enemy, changing
   over the game from seller to advisor. As advisor he supplies the approved alternatives that
-  solve the later cases.
+  solve the later cases. They are fictional products; Harmonic is not his, and no Harmonic
+  station is (§6).
 - **The intern.** Sits in the break room, knows everything, likes to say it. This is the hint
   system in diegetic form: a player who is stuck goes to the break room. For a game played at home
   without a walkthrough, this matters more than it sounds.
@@ -233,7 +234,21 @@ by the author's decision on that basis, and no trademark register was searched (
 
 ## 5. Names
 
-Every product, company and tool in the game is fictional. Before a name is fixed in the world data
-it is checked against real trademarks and products; a name that exists, or is a thin disguise of
-one that exists, is not used. Domains and mail addresses in the game use reserved example domains.
-The company itself has no name that resembles a real one, and never the author's own employer.
+Every product, company and tool in the game is fictional, with two exceptions: LMIS, which
+presents the game, and Harmonic, which stands in its world (`vision.md` §10). Before any other
+name is fixed in the world data it is checked against real trademarks and products; a name that
+exists, or is a thin disguise of one that exists, is not used. Domains and mail addresses in the
+game use reserved example domains. The company in the game has no name that resembles a real
+one, and it is never LMIS: LMIS presents the game and is not part of its world.
+
+## 6. The Harmonic stations
+
+Three desks on which Harmonic runs (`vision.md` §10, `gameplay.md` §10). Each stands in a region
+with a density above 0, behind that region's shadow wall, and belongs to that region alone.
+
+- **Sales, Act 1.** On the way from the doorway to the cubicles, where nobody can miss it. Its
+  species is the snippet, and the snippet of the east corridor stands in front of the doorway, so
+  a player who captures that one finds the station ready. Its cell is fixed in the feature that
+  builds it.
+- **Two in Act 2.** Each off the way through its room, so that a player finds it by looking
+  around. Which regions and which cells is decided in their case specs.
