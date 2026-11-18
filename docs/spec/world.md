@@ -114,6 +114,11 @@ closed until the upgrades of M6. The two upgrades that gate the floor are earned
 the wider cone in Marketing (strength 2), the colour filter in HR (strength 3). A case spec of M6
 may move either; the gating test then guards the new place.
 
+**As built** (feature 0029): the case of Marketing earns the wider cone. With it the walls of
+HR and Accounting are lifted like the thin ones, and the player enters both rooms; they are
+under their shadow and have nothing of their own until their cases come. The wall of
+Development holds until the colour filter.
+
 **As built** (feature 0023): every region of the floor has an area in the map — a rectangle
 named `region:<id>` in the `objects` layer that covers its room as the layout knows it, with its
 upper and its left wall. The meeting rooms have two areas, one per room. A room whose region has
