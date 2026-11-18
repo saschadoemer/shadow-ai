@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Box } from '../../src/engine/collision';
 import type { NamedRect, TileMap } from '../../src/engine/tiled';
+import { WIDE_SPREAD } from '../../src/game/lamp';
 import { noticeOf, TRACE_NOTICE_STEPS } from '../../src/game/notice';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
 import { rectsOf, TRACE_PREFIX, WALL_PREFIX } from '../../src/game/rects';
@@ -11,6 +12,7 @@ import {
   FIND_STEPS,
   hiddenTraces,
   restedTraces,
+  stepTraces,
   type Trace,
   traceInLight,
   tracesOf,
@@ -315,5 +317,32 @@ describe('the cases the traces open (0022)', () => {
       { region: 'marketing', found: 1, all: 1 },
       { region: 'hr', found: 1, all: 1 },
     ]);
+  });
+});
+
+describe('a trace and the wider cone (0029)', () => {
+  /**
+   * The player at (168, 128) looks up: the apex is (168, 116). The trace on cell (12, 5) begins
+   * 24 px beside the axis and ends 36 px along it: outside the narrow cone, inside the wider.
+   */
+  const map = mapAt(168, 128, [rect('trace:sales', 192, 80)]);
+  const [trace] = tracesOf(map.rects);
+  const player = facing(map, 'up').player;
+
+  it('is in the light at the wider edge with the wider cone, and not with the narrow one', () => {
+    expect(trace).toBeDefined();
+    if (trace !== undefined) {
+      expect(traceInLight(trace, player, true, map, WIDE_SPREAD)).toBe(true);
+      expect(traceInLight(trace, player, true, map)).toBe(false);
+      expect(traceInLight(trace, player, false, map, WIDE_SPREAD)).toBe(false);
+    }
+  });
+
+  it('counts its lit steps with the wider cone only', () => {
+    const hidden = hiddenTraces(tracesOf(map.rects));
+    expect(
+      stepTraces(hidden, tracesOf(map.rects), player, true, map, 7, WIDE_SPREAD),
+    ).toStrictEqual([{ trace: 0, light: 1, found: null }]);
+    expect(stepTraces(hidden, tracesOf(map.rects), player, true, map, 7)).toStrictEqual(hidden);
   });
 });

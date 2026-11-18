@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type { Box } from '../../src/engine/collision';
 import { type NamedRect, parseTileMap, parseTileset, type TileMap } from '../../src/engine/tiled';
-import { lampCone } from '../../src/game/lamp';
+import { type Cone, lampCone, SPREAD, WIDE_SPREAD } from '../../src/game/lamp';
 import {
   LIFT_STEPS,
   meetsCone,
@@ -268,5 +268,68 @@ describe('the map with its standing walls (0014)', () => {
     expect(walled.solids[3 * 20 + 15]).toStrictEqual([V]);
     expect(walled.solids[4 * 20 + 15]).toStrictEqual([V]);
     expect(walled.solids[5 * 20 + 15]).toStrictEqual([]);
+  });
+});
+
+describe('a box and the wider cone (0029)', () => {
+  /** A cone from (100, 100): down, and to the right. */
+  const DOWN: Cone = { apex: { x: 100, y: 100 }, facing: 'down' };
+  const RIGHT: Cone = { apex: { x: 100, y: 100 }, facing: 'right' };
+  /** Each box begins 40 px along the axis and 26 px beside it: a strip across, and one along. */
+  const BOXES: readonly (readonly [string, Cone, Box])[] = [
+    ['down, a strip across', DOWN, { x: 126, y: 140, width: 16, height: 4 }],
+    ['down, a strip along', DOWN, { x: 126, y: 140, width: 4, height: 16 }],
+    ['down, on the other side', DOWN, { x: 58, y: 140, width: 16, height: 4 }],
+    ['right, a strip across', RIGHT, { x: 140, y: 126, width: 4, height: 16 }],
+    ['right, a strip along', RIGHT, { x: 140, y: 126, width: 16, height: 4 }],
+    ['right, on the other side', RIGHT, { x: 140, y: 58, width: 4, height: 16 }],
+  ];
+
+  it.each(BOXES)('%s: meets the wider cone and not the narrow one', (_name, cone, box) => {
+    expect(meetsCone(box, cone, WIDE_SPREAD)).toBe(true);
+    expect(meetsCone(box, cone, SPREAD)).toBe(false);
+    expect(meetsCone(box, cone)).toBe(false);
+  });
+
+  it('gives without a spread what it gives with one half', () => {
+    for (const cone of [DOWN, RIGHT]) {
+      for (let x = 40; x <= 160; x += 6) {
+        for (let y = 40; y <= 160; y += 6) {
+          const box: Box = { x, y, width: 16, height: 4 };
+          expect(meetsCone(box, cone), `${x}, ${y}`).toBe(meetsCone(box, cone, SPREAD));
+        }
+      }
+    }
+  });
+
+  it('is 48 px long with either spread', () => {
+    // Half-open, as for a point: a box that begins 48 px along the axis is out.
+    const beyond: Box = { x: 92, y: 148, width: 16, height: 4 };
+    const atTheEnd: Box = { x: 92, y: 147.5, width: 16, height: 4 };
+    for (const spread of [SPREAD, WIDE_SPREAD]) {
+      expect(meetsCone(beyond, DOWN, spread)).toBe(false);
+      expect(meetsCone(atTheEnd, DOWN, spread)).toBe(true);
+    }
+  });
+
+  it('puts a wall at the wider edge in the light of the wider cone only', () => {
+    // The figure's apex is (100, 100): the strip begins 26 px beside the axis, 40 px along.
+    const strip = wall({ x: 126, y: 140, width: 16, height: 4 });
+    const player = figure(100, 112, 'down');
+    expect(wallInLight(strip, player, true, OPEN, WIDE_SPREAD)).toBe(true);
+    expect(wallInLight(strip, player, true, OPEN)).toBe(false);
+    expect(wallInLight(strip, player, false, OPEN, WIDE_SPREAD)).toBe(false);
+  });
+
+  it('steps a wall at the wider edge with the wider cone only', () => {
+    const walls = [wall({ x: 126, y: 140, width: 16, height: 4 })];
+    const player = figure(100, 112, 'down');
+    const lamp = { on: true, strength: 1, owned: true, used: true };
+    expect(stepWalls(standingWalls(walls), walls, player, lamp, OPEN, WIDE_SPREAD)).toStrictEqual([
+      { wall: 0, lit: true, light: 1 },
+    ]);
+    expect(stepWalls(standingWalls(walls), walls, player, lamp, OPEN)).toStrictEqual([
+      { wall: 0, lit: false, light: 0 },
+    ]);
   });
 });

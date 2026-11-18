@@ -2,7 +2,7 @@ import { moveBox, sightBlocked } from '../engine/collision';
 import { STEPS_PER_SECOND } from '../engine/loop';
 import { type NamedPoint, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { isFigurePoint } from './cast';
-import { inCone, lampCone } from './lamp';
+import { inCone, lampCone, SPREAD } from './lamp';
 import { isRoutePoint } from './mover';
 import { WAKE_POINT } from './overview';
 import { BOX_HEIGHT, BOX_WIDTH } from './player';
@@ -44,19 +44,21 @@ export function bodyPoint(creature: CreatureState): Point {
  * the centre of the figure's collision box to the body point. The line starts at the box and
  * not at the cone's apex, because the apex is inside a wall when the figure stands under one.
  * Furniture that is low does not block the light; it still stops the walk (feature 0011).
+ * `spread` is the cone's (0029).
  */
 export function isLit(
   creature: CreatureState,
   player: PlayerState,
   lampOn: boolean,
   map: TileMap,
+  spread: number = SPREAD,
 ): boolean {
   if (!lampOn) {
     return false;
   }
   const body = bodyPoint(creature);
   return (
-    inCone(body, lampCone(player)) &&
+    inCone(body, lampCone(player), spread) &&
     !sightBlocked({ x: player.x, y: player.y - BOX_HEIGHT / 2 }, body, {
       width: map.width,
       height: map.height,
@@ -108,8 +110,9 @@ export function stepCreature(
   player: PlayerState,
   lampOn: boolean,
   map: TileMap,
+  spread: number = SPREAD,
 ): CreatureState | null {
-  if (!isLit(creature, player, lampOn, map)) {
+  if (!isLit(creature, player, lampOn, map, spread)) {
     return approach(creature, player, map);
   }
   const light = creature.light + 1;
@@ -123,11 +126,12 @@ export function stepCreatures(
   player: PlayerState,
   lampOn: boolean,
   map: TileMap,
+  spread: number = SPREAD,
 ): { readonly creatures: readonly CreatureState[]; readonly captured: Captured } {
   const remaining: CreatureState[] = [];
   const counts: Record<Species, number> = { ...captured };
   for (const creature of creatures) {
-    const next = stepCreature(creature, player, lampOn, map);
+    const next = stepCreature(creature, player, lampOn, map, spread);
     if (next === null) {
       counts[creature.species] += 1;
     } else {

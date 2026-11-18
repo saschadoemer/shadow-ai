@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CASE_NOTICE_STEPS,
   NOTICE_CASE_SOLVED,
   NOTICE_LAMP,
   NOTICE_REST,
   NOTICE_SHADOW_TOO_DENSE,
   NOTICE_TRACE_FOUND,
+  NOTICE_UPGRADE,
   noticeOf,
   REST_NOTICE_STEPS,
+  UPGRADE_NOTICE_STEPS,
 } from '../../src/game/notice';
 import type { GameInput } from '../../src/game/player';
 import { type GameState, REST_RESULTS, type ShadowWallState } from '../../src/game/state';
@@ -252,5 +255,113 @@ describe('the notice of a rest (0027)', () => {
       expect(noticeOf(state), `step ${step}`).toBe(NOTICE_REST.full);
     }
     expect(noticeOf(update(state, NONE, map))).toBeNull();
+  });
+});
+
+describe('the notice of an upgrade (0029)', () => {
+  const WIDER = textKey('notice.upgrade-wide-cone');
+  /** Marketing was solved at step 1000 and earned the wider cone; `since` steps have passed. */
+  const earned = (since: number): GameState => ({
+    ...BASE,
+    tick: 1000 + since,
+    solved: [{ region: 'marketing', at: 1000 }],
+    upgrades: ['wide-cone'],
+    lamp: { ...BASE.lamp, strength: 2 },
+  });
+
+  it('is the line of the wider cone, for two seconds', () => {
+    expect(NOTICE_UPGRADE['wide-cone']).toBe(WIDER);
+    expect([CASE_NOTICE_STEPS, UPGRADE_NOTICE_STEPS]).toStrictEqual([120, 120]);
+  });
+
+  it('follows the notice of the solved case: the case for 120 steps, the upgrade for the next 120', () => {
+    expect(noticeOf(earned(0))).toBe(NOTICE_CASE_SOLVED);
+    expect(noticeOf(earned(119))).toBe(NOTICE_CASE_SOLVED);
+    expect(noticeOf(earned(120))).toBe(WIDER);
+    expect(noticeOf(earned(239))).toBe(WIDER);
+    expect(noticeOf(earned(240))).toBeNull();
+    expect(noticeOf(earned(6000))).toBeNull();
+  });
+
+  it('is not shown after Sales is solved: that case earns nothing', () => {
+    for (const since of [0, 119, 120, 239, 240]) {
+      const sales: GameState = { ...earned(since), solved: [{ region: 'sales', at: 1000 }] };
+      expect(noticeOf(sales), `${since}`).toBe(since < 120 ? NOTICE_CASE_SOLVED : null);
+    }
+  });
+
+  it('is not shown for a solved case whose upgrade the player does not have', () => {
+    expect(noticeOf({ ...earned(150), upgrades: [] })).toBeNull();
+    expect(noticeOf({ ...earned(150), upgrades: ['filter'] })).toBeNull();
+  });
+
+  it('counts from the case that earned it, with Sales solved before or after', () => {
+    const before: GameState = {
+      ...earned(150),
+      solved: [
+        { region: 'sales', at: 400 },
+        { region: 'marketing', at: 1000 },
+      ],
+    };
+    expect(noticeOf(before)).toBe(WIDER);
+    // Sales solved 30 steps ago: its notice comes first, the upgrade's when it is over.
+    const after: GameState = {
+      ...earned(150),
+      solved: [
+        { region: 'marketing', at: 1000 },
+        { region: 'sales', at: 1120 },
+      ],
+    };
+    expect(noticeOf(after)).toBe(NOTICE_CASE_SOLVED);
+    expect(noticeOf({ ...after, tick: 1239 })).toBe(NOTICE_CASE_SOLVED);
+  });
+
+  it('comes after a wall that holds and before a found trace, a rest and the lamp key', () => {
+    const holds: GameState = {
+      ...earned(150),
+      lamp: { on: true, strength: 2, owned: true, used: true },
+      shadowWalls: [HOLDS],
+    };
+    expect(noticeOf(holds)).toBe(NOTICE_SHADOW_TOO_DENSE);
+    const found: GameState = {
+      ...earned(150),
+      traces: [{ trace: 0, light: 0, found: 1140 }],
+      rested: { at: 1140, result: 'restored' },
+      lamp: { on: false, strength: 2, owned: true, used: false },
+    };
+    expect(noticeOf(found)).toBe(WIDER);
+    expect(noticeOf({ ...found, tick: 1240 })).toBe(NOTICE_TRACE_FOUND);
+  });
+
+  it('is what a game shows that solves Marketing: the case, then the upgrade, then nothing', () => {
+    const map = grassMap(
+      20,
+      12,
+      { x: 104, y: 144 },
+      [
+        { name: 'person:marketing:1', x: 64, y: 144, pause: 600 },
+        { name: 'person:marketing:2', x: 128, y: 144 },
+      ],
+      [{ name: 'trace:marketing', x: 240, y: 128, width: 16, height: 16 }],
+    );
+    const TALK: GameInput = { ...NONE, talk: true };
+    const start = createInitialState(map);
+    let state: GameState = {
+      ...start,
+      tick: 1000,
+      traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+    };
+    for (const input of [TALK, NONE, TALK, NONE, TALK]) {
+      state = update(state, input, map);
+    }
+    expect(state.solved).toStrictEqual([{ region: 'marketing', at: 1005 }]);
+    const shown: (string | null)[] = [];
+    for (let step = 0; step < 242; step += 1) {
+      shown.push(noticeOf(state));
+      state = update(state, NONE, map);
+    }
+    expect(shown.slice(0, 120).every((key) => key === NOTICE_CASE_SOLVED)).toBe(true);
+    expect(shown.slice(120, 240).every((key) => key === WIDER)).toBe(true);
+    expect(shown.slice(240)).toStrictEqual([null, null]);
   });
 });

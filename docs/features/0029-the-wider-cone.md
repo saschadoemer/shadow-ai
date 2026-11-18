@@ -1,6 +1,6 @@
 # 0029 — The wider cone
 
-**Status:** approved 2026-11-18
+**Status:** implemented 2026-11-19
 **Milestone:** M6
 **Drafted:** 2026-11-18
 
@@ -201,7 +201,10 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 - Two lines one after the other, four seconds in all: readable, or too much?
 - Do the two rooms that open now feel earned?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–16. Feel: the wider cone is felt at once, and one
+and a half times is the right step; the upgrade with the solved case, one line and no
+person, is enough of a moment; the two lines one after the other are readable; the two
+rooms that open feel earned.
 
 ## Open questions
 

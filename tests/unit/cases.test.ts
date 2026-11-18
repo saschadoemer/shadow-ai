@@ -6,6 +6,7 @@ import {
   CASES,
   type Case,
   clearRegion,
+  earn,
   isReady,
   isSolved,
   outcomeOf,
@@ -22,6 +23,7 @@ import type { CreatureState, GameState, TraceState } from '../../src/game/state'
 import { speakerOf, speakersOf } from '../../src/game/talk';
 import type { Trace } from '../../src/game/trace';
 import { createInitialState, update } from '../../src/game/update';
+import { UPGRADES } from '../../src/game/world';
 import { textKey } from '../../src/text/text';
 import { grassMap } from './grass-map';
 
@@ -555,5 +557,119 @@ describe('the case of Marketing (0028)', () => {
       textKey('policy.sales'),
       textKey('policy.marketing'),
     ]);
+  });
+});
+
+describe('the upgrade a case earns (0029)', () => {
+  /** Both sources, each waiting ten seconds on its first point, 96 px apart. */
+  const SOURCES: readonly NamedPoint[] = [
+    { name: 'person:sales:1', x: 64, y: 48, pause: 600 },
+    { name: 'person:sales:2', x: 128, y: 48 },
+    { name: 'person:marketing:1', x: 64, y: 144, pause: 600 },
+    { name: 'person:marketing:2', x: 128, y: 144 },
+  ];
+  /** 20x12 cells of open floor: one trace of Sales, one of Marketing. */
+  const BOTH: TileMap = grassMap(20, 12, { x: 104, y: 48 }, SOURCES, [
+    { name: 'trace:sales', x: 240, y: 32, width: 16, height: 16 },
+    { name: 'trace:marketing', x: 240, y: 128, width: 16, height: 16 },
+  ]);
+  /** Both traces found long ago: both cases are ready. */
+  const ready: GameState = { ...createInitialState(BOTH), tick: T0, traces: found(10, 20) };
+  /** The figure 40 px right of the colleague of Sales, or of the colleague of Marketing. */
+  const beside = (state: GameState, source: 'sales' | 'marketing'): GameState => ({
+    ...state,
+    player: { ...state.player, x: 104, y: source === 'sales' ? 48 : 144 },
+  });
+  const step = (start: GameState, ...inputs: readonly GameInput[]): GameState =>
+    inputs.reduce((state, input) => update(state, input, BOTH), start);
+  /** Three presses of talk: the pages of a colleague open, turn and close. */
+  const talk = (start: GameState): GameState => step(start, TALK, NONE, TALK, NONE, TALK, NONE);
+
+  it('is the upgrade of the region, with a strength one above the base', () => {
+    const earned = earn(ready, 'marketing');
+    expect(earned).toStrictEqual({
+      ...ready,
+      upgrades: ['wide-cone'],
+      lamp: { ...ready.lamp, strength: 2 },
+    });
+    expect(ready.upgrades).toStrictEqual([]);
+  });
+
+  it('is nothing in a region without an upgrade: the state itself', () => {
+    expect(earn(ready, 'sales')).toBe(ready);
+    expect(earn(ready, 'reception')).toBe(ready);
+    expect(earn(ready, 'cellar')).toBe(ready);
+  });
+
+  it('is never earned twice', () => {
+    const once = earn(ready, 'marketing');
+    expect(earn(once, 'marketing')).toBe(once);
+  });
+
+  it('holds for every upgrade of the table: the second makes a strength of 3', () => {
+    const second = earn(earn(ready, 'marketing'), 'hr');
+    expect(second.upgrades).toStrictEqual(['wide-cone', 'filter']);
+    expect(second.lamp.strength).toBe(3);
+    // The strength follows from how many upgrades there are, not from which.
+    expect(earn(ready, 'hr').lamp.strength).toBe(2);
+    expect(earn(ready, 'hr').upgrades).toStrictEqual(['filter']);
+  });
+
+  it('reads the table it is given: the game passes its own', () => {
+    const table = [{ id: 'battery', earnedIn: 'sales' }];
+    expect(earn(ready, 'sales', table).upgrades).toStrictEqual(['battery']);
+    expect(earn(ready, 'marketing', table)).toBe(ready);
+  });
+
+  it('comes with the step that solves Marketing: the wider cone and a strength of 2', () => {
+    const before = step(beside(ready, 'marketing'), TALK, NONE, TALK, NONE);
+    expect(before.upgrades).toStrictEqual([]);
+    expect(before.lamp.strength).toBe(1);
+    const solved = update(before, TALK, BOTH);
+    expect(solved.solved).toStrictEqual([{ region: 'marketing', at: T0 + 5 }]);
+    expect(solved.upgrades).toStrictEqual(['wide-cone']);
+    expect(solved.lamp.strength).toBe(2);
+    expect(solved.overview).toStrictEqual({ current: 6, max: 6 });
+  });
+
+  it('does not come with the step that solves Sales', () => {
+    const solved = talk(beside(ready, 'sales'));
+    expect(solved.solved).toStrictEqual([{ region: 'sales', at: T0 + 5 }]);
+    expect(solved.upgrades).toStrictEqual([]);
+    expect(solved.lamp.strength).toBe(1);
+  });
+
+  it('is the same in either order of the two cases', () => {
+    const marketingFirst = talk(beside(talk(beside(ready, 'marketing')), 'sales'));
+    const salesFirst = talk(beside(talk(beside(ready, 'sales')), 'marketing'));
+    for (const state of [marketingFirst, salesFirst]) {
+      expect(state.solved).toHaveLength(2);
+      expect(state.upgrades).toStrictEqual(['wide-cone']);
+      expect(state.lamp.strength).toBe(2);
+    }
+  });
+
+  it('is not earned again by a talk with the source of the solved case', () => {
+    const solved = talk(beside(ready, 'marketing'));
+    // "Afterwards" is one page: a press opens it, the next closes it.
+    const again = step(solved, TALK, NONE, TALK, NONE);
+    expect(again.dialogue).toBeNull();
+    expect(again.solved).toStrictEqual(solved.solved);
+    expect(again.upgrades).toStrictEqual(['wide-cone']);
+    expect(again.lamp.strength).toBe(2);
+  });
+
+  it('is never earned in a region without a case', () => {
+    const without = UPGRADES.filter(
+      (upgrade) => !CASES.some((entry) => entry.region === upgrade.earnedIn),
+    ).map((upgrade) => upgrade.id);
+    expect(without).toStrictEqual(['filter']);
+    const all = talk(beside(talk(beside(ready, 'marketing')), 'sales'));
+    expect(all.upgrades).not.toContain('filter');
+  });
+
+  it('survives a JSON round trip with the upgrade earned (INV-1)', () => {
+    const solved = talk(beside(ready, 'marketing'));
+    expect(JSON.parse(JSON.stringify(solved))).toStrictEqual(solved);
   });
 });

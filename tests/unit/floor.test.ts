@@ -10,6 +10,7 @@ import { CASES, isReady, progressOf } from '../../src/game/cases';
 import { COLLEAGUES, figuresOf, pagesOfRoute } from '../../src/game/cast';
 import { REGION_NAME } from '../../src/game/journal';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
+import { NOTICE_SHADOW_TOO_DENSE, noticeOf } from '../../src/game/notice';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
 import { areasOf, inArea, shadowedAreas, veilOf } from '../../src/game/region';
 import { restInReach, restsOf, restUnderShadow } from '../../src/game/rest';
@@ -1833,5 +1834,85 @@ describe('the case of Marketing on the floor (0028)', () => {
       expect(restUnderShadow(machine, floor.rects, [])).toBe(true);
       expect(restUnderShadow(machine, floor.rects, marketing.solved)).toBe(false);
     }
+  });
+});
+
+describe('the wider cone on the floor (0029)', () => {
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const SHINE: GameInput = { ...NO_INPUT, lamp: true };
+  const walls = wallsOf(floor.rects);
+  const routes = routesOf(floor.points);
+  const start = createInitialState(floor);
+  const sourceOf = (route: string) =>
+    start.movers.find((mover) => routes[mover.route]?.name === route);
+  /** Every trace found long ago, the figure 24 px below the colleague of the given route. */
+  const beside = (route: string): GameState => ({
+    ...start,
+    tick: 1000,
+    player: {
+      ...start.player,
+      x: sourceOf(route)?.x ?? 0,
+      y: (sourceOf(route)?.y ?? 0) + 24,
+    },
+    traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+  });
+  const answer = (from: GameState): GameState =>
+    [TALK, NO_INPUT, TALK, NO_INPUT, TALK, NO_INPUT].reduce(
+      (state, input) => update(state, input, floor),
+      from,
+    );
+  /** The state with the figure 20 px below the wall of a region in the top corridor, looking up. */
+  const below = (state: GameState, region: string): GameState => {
+    const box = walls.find((wall) => wall.region === region)?.box ?? { x: 0, y: 0, width: 0 };
+    return {
+      ...state,
+      player: { ...state.player, x: box.x + box.width / 2, y: box.y + 24, facing: 'up' },
+    };
+  };
+  const shine = (from: GameState, count: number): GameState => {
+    let state = from;
+    for (let step = 0; step < count; step += 1) {
+      state = update(state, SHINE, floor);
+    }
+    return state;
+  };
+  const regionsOf = (state: GameState): (string | undefined)[] =>
+    state.shadowWalls.map((standing) => walls[standing.wall]?.region);
+  const marketing = answer(beside('person:marketing'));
+
+  it('has room for the figure below the walls of HR, Accounting and Development', () => {
+    for (const region of ['hr', 'accounting', 'development']) {
+      expect(reached(below(start, region).player), region).toBe(true);
+    }
+  });
+
+  it('is earned by the case of Marketing and not by the case of Sales', () => {
+    expect(marketing.upgrades).toStrictEqual(['wide-cone']);
+    expect(marketing.lamp.strength).toBe(2);
+    const sales = answer(beside('person:sales'));
+    expect(sales.upgrades).toStrictEqual([]);
+    expect(sales.lamp.strength).toBe(1);
+  });
+
+  it('holds the walls of HR and Accounting before it, with the basic lamp', () => {
+    for (const region of ['hr', 'accounting']) {
+      const held = shine(below(start, region), 180);
+      expect(regionsOf(held), region).toContain(region);
+      expect(noticeOf(held), region).toBe(NOTICE_SHADOW_TOO_DENSE);
+    }
+  });
+
+  it('lifts the walls of HR and Accounting after it, each in the 60th lit step', () => {
+    for (const region of ['hr', 'accounting']) {
+      const almost = shine(below(marketing, region), 59);
+      expect(regionsOf(almost), region).toContain(region);
+      expect(regionsOf(update(almost, SHINE, floor)), region).not.toContain(region);
+    }
+  });
+
+  it('still holds the wall of Development, with the notice of 0016', () => {
+    const held = shine(below(marketing, 'development'), 180);
+    expect(regionsOf(held)).toContain('development');
+    expect(noticeOf(held)).toBe(NOTICE_SHADOW_TOO_DENSE);
   });
 });

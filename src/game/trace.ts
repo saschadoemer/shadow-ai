@@ -1,6 +1,6 @@
 import { type Box, sightBlocked } from '../engine/collision';
 import type { NamedRect, TileMap } from '../engine/tiled';
-import { lampCone } from './lamp';
+import { lampCone, SPREAD } from './lamp';
 import { BOX_HEIGHT } from './player';
 import { isCell, rectsOf, TRACE_PREFIX } from './rects';
 import { meetsCone } from './shadow';
@@ -63,15 +63,16 @@ function clamp(value: number, min: number, max: number): number {
  * opaque box lies on the line from the centre of the figure's collision box to the nearest
  * pixel of the trace's box. `map` is the map with the shadow walls standing, as for a
  * creature: a trace is not found through a standing wall. A desk, a screen and a partition
- * are low and do not stop the light.
+ * are low and do not stop the light. `spread` is the cone's (0029).
  */
 export function traceInLight(
   trace: Trace,
   player: PlayerState,
   lampOn: boolean,
   map: TileMap,
+  spread: number = SPREAD,
 ): boolean {
-  if (!lampOn || !meetsCone(trace.box, lampCone(player))) {
+  if (!lampOn || !meetsCone(trace.box, lampCone(player), spread)) {
     return false;
   }
   const { box } = trace;
@@ -100,13 +101,14 @@ export function stepTraces(
   lampOn: boolean,
   map: TileMap,
   tick: number,
+  spread: number = SPREAD,
 ): TraceState[] {
   return states.map((state) => {
     const trace = traces[state.trace];
     if (state.found !== null || trace === undefined) {
       return state;
     }
-    if (!traceInLight(trace, player, lampOn, map)) {
+    if (!traceInLight(trace, player, lampOn, map, spread)) {
       return state.light === 0 ? state : { ...state, light: 0 };
     }
     return state.light + 1 < FIND_STEPS

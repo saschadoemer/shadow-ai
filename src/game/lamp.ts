@@ -7,13 +7,20 @@ import type { Facing, PlayerState } from './state';
  * is as wide at its end as it is long. `inCone` is the one test the game makes on it; 0008
  * freezes a creature whose point passes it. Pure data and pure functions: the renderer draws the
  * same cone from a sprite sheet whose frames hold it (FRAME_APEX), the generator draws that sheet
- * from `inCone`.
+ * from `inCone`. The slope is the cone's spread (0029): with the upgrade `wide-cone` it is 3/4,
+ * and the cone is one and a half times as wide at its end.
  */
 
 /** Tune: 48 px is three tiles. Half-open: a point at exactly 48 is outside. */
 export const CONE_LENGTH = 48;
 /** The lamp is held at chest height: the apex is this many pixels above the feet. */
 export const LAMP_HEIGHT = 12;
+/** The cone's spread, its slope to each side: one half makes it as wide at its end as it is long. */
+export const SPREAD = 1 / 2;
+/** Tune: the spread with the wider cone (0029). 72 px wide at the end, one and a half times as wide. */
+export const WIDE_SPREAD = 3 / 4;
+/** The id of the upgrade that widens the cone, as the world data names it. */
+export const WIDE_CONE = 'wide-cone';
 
 export interface Cone {
   /** Map pixels, floating point like the feet. */
@@ -42,21 +49,43 @@ export const FRAME_APEX: Readonly<Record<Facing, Point>> = {
   right: { x: 0, y: 24 },
 };
 
+/** The side of a frame of the wider cone's sheet (0029): the cone's width at its end, 72 px. */
+export const WIDE_FRAME_SIZE = 2 * CONE_LENGTH * WIDE_SPREAD;
+
+/**
+ * Where the apex sits in a WIDE_FRAME_SIZE × WIDE_FRAME_SIZE frame of the wider cone's sheet,
+ * per facing: the middle of the edge the cone opens from, as in FRAME_APEX (0029).
+ */
+export const WIDE_FRAME_APEX: Readonly<Record<Facing, Point>> = {
+  down: { x: 36, y: 0 },
+  up: { x: 36, y: 71 },
+  left: { x: 71, y: 36 },
+  right: { x: 0, y: 36 },
+};
+
 /** The cone the figure's lamp casts: the apex LAMP_HEIGHT above the feet, in the facing. */
 export function lampCone(player: PlayerState): Cone {
   return { apex: { x: player.x, y: player.y - LAMP_HEIGHT }, facing: player.facing };
 }
 
 /**
- * Whether a point lies in the cone: with d its distance from the apex along the direction and
- * s its distance from the axis, 0 ≤ d < CONE_LENGTH and |s| ≤ d / 2. The apex is in; a point
- * beside it or behind it is not.
+ * The spread of the lamp of a player with these upgrades (0029): WIDE_SPREAD with `wide-cone`,
+ * SPREAD without. Derived in every step and every frame; the state has no field for it.
  */
-export function inCone(point: Point, cone: Cone): boolean {
+export function spreadOf(upgrades: readonly string[]): number {
+  return upgrades.includes(WIDE_CONE) ? WIDE_SPREAD : SPREAD;
+}
+
+/**
+ * Whether a point lies in the cone: with d its distance from the apex along the direction and
+ * s its distance from the axis, 0 ≤ d < CONE_LENGTH and |s| ≤ d × spread. The apex is in; a
+ * point beside it or behind it is not.
+ */
+export function inCone(point: Point, cone: Cone, spread: number = SPREAD): boolean {
   const direction = DIRECTIONS[cone.facing];
   const dx = point.x - cone.apex.x;
   const dy = point.y - cone.apex.y;
   const along = dx * direction.x + dy * direction.y;
   const aside = Math.abs(dx * direction.y - dy * direction.x);
-  return along >= 0 && along < CONE_LENGTH && aside <= along / 2;
+  return along >= 0 && along < CONE_LENGTH && aside <= along * spread;
 }
