@@ -53,6 +53,15 @@ at the bottom of the screen — `Dieser Schatten ist zu dicht für die Lampe.` T
 long as the light is on the wall and gone with it: when Space is let go, when the figure turns
 away, when it is pushed.
 
+**As built** (feature 0022): a trace is shadow residue on a device. It cannot be seen until the
+lamp's light is on it; in the light it shows and grows. After one second of unbroken light — 60
+steps, the number of a capture — it is found and gone from the world. A break starts the second
+again. The light test is the shadow wall's, but against the map with the walls standing, as for
+a creature: a trace is not found through a standing shadow wall. A desk, a screen and a
+partition are low and do not stop the light. When a trace is found, the line at the bottom says
+`Spur gefunden. Sie steht im Journal.` for two seconds; a wall that holds says its own line
+first.
+
 ## 3. Three layers of opposition
 
 Combat matters but is never the whole answer. Every piece of shadow belongs to one layer:
@@ -106,7 +115,7 @@ Linear and lean, by decision for the first draft (`docs/plan.md`, deferred, reco
 alternative):
 
 1. Traces found in the region are shadow residue on devices, visible in the lamp's light; each
-   goes into the journal.
+   goes into the journal. *As built* (feature 0022): the five traces of Sales.
 2. Conversations in the department and the break room lead to the source — the person where the
    data flow begins.
 3. At the source the player **shows a matching trace** from the journal. It is a gesture, not an
@@ -139,6 +148,11 @@ closes. A species has its entry as soon as one of it is captured: its own 16x16 
 name and two to four lines. The cases and the policy say in one line that they are empty; their
 content comes with M5. There is no count of captures and no pages within a tab yet. J does
 nothing with a dialogue open and nothing in the dark.
+
+**As built** (feature 0022): the cases tab lists every department of which a trace is found, in
+the order of the world data — its name and `found of all`, as in `Vertrieb` and
+`Spuren: 1 von 5` below it. Until a trace is found it shows its line for nothing. People spoken
+to, the source and the outcome come with 0024.
 
 ## 8. Controls and presentation
 
