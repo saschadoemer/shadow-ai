@@ -263,6 +263,21 @@ export function areaBox(rect: CellRect): Box {
   };
 }
 
+/**
+ * The rests (0027): per rest what it is and its cell. Every coffee machine of the floor is one,
+ * in the order of the rows and, in a row, from left to right: the order in the file.
+ */
+export const RESTS: readonly { readonly what: string; readonly cell: Point }[] = [
+  { what: 'coffee', cell: { x: 104, y: 8 } },
+  { what: 'coffee', cell: { x: 27, y: 19 } },
+  { what: 'coffee', cell: { x: 52, y: 19 } },
+  { what: 'coffee', cell: { x: 35, y: 26 } },
+  { what: 'coffee', cell: { x: 42, y: 26 } },
+  { what: 'coffee', cell: { x: 104, y: 26 } },
+  { what: 'coffee', cell: { x: 12, y: 78 } },
+  { what: 'coffee', cell: { x: 52, y: 78 } },
+];
+
 /** The box of a trace in map pixels: its cell. */
 export function traceBox(cell: Point): Box {
   return { x: cell.x * TILE_SIZE, y: cell.y * TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE };
@@ -1177,6 +1192,7 @@ export function floorJson(): MapJson {
   const firstFigure = firstWall + SHADOW_WALLS.length;
   const firstTrace = firstFigure + FIGURES.length;
   const firstArea = firstTrace + TRACES.length;
+  const firstRest = firstArea + REGION_AREAS.length;
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1208,6 +1224,9 @@ export function floorJson(): MapJson {
           ...REGION_AREAS.map((area, i) =>
             rectObject(firstArea + i, `region:${area.region}`, areaBox(area.cells)),
           ),
+          ...RESTS.map((rest, i) =>
+            rectObject(firstRest + i, `rest:${rest.what}`, traceBox(rest.cell)),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1217,7 +1236,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstArea + REGION_AREAS.length,
+    nextobjectid: firstRest + RESTS.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

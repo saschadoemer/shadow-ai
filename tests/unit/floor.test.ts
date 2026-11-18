@@ -11,6 +11,7 @@ import { REGION_NAME } from '../../src/game/journal';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
 import { areasOf, inArea, shadowedAreas, veilOf } from '../../src/game/region';
+import { restInReach, restsOf, restUnderShadow } from '../../src/game/rest';
 import { standingWalls, wallsOf, withWalls } from '../../src/game/shadow';
 import { type GameState, NO_RECOIL } from '../../src/game/state';
 import { speakerInReach, speakersOf, TALK_DISTANCE } from '../../src/game/talk';
@@ -29,6 +30,7 @@ import {
   HORIZONTAL_WALLS,
   POSTS,
   REGION_AREAS,
+  RESTS,
   ROOMS,
   ROUTES,
   SHADOW_WALLS,
@@ -495,9 +497,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 115 }, (_, i) => i + 1),
+      Array.from({ length: 123 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(116);
+    expect(json.nextobjectid).toBe(124);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -1353,15 +1355,13 @@ describe('the areas of the regions on the floor (0023)', () => {
     );
   });
 
-  it('are the last ten objects of the file, rectangles with the ids 106 to 115', () => {
+  it('are ten rectangles with the ids 106 to 115, after the traces and before the rests of 0027', () => {
     const objects = floorJson().layers[3].objects;
-    expect(objects).toHaveLength(115);
-    expect(objects.slice(105).map((object) => [object.id, object.name])).toStrictEqual(
+    expect(objects.slice(105, 115).map((object) => [object.id, object.name])).toStrictEqual(
       TABLE.map(([region], i) => [106 + i, `region:${region}`]),
     );
-    expect(objects.slice(105).some((object) => 'point' in object)).toBe(false);
-    expect(floorJson().nextobjectid).toBe(116);
-    expect(floor.rects).toHaveLength(23);
+    expect(objects.slice(105, 115).some((object) => 'point' in object)).toBe(false);
+    expect(areasOf(floor.rects)).toHaveLength(10);
   });
 
   it('leave the walls and the traces as they were', () => {
@@ -1508,5 +1508,103 @@ describe('the cleared region on the floor (0025)', () => {
     expect(veil(90, 30)).toBe(0);
     expect([veil(10, 70), veil(100, 70), veil(95, 5)]).toStrictEqual([1, 1, 1]);
     expect([veil(5, 5), veil(30, 10), veil(60, 10)]).toStrictEqual([2, 2, 3]);
+  });
+});
+
+describe('the rests of the floor (0027)', () => {
+  /** Cell, room and the veil of the cell at the start: the spec's table. */
+  const TABLE: readonly (readonly [number, number, string, number])[] = [
+    [104, 8, 'meeting room north', 1],
+    [27, 19, 'accounting', 2],
+    [52, 19, 'development', 3],
+    [35, 26, 'break room', 0],
+    [42, 26, 'break room', 0],
+    [104, 26, 'sales', 1],
+    [12, 78, 'marketing', 1],
+    [52, 78, 'support', 1],
+  ];
+  const rests = restsOf(floor.rects);
+  const areas = areasOf(floor.rects);
+  const reached = (x: number, y: number) => restInReach({ x, y }, rests, floor);
+
+  it('are the eight of the table, in the layout and in the file', () => {
+    expect(RESTS).toStrictEqual(TABLE.map(([x, y]) => ({ what: 'coffee', cell: { x, y } })));
+    expect(rests).toStrictEqual(
+      TABLE.map(([x, y]) => ({
+        what: 'coffee',
+        box: { x: 16 * x, y: 16 * y, width: 16, height: 16 },
+      })),
+    );
+  });
+
+  it('are the last eight objects of the file, rectangles with the ids 116 to 123', () => {
+    const objects = floorJson().layers[3].objects;
+    expect(objects).toHaveLength(123);
+    expect(objects.slice(115).map((object) => [object.id, object.name])).toStrictEqual(
+      TABLE.map((_row, i) => [116 + i, 'rest:coffee']),
+    );
+    expect(objects.slice(115).some((object) => 'point' in object)).toBe(false);
+    expect(floorJson().nextobjectid).toBe(124);
+    expect(floor.rects).toHaveLength(31);
+  });
+
+  it('leave the objects of 0023 and before as they were', () => {
+    expect(wallsOf(floor.rects)).toHaveLength(8);
+    expect(tracesOf(floor.rects)).toHaveLength(5);
+    expect(areas).toHaveLength(10);
+    expect(floor.points).toHaveLength(91);
+  });
+
+  it('lie each on a counter with a coffee machine, and the floor has no such tile without one', () => {
+    const machines: string[] = [];
+    floor.detail.forEach((id, at) => {
+      if (id === COUNTER_COFFEE) {
+        machines.push(`${at % 108},${Math.floor(at / 108)}`);
+      }
+    });
+    expect(machines.sort()).toStrictEqual(TABLE.map(([x, y]) => `${x},${y}`).sort());
+  });
+
+  it('lie each in its room', () => {
+    for (const [x, y, name] of TABLE) {
+      const room = ROOMS.find((candidate) => candidate.name === name);
+      expect(room, name).toBeDefined();
+      const { c0, c1, r0, r1 } = room?.cells ?? { c0: 0, c1: 0, r0: 0, r1: 0 };
+      expect(x >= c0 && x <= c1 && y >= r0 && y <= r1, `(${x}, ${y}) in ${name}`).toBe(true);
+    }
+  });
+
+  it('have the veil of the table: only the two of the break room are not under shadow at the start', () => {
+    expect(TABLE.map(([x, y]) => veilOf(areas, x, y))).toStrictEqual(
+      TABLE.map(([, , , veil]) => veil),
+    );
+    expect(rests.map((rest) => restUnderShadow(rest, floor.rects, []))).toStrictEqual([
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+    ]);
+  });
+
+  it('are in reach from inside their room and not from the corridor behind the wall', () => {
+    // The machine of Sales, cell (104, 26): from below it, and from the north corridor.
+    expect(reached(1672, 440)).toStrictEqual(rests[5]);
+    expect(reached(1672, 416)).toBeNull();
+    // The left machine of the break room, cell (35, 26).
+    expect(reached(568, 440)).toStrictEqual(rests[3]);
+    expect(reached(568, 416)).toBeNull();
+  });
+
+  it('give the machine of Sales its use once Sales is solved', () => {
+    const sales = rests[5];
+    expect(sales).toBeDefined();
+    if (sales !== undefined) {
+      expect(restUnderShadow(sales, floor.rects, [])).toBe(true);
+      expect(restUnderShadow(sales, floor.rects, [{ region: 'sales', at: 1005 }])).toBe(false);
+    }
   });
 });
