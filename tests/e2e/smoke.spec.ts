@@ -283,3 +283,13 @@ test('J opens the journal on the creatures and closes it again', async ({ page }
   await expect.poll(journal, { message: 'a second press of J closes it' }).toBeNull();
   await page.keyboard.up('KeyJ');
 });
+
+test('the floor starts with its five traces, none seen and none found', async ({ page }) => {
+  await page.goto('/');
+  // One poll for the whole value: nothing is read from a page that might still be loading.
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.traces), {
+      message: 'window.shadowAi.state.traces holds the five traces of Sales',
+    })
+    .toStrictEqual([0, 1, 2, 3, 4].map((trace) => ({ trace, light: 0, found: null })));
+});
