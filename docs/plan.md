@@ -139,9 +139,17 @@ cone after it, because the case of Marketing earns it and HR and Accounting open
 creature of Marketing third: every case has its species (`world.md` §4), and the second
 species brings what the journal still lacks — a choice among its entries, and pages.
 
+Three features for a build that can be played from the call to a close by somebody who was
+only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034 the close.
+The creature first, so that the second room has opposition; it is cut small — the choice
+among the journal's entries and its pages wait for a later case and the third species. The
+intern after it: the hint system `world.md` §3 has named since M1, one figure in the break
+room who says where the next step is. The close last, because it follows whatever the last
+case is: the story says once that the rest of the floor follows, and the game goes on.
+
 Named here without a number and specified when their turn comes: the case of Support · the
 cases of HR and Accounting · the colour filter · the case of Development · the meeting rooms'
-side case · the vendor in every department · the intern in the break room and the hints ·
+side case · the vendor in every department ·
 who sees the shadow · the two keys · Management and the last case · the two Harmonic stations
 of Act 2, each in its case spec. 0028 and 0029 are implemented.
 
