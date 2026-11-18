@@ -3,7 +3,7 @@ import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { type Figure, figuresOf } from '../game/cast';
 import { CREATURE_SIZE } from '../game/creature';
 import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
-import { DOG_LOOKS, MOVER_SIZE } from '../game/mover';
+import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
 import { DARK_STEPS } from '../game/overview';
 import { LIFT_STEPS, wallsOf } from '../game/shadow';
@@ -18,6 +18,7 @@ import {
   type ShadowWallState,
   type Species,
 } from '../game/state';
+import { speakerOf, speakersOf } from '../game/talk';
 import { type Language, textOf } from '../text/text';
 import { drawLayer } from './draw-map';
 import { drawText } from './draw-text';
@@ -373,7 +374,8 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
   const page =
     state.dialogue === null
       ? undefined
-      : figures[state.dialogue.figure]?.pages[state.dialogue.page];
+      : speakerOf(state.dialogue, speakersOf(figures, state.movers, routesOf(content.map.points)))
+          ?.pages[state.dialogue.page];
   const notice = noticeOf(state);
   if (page !== undefined) {
     renderer.fillRect(

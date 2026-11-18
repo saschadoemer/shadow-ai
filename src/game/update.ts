@@ -7,7 +7,7 @@ import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from 
 import { type GameInput, stepPlayer } from './player';
 import { standingWalls, stepWalls, wallsOf, withWalls } from './shadow';
 import { type GameState, type LampState, NO_RECOIL, type PlayerState } from './state';
-import { openDialogue, stepDialogue } from './talk';
+import { openDialogue, speakersOf, stepDialogue } from './talk';
 import { BASE_STRENGTH } from './world';
 
 /**
@@ -55,8 +55,9 @@ export function createInitialState(map: TileMap): GameState {
 /**
  * Advances the game by exactly one logic step and returns the new state; its arguments are not
  * mutated. In the dark the step is the dark sequence and nothing else (0009). With a dialogue
- * open the step is the dialogue's and nothing else; a press of `talk` next to a standing figure
- * opens one instead of an ordinary step (0017). Otherwise: the lamp is on when the input holds
+ * open the step is the dialogue's and nothing else; a press of `talk` near a speaker — a
+ * standing figure or a colleague — in reach and in sight opens one instead of an ordinary step
+ * (0017, 0018). Otherwise: the lamp is on when the input holds
  * it and the figure is not being pushed; the figure is stepped; each creature is stepped
  * against the stepped figure (0008); the first free creature within reach of a figure that is
  * not safe hits; the camera follows the figure; each mover is stepped against the figure after
@@ -70,11 +71,13 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   if (state.dark > 0) {
     return { ...stepDark(state, content), talkHeld: input.talk };
   }
-  const figures = figuresOf(content.points);
+  const routes = routesOf(content.points);
+  const speakers = speakersOf(figuresOf(content.points), state.movers, routes);
   if (state.dialogue !== null) {
-    return stepDialogue(state, state.dialogue, input, figures);
+    return stepDialogue(state, state.dialogue, input, speakers);
   }
-  const opened = openDialogue(state, input, figures);
+  // In sight is tested against the map as loaded: a shadow wall does not stop a conversation.
+  const opened = openDialogue(state, input, speakers, content);
   if (opened !== null) {
     return opened;
   }
@@ -104,7 +107,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     camera: followPlayer(player, content),
     lamp,
     creatures,
-    movers: stepMovers(state.movers, routesOf(content.points), player),
+    movers: stepMovers(state.movers, routes, player),
     // The light on a wall is tested against the map as loaded: a wall does not block itself.
     shadowWalls: stepWalls(state.shadowWalls, walls, stepped, lamp, content),
     figures: state.figures,
