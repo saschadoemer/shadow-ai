@@ -9,7 +9,7 @@ import { CONE_LENGTH } from './game/lamp';
 import { MOVER_SIZE } from './game/mover';
 import type { GameInput } from './game/player';
 import type { GameState } from './game/state';
-import { createInitialState, update } from './game/update';
+import { newGame, update } from './game/update';
 import { createCanvas2dRenderer } from './render/canvas2d/canvas2d-renderer';
 import { drawScene, HEART_SIZE, type SceneContent, type SceneSettings } from './render/draw-scene';
 import { GLYPH_HEIGHT, GLYPH_WIDTH } from './render/font';
@@ -235,7 +235,7 @@ function readInput(): GameInput {
 async function start(): Promise<void> {
   const renderer = createCanvas2dRenderer(findCanvas());
   const content = await loadContent();
-  const handle = { state: createInitialState(content.map), language: settings.language };
+  const handle = { state: newGame(content.map), language: settings.language };
   window.shadowAi = handle;
   runLoop(
     handle.state,
