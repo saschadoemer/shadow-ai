@@ -200,7 +200,10 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 - Is the block of the policy something a team would accept?
 - Marketing can be solved before Sales. Does that fit the story the call tells?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–22. Feel: a second case by the same rules — fits; the
+printer as a place for a trace — fits; the answer sounds like the colleague with the printer —
+fits; the policy block is one a team would accept — fits; solving Marketing before Sales fits
+the story of the call — fits.
 
 ## Open questions
 
