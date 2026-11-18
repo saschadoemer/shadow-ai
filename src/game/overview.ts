@@ -10,6 +10,7 @@ import {
   type PlayerState,
   type Recoil,
 } from './state';
+import { restedTraces } from './trace';
 
 /**
  * Overview (gameplay.md §4, feature 0009): the hit of a free creature, the push and the safe
@@ -141,6 +142,7 @@ function woken(state: GameState, map: TileMap): GameState {
     })),
     movers: state.movers,
     shadowWalls: restedWalls(state.shadowWalls),
+    traces: restedTraces(state.traces),
     figures: state.figures,
     dialogue: null,
     journal: null,

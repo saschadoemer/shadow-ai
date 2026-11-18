@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
-import { drawText, LINE_PITCH } from '../../src/render/draw-text';
+import { drawNumber, drawText, LINE_PITCH } from '../../src/render/draw-text';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
 import { type TextKey, textKey } from '../../src/text/text';
 
@@ -105,5 +105,30 @@ describe('drawText (0016)', () => {
   it('asks for a TextKey: a literal does not compile (INV-4)', () => {
     expectTypeOf(drawText).parameter(2).toEqualTypeOf<TextKey>();
     expectTypeOf<string>().not.toExtend<TextKey>();
+  });
+});
+
+describe('drawNumber (0022)', () => {
+  const drawn = (value: number, x = 64, y = 48): string[] => {
+    const { renderer, calls } = recorder();
+    drawNumber(renderer, FONT, value, x, y);
+    return calls;
+  };
+
+  it('draws the decimal digits of a whole number from the left, 6 px apart', () => {
+    // The digits 0 to 9 are the glyphs 16 to 25.
+    expect(drawn(0)).toStrictEqual(['16 at 64,48']);
+    expect(drawn(7)).toStrictEqual(['23 at 64,48']);
+    expect(drawn(10)).toStrictEqual(['17 at 64,48', '16 at 70,48']);
+    expect(drawn(123, 16, 36)).toStrictEqual(['17 at 16,36', '18 at 22,36', '19 at 28,36']);
+  });
+
+  it('takes a number and nothing else: no key, no string', () => {
+    expectTypeOf(drawNumber).parameter(2).toEqualTypeOf<number>();
+  });
+
+  it('draws a number below 0 as 0 and a fraction as its whole part', () => {
+    expect(drawn(-3)).toStrictEqual(['16 at 64,48']);
+    expect(drawn(4.9)).toStrictEqual(['20 at 64,48']);
   });
 });

@@ -43,6 +43,7 @@ const DOG_SHEET_URL = '/sprites/dog.png';
 const VACUUM_SHEET_URL = '/sprites/vacuum.png';
 const DRONE_SHEET_URL = '/sprites/drone.png';
 const SHADOW_WALL_SHEET_URL = '/sprites/shadow-wall.png';
+const TRACE_SHEET_URL = '/sprites/trace.png';
 const FONT_SHEET_URL = '/sprites/font.png';
 
 /**
@@ -84,6 +85,11 @@ async function loadContent(): Promise<SceneContent> {
     },
     shadowWallSheet: {
       image: await loadImage(SHADOW_WALL_SHEET_URL),
+      frameWidth: TILE_SIZE,
+      frameHeight: TILE_SIZE,
+    },
+    traceSheet: {
+      image: await loadImage(TRACE_SHEET_URL),
       frameWidth: TILE_SIZE,
       frameHeight: TILE_SIZE,
     },

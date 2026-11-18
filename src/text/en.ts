@@ -4,6 +4,7 @@ import type { de } from './de';
 export const en: Readonly<Record<keyof typeof de, string>> = {
   'notice.shadow-too-dense': 'This shadow is too dense for the lamp.',
   'notice.language': 'Language: English',
+  'notice.trace-found': 'Trace found. It is in the journal.',
   'notice.help': 'Help: press H',
   'help.key-walk': 'Arrow keys, WASD',
   'help.do-walk': 'Walk',
@@ -25,6 +26,9 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
   'journal.no-creatures': 'No creature captured yet.',
   'journal.no-cases': 'No case opened yet.',
   'journal.no-policy': 'The policy is still empty.',
+  'journal.traces': 'Traces:',
+  'journal.of': 'of',
+  'region.sales': 'Sales',
   'creature.snippet-name': 'Snippet',
   'creature.snippet-text': [
     'A piece of text somebody pasted into a public',

@@ -1781,6 +1781,61 @@
           "width": 0,
           "x": 264,
           "y": 472
+        },
+        {
+          "height": 16,
+          "id": 101,
+          "name": "trace:sales",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 1328,
+          "y": 448
+        },
+        {
+          "height": 16,
+          "id": 102,
+          "name": "trace:sales",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 1568,
+          "y": 448
+        },
+        {
+          "height": 16,
+          "id": 103,
+          "name": "trace:sales",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 1488,
+          "y": 544
+        },
+        {
+          "height": 16,
+          "id": 104,
+          "name": "trace:sales",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 1408,
+          "y": 640
+        },
+        {
+          "height": 16,
+          "id": 105,
+          "name": "trace:sales",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 1568,
+          "y": 736
         }
       ],
       "opacity": 1,
@@ -1791,7 +1846,7 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 101,
+  "nextobjectid": 106,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",

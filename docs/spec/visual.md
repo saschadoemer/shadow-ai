@@ -83,9 +83,10 @@ under it.
 `#181425` with three tabs along the top in two blues — `#3a4466` for the open tab, `#262b44` for
 the other two — each with its title centred in white, and under them a rule in the open tab's
 colour, so that the open tab stands on it. A captured species shows its own 16x16 picture, the
-frame the light shows, with its name beside it and its lines below. The help is the one thing
-drawn over it; its frame is what makes it a box on the journal's screen, which has the field's
-colour.
+frame the light shows, with its name beside it and its lines below. A case on the cases tab
+(feature 0022) is two white lines: the department's name, and below it its count —
+`Spuren: 1 von 5`. The help is the one thing drawn over the journal; its frame is what makes it
+a box on the journal's screen, which has the field's colour.
 
 ## 4. Palette
 
@@ -98,8 +99,8 @@ The colour of a transparent pixel is not checked. The palette is data in
 
 **The signature colour.** One violet of the palette, `#68386c`, is reserved for the shadow and
 for nothing else in the world; the asset test rejects it in every PNG under `public/` except the
-shadow assets, a list in the test: `sprites/snippet.png` (feature 0008) and
-`sprites/shadow-wall.png` (feature 0014).
+shadow assets, a list in the test: `sprites/snippet.png` (feature 0008),
+`sprites/shadow-wall.png` (feature 0014) and `sprites/trace.png` (feature 0022).
 Every trace of shadow AI glows in
 it. The player learns in seconds what to look for, without a word of text. Because colour alone
 excludes colour-blind players, the signature colour is always accompanied by **form and
@@ -113,6 +114,12 @@ many pixels it has — 32 per 16 px segment for density 1, 48 for density 2, 64 
 it flickers four times a second between two phases of that look. In the light it stands still; a
 wall that holds keeps its density's first look, a wall that gives way thins out to 16 and then 8
 pixels per segment before it is gone.
+
+The trace (feature 0022) is the third shadow asset: a checkerboard in the signature colour on
+the screen of a device. It is drawn only while the lamp's light is on it, and it grows in three
+looks — a centred square of 6, 10 and 14 px — over the second the light needs to find it; then it
+is gone and is not drawn again. Form and motion beside the colour: the residue appears, grows
+and vanishes.
 
 **Shadowed and cleared.** A region under shadow renders desaturated with violet dithering; a
 cleared region renders in the full palette. The world shows progress by colour (`vision.md` §5).

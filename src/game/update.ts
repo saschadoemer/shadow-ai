@@ -10,6 +10,7 @@ import { type GameInput, NO_INPUT, stepPlayer } from './player';
 import { standingWalls, stepWalls, wallsOf, withWalls } from './shadow';
 import { type GameState, type LampState, NO_RECOIL, type PlayerState } from './state';
 import { openDialogue, speakersOf, stepDialogue } from './talk';
+import { hiddenTraces, stepTraces, tracesOf } from './trace';
 import { BASE_STRENGTH } from './world';
 
 /**
@@ -18,9 +19,10 @@ import { BASE_STRENGTH } from './world';
  * (0008); overview full and the dark not running (0009); one mover per route on its point 1
  * (0015); a lamp of strength BASE_STRENGTH and every shadow wall of the map standing (0014);
  * every standing figure of the map facing down and no dialogue (0017); the journal closed and
- * no key remembered (0020); the help closed (0021). A map with two wake points, a route that is malformed or crosses a solid tile, a rectangle that
- * is no shadow wall, or a figure point the cast does not know or names twice is rejected here,
- * before the game starts.
+ * no key remembered (0020); the help closed (0021); every trace of the map unseen and not found
+ * (0022). A map with two wake points, a route that is malformed or crosses a solid tile, a
+ * rectangle of no known kind, a shadow wall or a trace the world data or the grid refuses, or a
+ * figure point the cast does not know or names twice is rejected here, before the game starts.
  */
 export function createInitialState(map: TileMap): GameState {
   wakePoint(map);
@@ -45,6 +47,7 @@ export function createInitialState(map: TileMap): GameState {
     creatures: creaturesFrom(map.points),
     movers: moversFrom(routes),
     shadowWalls: standingWalls(walls),
+    traces: hiddenTraces(tracesOf(map.rects)),
     figures: figuresFrom(figures),
     dialogue: null,
     journal: null,
@@ -72,7 +75,9 @@ export function createInitialState(map: TileMap): GameState {
  * the hit, on routes rebuilt from the map's points (0015). The figure and the creatures are
  * stepped against the map with the walls standing at the start of the step; then every
  * standing wall is stepped against the stepped figure, on walls rebuilt from the map's
- * rectangles (0014). Every step, the dark's included, remembers the whole input in `held`, so
+ * rectangles (0014); every trace is stepped against the stepped figure, on the map with the
+ * walls standing at the start of the step, so that none is found through a wall (0022). Every
+ * step, the dark's included, remembers the whole input in `held`, so
  * that the next step can tell a press from a held key (0017, 0020).
  */
 export function update(state: GameState, input: GameInput, content: TileMap): GameState {
@@ -132,6 +137,15 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     movers: stepMovers(state.movers, routes, player),
     // The light on a wall is tested against the map as loaded: a wall does not block itself.
     shadowWalls: stepWalls(state.shadowWalls, walls, stepped, lamp, content),
+    // A trace is tested against the map with the walls standing: none is found through one.
+    traces: stepTraces(
+      state.traces,
+      tracesOf(content.rects),
+      stepped,
+      lamp.on,
+      walled,
+      state.tick + 1,
+    ),
     figures: state.figures,
     dialogue: null,
     journal: null,

@@ -67,6 +67,7 @@ const CONTENT: SceneContent = {
   creatureSheets: { snippet: sheet(16, 16) },
   overviewSheet: sheet(8, 8),
   shadowWallSheet: sheet(16, 16),
+  traceSheet: sheet(16, 16),
   moverSheets: {
     person: [0, 1, 2, 3].map(() => sheet(16, 24)),
     dog: sheet(16, 16),
@@ -97,6 +98,7 @@ const playing = (fields: Partial<GameState> = {}): GameState => ({
   creatures: [],
   movers: [],
   shadowWalls: [],
+  traces: [],
   figures: [{ figure: 0, facing: 'down' }],
   dialogue: null,
   journal: null,

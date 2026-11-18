@@ -43,6 +43,17 @@ export const ENTRY_TEXT: Readonly<Record<Species, EntryText>> = {
   snippet: { name: textKey('creature.snippet-name'), text: textKey('creature.snippet-text') },
 };
 
+/** The words of a region's line on the cases tab (0022): `Spuren: 1 von 5`. */
+export const CASE_TEXT = {
+  traces: textKey('journal.traces'),
+  of: textKey('journal.of'),
+} as const;
+
+/** The displayed names of the regions that have traces, by the region's id (0022). */
+export const REGION_NAME: Readonly<Partial<Record<string, TextKey>>> = {
+  sales: textKey('region.sales'),
+};
+
 /** The entries of the creatures tab: every species captured at least once, in SPECIES order. */
 export function entriesOf(captured: Captured): Species[] {
   return SPECIES.filter((species) => captured[species] > 0);

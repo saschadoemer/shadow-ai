@@ -7,6 +7,7 @@
 export const de = {
   'notice.shadow-too-dense': 'Dieser Schatten ist zu dicht für die Lampe.',
   'notice.language': 'Sprache: Deutsch',
+  'notice.trace-found': 'Spur gefunden. Sie steht im Journal.',
   'notice.help': 'Hilfe: Taste H',
   'help.key-walk': 'Pfeiltasten, WASD',
   'help.do-walk': 'Gehen',
@@ -28,6 +29,9 @@ export const de = {
   'journal.no-creatures': 'Noch keine Kreatur gefangen.',
   'journal.no-cases': 'Noch kein Fall aufgenommen.',
   'journal.no-policy': 'Die Richtlinie ist noch leer.',
+  'journal.traces': 'Spuren:',
+  'journal.of': 'von',
+  'region.sales': 'Vertrieb',
   'creature.snippet-name': 'Schnipsel',
   'creature.snippet-text': [
     'Ein Stück Text, das jemand in einen',

@@ -104,6 +104,23 @@ that lists every key, and a line at the start that names its own. It came out of
 0019, and it follows the journal because it lists the journal's key and uses its press. 0016 to
 0020 are implemented, and 0021 is approved.
 
+### M5 — Act 1 complete
+
+Six features, each its own pull request with its own acceptance plan, in this order: 0022
+traces · 0023 the shadow over the regions · 0024 the case of Sales · 0025 the cleared region ·
+0026 the call · 0027 overview won back. Traces first, because finding them is the next verb of
+the game and every case begins with it: shadow residue on devices, seen only in the lamp's
+light, counted on the journal's cases tab. Then the shadow over the regions, so that a room
+under shadow looks it before the first one is cleared — `visual.md` §4 has asked for the grey
+and the violet veil since M1. The case of Sales after it: the conversations that lead to the
+source, the trace shown to it, the entry and the policy block in the journal. The cleared
+region next, because it is the answer to the case and the picture the teaser ends on: colour
+returns, more colleagues see the shadow, overview grows by one. The call last of the story:
+the customer on the phone, the first sight of the shadow and the lamp handed over can be told
+once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
+has left it open since 0009. 0022 is implemented and 0023 is drafted; the others are named here and
+specified when their turn comes.
+
 ## 5. Deferred, with reasons
 
 Ideas judged good and set aside for the first draft. Each records why, so it is not re-argued
