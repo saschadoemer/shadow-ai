@@ -66,10 +66,27 @@ bottom, 8 px from the left, the right and the bottom edge, 304x18, with one whit
 it. While a dialogue is open the dialogue box (feature 0017) is drawn in the notice's place: the
 notice's bar grown upwards to three lines, (8, 134, 304, 42) in `#181425`, with the page's white
 lines left-aligned from (12, 138), 12 px apart, and in its lower right corner a small white
-triangle that points down and blinks once a second — a press goes on. A heart is 7x7 with a rim
+triangle that points down and blinks once a second — a press goes on. For the first ten
+seconds of a game the same bar holds the start hint (feature 0021), one white line that names
+the key of the help, where no other text has the bar. A heart is 7x7 with a rim
 in `#181425`, red `#e43b44` when full and
 `#3a4466` when empty. The screen of the dark is two rectangles in `#181425` that close from the top
 and the bottom; nothing is blended, so no pixel leaves the palette.
+
+**The help** (feature 0021) is a box over the game, (48, 30, 224, 98): a frame of 1 px in
+`#3a4466` around a field in `#181425`, with seven white rows in two columns — the key on the
+left, what it does on the right. It keeps clear of the hearts, of the journal's tabs and of the
+dialogue box, so the floor stays visible on all four sides and a dialogue's page stays readable
+under it.
+
+**The journal** (feature 0020) is drawn instead of the world, not over it: a dark screen in
+`#181425` with three tabs along the top in two blues — `#3a4466` for the open tab, `#262b44` for
+the other two — each with its title centred in white, and under them a rule in the open tab's
+colour, so that the open tab stands on it. A captured species shows its own 16x16 picture, the
+frame the light shows, with its name beside it and its lines below. A case on the cases tab
+(feature 0022) is two white lines: the department's name, and below it its count —
+`Spuren: 1 von 5`. The help is the one thing drawn over the journal; its frame is what makes it
+a box on the journal's screen, which has the field's colour.
 
 ## 4. Palette
 
@@ -82,8 +99,9 @@ The colour of a transparent pixel is not checked. The palette is data in
 
 **The signature colour.** One violet of the palette, `#68386c`, is reserved for the shadow and
 for nothing else in the world; the asset test rejects it in every PNG under `public/` except the
-shadow assets, a list in the test: `sprites/snippet.png` (feature 0008) and
-`sprites/shadow-wall.png` (feature 0014).
+shadow assets, a list in the test: `sprites/snippet.png` (feature 0008),
+`sprites/shadow-wall.png` (feature 0014), `sprites/trace.png` (feature 0022) and
+`sprites/shadow-veil.png` (feature 0023).
 Every trace of shadow AI glows in
 it. The player learns in seconds what to look for, without a word of text. Because colour alone
 excludes colour-blind players, the signature colour is always accompanied by **form and
@@ -98,8 +116,35 @@ it flickers four times a second between two phases of that look. In the light it
 wall that holds keeps its density's first look, a wall that gives way thins out to 16 and then 8
 pixels per segment before it is gone.
 
+The trace (feature 0022) is the third shadow asset: a checkerboard in the signature colour on
+the screen of a device. It is drawn only while the lamp's light is on it, and it grows in three
+looks — a centred square of 6, 10 and 14 px — over the second the light needs to find it; then it
+is gone and is not drawn again. Form and motion beside the colour: the residue appears, grows
+and vanishes.
+
 **Shadowed and cleared.** A region under shadow renders desaturated with violet dithering; a
 cleared region renders in the full palette. The world shows progress by colour (`vision.md` §5).
+
+*As built* (feature 0023). A cell in an area of a region with a density above 0 (`world.md` §1)
+is under shadow. Its tiles — `ground`, `detail` and `above` — are drawn from the shadow tileset,
+the tileset in greys, and the veil lies over it. The greys are a **ramp** of six colours of the
+palette, from dark to light: `#181425`, `#262b44`, `#3a4466`, `#5a6988`, `#8b9bb4`, `#c0cbdc`.
+The **weight** of a colour is 299 × R + 587 × G + 114 × B. The grey of a colour is the ramp
+colour nearest in weight — no colour of the palette lies exactly between two — and from there
+one step darker; `#181425` stays. So the carpet's `#8b9bb4` becomes `#5a6988`, a desk's
+`#e4a672` becomes `#8b9bb4` and white becomes `#8b9bb4`. The step darker matters: the carpet of
+the rooms is grey already, and without it only the furniture would change. The shadow tileset
+never uses the signature colour; the veil carries it.
+
+The veil is the fourth shadow asset: three 16x16 frames, one per density, a pattern in the
+signature colour that repeats every 4 px — 32, 64 and 128 of 256 pixels, dots, diagonal lines
+and a checkerboard. It stands still. It is drawn over `ground` and `detail` and under everything
+else: the cone, the shadow walls, the traces, the people, the dogs, the machines, the creatures
+and the player keep their colours and get no veil, and `above` is drawn grey without one. So a
+person in a room under shadow stands out in colour against a floor that has none. The form
+beside the colour is the grey itself and the dithering of the veil, whose density tells the
+regions apart. The reception, the break room and the corridors are not under shadow. A region
+that clears and gets its colours back comes with feature 0025.
 
 ## 5. Assets
 
@@ -107,7 +152,8 @@ The art pipeline is stable from the first stage, whatever the art source:
 
 - In the first stage a script in the repository **generates the placeholder tiles** from code —
   in the palette, deterministic, free of licence questions. Tileset sizes, tile ids and the Tiled
-  integration are fixed by it.
+  integration are fixed by it. Beside each tileset it writes the tileset's shadow sheet, the same
+  tiles in the greys of §4, named with `-shadow` before `.png` (feature 0023).
 - Later an **art pass** replaces the generated graphics file by file — by hand, by a pixel artist
   or by the author — in the same size and the same palette, without any change to code.
 - Text is drawn with a bitmap font drawn in-house (feature 0016): one font, monospaced, white,

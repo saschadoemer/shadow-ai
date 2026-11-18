@@ -195,7 +195,7 @@ test('the floor starts with the officer standing and no dialogue open', async ({
   const state = await page.evaluate(() => window.shadowAi?.state);
   expect(state?.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
   expect(state?.dialogue).toBeNull();
-  expect(state?.talkHeld).toBe(false);
+  expect(state?.held.talk).toBe(false);
 });
 
 test('the game starts with full overview and outside the dark', async ({ page }) => {
@@ -235,5 +235,127 @@ test.describe('served by the container', () => {
   test('text responses are gzip-compressed when the client accepts it', async () => {
     const page = await get(`${container()}/`, { 'accept-encoding': 'gzip' });
     expect(page.headers['content-encoding']).toBe('gzip');
+  });
+});
+
+test('L switches the language once per press, and the page says which one is on', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const language = () => page.evaluate(() => window.shadowAi?.language);
+  const lang = () => page.evaluate(() => document.documentElement.lang);
+  await expect
+    .poll(language, { message: 'window.shadowAi.language is German after loading' })
+    .toBe('de');
+  expect(await lang()).toBe('de');
+  await page.keyboard.press('KeyL');
+  await expect.poll(language, { message: 'one press of L switches to English' }).toBe('en');
+  expect(await lang()).toBe('en');
+  // A second keydown without a keyup is the repeat of a held key: it switches nothing.
+  await page.keyboard.down('KeyL');
+  await page.keyboard.down('KeyL');
+  await page.keyboard.up('KeyL');
+  await expect.poll(language, { message: 'a held L switches once, back to German' }).toBe('de');
+  expect(await lang()).toBe('de');
+});
+
+test('J opens the journal on the creatures and closes it again', async ({ page }) => {
+  await page.goto('/');
+  const journal = () => page.evaluate(() => window.shadowAi?.state.journal);
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.held.journal), {
+      message: 'window.shadowAi.state.held is there: the game runs, and J is not held',
+    })
+    .toBe(false);
+  expect(await journal()).toBeNull();
+  // The game reads the held keys once per frame, so a key stays down until the state shows it.
+  await page.keyboard.down('KeyJ');
+  await expect.poll(journal, { message: 'J opens the journal' }).toStrictEqual({
+    tab: 'creatures',
+  });
+  await page.keyboard.up('KeyJ');
+  await page.keyboard.down('ArrowRight');
+  await expect.poll(journal, { message: 'the right arrow turns to the cases' }).toStrictEqual({
+    tab: 'cases',
+  });
+  await page.keyboard.up('ArrowRight');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.held.journal), {
+      message: 'J was let go',
+    })
+    .toBe(false);
+  await page.keyboard.down('KeyJ');
+  await expect.poll(journal, { message: 'a second press of J closes it' }).toBeNull();
+  await page.keyboard.up('KeyJ');
+});
+
+test('the floor starts with its five traces, none seen and none found', async ({ page }) => {
+  await page.goto('/');
+  // One poll for the whole value: nothing is read from a page that might still be loading.
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.traces), {
+      message: 'window.shadowAi.state.traces holds the five traces of Sales',
+    })
+    .toStrictEqual([0, 1, 2, 3, 4].map((trace) => ({ trace, light: 0, found: null })));
+});
+
+test('H opens the help, the game stands still under it, and H closes it again', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const help = () => page.evaluate(() => window.shadowAi?.state.help);
+  await expect
+    .poll(help, { message: 'window.shadowAi.state.help is there: the game runs, the help closed' })
+    .toBe(false);
+  // The game reads the held keys once per frame, so a key stays down until the state shows it.
+  await page.keyboard.down('KeyH');
+  await expect.poll(help, { message: 'H opens the help' }).toBe(true);
+  await page.keyboard.up('KeyH');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.held.help), {
+      message: 'H was let go',
+    })
+    .toBe(false);
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(300);
+  await page.keyboard.up('ArrowRight');
+  expect(await page.evaluate(() => window.shadowAi?.state.player.x)).toBe(256);
+  expect(await help()).toBe(true);
+  await page.keyboard.down('KeyH');
+  await expect.poll(help, { message: 'a second press of H closes it' }).toBe(false);
+  await page.keyboard.up('KeyH');
+});
+
+test('the reception keeps its colours: no shadow lies over it', async ({ page }) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.camera), {
+      message: 'the first view is the reception',
+    })
+    .toStrictEqual({ x: 96, y: 624 });
+  // Cell (7, 43) is carpet, with no furniture and on no route. Its corner is at (16, 64) on the
+  // surface, the factor is 4, and the corner pixel of the carpet tile is its base colour.
+  const canvas = page.locator('canvas#game');
+  await expect
+    .poll(
+      () =>
+        canvas.evaluate((element: HTMLCanvasElement) =>
+          Array.from(element.getContext('2d')?.getImageData(16 * 4, 64 * 4, 1, 1).data ?? []),
+        ),
+      { message: 'the pixel is the carpet #8b9bb4, not its grey under shadow #5a6988' },
+    )
+    .toStrictEqual([0x8b, 0x9b, 0xb4, 255]);
+});
+
+test('the game starts with no case solved and five hearts', async ({ page }) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.solved), {
+      message: 'window.shadowAi.state.solved is there and empty',
+    })
+    .toStrictEqual([]);
+  expect(await page.evaluate(() => window.shadowAi?.state.overview)).toStrictEqual({
+    current: 5,
+    max: 5,
   });
 });

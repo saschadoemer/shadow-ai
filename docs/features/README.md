@@ -39,4 +39,13 @@ in two.
 | [0015](0015-the-moving-floor.md) | The moving floor | M3 | implemented 2026-11-13 |
 | [0016](0016-text-on-screen.md) | Text on screen | M4 | implemented 2026-11-17 |
 | [0017](0017-talking.md) | Talking | M4 | implemented 2026-11-17 |
+| [0018](0018-everyday-lines.md) | Everyday lines | M4 | implemented 2026-11-18 |
+| [0019](0019-the-language-switch.md) | The language switch | M4 | implemented 2026-11-18 |
+| [0020](0020-the-journal.md) | The journal | M4 | implemented 2026-11-18 |
+| [0021](0021-help.md) | Help | M4 | implemented 2026-11-18 |
+| [0022](0022-traces.md) | Traces | M5 | implemented 2026-11-18 |
+| [0023](0023-the-shadow-over-the-regions.md) | The shadow over the regions | M5 | implemented 2026-11-18 |
+| [0024](0024-the-case-of-sales.md) | The case of Sales | M5 | implemented 2026-11-18 |
+| [0025](0025-the-cleared-region.md) | The cleared region | M5 | approved 2026-11-18 |
+| [0026](0026-the-call.md) | The call | M5 | approved 2026-11-18 |
 | [0018](0018-cloud-run-deployment.md) | Cloud Run deployment | M8 | approved 2026-11-17 |

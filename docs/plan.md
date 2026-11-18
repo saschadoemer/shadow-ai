@@ -88,8 +88,9 @@ first cleared region in M5. M3 is done: 0014 was the last of the nine.
 
 ### M4 — Dialogue, language table and journal
 
-Five features, each its own pull request with its own acceptance plan, in this order: 0016 text
-on screen · 0017 talking · 0018 everyday lines · 0019 the language switch · 0020 the journal.
+Six features, each its own pull request with its own acceptance plan, in this order: 0016 text
+on screen · 0017 talking · 0018 everyday lines · 0019 the language switch · 0020 the journal ·
+0021 help.
 Text first, because everything else in the milestone is made of it: the font, the language
 table in German and English and the `TextKey` arrive with one sentence — the line that says a
 shadow wall is too dense for the lamp, which 0014 left to M4. Talking after it, so the dialogue
@@ -98,9 +99,28 @@ data protection officer as the first figure with text — one who stands, so tha
 is the whole feature. Then everyday lines for the four colleagues who walk the floor since
 0015: they have to stop and turn before they can be spoken to. The language switch after that,
 when there is enough text for English to be worth looking at; the title screen that will hold
-the switch is M8, so M4 needs an interim one. The journal last: its three tabs are text and
-pictures, and its first content — the captured snippet — exists since 0008. 0016 is
-implemented and 0017 drafted; the others are named here and specified when their turn comes.
+the switch is M8, so M4 needs an interim one. The journal after it: its three tabs are text and
+pictures, and its first content — the captured snippet — exists since 0008. Help last: a box
+that lists every key, and a line at the start that names its own. It came out of the walk of
+0019, and it follows the journal because it lists the journal's key and uses its press. All six
+are implemented. M4 is done: 0021 was the last of the six.
+
+### M5 — Act 1 complete
+
+Six features, each its own pull request with its own acceptance plan, in this order: 0022
+traces · 0023 the shadow over the regions · 0024 the case of Sales · 0025 the cleared region ·
+0026 the call · 0027 overview won back. Traces first, because finding them is the next verb of
+the game and every case begins with it: shadow residue on devices, seen only in the lamp's
+light, counted on the journal's cases tab. Then the shadow over the regions, so that a room
+under shadow looks it before the first one is cleared — `visual.md` §4 has asked for the grey
+and the violet veil since M1. The case of Sales after it: the conversations that lead to the
+source, the trace shown to it, the entry and the policy block in the journal. The cleared
+region next, because it is the answer to the case and the picture the teaser ends on: colour
+returns, more colleagues see the shadow, overview grows by one. The call last of the story:
+the customer on the phone, the first sight of the shadow and the lamp handed over can be told
+once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
+has left it open since 0009. 0022, 0023 and 0024 are implemented; 0025
+and 0026 are approved; 0027 is named here and specified when its turn comes.
 
 ## 5. Deferred, with reasons
 

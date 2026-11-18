@@ -4,15 +4,19 @@ import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
 import { type Box, parseTileset } from '../../src/engine/tiled';
-import { encodePng, encodeTsj } from '../../tools/gen-tiles.ts';
+import { ENDESGA_32, SHADOW_COLOUR } from '../../src/render/palette';
+import { encodePng, encodeShadowPng, encodeTsj } from '../../tools/gen-tiles.ts';
 import {
   CARPET,
   CORRIDOR,
   DOOR_CLOSED,
+  renderShadowTiles,
   renderTiles,
+  SHADOW_RAMP,
   SHEET_COLUMNS,
   SHEET_HEIGHT,
   SHEET_WIDTH,
+  shadowGrey,
   TILE_KINDS,
   TILE_SIZE,
   tilesetJson,
@@ -21,6 +25,7 @@ import {
   WALL_POST,
   WALL_TOP,
   WINDOW,
+  weightOf,
 } from '../../tools/placeholder-tiles.ts';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -529,5 +534,93 @@ describe('the lounge and gadget tiles (0013)', () => {
   ])('tile %i at (%i, %i) is %s', (id, x, y, colour) => {
     expect(tileAlpha(data, id, x, y)).toBe(255);
     expect(tileHex(data, id, x, y)).toBe(colour);
+  });
+});
+
+describe('the shadow tileset (0023)', () => {
+  const SHADOW_FILE = join(ROOT, 'public/tiles/placeholder-shadow.png');
+  const tiles = renderTiles();
+  const shadow = renderShadowTiles();
+
+  it('has a ramp of six greys of the palette, from dark to light', () => {
+    expect(SHADOW_RAMP).toStrictEqual([
+      '#181425',
+      '#262b44',
+      '#3a4466',
+      '#5a6988',
+      '#8b9bb4',
+      '#c0cbdc',
+    ]);
+    const weights = SHADOW_RAMP.map(weightOf);
+    expect(weights).toStrictEqual([...weights].sort((a, b) => a - b));
+    expect(weightOf('#ffffff')).toBe(255000);
+    expect(weightOf('#181425')).toBe(299 * 0x18 + 587 * 0x14 + 114 * 0x25);
+  });
+
+  it('gives a colour the grey nearest in weight, one step darker', () => {
+    expect(shadowGrey('#8b9bb4')).toBe('#5a6988');
+    expect(shadowGrey('#e4a672')).toBe('#8b9bb4');
+    expect(shadowGrey('#3e8948')).toBe('#3a4466');
+    expect(shadowGrey('#ffffff')).toBe('#8b9bb4');
+    expect(shadowGrey('#262b44')).toBe('#181425');
+    expect(shadowGrey('#181425')).toBe('#181425');
+  });
+
+  it('gives every colour of the palette a grey of the ramp, and none the lightest', () => {
+    for (const colour of ENDESGA_32) {
+      expect(SHADOW_RAMP.slice(0, 5), colour).toContain(shadowGrey(colour));
+    }
+  });
+
+  it('has no colour of the palette exactly between two greys of the ramp', () => {
+    for (const colour of ENDESGA_32) {
+      const gaps = SHADOW_RAMP.map((grey) => Math.abs(weightOf(grey) - weightOf(colour)));
+      const nearest = Math.min(...gaps);
+      expect(
+        gaps.filter((gap) => gap === nearest),
+        colour,
+      ).toHaveLength(1);
+    }
+  });
+
+  it('is deterministic and matches the committed file', () => {
+    expect(encodeShadowPng().equals(encodeShadowPng())).toBe(true);
+    const committed = PNG.sync.read(readFileSync(SHADOW_FILE));
+    expect([committed.width, committed.height]).toStrictEqual([SHEET_WIDTH, SHEET_HEIGHT]);
+    expect(Buffer.from(shadow).equals(committed.data)).toBe(true);
+  });
+
+  it('keeps the size and the alpha of the tileset, pixel for pixel', () => {
+    expect(shadow).toHaveLength(tiles.length);
+    for (let offset = 3; offset < tiles.length; offset += 4) {
+      expect(shadow[offset]).toBe(tiles[offset]);
+    }
+  });
+
+  it('turns every opaque pixel into the grey of the pixel at its place', () => {
+    for (let y = 0; y < SHEET_HEIGHT; y += 1) {
+      for (let x = 0; x < SHEET_WIDTH; x += 1) {
+        if (tiles[(y * SHEET_WIDTH + x) * 4 + 3] === 0) {
+          continue;
+        }
+        const colour = hexAt(tiles, x, y) as (typeof ENDESGA_32)[number];
+        expect(hexAt(shadow, x, y), `(${x}, ${y})`).toBe(shadowGrey(colour));
+      }
+    }
+  });
+
+  it('makes the carpet darker and leaves the tileset itself as it was', () => {
+    expect(hexAt(tiles, tileX(CARPET), 0)).toBe('#8b9bb4');
+    expect(hexAt(shadow, tileX(CARPET), 0)).toBe('#5a6988');
+    expect(hexAt(shadow, tileX(CORRIDOR), 0)).toBe('#8b9bb4');
+    expect(encodePng().equals(readFileSync(PNG_FILE))).toBe(true);
+  });
+
+  it('never uses the shadow colour: the veil carries it', () => {
+    for (let y = 0; y < SHEET_HEIGHT; y += 1) {
+      for (let x = 0; x < SHEET_WIDTH; x += 1) {
+        expect(hexAt(shadow, x, y)).not.toBe(SHADOW_COLOUR);
+      }
+    }
   });
 });

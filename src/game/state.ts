@@ -1,4 +1,5 @@
 import type { Point } from '../engine/tiled';
+import type { GameInput } from './player';
 
 /** The facings in sprite-sheet order: frame index = facing × PHASES_PER_FACING + phase. */
 export const FACINGS = ['down', 'up', 'left', 'right'] as const;
@@ -91,6 +92,22 @@ export interface ShadowWallState {
   readonly light: number;
 }
 
+/** A trace of the map (0022). Its place stays in the map; all of them stay in the state for good. */
+export interface TraceState {
+  /** The index of the trace in `tracesOf(map.rects)`. */
+  readonly trace: number;
+  /** Steps the light has been on it without a break, 0–59; above 0 it is seen. */
+  readonly light: number;
+  /** The tick of the step in which it was found, or null. A found trace never changes. */
+  readonly found: number | null;
+}
+
+/** A solved case (0024): its region, and the tick of the step that solved it. */
+export interface SolvedCase {
+  readonly region: string;
+  readonly at: number;
+}
+
 /** A standing figure of the cast (0017). Its place stays in the map, its pages in game/cast. */
 export interface FigureState {
   /** The index of the figure in `figuresOf(map.points)`. */
@@ -99,12 +116,26 @@ export interface FigureState {
   readonly facing: Facing;
 }
 
-/** An open dialogue (0017). */
+/** Who speaks in a dialogue (0018): a standing figure of the cast, or a colleague on its round. */
+export const SPEAKER_KINDS = ['figure', 'mover'] as const;
+export type SpeakerKind = (typeof SPEAKER_KINDS)[number];
+
+/** An open dialogue (0017, 0018). */
 export interface Dialogue {
-  /** The index of the figure that speaks. */
-  readonly figure: number;
+  readonly speaker: SpeakerKind;
+  /** The index of the speaker in `GameState.figures` or in `GameState.movers`. */
+  readonly index: number;
   /** The page shown, from 0. */
   readonly page: number;
+}
+
+/** The tabs of the journal (gameplay.md §7), in their order on the screen (0020). */
+export const JOURNAL_TABS = ['creatures', 'cases', 'policy'] as const;
+export type JournalTab = (typeof JOURNAL_TABS)[number];
+
+/** The open journal (0020). What its tabs show is derived from the rest of the state. */
+export interface JournalState {
+  readonly tab: JournalTab;
 }
 
 /** How many creatures of each species were captured. */
@@ -137,12 +168,23 @@ export interface GameState {
   readonly movers: readonly MoverState[];
   /** The shadow walls still standing, in the map's order (0014); a lifted wall has left it for good. */
   readonly shadowWalls: readonly ShadowWallState[];
+  /** The traces of the map, in file order (0022): found or not, all of them. */
+  readonly traces: readonly TraceState[];
+  /** The solved cases, in the order they were solved (0024). */
+  readonly solved: readonly SolvedCase[];
   /** The standing figures of the map, in file order (0017). */
   readonly figures: readonly FigureState[];
   /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
   readonly dialogue: Dialogue | null;
-  /** Whether the last step's input held `talk`: a press is held now and not then (0017). */
-  readonly talkHeld: boolean;
+  /** The journal that is open, or null. While it is open nothing else is stepped (0020). */
+  readonly journal: JournalState | null;
+  /**
+   * Whether the help is open (0021). While it is, nothing else is stepped — not the world, not
+   * an open dialogue and not the open journal: it lies over whatever is there.
+   */
+  readonly help: boolean;
+  /** The last step's input: an action is pressed when it is held now and was not then (0020). */
+  readonly held: GameInput;
   /** Captured creatures per species; the journal (M4) reads it. */
   readonly captured: Captured;
   readonly overview: Overview;

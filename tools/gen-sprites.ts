@@ -17,7 +17,9 @@ import {
   WALL_SHEET_WIDTH,
 } from './placeholder-shadow-wall.ts';
 import { renderSnippet, SNIPPET_SHEET_HEIGHT, SNIPPET_SHEET_WIDTH } from './placeholder-snippet.ts';
+import { renderTrace, TRACE_SHEET_HEIGHT, TRACE_SHEET_WIDTH } from './placeholder-trace.ts';
 import { renderVacuum, VACUUM_SHEET_HEIGHT, VACUUM_SHEET_WIDTH } from './placeholder-vacuum.ts';
+import { renderVeil, VEIL_SHEET_HEIGHT, VEIL_SHEET_WIDTH } from './placeholder-veil.ts';
 
 /**
  * `npm run gen-sprites`: writes public/sprites/player.png from tools/placeholder-player.ts and
@@ -28,7 +30,9 @@ import { renderVacuum, VACUUM_SHEET_HEIGHT, VACUUM_SHEET_WIDTH } from './placeho
  * vacuum.png and drone.png from tools/placeholder-dog.ts, -vacuum.ts and -drone.ts; and
  * public/sprites/shadow-wall.png of 0014 from tools/placeholder-shadow-wall.ts; and
  * public/sprites/font.png of 0016 from tools/placeholder-font.ts; and public/sprites/officer.png
- * of 0017 from tools/placeholder-person.ts. Deterministic — pngjs writes no timestamp — and Node
+ * of 0017 from tools/placeholder-person.ts; and public/sprites/trace.png of 0022 from
+ * tools/placeholder-trace.ts; and public/sprites/shadow-veil.png of 0023 from
+ * tools/placeholder-veil.ts. Deterministic — pngjs writes no timestamp — and Node
  * runs this TypeScript file directly, without a transpiler.
  */
 
@@ -100,6 +104,18 @@ export function encodeFontPng(): Buffer {
   return PNG.sync.write(png);
 }
 
+export function encodeTracePng(): Buffer {
+  const png = new PNG({ width: TRACE_SHEET_WIDTH, height: TRACE_SHEET_HEIGHT });
+  png.data = Buffer.from(renderTrace());
+  return PNG.sync.write(png);
+}
+
+export function encodeVeilPng(): Buffer {
+  const png = new PNG({ width: VEIL_SHEET_WIDTH, height: VEIL_SHEET_HEIGHT });
+  png.data = Buffer.from(renderVeil());
+  return PNG.sync.write(png);
+}
+
 if (import.meta.main) {
   mkdirSync('public/sprites', { recursive: true });
   writeFileSync('public/sprites/player.png', encodePng());
@@ -115,4 +131,6 @@ if (import.meta.main) {
   writeFileSync('public/sprites/shadow-wall.png', encodeShadowWallPng());
   writeFileSync('public/sprites/font.png', encodeFontPng());
   writeFileSync('public/sprites/officer.png', encodeOfficerPng());
+  writeFileSync('public/sprites/trace.png', encodeTracePng());
+  writeFileSync('public/sprites/shadow-veil.png', encodeVeilPng());
 }

@@ -34,8 +34,18 @@ the lamp is stronger. The game shows its first text (feature 0016): a wall that 
 the lamp says so in one line, in the game's own pixel font, from a language table in German and
 English. The data protection officer stands in her office beside the reception and can be
 spoken to with `E` or `Enter` (feature 0017): a box shows what she says, page by page, and the
-world stands still while it is open. Every merge to `main` is deployed to Cloud Run
-(feature 0018). Milestone M3 is complete. The roadmap is in [docs/plan.md](docs/plan.md).
+world stands still while it is open. The four colleagues who walk the floor can be spoken to as
+well, across the counter too, and each has a saying (feature 0018). `L` switches the game between
+German and English at any moment (feature 0019). `J` opens the journal with its three tabs;
+a captured snippet has its entry there (feature 0020). `H` opens the help, a box that lists
+every key, and for the first ten seconds a line at the bottom names it (feature 0021).
+Milestones M3 and M4 are complete, and M5, the first act, has begun: the lamp finds traces on
+the screens of Sales, and the journal counts them on its cases tab (feature 0022). The regions
+under shadow are drawn darker, without colour and under a violet veil whose density is the
+region's (feature 0023). With all five traces found, the colleague of Sales answers honestly,
+the case is solved, the journal records its outcome and the first block of the policy, and
+overview grows by one (feature 0024). Every merge to `main` is deployed to Cloud Run (feature
+0018). The roadmap is in [docs/plan.md](docs/plan.md).
 
 ## Run it
 

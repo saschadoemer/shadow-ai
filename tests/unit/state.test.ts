@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseTileMap, parseTileset, type TileMap } from '../../src/engine/tiled';
 import { followPlayer } from '../../src/game/camera';
-import type { GameInput } from '../../src/game/player';
+import { type GameInput, NO_INPUT } from '../../src/game/player';
 import { FACINGS, type GameState, PHASES_PER_FACING, type PlayerState } from '../../src/game/state';
 import { createInitialState, update } from '../../src/game/update';
 import { grassMap } from './grass-map';
@@ -32,6 +32,18 @@ const FIGURES_MAP = loadMap(
   'tests/fixtures/maps/figures.tmj',
   'tests/fixtures/maps/fixture-tiles.tsj',
 );
+/** The officer, a colleague with lines on a route of two points and a dog, on open floor (0018). */
+const TALKERS_MAP = loadMap(
+  'tests/fixtures/maps/talkers.tmj',
+  'tests/fixtures/maps/fixture-tiles.tsj',
+);
+/** One trace on cell (10, 5) behind a wall strip of Marketing, the spawn below both (0022). */
+const TRACES_MAP = loadMap(
+  'tests/fixtures/maps/traces.tmj',
+  'tests/fixtures/maps/fixture-tiles.tsj',
+);
+/** The colleague of Sales and two traces of Sales on open floor, the spawn 40 px from it (0024). */
+const CASE_MAP = loadMap('tests/fixtures/maps/case.tmj', 'tests/fixtures/maps/fixture-tiles.tsj');
 /** The floor the game loads. */
 const FLOOR_MAP = loadMap('public/maps/floor.tmj', 'public/tiles/placeholder.tsj');
 
@@ -42,6 +54,8 @@ const NONE: GameInput = {
   right: false,
   lamp: false,
   talk: false,
+  journal: false,
+  help: false,
 };
 const RIGHT: GameInput = { ...NONE, right: true };
 const UP_LEFT: GameInput = { ...NONE, up: true, left: true };
@@ -76,9 +90,13 @@ describe('GameState (INV-1)', () => {
       creatures: [],
       movers: [],
       shadowWalls: [],
+      traces: [],
+      solved: [],
       figures: [],
       dialogue: null,
-      talkHeld: false,
+      journal: null,
+      help: false,
+      held: NO_INPUT,
       captured: { snippet: 0 },
       overview: { current: 5, max: 5 },
       dark: 0,
@@ -132,9 +150,13 @@ describe('update', () => {
         creatures: [],
         movers: [],
         shadowWalls: [],
+        traces: [],
+        solved: [],
         figures: [],
         dialogue: null,
-        talkHeld: false,
+        journal: null,
+        help: false,
+        held: NO_INPUT,
         captured: { snippet: 0 },
         overview: { current: 3, max: 3 },
         dark: 0,
@@ -156,9 +178,13 @@ describe('update', () => {
       creatures: [],
       movers: [],
       shadowWalls: [],
+      traces: [],
+      solved: [],
       figures: [],
       dialogue: null,
-      talkHeld: false,
+      journal: null,
+      help: false,
+      held: NO_INPUT,
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -172,9 +198,13 @@ describe('update', () => {
       creatures: [],
       movers: [],
       shadowWalls: [],
+      traces: [],
+      solved: [],
       figures: [],
       dialogue: null,
-      talkHeld: false,
+      journal: null,
+      help: false,
+      held: NO_INPUT,
       captured: { snippet: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
@@ -413,6 +443,8 @@ describe('movers in the state (0015)', () => {
       right: i % 240 < 60,
       lamp: i % 97 < 20,
       talk: false,
+      journal: false,
+      help: false,
     }));
     let withMovers = createInitialState(FLOOR_MAP);
     let without: GameState = { ...withMovers, movers: [] };
@@ -564,7 +596,7 @@ describe('shadow walls in the state (0014)', () => {
     expect(woken.lamp).toStrictEqual({ on: false, strength: 1 });
   });
 
-  it('steps a state without standing walls exactly as a map without rectangles (600 steps)', () => {
+  it('steps a state without standing walls exactly as a map without walls (600 steps)', () => {
     const inputs = Array.from({ length: 600 }, (_, i) => ({
       up: i % 240 >= 180,
       down: i % 240 >= 60 && i % 240 < 120,
@@ -572,8 +604,14 @@ describe('shadow walls in the state (0014)', () => {
       right: i % 240 < 60,
       lamp: i % 97 < 20,
       talk: false,
+      journal: false,
+      help: false,
     }));
-    const bare: TileMap = { ...FLOOR_MAP, rects: [] };
+    // Without its walls; the traces of 0022 are rectangles too, and they stay.
+    const bare: TileMap = {
+      ...FLOOR_MAP,
+      rects: FLOOR_MAP.rects.filter((rect) => !rect.name.startsWith('shadow:')),
+    };
     let open: GameState = { ...createInitialState(FLOOR_MAP), shadowWalls: [] };
     let without = createInitialState(bare);
     expect(open).toStrictEqual(without);
@@ -592,7 +630,7 @@ describe('standing figures in the state (0017)', () => {
     const state = createInitialState(FIGURES_MAP);
     expect(state.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
     expect(state.dialogue).toBeNull();
-    expect(state.talkHeld).toBe(false);
+    expect(state.held).toStrictEqual(NO_INPUT);
     expect(state.creatures).toHaveLength(1);
     expect(state.movers).toStrictEqual([]);
   });
@@ -609,12 +647,12 @@ describe('standing figures in the state (0017)', () => {
   it('remembers in every step whether talk was held: an ordinary step and a step of the dark', () => {
     const start = createInitialState(MAP);
     const held = update(start, TALK, MAP);
-    expect(held.talkHeld).toBe(true);
-    expect(update(held, NONE, MAP).talkHeld).toBe(false);
+    expect(held.held).toStrictEqual(TALK);
+    expect(update(held, NONE, MAP).held).toStrictEqual(NONE);
     const dark = update({ ...start, dark: 1 }, TALK, MAP);
     expect(dark.dark).toBe(2);
-    expect(dark.talkHeld).toBe(true);
-    expect(update(dark, NONE, MAP).talkHeld).toBe(false);
+    expect(dark.held).toStrictEqual(TALK);
+    expect(update(dark, NONE, MAP).held).toStrictEqual(NONE);
   });
 
   it('keeps the figures through the wake', () => {
@@ -628,5 +666,180 @@ describe('standing figures in the state (0017)', () => {
   it('survives a JSON round trip at the start (INV-1)', () => {
     const state = createInitialState(FIGURES_MAP);
     expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
+  });
+});
+
+describe('colleagues with lines in the state (0018)', () => {
+  const TALK: GameInput = { ...NONE, talk: true };
+
+  it('starts on the fixture with the officer, the colleague waiting on its point 1 and the dog', () => {
+    const state = createInitialState(TALKERS_MAP);
+    expect(state.player).toMatchObject({ x: 104, y: 48 });
+    expect(state.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
+    expect(state.movers.map((mover) => mover.kind)).toStrictEqual(['person', 'dog']);
+    expect(state.movers[0]).toMatchObject({ x: 64, y: 48, wait: 600, target: 1, facing: 'down' });
+    expect(state.dialogue).toBeNull();
+  });
+
+  it('opens a dialogue with the colleague 40 px from the spawn, and closes it with the next press', () => {
+    const start = createInitialState(TALKERS_MAP);
+    const opened = update(start, TALK, TALKERS_MAP);
+    expect(opened.dialogue).toStrictEqual({ speaker: 'mover', index: 0, page: 0 });
+    expect(opened.movers[0]).toStrictEqual({ ...start.movers[0], facing: 'right' });
+    expect(opened.movers[1]).toStrictEqual(start.movers[1]);
+    expect(opened.figures).toStrictEqual(start.figures);
+    const closed = update(update(opened, NONE, TALKERS_MAP), TALK, TALKERS_MAP);
+    expect(closed.dialogue).toBeNull();
+    expect(closed.tick).toBe(3);
+  });
+
+  it('survives a JSON round trip with the colleague speaking (INV-1)', () => {
+    const opened = update(createInitialState(TALKERS_MAP), TALK, TALKERS_MAP);
+    expect(opened.dialogue).not.toBeNull();
+    expect(JSON.parse(JSON.stringify(opened))).toStrictEqual(opened);
+  });
+});
+
+describe('the journal in the state (0020)', () => {
+  const JOURNAL: GameInput = { ...NONE, journal: true };
+
+  it('starts closed, with no key remembered', () => {
+    const state = createInitialState(FLOOR_MAP);
+    expect(state.journal).toBeNull();
+    expect(state.held).toStrictEqual(NO_INPUT);
+    expect(NONE).toStrictEqual(NO_INPUT);
+  });
+
+  it('opens on the floor with a press and closes with the next, and nothing has moved', () => {
+    const start = createInitialState(FLOOR_MAP);
+    const open = update(start, JOURNAL, FLOOR_MAP);
+    expect(open).toStrictEqual({ ...start, tick: 1, held: JOURNAL, journal: { tab: 'creatures' } });
+    const closed = update(update(open, NONE, FLOOR_MAP), JOURNAL, FLOOR_MAP);
+    expect(closed).toStrictEqual({ ...start, tick: 3, held: JOURNAL });
+  });
+
+  it('keeps the journal closed through the wake', () => {
+    let state: GameState = { ...createInitialState(FLOOR_MAP), dark: 44 };
+    state = update(state, JOURNAL, FLOOR_MAP);
+    expect(state.dark).toBe(45);
+    expect(state.journal).toBeNull();
+    expect(state.held).toStrictEqual(JOURNAL);
+  });
+});
+
+describe('traces in the state (0022)', () => {
+  const JOURNAL: GameInput = { ...NONE, journal: true };
+  const TALK: GameInput = { ...NONE, talk: true };
+  const lookingUp = (map: TileMap): GameState => {
+    const start = createInitialState(map);
+    return { ...start, player: { ...start.player, facing: 'up' } };
+  };
+  const stepping = (map: TileMap, start: GameState, input: GameInput, count: number): GameState => {
+    let state = start;
+    for (let step = 0; step < count; step += 1) {
+      state = update(state, input, map);
+    }
+    return state;
+  };
+
+  it('starts on the floor with five traces, unseen and not found', () => {
+    expect(createInitialState(FLOOR_MAP).traces).toStrictEqual(
+      [0, 1, 2, 3, 4].map((trace) => ({ trace, light: 0, found: null })),
+    );
+    expect(createInitialState(MAP).traces).toStrictEqual([]);
+  });
+
+  it('reads a trace and a wall from a parsed map, each by its kind', () => {
+    const state = createInitialState(TRACES_MAP);
+    expect(state.player).toMatchObject({ x: 168, y: 128 });
+    expect(state.traces).toStrictEqual([{ trace: 0, light: 0, found: null }]);
+    expect(state.shadowWalls).toStrictEqual([{ wall: 0, lit: false, light: 0 }]);
+  });
+
+  it('lifts the wall in a second and finds the trace behind it in the next', () => {
+    const lifted = stepping(TRACES_MAP, lookingUp(TRACES_MAP), SHINE, 60);
+    expect(lifted.shadowWalls).toStrictEqual([]);
+    expect(lifted.traces).toStrictEqual([{ trace: 0, light: 0, found: null }]);
+    const found = stepping(TRACES_MAP, lifted, SHINE, 60);
+    expect(found.traces).toStrictEqual([{ trace: 0, light: 0, found: 120 }]);
+  });
+
+  it('survives a JSON round trip at the start and with a trace found (INV-1)', () => {
+    const start = createInitialState(TRACES_MAP);
+    expect(JSON.parse(JSON.stringify(start))).toStrictEqual(start);
+    const found = stepping(TRACES_MAP, lookingUp(TRACES_MAP), SHINE, 120);
+    expect(found.traces[0]?.found).toBe(120);
+    expect(JSON.parse(JSON.stringify(found))).toStrictEqual(found);
+  });
+
+  it('steps no trace while the journal is open: 600 steps with the lamp held', () => {
+    const lit = stepping(
+      TRACES_MAP,
+      stepping(TRACES_MAP, lookingUp(TRACES_MAP), SHINE, 60),
+      SHINE,
+      30,
+    );
+    expect(lit.traces).toStrictEqual([{ trace: 0, light: 30, found: null }]);
+    const open = update(lit, { ...SHINE, journal: true }, TRACES_MAP);
+    expect(open.journal).not.toBeNull();
+    expect(stepping(TRACES_MAP, open, SHINE, 600).traces).toStrictEqual(lit.traces);
+    expect(open.traces).toStrictEqual(lit.traces);
+    expect(JOURNAL.journal).toBe(true);
+  });
+
+  it('steps no trace while a dialogue is open', () => {
+    const map = grassMap(
+      20,
+      12,
+      { x: 168, y: 128 },
+      [{ name: 'figure:officer', x: 190, y: 128 }],
+      [{ name: 'trace:sales', x: 160, y: 80, width: 16, height: 16 }],
+    );
+    const lit = stepping(map, lookingUp(map), SHINE, 30);
+    expect(lit.traces).toStrictEqual([{ trace: 0, light: 30, found: null }]);
+    // Without the lamp the count starts again in an ordinary step; the step that opens steps nothing.
+    const talking = update(update(lit, NONE, map), TALK, map);
+    expect(talking.dialogue).not.toBeNull();
+    expect(stepping(map, talking, SHINE, 600).traces).toStrictEqual(talking.traces);
+  });
+});
+
+describe('the solved cases in the state (0024)', () => {
+  const TALK: GameInput = { ...NONE, talk: true };
+  const through = (start: GameState, ...inputs: readonly GameInput[]): GameState =>
+    inputs.reduce((state, input) => update(state, input, CASE_MAP), start);
+
+  it('starts with none, on the floor and on the fixture', () => {
+    expect(createInitialState(FLOOR_MAP).solved).toStrictEqual([]);
+    const state = createInitialState(CASE_MAP);
+    expect(state.solved).toStrictEqual([]);
+    expect(state.traces).toHaveLength(2);
+    expect(state.movers.map((mover) => mover.kind)).toStrictEqual(['person']);
+  });
+
+  it('solves the case of a parsed map: both traces found, three presses beside the source', () => {
+    const start = createInitialState(CASE_MAP);
+    const ready: GameState = {
+      ...start,
+      tick: 1000,
+      traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+    };
+    const solved = through(ready, TALK, NONE, TALK, NONE, TALK);
+    expect(solved.dialogue).toBeNull();
+    expect(solved.solved).toStrictEqual([{ region: 'sales', at: 1005 }]);
+    expect(solved.overview).toStrictEqual({ current: 6, max: 6 });
+    expect(JSON.parse(JSON.stringify(solved))).toStrictEqual(solved);
+  });
+
+  it('solves nothing on the same map with one trace still to find', () => {
+    const start = createInitialState(CASE_MAP);
+    const one: GameState = {
+      ...start,
+      tick: 1000,
+      traces: start.traces.map((trace, i) => (i === 0 ? { ...trace, found: 10 } : trace)),
+    };
+    const closed = through(one, TALK, NONE, TALK);
+    expect(closed.dialogue).toBeNull();
+    expect(closed.solved).toStrictEqual([]);
   });
 });

@@ -53,6 +53,15 @@ at the bottom of the screen — `Dieser Schatten ist zu dicht für die Lampe.` T
 long as the light is on the wall and gone with it: when Space is let go, when the figure turns
 away, when it is pushed.
 
+**As built** (feature 0022): a trace is shadow residue on a device. It cannot be seen until the
+lamp's light is on it; in the light it shows and grows. After one second of unbroken light — 60
+steps, the number of a capture — it is found and gone from the world. A break starts the second
+again. The light test is the shadow wall's, but against the map with the walls standing, as for
+a creature: a trace is not found through a standing shadow wall. A desk, a screen and a
+partition are low and do not stop the light. When a trace is found, the line at the bottom says
+`Spur gefunden. Sie steht im Journal.` for two seconds; a wall that holds says its own line
+first.
+
 ## 3. Three layers of opposition
 
 Combat matters but is never the whole answer. Every piece of shadow belongs to one layer:
@@ -79,8 +88,10 @@ closes like an eye and opens again a second and a half later: the figure stands 
 protection officer's office (feature 0010) with full overview, the creatures still in the world are back
 at their places, and what was captured stays captured. **Open:** how overview is won back
 without falling into the dark — a conversation, a place, a find — is decided when there are
-figures to talk to and rooms to enter (M4, M5). The maximum grows with the first solved case
-(M5).
+figures to talk to and rooms to enter (M4, M5).
+
+**As built** (feature 0024): the step that solves a case raises the maximum by one and fills
+overview to it, whatever it stood at — six full hearts after Sales.
 
 ## 5. Progression
 
@@ -106,7 +117,7 @@ Linear and lean, by decision for the first draft (`docs/plan.md`, deferred, reco
 alternative):
 
 1. Traces found in the region are shadow residue on devices, visible in the lamp's light; each
-   goes into the journal.
+   goes into the journal. *As built* (feature 0022): the five traces of Sales.
 2. Conversations in the department and the break room lead to the source — the person where the
    data flow begins.
 3. At the source the player **shows a matching trace** from the journal. It is a gesture, not an
@@ -116,6 +127,16 @@ alternative):
    block, more colleagues see the shadow, maximum overview grows by one.
 
 There is no interrogation, no evidence puzzle and no choice of outcome.
+
+**As built** (feature 0024): the case of Sales. Its source is the colleague in the pink shirt
+who walks between the cubicles and the coffee. While a trace of Sales is missing, the colleague
+says the everyday line. With all five found, a talk is the gesture: the colleague answers
+honestly in two pages, and the hero says nothing. There is no key, no screen and no picture for
+the gesture. The press that closes the answer solves the case: the journal gains the outcome
+and the policy block, a notice says so for two seconds, and overview grows by one. Afterwards
+the colleague says something else, every time. The region does not clear yet, and no further
+colleague sees the shadow (0025, M6). Picking a creature from the journal comes with the second
+species (M6).
 
 ## 7. The journal
 
@@ -131,20 +152,66 @@ to click except turning pages:
 
 There is no map in the journal. The map itself shows by colour what has been cleared.
 
+The help (feature 0021) is no second screen: it is a box over whatever is on screen, as the
+dialogue box is.
+
+**As built** (feature 0020): a press of J opens the journal on the creatures, and a second press
+closes it. The left and right keys of walking turn the three tabs, one tab per press, and stop
+at either end; the journal always opens on the creatures. The game stands still while it is
+open: nothing moves, nothing can hurt the player, and everything goes on where it stood when it
+closes. A species has its entry as soon as one of it is captured: its own 16x16 picture, its
+name and two to four lines. The cases and the policy say in one line that they are empty; their
+content comes with M5. There is no count of captures and no pages within a tab yet. J does
+nothing with a dialogue open and nothing in the dark.
+
+**As built** (feature 0022): the cases tab lists every department of which a trace is found, in
+the order of the world data — its name and `found of all`, as in `Vertrieb` and
+`Spuren: 1 von 5` below it. Until a trace is found it shows its line for nothing. People spoken
+to, the source and the outcome come with 0024.
+
+**As built** (feature 0024): a solved case gets a third line, its outcome, as in
+`Gelöst: Angebote gingen in einen Chatbot.` People spoken to and the source are not listed. The
+policy tab shows one block per solved case, in the order they were solved, two to four lines
+each; until a case is solved it shows its line for nothing. Two blocks fit the screen; pages
+within the tab come with the third (M6).
+
 ## 8. Controls and presentation
 
 Desktop browser with keyboard; a gamepad is deferred (`docs/plan.md` §5); touch and
 mobile are non-goals. Arrow keys or WASD walk, Space holds the lamp, E or Enter talks to a
-figure and turns the pages of what it says, F toggles fullscreen.
+figure and turns the pages of what it says, J opens and closes the journal, F toggles
+fullscreen, L switches between German and English, H opens and closes the help.
 Scrolling camera on a 320x180 internal resolution (`visual.md`). Movement,
 collision and camera behaviour are specified in the feature that introduces them.
 
-**As built** (feature 0017): a press of E or Enter within 24 px of a standing figure — between
-the feet of the two — opens a dialogue. The two turn to each other, and the figure's first page
+**As built** (feature 0017): a press of E or Enter within 40 px of a standing figure (feature
+0018; it was 24) — between the feet of the two — opens a dialogue. The two turn to each other, and the figure's first page
 appears in a box at the bottom of the screen. A press turns to the next page; a press on the
 last page closes the box. While it is open the world stands still: nothing moves, nothing can
 hurt the player, the lamp is off and the other keys do nothing. A press does not open a dialogue
 while the lamp is held or while the player is being pushed. A held key counts once.
+
+**As built** (feature 0018): the four colleagues who walk the floor can be spoken to as well. A
+press reaches a speaker — a standing figure or a colleague — at most 40 px away and in sight,
+that is with nothing opaque between the two: a counter, a desk or a chair does not stop a
+conversation, a wall does. The colleague stands where it is and turns to the player. Each has one
+saying of one page, the same every time. After it the colleague goes on its round, and keeps its
+facing until it moves.
+
+**As built** (feature 0019): a press of L switches the language at any moment — while walking,
+with the lamp held, with a dialogue open, in the dark. Every text on screen changes at once: the
+notice, and the page of an open dialogue, which shows the same page in the other language.
+Where no text is on screen, a line in the notice's bar names the language that is on, in that
+language, for two seconds: `Sprache: Deutsch` or `Language: English`. A held key switches once.
+Every load starts in German, and nothing is remembered. The title screen of M8 will hold the
+switch.
+
+**As built** (feature 0021): a press of H opens the help, a box over the game with seven rows —
+a key and what it does — and a second press closes it. The game stands still while it is open,
+and everything goes on where it stood when it closes. The help opens over a dialogue and over
+the journal, which keep their page and their tab, and not in the dark. For the first ten
+seconds of a game one line in the notice's bar names the key — `Hilfe: Taste H` or
+`Help: press H` — behind every other text, and it does not come back. A held key counts once.
 
 ## 9. Deliberately simple in the first draft
 

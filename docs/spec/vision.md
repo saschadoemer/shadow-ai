@@ -25,6 +25,11 @@ Two purposes, in this order:
    teaser: the first act, about fifteen minutes, played standing up by somebody who has never
    seen it. It has to be readable without a word of tutorial text, look polished at first sight,
    and show a situation the visitor recognizes from their own company within the first minutes.
+   Tutorial text is text that explains the game: what the shadow is, what the lamp is for, what
+   to do next. The game has none. The help (feature 0021) is not tutorial text: a list of keys
+   the player calls up, and one line at the start that names its key. It says which key does
+   what, and nothing about why. The line that names the lamp's key when the lamp is handed
+   over (feature 0026) is of the same kind.
 
 And a third, quietly: a project the author enjoys building. That is allowed to show.
 
@@ -130,7 +135,8 @@ Dialogue and descriptions are written by many hands, some of them agents. This i
 
 German first, English second. Both complete before distribution. Every visible string goes
 through a key and a language table from the first line of text; no literal text in code. The
-language is switched on the title screen. Code, comments, documentation and asset names are
+language is switched on the title screen; until the title screen exists (M8), `L` switches it
+while playing (feature 0019). Code, comments, documentation and asset names are
 English.
 
 ## 8. Non-goals of the vision

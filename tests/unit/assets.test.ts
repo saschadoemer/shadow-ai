@@ -9,10 +9,12 @@ import { checkTileset, type TilesetFacts } from './tileset-check';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const RULES = { palette: new Set<string>(ENDESGA_32), reserved: SHADOW_COLOUR };
-/** The shadow assets: the only files that may use the reserved colour (visual.md §4, 0008, 0014). */
+/** The shadow assets: the only files that may use the reserved colour (visual.md §4, 0008, 0014, 0022). */
 const SHADOW_ASSETS: ReadonlySet<string> = new Set([
   'public/sprites/snippet.png',
   'public/sprites/shadow-wall.png',
+  'public/sprites/trace.png',
+  'public/sprites/shadow-veil.png',
 ]);
 const rulesFor = (file: string) => ({
   ...RULES,
@@ -84,9 +86,12 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
     expect(checkPng('x.png', violet, rulesFor('public/sprites/player.png'))).toStrictEqual([
       'x.png: pixel (0, 0) uses the reserved shadow colour #68386c',
     ]);
+    expect(checkPng('x.png', violet, rulesFor('public/sprites/trace.png'))).toStrictEqual([]);
     expect([...SHADOW_ASSETS]).toStrictEqual([
       'public/sprites/snippet.png',
       'public/sprites/shadow-wall.png',
+      'public/sprites/trace.png',
+      'public/sprites/shadow-veil.png',
     ]);
   });
 

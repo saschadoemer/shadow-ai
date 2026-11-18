@@ -54,7 +54,8 @@ to four points and waits a pause at each; there is no random wandering and no pa
 mover leaves its room. Nothing that moves is solid: the figure, the creatures and the light pass
 through it. A colleague, a dog or a vacuum stands while the figure's feet are closer than 20 px;
 a drone flies on. The routes live in the map's `objects` layer; the tables in
-`docs/features/0015-the-moving-floor.md` are the routes until the art pass.
+`docs/features/0015-the-moving-floor.md` are the routes until the art pass. Since feature 0018
+the four colleagues can be spoken to, and stop where they are while they speak.
 
 | Region | Role |
 |---|---|
@@ -113,6 +114,27 @@ closed until the upgrades of M6. The two upgrades that gate the floor are earned
 the wider cone in Marketing (strength 2), the colour filter in HR (strength 3). A case spec of M6
 may move either; the gating test then guards the new place.
 
+**As built** (feature 0023): every region of the floor has an area in the map — a rectangle
+named `region:<id>` in the `objects` layer that covers its room as the layout knows it, with its
+upper and its left wall. The meeting rooms have two areas, one per room. A room whose region has
+a density above 0 is under shadow and is drawn so (`visual.md` §4); the reception and the break
+room are not. The corridors, the side passage, the lift, the stairwell and the data protection
+officer's office are no regions and have no area. Lifting the shadow wall of a doorway does not
+change the room behind it: the wall was the door, not the shadow.
+
+| Area | Cells | Density |
+|---|---|---|
+| `region:hr` | (1, 1)–(21, 19) | 2 |
+| `region:accounting` | (22, 1)–(43, 19) | 2 |
+| `region:development` | (44, 1)–(84, 19) | 3 |
+| `region:meeting-rooms` | (89, 1)–(106, 9) | 1 |
+| `region:meeting-rooms` | (89, 10)–(106, 19) | 1 |
+| `region:reception` | (1, 38)–(22, 51) | 0 |
+| `region:break-room` | (29, 26)–(48, 51) | 0 |
+| `region:sales` | (79, 26)–(106, 51) | 1 |
+| `region:marketing` | (1, 58)–(48, 78) | 1 |
+| `region:support` | (49, 58)–(106, 78) | 1 |
+
 ## 2. The cases
 
 Seven department cases and one side case. Each needs a pattern the visitor recognizes from their
@@ -128,6 +150,15 @@ own company, one creature species, and one building block of the AI policy.
 | Development | API keys and customer data in the prompt of a code assistant; proprietary code in public models | Secrets never go into a prompt |
 | Management *(last case)* | Strategy papers and board documents in a private account — the densest shadow in the house | Responsibility: the policy has an owner, and the owner sits at the top |
 | Meeting rooms *(side case)* | An AI note-taker somebody invites to every meeting records everything, including the confidential ones | Whoever records says so beforehand |
+
+**Traces of Sales** (feature 0022): five traces lie on the screens of five of the sixteen cubicle
+desks of Sales, at least one in every row of four. The table of `docs/features/0022-traces.md`
+is the placement until the art pass.
+
+**The case of Sales** (feature 0024): the case is solved by the talk with its source once its
+five traces are found. Its policy block, in the words of `docs/features/0024-the-case-of-sales.md`:
+every text has a level — open, internal or confidential; confidential text stays in tools we
+have approved; whoever is unsure asks, without trouble.
 
 **Order and gating.** Marketing and Support are open from the start (thin shadow). HR and
 Accounting open after the first upgrade, Development after the second. Management is last: without
@@ -145,7 +176,8 @@ Kept as small as the story allows. About thirty figures in all.
   Since feature 0017 she stands in her office at tile (16, 29), two tiles from the wake point,
   and can be spoken to. She says the three sentences that explain the shadow and the lamp, the
   same two pages every time, until M5 brings the first meeting. She has no name yet and is not
-  solid: the player walks through her.
+  solid: the player walks through her. Feature 0018 changed nothing for her but the distance
+  from which she can be spoken to: 40 px, and in sight.
 - **The vendor.** See `vision.md` §4. Recurring in every department, never an enemy, changing
   over the game from seller to advisor. As advisor he supplies the approved alternatives that
   solve the later cases.
@@ -158,7 +190,10 @@ Kept as small as the story allows. About thirty figures in all.
 - **Per department, three to five figures.** The source, the head of department, two or three
   colleagues with hints and everyday lines.
   The colleagues of the reception, Marketing, Support and Sales walk the floor since feature
-  0015, without a name and without a line; their lines come with M4.
+  0015. Since feature 0018 each has one everyday saying; they still have no name.
+  Since feature 0024 the colleague of Sales is the source of the first case. What the colleague
+  says follows from the case: the everyday line while a trace is missing, the honest answer
+  once all five are found, and the line afterwards once the case is solved.
 - **The managing director.** The last case.
 - **The customer.** A voice on the phone at the start. One line in the epilogue: he called again.
 
@@ -177,8 +212,11 @@ Species names, looks and behaviours are defined in the feature spec that introdu
 
 **The snippet** (*Schnipsel*, feature 0008) is the species of the Sales case: a scrap of paper
 with lines of text, because it feeds on text pasted into a public chatbot. Small, layer 1. Three
-stand on the floor: one in the east corridor in front of the Sales doorway, two in Sales. Its displayed name and its journal text are fixed with the journal (M4), the name
-check of §5 included.
+stand on the floor: one in the east corridor in front of the Sales doorway, two in Sales. Its displayed name is *Schnipsel*, in English
+*Snippet*, and its journal text is fixed with feature 0020: what it is, what it lives on, and
+that it goes as soon as everyone knows which data may go where. The name is a dictionary word
+for a scrap of paper, used for a species and not for a product, a company or a tool; it is fixed
+by the author's decision on that basis, and no trademark register was searched (§5).
 
 ## 5. Names
 

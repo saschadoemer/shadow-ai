@@ -16,7 +16,7 @@ import {
   WAKE_STEP,
   wakePoint,
 } from '../../src/game/overview';
-import type { GameInput } from '../../src/game/player';
+import { type GameInput, NO_INPUT } from '../../src/game/player';
 import {
   type CreatureState,
   type Facing,
@@ -168,9 +168,13 @@ describe('stepDark', () => {
     creatures: [snippet(310, 200)],
     movers: [],
     shadowWalls: [{ wall: 1, lit: true, light: 30 }],
+    traces: [],
+    solved: [],
     figures: [],
     dialogue: null,
-    talkHeld: false,
+    journal: null,
+    help: false,
+    held: NO_INPUT,
     captured: { snippet: 2 },
     overview: { current: 0, max: 3 },
     dark: 1,
@@ -203,9 +207,13 @@ describe('stepDark', () => {
       creatures: [{ ...snippet(40, 40), home: { x: 40, y: 40 } }],
       movers: [],
       shadowWalls: [{ wall: 1, lit: false, light: 0 }],
+      traces: [],
+      solved: [],
       figures: [],
       dialogue: null,
-      talkHeld: false,
+      journal: null,
+      help: false,
+      held: NO_INPUT,
       captured: { snippet: 2 },
       overview: { current: 3, max: 3 },
       dark: 45,
@@ -237,10 +245,21 @@ describe('overview in update', () => {
     right: false,
     lamp: false,
     talk: false,
+    journal: false,
+    help: false,
   };
   const SHINE: GameInput = { ...NONE, lamp: true };
   const LEFT_SHINE: GameInput = { ...NONE, left: true, lamp: true };
-  const ALL: GameInput = { up: true, down: true, left: true, right: true, lamp: true, talk: false };
+  const ALL: GameInput = {
+    up: true,
+    down: true,
+    left: true,
+    right: true,
+    lamp: true,
+    talk: false,
+    journal: false,
+    help: false,
+  };
   /** The figure at (160, 100) facing right, with these creatures. */
   const game = (
     creatures: readonly CreatureState[],
