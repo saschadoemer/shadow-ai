@@ -2,6 +2,7 @@ import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
 import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { type Figure, figuresOf } from '../game/cast';
 import { CREATURE_SIZE } from '../game/creature';
+import { HELP_HINT, helpHintDue } from '../game/help';
 import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
@@ -19,7 +20,8 @@ import {
   type Species,
 } from '../game/state';
 import { speakerOf, speakersOf } from '../game/talk';
-import { type Language, textKey, textOf } from '../text/text';
+import { type Language, type TextKey, textKey, textOf } from '../text/text';
+import { drawHelp } from './draw-help';
 import { drawJournal } from './draw-journal';
 import { drawLayer } from './draw-map';
 import { drawText } from './draw-text';
@@ -271,6 +273,22 @@ export function languageNoticeVisible(tick: number, switchedAt: number | null): 
   return switchedAt !== null && tick >= switchedAt && tick - switchedAt < LANGUAGE_NOTICE_STEPS;
 }
 
+/**
+ * The line the bar shows where no dialogue is open and no notice shows, or null. Where a text
+ * is on screen, that text changes with the language; the language line answers a switch only
+ * where nothing else would (0019). The start hint has the last place (0021). With the help
+ * open the bar shows neither: the box is the answer.
+ */
+export function quietLine(state: GameState, settings: SceneSettings): TextKey | null {
+  if (state.help) {
+    return null;
+  }
+  if (languageNoticeVisible(state.tick, settings.switchedAt)) {
+    return LANGUAGE_NOTICE;
+  }
+  return helpHintDue(state.tick) ? HELP_HINT : null;
+}
+
 /** The dialogue box (0017): the notice's bar grown upwards to three lines, the same bottom edge. */
 export const DIALOGUE_BOX: Box = { x: 8, y: 134, width: 304, height: 42 };
 /** Where the first line of a page starts; the lines are left-aligned. */
@@ -323,6 +341,10 @@ export function lidHeight(dark: number): number {
  * shifted by the camera; and last the two lids of the dark (0009). Every text is drawn in the
  * language of the settings. A safe figure blinks; its cone and the movers do not. While the
  * journal is open the frame is the journal's alone (0020, render/draw-journal).
+ * While the help is open (0021, render/draw-help) its box is drawn last but for the lids, over
+ * the world and over the journal alike, and the bar shows neither the language line nor the
+ * start hint — the line that names the help's key in the first ten seconds of a game, which
+ * has the bar only where nothing else has it.
  */
 export function drawScene(
   renderer: Renderer,
@@ -332,6 +354,9 @@ export function drawScene(
 ): void {
   if (state.journal !== null) {
     drawJournal(renderer, state, state.journal, content, settings);
+    if (state.help) {
+      drawHelp(renderer, content.fontSheet, settings.language);
+    }
     return;
   }
   const { language } = settings;
@@ -424,10 +449,7 @@ export function drawScene(
       }
     }
   } else {
-    // Where a text is on screen, that text changes with the language; the line answers a
-    // switch only where nothing else would.
-    const line =
-      notice ?? (languageNoticeVisible(state.tick, settings.switchedAt) ? LANGUAGE_NOTICE : null);
+    const line = notice ?? quietLine(state, settings);
     if (line !== null) {
       renderer.fillRect(
         NOTICE_BAR.x,
@@ -439,6 +461,9 @@ export function drawScene(
       const origin = noticeOrigin(textOf(line, language).length);
       drawText(renderer, content.fontSheet, line, language, origin.x, origin.y);
     }
+  }
+  if (state.help) {
+    drawHelp(renderer, content.fontSheet, language);
   }
   const lid = lidHeight(state.dark);
   if (lid > 0) {
