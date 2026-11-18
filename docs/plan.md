@@ -99,7 +99,7 @@ is the whole feature. Then everyday lines for the four colleagues who walk the f
 when there is enough text for English to be worth looking at; the title screen that will hold
 the switch is M8, so M4 needs an interim one. The journal last: its three tabs are text and
 pictures, and its first content — the captured snippet — exists since 0008. 0016, 0017 and
-0018 are implemented, and 0019 and 0020 are drafted.
+0018 are implemented, 0019 is approved, and 0020 is drafted.
 
 ## 5. Deferred, with reasons
 
