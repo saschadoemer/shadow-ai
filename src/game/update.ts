@@ -1,6 +1,6 @@
 import type { TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
-import { answeredCase, clearRegion, progressOf, solve } from './cases';
+import { answeredCase, clearRegion, earn, progressOf, solve } from './cases';
 import { figuresFrom, figuresIn, figuresOf, isFirstMeeting } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
 import { openHelp, stepHelp } from './help';
@@ -100,8 +100,8 @@ export function newGame(map: TileMap): GameState {
  * What the step that closed a dialogue changes besides closing it (0024, 0025, 0026). Closing
  * the scene a game opens with ends the opening: `started` is this step's tick. Closing the
  * first meeting hands the lamp over. Closing the source's answer of a ready case solves the
- * case, and what is left of the region's shadow goes with it. Every other closing changes
- * nothing more.
+ * case, earns the upgrade of its region if it has one (0029), and what is left of the region's
+ * shadow goes with it. Every other closing changes nothing more.
  */
 function closed(
   stepped: GameState,
@@ -125,7 +125,7 @@ function closed(
   );
   return answered === null
     ? stepped
-    : clearRegion(solve(stepped, answered.region), answered.region, content);
+    : clearRegion(earn(solve(stepped, answered.region), answered.region), answered.region, content);
 }
 
 /**
