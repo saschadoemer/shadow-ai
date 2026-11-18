@@ -19,7 +19,7 @@ import {
   type Species,
 } from '../game/state';
 import { speakerOf, speakersOf } from '../game/talk';
-import { type Language, textOf } from '../text/text';
+import { type Language, textKey, textOf } from '../text/text';
 import { drawLayer } from './draw-map';
 import { drawText } from './draw-text';
 import { GLYPH_HEIGHT, GLYPH_WIDTH } from './font';
@@ -56,8 +56,17 @@ export interface SceneContent {
   readonly fontSheet: SpriteSheet;
   /** One sheet per figure of the cast, by its id: twenty 16x24 frames like the player's (0017). */
   readonly figureSheets: Readonly<Record<string, SpriteSheet>>;
+}
+
+/**
+ * The player's settings of the scene (0019): not part of the game's state and not loaded
+ * content — main.ts holds them and hands them over with every frame.
+ */
+export interface SceneSettings {
   /** The language text is drawn in. */
   readonly language: Language;
+  /** The state's tick at the last switch of the language; null when it was never switched. */
+  readonly switchedAt: number | null;
 }
 
 /** The frame in the player sheet: facing × 5 + phase, facings in FACINGS order. */
@@ -251,6 +260,16 @@ export function noticeOrigin(length: number): Point {
   };
 }
 
+/** The language line (0019): which language is on, in that language, in the notice's bar. */
+export const LANGUAGE_NOTICE = textKey('notice.language');
+/** Tune: two seconds. */
+export const LANGUAGE_NOTICE_STEPS = 120;
+
+/** Whether the language line is due at `tick`: for LANGUAGE_NOTICE_STEPS steps from the switch. */
+export function languageNoticeVisible(tick: number, switchedAt: number | null): boolean {
+  return switchedAt !== null && tick >= switchedAt && tick - switchedAt < LANGUAGE_NOTICE_STEPS;
+}
+
 /** The dialogue box (0017): the notice's bar grown upwards to three lines, the same bottom edge. */
 export const DIALOGUE_BOX: Box = { x: 8, y: 134, width: 304, height: 42 };
 /** Where the first line of a page starts; the lines are left-aligned. */
@@ -298,11 +317,18 @@ export function lidHeight(dark: number): number {
  * pixels (engine/camera). The cone lies under the figure, so the body hides the apex. After
  * `above` come the hearts of overview, on the surface and not shifted by the camera; then,
  * while a dialogue is open, the dialogue box with the page's lines and its blinking marker
- * (0017), else the notice — the bar and its line (0016) — both on the surface and not shifted
- * by the camera; and last the two lids of the dark (0009). A safe figure blinks; its cone and
- * the movers do not.
+ * (0017), else the notice — the bar and its line (0016) — else, for two seconds after a switch
+ * of the language, the language line in the same bar (0019); all on the surface and not
+ * shifted by the camera; and last the two lids of the dark (0009). Every text is drawn in the
+ * language of the settings. A safe figure blinks; its cone and the movers do not.
  */
-export function drawScene(renderer: Renderer, state: GameState, content: SceneContent): void {
+export function drawScene(
+  renderer: Renderer,
+  state: GameState,
+  content: SceneContent,
+  settings: SceneSettings,
+): void {
+  const { language } = settings;
   const { player, camera } = state;
   renderer.clear(PAGE_BACKGROUND);
   drawLayer(renderer, content.map, content.tileset, 'ground', camera);
@@ -385,22 +411,28 @@ export function drawScene(renderer: Renderer, state: GameState, content: SceneCo
       DIALOGUE_BOX.height,
       PAGE_BACKGROUND,
     );
-    drawText(renderer, content.fontSheet, page, content.language, DIALOGUE_TEXT.x, DIALOGUE_TEXT.y);
+    drawText(renderer, content.fontSheet, page, language, DIALOGUE_TEXT.x, DIALOGUE_TEXT.y);
     if (markerVisible(state.tick)) {
       for (const part of DIALOGUE_MARKER) {
         renderer.fillRect(part.x, part.y, part.width, part.height, MARKER_COLOUR);
       }
     }
-  } else if (notice !== null) {
-    renderer.fillRect(
-      NOTICE_BAR.x,
-      NOTICE_BAR.y,
-      NOTICE_BAR.width,
-      NOTICE_BAR.height,
-      PAGE_BACKGROUND,
-    );
-    const origin = noticeOrigin(textOf(notice, content.language).length);
-    drawText(renderer, content.fontSheet, notice, content.language, origin.x, origin.y);
+  } else {
+    // Where a text is on screen, that text changes with the language; the line answers a
+    // switch only where nothing else would.
+    const line =
+      notice ?? (languageNoticeVisible(state.tick, settings.switchedAt) ? LANGUAGE_NOTICE : null);
+    if (line !== null) {
+      renderer.fillRect(
+        NOTICE_BAR.x,
+        NOTICE_BAR.y,
+        NOTICE_BAR.width,
+        NOTICE_BAR.height,
+        PAGE_BACKGROUND,
+      );
+      const origin = noticeOrigin(textOf(line, language).length);
+      drawText(renderer, content.fontSheet, line, language, origin.x, origin.y);
+    }
   }
   const lid = lidHeight(state.dark);
   if (lid > 0) {

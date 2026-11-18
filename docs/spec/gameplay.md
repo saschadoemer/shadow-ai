@@ -135,7 +135,8 @@ There is no map in the journal. The map itself shows by colour what has been cle
 
 Desktop browser with keyboard; a gamepad is deferred (`docs/plan.md` §5); touch and
 mobile are non-goals. Arrow keys or WASD walk, Space holds the lamp, E or Enter talks to a
-figure and turns the pages of what it says, F toggles fullscreen.
+figure and turns the pages of what it says, F toggles fullscreen, L switches between German
+and English.
 Scrolling camera on a 320x180 internal resolution (`visual.md`). Movement,
 collision and camera behaviour are specified in the feature that introduces them.
 
@@ -152,6 +153,14 @@ that is with nothing opaque between the two: a counter, a desk or a chair does n
 conversation, a wall does. The colleague stands where it is and turns to the player. Each has one
 saying of one page, the same every time. After it the colleague goes on its round, and keeps its
 facing until it moves.
+
+**As built** (feature 0019): a press of L switches the language at any moment — while walking,
+with the lamp held, with a dialogue open, in the dark. Every text on screen changes at once: the
+notice, and the page of an open dialogue, which shows the same page in the other language.
+Where no text is on screen, a line in the notice's bar names the language that is on, in that
+language, for two seconds: `Sprache: Deutsch` or `Language: English`. A held key switches once.
+Every load starts in German, and nothing is remembered. The title screen of M8 will hold the
+switch.
 
 ## 9. Deliberately simple in the first draft
 

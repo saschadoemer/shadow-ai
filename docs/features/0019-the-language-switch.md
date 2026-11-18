@@ -1,6 +1,6 @@
 # 0019 — The language switch
 
-**Status:** draft
+**Status:** implemented 2026-11-18
 **Milestone:** M4
 **Drafted:** 2026-11-17
 
@@ -180,14 +180,22 @@ lamp, `E` or `Enter` talks, `L` switches the language.
 - Does the English of the three sentences and of the notice read right?
 - The game always starts in German. Should it follow the browser's language before M8?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–20. Feel:
+
+- The key: `L` is right. The game as a whole needs a small help menu that can be called up,
+  and a hint to it after the game starts — a new draft, not part of 0019.
+- The line: two seconds are right, and the line is wanted.
+- The English of the three sentences and of the notice reads right.
+- The start: the game stays German on every load until M8; it does not follow the browser's
+  language.
 
 ## Open questions
 
-1. **The key.** `L` switches. Is that the key, or another?
-2. **Start and memory.** Every load starts in German; the game neither reads the browser's
-   language nor remembers the choice. I propose to leave both to M8, with the title screen
-   and the save states, because remembering means storing something in the browser.
-3. **The language line.** A press shows `Sprache: Deutsch` or `Language: English` for two
-   seconds where no other text is on screen, so that a press is never without an answer.
-   Without it the feature is smaller by one key and one rule.
+None. Three were settled on 2026-11-18, each as drafted:
+
+- The key: `L` switches the language.
+- Start and memory: every load starts in German; the game neither reads the browser's
+  language nor remembers the choice. Both are left to M8, with the title screen and the save
+  states.
+- The language line: a press shows `Sprache: Deutsch` or `Language: English` for two seconds
+  where no other text is on screen.

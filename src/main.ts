@@ -11,18 +11,19 @@ import type { GameInput } from './game/player';
 import type { GameState } from './game/state';
 import { createInitialState, update } from './game/update';
 import { createCanvas2dRenderer } from './render/canvas2d/canvas2d-renderer';
-import { drawScene, HEART_SIZE, type SceneContent } from './render/draw-scene';
+import { drawScene, HEART_SIZE, type SceneContent, type SceneSettings } from './render/draw-scene';
 import { GLYPH_HEIGHT, GLYPH_WIDTH } from './render/font';
 import { computeLayout } from './render/scale';
-import { DEFAULT_LANGUAGE } from './text/text';
+import { DEFAULT_LANGUAGE, type Language, nextLanguage } from './text/text';
 
 declare global {
   interface Window {
     /**
-     * The game's one global (0004): the state passed to the last render, so that the smoke test
-     * can read the player's position. Read-only by convention; absent until the content loaded.
+     * The game's one global (0004): the state passed to the last render and the language it was
+     * drawn in (0019), so that the smoke test can read them. Read-only by convention; absent
+     * until the content loaded.
      */
-    shadowAi?: { state: GameState };
+    shadowAi?: { state: GameState; language: Language };
   }
 }
 
@@ -128,7 +129,6 @@ async function loadContent(): Promise<SceneContent> {
         ]),
       ),
     ),
-    language: DEFAULT_LANGUAGE,
   };
 }
 
@@ -151,7 +151,23 @@ function toggleFullscreen(): void {
   });
 }
 
-type Action = keyof GameInput | 'fullscreen';
+/**
+ * The player's settings (0019): the language, German on every load, and the tick of its last
+ * switch. Not part of the game's state: a saved game does not carry them.
+ */
+let settings: SceneSettings = { language: DEFAULT_LANGUAGE, switchedAt: null };
+
+/** L goes to the next language. Before the content has loaded there is no tick to note. */
+function switchLanguage(): void {
+  const handle = window.shadowAi;
+  if (handle === undefined) {
+    return;
+  }
+  settings = { language: nextLanguage(settings.language), switchedAt: handle.state.tick };
+  document.documentElement.lang = settings.language;
+}
+
+type Action = keyof GameInput | 'fullscreen' | 'language';
 
 /** architecture.md §4: the one table from physical keys to actions. */
 const BINDINGS: Bindings<Action> = {
@@ -162,6 +178,7 @@ const BINDINGS: Bindings<Action> = {
   lamp: ['Space'],
   talk: ['KeyE', 'Enter'],
   fullscreen: ['KeyF'],
+  language: ['KeyL'],
 };
 const BOUND_CODES: ReadonlySet<string> = new Set(Object.values(BINDINGS).flat());
 
@@ -170,8 +187,8 @@ listenToKeyboard(keyboard, window);
 
 // A bound key without Ctrl, Alt or Cmd belongs to the game: its default is prevented, so the
 // arrows never scroll the page and Space neither scrolls nor clicks a focused control; with a
-// modifier the browser keeps its own shortcut. F toggles fullscreen once per press here and
-// never reaches the game.
+// modifier the browser keeps its own shortcut. F toggles fullscreen and L switches the language,
+// each once per press, here: neither reaches the game.
 window.addEventListener('keydown', (event) => {
   if (!BOUND_CODES.has(event.code) || event.ctrlKey || event.altKey || event.metaKey) {
     return;
@@ -180,9 +197,12 @@ window.addEventListener('keydown', (event) => {
   if (BINDINGS.fullscreen.includes(event.code) && !event.repeat) {
     toggleFullscreen();
   }
+  if (BINDINGS.language.includes(event.code) && !event.repeat) {
+    switchLanguage();
+  }
 });
 
-/** The game's actions of this frame; `fullscreen` stays in main.ts. */
+/** The game's actions of this frame; `fullscreen` and `language` stay in main.ts. */
 function readInput(): GameInput {
   const { up, down, left, right, lamp, talk } = resolveActions(keyboard.held, BINDINGS);
   return { up, down, left, right, lamp, talk };
@@ -192,7 +212,7 @@ function readInput(): GameInput {
 async function start(): Promise<void> {
   const renderer = createCanvas2dRenderer(findCanvas());
   const content = await loadContent();
-  const handle = { state: createInitialState(content.map) };
+  const handle = { state: createInitialState(content.map), language: settings.language };
   window.shadowAi = handle;
   runLoop(
     handle.state,
@@ -201,7 +221,8 @@ async function start(): Promise<void> {
       update: (state, input) => update(state, input, content.map),
       render(state) {
         handle.state = state;
-        drawScene(renderer, state, content);
+        handle.language = settings.language;
+        drawScene(renderer, state, content, settings);
         // Read every frame: this covers resize, zoom, fullscreen and a move to another monitor.
         renderer.present(
           computeLayout(window.innerWidth, window.innerHeight, window.devicePixelRatio),

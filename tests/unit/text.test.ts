@@ -2,6 +2,7 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   DEFAULT_LANGUAGE,
   LANGUAGES,
+  nextLanguage,
   TABLE,
   type TextId,
   type TextKey,
@@ -13,6 +14,18 @@ describe('the language table (INV-4, 0016)', () => {
   it('has German first and English second, and German is the default', () => {
     expect(LANGUAGES).toStrictEqual(['de', 'en']);
     expect(DEFAULT_LANGUAGE).toBe('de');
+  });
+
+  it('goes from each language to the next, and from the last to the first (0019)', () => {
+    expect(nextLanguage('de')).toBe('en');
+    expect(nextLanguage('en')).toBe('de');
+    expect(LANGUAGES.map(nextLanguage)).toStrictEqual(['en', 'de']);
+  });
+
+  it('names the language that is on, in that language (0019)', () => {
+    const key = textKey('notice.language');
+    expect(textOf(key, 'de')).toBe('Sprache: Deutsch');
+    expect(textOf(key, 'en')).toBe('Language: English');
   });
 
   it('has the same keys in `de` and in `en`', () => {

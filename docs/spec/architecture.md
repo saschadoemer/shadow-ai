@@ -10,7 +10,8 @@ TypeScript and Canvas 2D, no framework.
 src/
   main.ts        bootstrap only: creates the canvas, loads assets, starts the loop, wires input,
                  game and renderer together – the one file that knows both sides; keeps the
-                 state it rendered last as window.shadowAi.state, the game's one global
+                 state it rendered last as window.shadowAi.state, the game's one global;
+                 holds the player's settings — the language (0019)
   engine/        generic and game-agnostic: the fixed-step loop, keyboard state, image loading,
                  Tiled JSON → TileMap, camera math, collision of a box against solid boxes
   game/          Shadow AI itself: the GameState type and update(state, input, content) – plain
@@ -71,7 +72,8 @@ arrows that matter: nothing in `game/` reaches `render/` or the DOM.
 
 `window.shadowAi.state` is the state `main.ts` passed to the last render. It exists in every
 build, because the smoke test reads the player's position from it against the dev server and
-against the container alike. It is read-only by convention; nothing in the game reads it, and
+against the container alike. Beside it, `window.shadowAi.language` is the language of the last
+render (feature 0019). It is read-only by convention; nothing in the game reads it, and
 `game/` does not know it (INV-2).
 
 ## 2. The state model
@@ -231,7 +233,9 @@ state without speakers, in which `talk` is never held, steps exactly as before 0
 
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
-save state, it is in `GameState`; if it ships with the build, it is content.
+save state, it is in `GameState`; if it ships with the build, it is content. The player's
+settings are neither: the language (feature 0019) is held by `main.ts`, not saved with a game and
+not shipped, and reaches only the scene (§5, §8).
 
 `update(state, input, content)` advances the state by exactly one logic step and returns the new
 state. `input` is `GameInput`: the four movement actions, `lamp` and `talk`, as booleans (§4);
@@ -291,7 +295,7 @@ the last step's `talk` (§2). The keyboard still keeps no edge.
 The game reads named actions — `up`, `down`, `left`, `right`, `lamp` and `talk`, later
 `journal` — never key codes. The mapping from keys to actions lives in one table in `main.ts`:
 `up` ← ArrowUp or W, `down` ← ArrowDown or S, `left` ← ArrowLeft or A, `right` ← ArrowRight or
-D, `lamp` ← Space, `talk` ← E or Enter, `fullscreen` ← F.
+D, `lamp` ← Space, `talk` ← E or Enter, `fullscreen` ← F, `language` ← L.
 Once per frame, before the steps (§3), `main.ts` resolves the held keys through the table with
 `resolveActions`, a pure function in `engine/input`: an action is on when any of its keys is
 down. The game gets the six actions as booleans and nothing else. A gamepad (deferred,
@@ -301,7 +305,11 @@ A bound key pressed without Ctrl, Alt or Cmd belongs to the game: `main.ts` prev
 so the arrow keys never scroll the page and Space neither scrolls nor clicks a focused control.
 With Ctrl, Alt or Cmd the browser keeps its own shortcut.
 `fullscreen` is toggled in `main.ts` on the `keydown` of F without `repeat` and without Ctrl,
-Alt or Cmd; it never reaches the game.
+Alt or Cmd; it never reaches the game. `language` (feature 0019) is handled the same way on the
+`keydown` of L: `main.ts` sets the language to `nextLanguage` of it, notes the state's `tick` of
+the last frame as `switchedAt`, and sets the `lang` attribute of the page's root element. A held
+key switches once; with Ctrl, Alt or Cmd the browser keeps its shortcut and the language stays;
+before the content has loaded the key does nothing. The game still gets its six actions.
 
 ## 5. The renderer interface
 
@@ -375,8 +383,17 @@ both languages. Text is drawn by `render/draw-text`, the one function that draws
 a sprite of the font sheet with its top-left corner at (x + 6n, y + 12k), its frame the
 character's place in the glyph order (§7). A line break starts the next line, 12 px lower — a
 line is 10 px high and 2 px lie between two lines (feature 0017). A space is not drawn and only
-takes its 6 px; a character the font does not have is drawn as `?`. There is no wrapping. The
-language comes with the scene's content; `main.ts` sets it to `DEFAULT_LANGUAGE`.
+takes its 6 px; a character the font does not have is drawn as `?`. There is no wrapping.
+
+`drawScene(renderer, state, content, settings)` takes the player's settings as its fourth
+argument (feature 0019): `{ language, switchedAt }`, which `main.ts` holds and hands over with
+every frame. `SceneContent` holds loaded content only. Every text of the scene is drawn in
+`language`. The language line, the key `notice.language`, is drawn like the notice — the bar
+(8, 158, 304, 18) in `#181425` and the line centred in it — when `switchedAt` is not null and
+0 ≤ `tick` − `switchedAt` < `LANGUAGE_NOTICE_STEPS` (120, two seconds), no dialogue is open and
+no notice shows. The dialogue box comes first, then the notice, then the language line: where a
+text is on screen, that text changes with the language and is the answer to a switch. The lids
+of the dark close over the line as over everything.
 
 A standing figure (feature 0017) is drawn from its own sheet, `<id>.png`, like a colleague who
 stands: frame facing × 5, top-left corner at (round(x) − 8 − camera.x, round(y) − 24 −
@@ -776,8 +793,14 @@ tables are the only text a player can read in `src/`.
 The notice is the first text: `game/notice` derives from the state, in every frame, which notice
 it shows, if any. While the lamp is on and a standing shadow wall has `lit` true and `light` 0 —
 a wall in the light that holds (0014) — it is `notice.shadow-too-dense`; otherwise there is none.
-The state has no field for it (INV-1). Until the language switch (0019) the game shows German
-only; English is in the table and tested. A notice stays one line.
+The state has no field for it (INV-1). A notice stays one line.
+
+The language is a setting of the player (feature 0019), not a fact of the game. `main.ts` holds
+it: `DEFAULT_LANGUAGE` on every load — the browser's language is not read and nothing is stored
+—, changed by `nextLanguage(language)`, the language after it in `LANGUAGES` and the first after
+the last. It is not in the state, a saved game does not carry it, and `src/game/` does not know
+it: a test fails on the type `Language` under `src/game/`. `window.shadowAi` carries the language
+of the last render beside the state, for the smoke test.
 
 A string of the table may hold line breaks; each starts a new line (feature 0017). A page of
 dialogue is one key of the kind `talk`, with at most three lines of at most 47 characters and no
