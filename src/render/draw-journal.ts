@@ -1,4 +1,5 @@
 import type { Box, Point } from '../engine/tiled';
+import { outcomeOf, policyBlocks } from '../game/cases';
 import { CASE_TEXT, ENTRY_TEXT, entriesOf, REGION_NAME, TAB_TEXT } from '../game/journal';
 import { type GameState, JOURNAL_TABS, type JournalState } from '../game/state';
 import { caseEntries, tracesOf } from '../game/trace';
@@ -40,6 +41,11 @@ export const ENTRY_FRAME = 2;
 export const CASE_NAME: Point = { x: 16, y: 36 };
 export const CASE_LINE: Point = { x: 16, y: 48 };
 export const CASE_PITCH = 36;
+/** The third line of a solved case: its outcome (0024). */
+export const CASE_OUTCOME: Point = { x: 16, y: 60 };
+/** A block k of the policy, from 0, starts POLICY_PITCH below block k − 1 (0024). */
+export const POLICY_BLOCK: Point = { x: 16, y: 36 };
+export const POLICY_PITCH = 60;
 
 /** The rectangle of tab k. */
 export function tabBox(k: number): Box {
@@ -85,10 +91,12 @@ export function drawJournal(
     TAB_OPEN,
   );
   const entries = journal.tab === 'creatures' ? entriesOf(state.captured) : [];
-  // The cases are the regions with a found trace (0022); the policy comes with M5.
+  // The cases are the regions with a found trace (0022).
   const cases =
     journal.tab === 'cases' ? caseEntries(state.traces, tracesOf(content.map.rects)) : [];
-  if (entries.length === 0 && cases.length === 0) {
+  // The policy is one block per solved case (0024).
+  const blocks = journal.tab === 'policy' ? policyBlocks(state.solved) : [];
+  if (entries.length === 0 && cases.length === 0 && blocks.length === 0) {
     drawText(
       renderer,
       content.fontSheet,
@@ -120,6 +128,27 @@ export function drawJournal(
     count(entry.found);
     word(CASE_TEXT.of);
     count(entry.all);
+    const outcome = outcomeOf(entry.region, state.solved);
+    if (outcome !== null) {
+      drawText(
+        renderer,
+        content.fontSheet,
+        outcome,
+        language,
+        CASE_OUTCOME.x,
+        CASE_OUTCOME.y + down,
+      );
+    }
+  }
+  for (const [k, block] of blocks.entries()) {
+    drawText(
+      renderer,
+      content.fontSheet,
+      block,
+      language,
+      POLICY_BLOCK.x,
+      POLICY_BLOCK.y + k * POLICY_PITCH,
+    );
   }
   for (const [k, species] of entries.entries()) {
     const down = k * ENTRY_PITCH;
