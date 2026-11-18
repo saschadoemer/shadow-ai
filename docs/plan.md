@@ -27,11 +27,12 @@ specification.
 | M5 | **Act 1 complete** — the call, Sales, the data protection officer, the first cleared region | **Trade-fair teaser** |
 | M6 | **The cases of Act 2** — one department at a time, the upgrades and keys between them, the meeting-room side case | |
 | M7 | **Server room, core and epilogue** — the dungeon, the boss, the all-hands | |
-| M8 | **Save states, title screen, polish, English complete, the Cloud Run pipeline** | **Distribution** |
+| M8 | **Save states, title screen, polish, English complete, the custom domain** | **Distribution** |
 
 Audio arrives after M5 and before M8. A silent booth is normal; a silent distributed game is
-not. A gamepad is deferred (§5). Until M8 the game runs locally from its container
-(`docs/spec/ops.md` §3); the Dockerfile and CI exist from M2.
+not. A gamepad is deferred (§5). The Dockerfile and CI exist from M2. From feature 0030 on, every
+merge to `main` is deployed to Cloud Run (`docs/spec/ops.md` §5): until M8 that address is a
+preview of an unfinished game and is not announced; distribution stays with M8.
 
 ## 3. Content budget
 
@@ -123,8 +124,8 @@ once there is a case to walk into. Overview won back after it; `gameplay.md` §4
 open since 0009. The help label closes the milestone: the line that named the help's key for
 ten seconds, right after the call, was on screen too long, and a small label in the corner
 that stays takes its place. It comes after 0027 because it takes a field out of the state to
-which 0027 adds one. 0022, 0023, 0024, 0025 and 0026 are implemented; 0027 and 0031 are
-approved.
+which 0027 adds one. 0022, 0023, 0024, 0025, 0026 and 0027 are implemented; 0031 is
+approved; the two named below are not specified yet.
 
 Named here without a number and specified when their turn comes, both for the teaser
 (`vision.md` §10): the Harmonic station of Sales · the line that says LMIS presents the
@@ -134,7 +135,7 @@ game, which needs a place before the title screen of M8.
 
 The cases come one department at a time, and each brings what Act 2 has more than Act 1. The
 first three features, each its own pull request with its own acceptance plan: 0028 the case
-of Marketing · 0029 the wider cone · 0030 the creature of Marketing. The case first, by the
+of Marketing · 0029 the wider cone · 0032 the creature of Marketing. The case first, by the
 rules the case of Sales set — traces, the source's answer, the journal, the cleared room — so
 that a second case proves the first one's rules before anything is added to them. The wider
 cone after it, because the case of Marketing earns it and HR and Accounting open with it. The

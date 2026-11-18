@@ -30,7 +30,7 @@ rectangles.
 - With this draft: `docs/plan.md` §4 opens M6 and names its first three features.
 
 **Out, explicitly:** the species of Marketing — every case has one (`world.md` §4); it
-comes with its own feature (0030) · the upgrade the case earns, the wider cone (0029) · the
+comes with its own feature (0032) · the upgrade the case earns, the wider cone (0029) · the
 vendor, who is in every department of Act 2 (M6) · the intern and the hints (M6) · a rule
 for who sees the shadow (M6) · three outcomes per case and the mirror case
 (`docs/plan.md` §5) · the pages of the policy tab — two blocks fit · the generated visuals
@@ -213,7 +213,7 @@ None. Seven were settled on 2026-11-18, each as drafted:
 - The words: the answer, "Afterwards", the outcome and the block as in the table under "The
   text", in German and English.
 - Before Sales: nothing makes the player solve Sales first.
-- The cut of M6: 0028 the case of Marketing · 0029 the wider cone · 0030 the creature of
+- The cut of M6: 0028 the case of Marketing · 0029 the wider cone · 0032 the creature of
   Marketing; the rest is named in `docs/plan.md` §4 without a number.
 - Three outcomes per case: Act 2 stays linear. `docs/plan.md` §5 keeps the idea deferred.
 - The mirror case: not yet. It stays deferred; the budget stays at seven cases and one side

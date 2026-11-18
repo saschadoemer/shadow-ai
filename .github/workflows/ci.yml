@@ -1,5 +1,6 @@
-# The whole check on every pull request and on main (ops.md §4). One job, so the required
-# status check for branch protection is simply "ci".
+# The whole check on every pull request and on main, and the deployment of main (ops.md §4
+# and §5). The required status check for branch protection is the job "ci"; "deploy" runs
+# after it, on main only.
 name: CI
 
 on:
@@ -26,6 +27,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
+      - name: Check the shell scripts
+        run: shellcheck tools/gcp-bootstrap.sh tools/gcp-deploy.sh
       - run: npm run build
       - run: npm test
 
@@ -53,6 +56,23 @@ jobs:
         env:
           BASE_URL: http://localhost:8080
 
+      - name: Save the tested image for the deploy job
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # The image ID is printed here and again after the deploy job loads it: the same ID
+        # is the proof that what was tested is what goes live.
+        run: |
+          docker image inspect --format '{{.Id}}' shadow-ai
+          docker save shadow-ai | gzip > shadow-ai-image.tar.gz
+
+      - name: Hand the image to the deploy job
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
+        with:
+          name: shadow-ai-image
+          path: shadow-ai-image.tar.gz
+          retention-days: 1
+          if-no-files-found: error
+
       - name: Stop the container
         if: always()
         run: docker stop shadow-ai || true
@@ -62,5 +82,80 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
+          path: playwright-report
+          retention-days: 7
+
+  deploy:
+    name: deploy
+    needs: ci
+    # Only main, only after a green ci, and only when the bootstrap has run: before it, and in
+    # a fork, the variable is empty and the job is skipped.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.GCP_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    # Merges go live in order, never side by side; a running deployment is never cancelled.
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ vars.GCP_REGION }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: shadow-ai-image
+
+      - name: Load the image ci tested
+        run: |
+          gunzip -c shadow-ai-image.tar.gz | docker load
+          docker image inspect --format '{{.Id}}' shadow-ai
+
+      # The two actions below are pinned to a commit: this is the one job that carries a cloud
+      # identity. No key exists; the login is a token GitHub signs for this run (ops.md §5).
+      - name: Log in to Google Cloud without a key
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - name: Deploy
+        id: deploy
+        run: |
+          url="$(tools/gcp-deploy.sh shadow-ai "$GITHUB_SHA")"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - run: npm ci
+
+      - name: Install the Playwright browser
+        run: npx playwright install chromium
+
+      - name: Smoke test against the live URL
+        run: npm run test:e2e
+        env:
+          BASE_URL: ${{ steps.deploy.outputs.url }}
+
+      - name: Say what is live
+        if: always() && steps.deploy.outputs.url != ''
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: echo "Deployed \`$GITHUB_SHA\` to $URL" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the Playwright report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-live
           path: playwright-report
           retention-days: 7

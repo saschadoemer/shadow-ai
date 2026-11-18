@@ -115,6 +115,16 @@ export interface SolvedCase {
   readonly at: number;
 }
 
+/** What a press at a rest gave (0027): overview filled, nothing to fill, or nothing under shadow. */
+export const REST_RESULTS = ['restored', 'full', 'shadow'] as const;
+export type RestResult = (typeof REST_RESULTS)[number];
+
+/** The last rest the player took (0027): the tick of that step, and what it gave. */
+export interface Rested {
+  readonly at: number;
+  readonly result: RestResult;
+}
+
 /** A standing figure of the cast (0017). Its place stays in the map, its pages in game/cast. */
 export interface FigureState {
   /** The index of the figure in `figuresOf(map.points)`. */
@@ -187,6 +197,8 @@ export interface GameState {
   readonly traces: readonly TraceState[];
   /** The solved cases, in the order they were solved (0024). */
   readonly solved: readonly SolvedCase[];
+  /** The last rest taken, or null (0027); the notice of a rest is derived from it. */
+  readonly rested: Rested | null;
   /** The standing figures of the map, in file order (0017). */
   readonly figures: readonly FigureState[];
   /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */

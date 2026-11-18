@@ -99,9 +99,18 @@ from the creature — a wall holds the push — and leaves it safe for a second 
 all three numbers *tune*. The start value tunes as well. A frozen creature never hits: the lamp is the defence. At zero the screen
 closes like an eye and opens again a second and a half later: the figure stands in the data
 protection officer's office (feature 0010) with full overview, the creatures still in the world are back
-at their places, and what was captured stays captured. **Open:** how overview is won back
-without falling into the dark — a conversation, a place, a find — is decided when there are
-figures to talk to and rooms to enter (M4, M5).
+at their places, and what was captured stays captured.
+
+**As built** (feature 0027): overview is won back with a coffee. A press of E or Enter at a
+coffee machine — at most two tiles from its cell, and not through a wall — fills the hearts,
+all of them, as often as the player walks there: the walk is the price. A line at the bottom
+answers every press for two seconds: `Kaffee. Der Überblick ist wieder da.`, or
+`Kaffee. Den Überblick hast du schon.` when the hearts were full. Every coffee machine of the
+floor counts, but one in a room under shadow gives nothing — `Dieser Kaffee schmeckt nach
+nichts.` — until that room is cleared. At the start only the two of the break room work; every
+solved case brings a safe place nearer. The game goes on while the figure drinks: a creature
+that reaches it in the same moment still hits. A coffee never raises the maximum; only a solved
+case does.
 
 **As built** (feature 0024): the step that solves a case raises the maximum by one and fills
 overview to it, whatever it stood at — six full hearts after Sales.
@@ -234,6 +243,11 @@ third; until then the world stands still and the other keys do nothing, as with 
 There is no way to skip it before M8. In the first meeting the data protection officer says her
 first page and then the page that hands the lamp over; afterwards she says her two pages of
 0017. A press of E opens a dialogue with Space held as long as the player has no lamp.
+
+**As built** (feature 0027): E and Enter also take a coffee at a coffee machine (§4). A
+colleague or a figure in reach comes first: then the press opens the dialogue. The press does
+nothing at a machine while the lamp is held or the figure is being pushed. The help still lists
+E as the key to talk.
 
 **As built** (feature 0021): a press of H opens the help, a box over the game with seven rows —
 a key and what it does — and a second press closes it. The game stands still while it is open,
