@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest';
 import {
   NOTICE_CASE_SOLVED,
   NOTICE_LAMP,
+  NOTICE_REST,
   NOTICE_SHADOW_TOO_DENSE,
   NOTICE_TRACE_FOUND,
   noticeOf,
+  REST_NOTICE_STEPS,
 } from '../../src/game/notice';
 import type { GameInput } from '../../src/game/player';
-import type { GameState, ShadowWallState } from '../../src/game/state';
+import { type GameState, REST_RESULTS, type ShadowWallState } from '../../src/game/state';
 import { createInitialState, newGame, update } from '../../src/game/update';
 import { textKey } from '../../src/text/text';
 import { grassMap } from './grass-map';
@@ -171,5 +173,84 @@ describe("the line that names the lamp's key (0026)", () => {
     expect(noticeOf({ ...waiting, traces: [{ trace: 0, light: 0, found: 100 }] })).toBe(
       NOTICE_LAMP,
     );
+  });
+});
+
+describe('the notice of a rest (0027)', () => {
+  /** A game at step 1000, a rest taken `elapsed` steps ago with `result`. */
+  const rested = (result: (typeof REST_RESULTS)[number], elapsed: number): GameState => ({
+    ...BASE,
+    tick: 1000,
+    rested: { at: 1000 - elapsed, result },
+  });
+
+  it('has a line for each result, and two seconds', () => {
+    expect(NOTICE_REST).toStrictEqual({
+      restored: textKey('notice.rest'),
+      full: textKey('notice.rest-full'),
+      shadow: textKey('notice.rest-shadow'),
+    });
+    expect(Object.keys(NOTICE_REST)).toStrictEqual([...REST_RESULTS]);
+    expect(REST_NOTICE_STEPS).toBe(120);
+  });
+
+  it.each(REST_RESULTS)(
+    'shows the line of `%s` for 120 steps from the press, and none after',
+    (result) => {
+      expect(noticeOf(rested(result, 0))).toBe(NOTICE_REST[result]);
+      expect(noticeOf(rested(result, 119))).toBe(NOTICE_REST[result]);
+      expect(noticeOf(rested(result, 120))).toBeNull();
+      expect(noticeOf(rested(result, 5000))).toBeNull();
+    },
+  );
+
+  it('shows none while no rest was taken', () => {
+    expect(noticeOf({ ...BASE, tick: 1000, rested: null })).toBeNull();
+  });
+
+  it('comes after a wall that holds, a solved case and a found trace', () => {
+    const coffee = rested('restored', 10);
+    expect(
+      noticeOf({
+        ...coffee,
+        lamp: { on: true, strength: 1, owned: true, used: true },
+        shadowWalls: [HOLDS],
+      }),
+    ).toBe(NOTICE_SHADOW_TOO_DENSE);
+    expect(noticeOf({ ...coffee, solved: [{ region: 'sales', at: 950 }] })).toBe(
+      NOTICE_CASE_SOLVED,
+    );
+    expect(noticeOf({ ...coffee, traces: [{ trace: 0, light: 0, found: 950 }] })).toBe(
+      NOTICE_TRACE_FOUND,
+    );
+    // Once theirs are over, the coffee's is still due.
+    expect(noticeOf({ ...coffee, traces: [{ trace: 0, light: 0, found: 100 }] })).toBe(
+      NOTICE_REST.restored,
+    );
+  });
+
+  it("comes before the line that names the lamp's key, which is back when it is over", () => {
+    const waiting = { on: false, strength: 1, owned: true, used: false };
+    expect(noticeOf({ ...rested('full', 10), lamp: waiting })).toBe(NOTICE_REST.full);
+    expect(noticeOf({ ...rested('full', 120), lamp: waiting })).toBe(NOTICE_LAMP);
+  });
+
+  it('follows the game: a press at a coffee machine, and 120 steps later it is gone', () => {
+    const TALK: GameInput = { ...NONE, talk: true };
+    /** The player 24 px below a machine on cell (10, 5). */
+    const map = grassMap(
+      20,
+      12,
+      { x: 168, y: 112 },
+      [],
+      [{ name: 'rest:coffee', x: 160, y: 80, width: 16, height: 16 }],
+    );
+    let state = update(createInitialState(map), TALK, map);
+    expect(noticeOf(state)).toBe(NOTICE_REST.full);
+    for (let step = 0; step < 119; step += 1) {
+      state = update(state, NONE, map);
+      expect(noticeOf(state), `step ${step}`).toBe(NOTICE_REST.full);
+    }
+    expect(noticeOf(update(state, NONE, map))).toBeNull();
   });
 });

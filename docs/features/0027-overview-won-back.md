@@ -1,6 +1,6 @@
 # 0027 — Overview won back
 
-**Status:** approved 2026-11-18
+**Status:** implemented 2026-11-18
 **Milestone:** M5
 **Drafted:** 2026-11-18
 
@@ -212,7 +212,7 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 - `Dieser Kaffee schmeckt nach nichts.` — does it say that the room is the reason?
 - Should something be seen at the machine — a cup, steam?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–12. Feel: coffee as the way to win overview back, and the break room as the place — "Ja, passt." All hearts at once — "Ja, passt." The walk to the break room, price or detour — "Ja, passt." `Dieser Kaffee schmeckt nach nichts.` says the room is the reason — "Ja, passt." Something to see at the machine, a cup or steam — "Nein, das ist so in Ordnung."
 
 ## Open questions
 

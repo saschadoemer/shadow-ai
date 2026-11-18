@@ -9,6 +9,7 @@ import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
 import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from './overview';
 import { type GameInput, NO_INPUT, stepPlayer } from './player';
 import { areasOf } from './region';
+import { restsOf, takeRest } from './rest';
 import { standingWalls, stepWalls, wallsOf, withWalls } from './shadow';
 import {
   type Dialogue,
@@ -43,6 +44,8 @@ export function createInitialState(map: TileMap): GameState {
   const walls = wallsOf(map.rects);
   // The areas of the regions are only drawn (0023); a map with a faulty one still does not start.
   areasOf(map.rects);
+  // Nor does a map with a rest that is not one cell (0027).
+  restsOf(map.rects);
   const figures = figuresOf(map.points);
   const player: PlayerState = {
     x: map.spawn.x,
@@ -64,6 +67,7 @@ export function createInitialState(map: TileMap): GameState {
     shadowWalls: standingWalls(walls),
     traces: hiddenTraces(tracesOf(map.rects)),
     solved: [],
+    rested: null,
     figures: figuresFrom(figures),
     dialogue: null,
     journal: null,
@@ -180,6 +184,10 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   }
   // Without the lamp the input's `lamp` counts as not held: for the light and for the figure.
   const acting: GameInput = { ...input, lamp: input.lamp && state.lamp.owned };
+  // A press at a coffee machine in reach takes the rest (0027); the step goes on from there.
+  const rest = takeRest(state, acting, content);
+  const rested = rest === null ? state.rested : rest.rested;
+  const before = rest === null ? state.overview : rest.overview;
   const on = acting.lamp && state.player.recoil.steps === 0;
   const lamp: LampState = { ...state.lamp, on, used: state.lamp.used || on };
   const walls = wallsOf(content.rects);
@@ -196,8 +204,8 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   const hitter = hittingCreature(creatures, stepped);
   const { player, overview, dark } =
     hitter === null
-      ? { player: stepped, overview: state.overview, dark: 0 }
-      : applyHit(stepped, state.overview, hitter);
+      ? { player: stepped, overview: before, dark: 0 }
+      : applyHit(stepped, before, hitter);
   return {
     tick: state.tick + 1,
     started: state.started,
@@ -218,6 +226,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
       state.tick + 1,
     ),
     solved: state.solved,
+    rested,
     figures: state.figures,
     dialogue: null,
     journal: null,

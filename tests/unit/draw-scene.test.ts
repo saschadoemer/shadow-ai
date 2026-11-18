@@ -150,6 +150,7 @@ const state = (
 ): GameState => ({
   tick: QUIET_TICK,
   started: 0,
+  rested: null,
   player: player(fields),
   camera,
   lamp: { on: lampOn, strength: 1, owned: true, used: true },

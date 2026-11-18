@@ -66,6 +66,9 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'data protection officer has her light on.',
   ].join('\n'),
   'notice.lamp': 'The lamp: hold Space.',
+  'notice.rest': 'Coffee. Your overview is back.',
+  'notice.rest-full': 'Coffee. You have your overview already.',
+  'notice.rest-shadow': 'This coffee tastes of nothing.',
   'talk.reception-everyday': [
     'Morning! Three people have asked already',
     'whether we finally have a network for guests.',

@@ -121,8 +121,8 @@ region next, because it is the answer to the case and the picture the teaser end
 returns, more colleagues see the shadow, overview grows by one. The call last of the story:
 the customer on the phone, the first sight of the shadow and the lamp handed over can be told
 once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
-has left it open since 0009. 0022, 0023, 0024, 0025 and 0026 are
-implemented; 0027 is approved.
+has left it open since 0009. All six are implemented; the two named below are not specified
+yet.
 
 Named here without a number and specified when their turn comes, both for the teaser
 (`vision.md` §10): the Harmonic station of Sales · the line that says LMIS presents the

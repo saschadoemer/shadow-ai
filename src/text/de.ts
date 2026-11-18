@@ -70,6 +70,9 @@ export const de = {
     'Datenschutzbeauftragten, brennt Licht.',
   ].join('\n'),
   'notice.lamp': 'Die Lampe: Leertaste halten.',
+  'notice.rest': 'Kaffee. Der Überblick ist wieder da.',
+  'notice.rest-full': 'Kaffee. Den Überblick hast du schon.',
+  'notice.rest-shadow': 'Dieser Kaffee schmeckt nach nichts.',
   'talk.reception-everyday': [
     'Morgen! Heute haben schon drei Leute gefragt,',
     'ob wir endlich ein WLAN für Gäste haben.',

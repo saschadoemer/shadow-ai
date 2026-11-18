@@ -1,5 +1,5 @@
 import { type TextKey, textKey } from '../text/text';
-import type { GameState } from './state';
+import type { GameState, RestResult } from './state';
 
 /**
  * The notice (gameplay.md §2, feature 0016): one line the game itself says, shown at the
@@ -20,6 +20,15 @@ export const NOTICE_TRACE_FOUND: TextKey = textKey('notice.trace-found');
 /** Tune: two seconds from the find. */
 export const TRACE_NOTICE_STEPS = 120;
 
+/** A rest was taken (0027): what the coffee did, by its result. */
+export const NOTICE_REST: Readonly<Record<RestResult, TextKey>> = {
+  restored: textKey('notice.rest'),
+  full: textKey('notice.rest-full'),
+  shadow: textKey('notice.rest-shadow'),
+};
+/** Tune: two seconds from the press. */
+export const REST_NOTICE_STEPS = 120;
+
 /** The lamp's key (0026): shown from the step the lamp is handed over until it is held once. */
 export const NOTICE_LAMP: TextKey = textKey('notice.lamp');
 
@@ -28,8 +37,9 @@ export const NOTICE_LAMP: TextKey = textKey('notice.lamp');
  * is on and cannot lift: a wall that gives way counts from 1 in its first step; that notice
  * comes first. Then, for CASE_NOTICE_STEPS steps from the solving step, that a case is solved
  * (0024). Then, for TRACE_NOTICE_STEPS steps from the last find, that a trace was found (0022).
- * Last, while the lamp is owned and was never on, the line that names its key (0026): it has no
- * time, and it does not come back.
+ * Then, for REST_NOTICE_STEPS steps from a press at a rest, what the rest gave (0027). Last,
+ * while the lamp is owned and was never on, the line that names its key (0026): it has no time,
+ * and it does not come back.
  */
 export function noticeOf(state: GameState): TextKey | null {
   const holds = state.shadowWalls.some((wall) => wall.lit && wall.light === 0);
@@ -45,6 +55,9 @@ export function noticeOf(state: GameState): TextKey | null {
   );
   if (found) {
     return NOTICE_TRACE_FOUND;
+  }
+  if (state.rested !== null && state.tick - state.rested.at < REST_NOTICE_STEPS) {
+    return NOTICE_REST[state.rested.result];
   }
   return state.lamp.owned && !state.lamp.used ? NOTICE_LAMP : null;
 }
