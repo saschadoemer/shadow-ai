@@ -99,7 +99,7 @@ with the prototype.
 **Interfaces:**
 - Produces: the six text ids of the file structure, in both languages.
 
-- [ ] **Step 1: Write the failing test,** and widen the rule test to the kinds `case` and
+- [x] **Step 1: Write the failing test,** and widen the rule test to the kinds `case` and
   `policy`:
 
 ```diff
@@ -192,12 +192,12 @@ with the prototype.
          const rule = rules.find(([applies]) => applies(key));
 ```
 
-- [ ] **Step 2: Run it and see it fail.**
+- [x] **Step 2: Run it and see it fail.**
 
 Run: `npx vitest run tests/unit/text.test.ts`
 Expected: the new test FAILS — the ids do not exist. `npm run typecheck` fails too.
 
-- [ ] **Step 3: Add the strings.** The dash is `–`.
+- [x] **Step 3: Add the strings.** The dash is `–`.
 
 ```diff
 --- a/src/text/de.ts
@@ -261,13 +261,13 @@ Expected: the new test FAILS — the ids do not exist. `npm run typecheck` fails
      'sound as if I had had a week for it.',
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npx vitest run tests/unit/text.test.ts tests/unit/font.test.ts tests/unit/draw-scene.test.ts`
 Expected: PASS — the three pages of talk obey the page rule, the notice fits the bar, every
 character has a glyph. `npm run test`: 1092 tests.
 
-- [ ] **Step 5:** `npm run check`, then commit — `Give the case of Sales its words`.
+- [x] **Step 5:** `npm run check`, then commit — `Give the case of Sales its words`.
 
 ---
 
@@ -298,7 +298,7 @@ shows nothing of it yet.
 - Produces, in `game/talk`: `speakersOf(figures, movers, routes, colleagues?, progress?)`.
 - Produces, in `game/notice`: `NOTICE_CASE_SOLVED`, `CASE_NOTICE_STEPS = 120`.
 
-- [ ] **Step 1: Create the fixture** `tests/fixtures/maps/case.tmj` from `figures.tmj` with a
+- [x] **Step 1: Create the fixture** `tests/fixtures/maps/case.tmj` from `figures.tmj` with a
   one-off script. Do not commit the script. Run from the repository root:
 
 ```bash
@@ -340,7 +340,7 @@ EOF
   route `person:sales` with point 1 at (64, 48), pause 600, and point 2 at (128, 48); and
   two rectangles `trace:sales`, (160, 80, 16, 16) and (192, 80, 16, 16).
 
-- [ ] **Step 2: Create `tests/unit/cases.test.ts`.** Its ready state stands at step 1000
+- [x] **Step 2: Create `tests/unit/cases.test.ts`.** Its ready state stands at step 1000
   with both traces found long ago, so that no notice of a find is due.
 
 ```ts
@@ -672,7 +672,7 @@ describe('what the journal takes from the cases (0024)', () => {
 });
 ```
 
-- [ ] **Step 3: Change the tests that build a state, and add the state's and the floor's
+- [x] **Step 3: Change the tests that build a state, and add the state's and the floor's
   tests.** Every `GameState` literal gets `solved: []` after `traces`.
 
 ```diff
@@ -871,13 +871,13 @@ describe('what the journal takes from the cases (0024)', () => {
  });
 ```
 
-- [ ] **Step 4: Run and see it fail.**
+- [x] **Step 4: Run and see it fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `src/game/cases` does not exist, `solved` is no property of `GameState`,
 and `speakersOf` takes four arguments.
 
-- [ ] **Step 5: The state,** in `src/game/state.ts`:
+- [x] **Step 5: The state,** in `src/game/state.ts`:
 
 ```diff
 --- a/src/game/state.ts
@@ -906,7 +906,7 @@ and `speakersOf` takes four arguments.
    /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
 ```
 
-- [ ] **Step 6: Create `src/game/cases.ts`:**
+- [x] **Step 6: Create `src/game/cases.ts`:**
 
 ```ts
 import type { TileMap } from '../engine/tiled';
@@ -1052,7 +1052,7 @@ export function outcomeOf(
 }
 ```
 
-- [ ] **Step 7: Let the speakers follow the cases,** in `src/game/talk.ts`:
+- [x] **Step 7: Let the speakers follow the cases,** in `src/game/talk.ts`:
 
 ```diff
 --- a/src/game/talk.ts
@@ -1099,7 +1099,7 @@ export function outcomeOf(
    return [...standing, ...walking];
 ```
 
-- [ ] **Step 8: Start, keep and solve,** in `src/game/update.ts` and `src/game/overview.ts`.
+- [x] **Step 8: Start, keep and solve,** in `src/game/update.ts` and `src/game/overview.ts`.
   Update the two doc comments of `update.ts` too: the initial state has no case solved; a
   step that closes the source's answer of a ready case solves it (0024).
 
@@ -1161,7 +1161,7 @@ export function outcomeOf(
      journal: null,
 ```
 
-- [ ] **Step 9: The notice of a solved case,** in `src/game/notice.ts`:
+- [x] **Step 9: The notice of a solved case,** in `src/game/notice.ts`:
 
 ```diff
 --- a/src/game/notice.ts
@@ -1201,7 +1201,7 @@ export function outcomeOf(
    );
 ```
 
-- [ ] **Step 10: The same pages in the scene,** in `src/render/draw-scene.ts`. Without this
+- [x] **Step 10: The same pages in the scene,** in `src/render/draw-scene.ts`. Without this
   the box would show the everyday line while the dialogue has two pages:
 
 ```diff
@@ -1235,13 +1235,13 @@ export function outcomeOf(
      renderer.fillRect(
 ```
 
-- [ ] **Step 11: Run the tests.**
+- [x] **Step 11: Run the tests.**
 
 Run: `npm run typecheck && npx vitest run tests/unit/cases.test.ts tests/unit/talk.test.ts tests/unit/state.test.ts`
 Expected: PASS — `cases.test.ts` has 26 tests. Then `npm run test`: 1124 tests. The digest
 test of 0020 in `journal.test.ts` still holds: in its 600 steps no case is ready.
 
-- [ ] **Step 12:** `npm run check`, then commit —
+- [x] **Step 12:** `npm run check`, then commit —
   `Solve the case of Sales by the talk with its source`. The body says that the step which
   closes the answer is the gesture of the spec: no key, no screen, nobody gets into trouble.
 
@@ -1257,7 +1257,7 @@ test of 0020 in `journal.test.ts` still holds: in its 600 steps no case is ready
 - Consumes: `outcomeOf`, `policyBlocks` of Task 2.
 - Produces, in `render/draw-journal`: `CASE_OUTCOME`, `POLICY_BLOCK`, `POLICY_PITCH`.
 
-- [ ] **Step 1: Write the failing tests.** The helper is named `shown`, not `after`.
+- [x] **Step 1: Write the failing tests.** The helper is named `shown`, not `after`.
 
 ```diff
 --- a/tests/unit/draw-journal.test.ts
@@ -1365,12 +1365,12 @@ test of 0020 in `journal.test.ts` still holds: in its 600 steps no case is ready
 +});
 ```
 
-- [ ] **Step 2: Run and see them fail.**
+- [x] **Step 2: Run and see them fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `CASE_OUTCOME`, `POLICY_BLOCK` and `POLICY_PITCH` are not exported.
 
-- [ ] **Step 3: Draw the outcome and the blocks,** in `src/render/draw-journal.ts`:
+- [x] **Step 3: Draw the outcome and the blocks,** in `src/render/draw-journal.ts`:
 
 ```diff
 --- a/src/render/draw-journal.ts
@@ -1439,12 +1439,12 @@ Expected: errors — `CASE_OUTCOME`, `POLICY_BLOCK` and `POLICY_PITCH` are not e
      const { name, text } = ENTRY_TEXT[species];
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npm run typecheck && npx vitest run tests/unit/draw-journal.test.ts`
 Expected: PASS. Then `npm run test`: 1129 tests.
 
-- [ ] **Step 5:** `npm run check`, then commit —
+- [x] **Step 5:** `npm run check`, then commit —
   `Show a solved case's outcome and its policy block`.
 
 ---
@@ -1454,7 +1454,7 @@ Expected: PASS. Then `npm run test`: 1129 tests.
 **Files:**
 - Test: `tests/e2e/smoke.spec.ts`
 
-- [ ] **Step 1: Add the test** at the end of the file:
+- [x] **Step 1: Add the test** at the end of the file:
 
 ```diff
 --- a/tests/e2e/smoke.spec.ts
@@ -1478,13 +1478,13 @@ Expected: PASS. Then `npm run test`: 1129 tests.
 +});
 ```
 
-- [ ] **Step 2: Run.**
+- [x] **Step 2: Run.**
 
 Run: `npm run test:e2e`
 Expected: PASS — fifteen tests, three skipped (they need the container). This test passes at
 once: Task 2 built what it checks.
 
-- [ ] **Step 3:** `npm run check`, then commit — `Check the unsolved start in the smoke spec`.
+- [x] **Step 3:** `npm run check`, then commit — `Check the unsolved start in the smoke spec`.
 
 ---
 
@@ -1494,7 +1494,7 @@ once: Task 2 built what it checks.
 - Modify: `docs/spec/gameplay.md`, `docs/spec/world.md`, `docs/spec/architecture.md`,
   `docs/spec/testing.md`, `README.md`
 
-- [ ] **Step 1: `gameplay.md`.** §4: as built (feature 0024), the maximum of overview grows
+- [x] **Step 1: `gameplay.md`.** §4: as built (feature 0024), the maximum of overview grows
   by one with a solved case and is filled — six hearts after Sales. §6: add a paragraph
   **As built** (feature 0024): the case of Sales — its source is the colleague who walks
   between the cubicles and the coffee; while a trace is missing the colleague says the
@@ -1504,41 +1504,41 @@ once: Task 2 built what it checks.
   a creature from the journal comes with the second species. §7: the cases tab shows the
   outcome of a solved case as a third line; the policy tab shows one block per solved case.
 
-- [ ] **Step 2: `world.md`.** §2, at Sales: as built (feature 0024), the case is solved by
+- [x] **Step 2: `world.md`.** §2, at Sales: as built (feature 0024), the case is solved by
   the talk with its source once its five traces are found; its policy block is the one of
   the table, in the words of the spec. §3, at "Per department": the colleague of Sales is
   the source of the first case; what the colleague says follows from the case — the
   everyday line, the answer, the line afterwards.
 
-- [ ] **Step 3: `architecture.md`.** §1 directory list: `game/cases.ts`. §2: `solved`, a
+- [x] **Step 3: `architecture.md`.** §1 directory list: `game/cases.ts`. §2: `solved`, a
   list of `{ region, at }`; a case is ready and solved by rule, not by a field; the pages
   of a colleague follow from the progress of the cases in `update` and in the scene alike;
   the solving step and what it changes; the wake keeps `solved`; the notices in their order.
   §5: the outcome line and the policy tab with their places. §8: the kinds `case` and
   `policy` and their rules.
 
-- [ ] **Step 4: `testing.md` §2.** The INV-1 row gains the round trip with a case solved.
+- [x] **Step 4: `testing.md` §2.** The INV-1 row gains the round trip with a case solved.
   The INV-4 row gains the rules of the kinds `case` and `policy`. §6: `case.tmj`, if the
   section lists the fixtures.
 
-- [ ] **Step 5: `README.md`:** one sentence after the one on the shadow over the regions —
+- [x] **Step 5: `README.md`:** one sentence after the one on the shadow over the regions —
   with all five traces found, the colleague of Sales answers honestly, the case is solved,
   the journal records its outcome and the first block of the policy, and overview grows by
   one (feature 0024).
 
-- [ ] **Step 6:** `npm run check`, then commit — `Move the case of Sales into the spec`.
+- [x] **Step 6:** `npm run check`, then commit — `Move the case of Sales into the spec`.
 
 ---
 
 ### Task 6: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
   `Tick the full check of 0024`.
 
 ---
