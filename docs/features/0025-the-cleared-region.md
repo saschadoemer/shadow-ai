@@ -1,6 +1,6 @@
 # 0025 — The cleared region
 
-**Status:** draft
+**Status:** approved 2026-11-18
 **Milestone:** M5
 **Drafted:** 2026-11-18
 
