@@ -103,7 +103,7 @@ state — stop and look; do not bend a test. The container was **not** run with 
   `journal.no-creatures`, `journal.no-cases`, `journal.no-policy`, `creature.snippet-name`,
   `creature.snippet-text`, in both languages.
 
-- [ ] **Step 1: Write the failing tests** — the words, and the rule of each kind:
+- [x] **Step 1: Write the failing tests** — the words, and the rule of each kind:
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -179,13 +179,13 @@ state — stop and look; do not bend a test. The container was **not** run with 
        for (const [key, text] of Object.entries(TABLE[language])) {
 ```
 
-- [ ] **Step 2: Run them and see them fail.**
+- [x] **Step 2: Run them and see them fail.**
 
 Run: `npx vitest run tests/unit/text.test.ts`
 Expected: the first new test FAILS — the ids do not exist. `npm run typecheck` fails too:
 the eight ids are no `TextId`. The rule test passes on an empty set; it bites after Step 3.
 
-- [ ] **Step 3: Add the strings.** The dash is `–`.
+- [x] **Step 3: Add the strings.** The dash is `–`.
 
 ```diff
 --- a/src/text/de.ts
@@ -237,12 +237,12 @@ the eight ids are no `TextId`. The rule test passes on an empty set; it bites af
      'It stays behind wherever data leaves the house',
 ```
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `npx vitest run tests/unit/text.test.ts tests/unit/font.test.ts`
 Expected: PASS — the glyph test covers the new strings. `npm run test`: 879 tests.
 
-- [ ] **Step 5:** `npm run check`, then commit — `Give the journal its words`.
+- [x] **Step 5:** `npm run check`, then commit — `Give the journal its words`.
 
 ---
 
@@ -271,7 +271,7 @@ it and every test that builds a state or an input change together.
   `openJournal(state, input): GameState | null`;
   `stepJournal(state, journal: JournalState, input): GameState`.
 
-- [ ] **Step 1: Create `tests/unit/journal.test.ts`:**
+- [x] **Step 1: Create `tests/unit/journal.test.ts`:**
 
 ```ts
 import { createHash } from 'node:crypto';
@@ -633,7 +633,7 @@ describe('a game in which the journal is never opened (0020)', () => {
   `f096a86`, before this feature. It is the proof of criterion 14. Never change it: if the
   test fails, the world stepped differently, and that is the bug.
 
-- [ ] **Step 2: Change the tests that build an input or a state.** Every complete `GameInput`
+- [x] **Step 2: Change the tests that build an input or a state.** Every complete `GameInput`
   literal gets `journal: false`; every `GameState` literal gets `journal: null` and
   `held: NO_INPUT` in place of `talkHeld: false`; every expectation on `talkHeld` becomes one
   on `held`, which is the input of the step before.
@@ -1004,13 +1004,13 @@ describe('a game in which the journal is never opened (0020)', () => {
   And in `tests/e2e/smoke.spec.ts`, in the test of the officer, the line
   `expect(state?.talkHeld).toBe(false);` becomes `expect(state?.held.talk).toBe(false);`.
 
-- [ ] **Step 3: Run and see it fail.**
+- [x] **Step 3: Run and see it fail.**
 
 Run: `npm run typecheck`
 Expected: errors — `src/game/journal` does not exist, `NO_INPUT` and `pressed` are not
 exported, and `journal` and `held` are no properties of the input and the state.
 
-- [ ] **Step 4: The input and its press,** in `src/game/player.ts`:
+- [x] **Step 4: The input and its press,** in `src/game/player.ts`:
 
 ```diff
 --- a/src/game/player.ts
@@ -1053,7 +1053,7 @@ exported, and `journal` and `held` are no properties of the input and the state.
  /** Tune: 80 px/s is 1.333 px per step. */
 ```
 
-- [ ] **Step 5: The state,** in `src/game/state.ts`. The import of `GameInput` is a type
+- [x] **Step 5: The state,** in `src/game/state.ts`. The import of `GameInput` is a type
   import; `player.ts` imports values from `state.ts`, and that stays the only direction at run
   time.
 
@@ -1097,7 +1097,7 @@ exported, and `journal` and `held` are no properties of the input and the state.
    readonly overview: Overview;
 ```
 
-- [ ] **Step 6: Create `src/game/journal.ts`:**
+- [x] **Step 6: Create `src/game/journal.ts`:**
 
 ```ts
 import { type TextKey, textKey } from '../text/text';
@@ -1180,7 +1180,7 @@ export function stepJournal(state: GameState, journal: JournalState, input: Game
 }
 ```
 
-- [ ] **Step 7: `held` in place of `talkHeld`,** in `src/game/talk.ts` and
+- [x] **Step 7: `held` in place of `talkHeld`,** in `src/game/talk.ts` and
   `src/game/overview.ts`:
 
 ```diff
@@ -1252,7 +1252,7 @@ export function stepJournal(state: GameState, journal: JournalState, input: Game
      dark: state.dark,
 ```
 
-- [ ] **Step 8: The journal's step in `update`,** `src/game/update.ts`. Update the two doc
+- [x] **Step 8: The journal's step in `update`,** `src/game/update.ts`. Update the two doc
   comments of the file as well: the initial state has the journal closed and no key
   remembered; a step with the journal open is the journal's and nothing else, and a press of
   `journal` opens it before a press of `talk` is looked at (0020).
@@ -1316,7 +1316,7 @@ export function stepJournal(state: GameState, journal: JournalState, input: Game
      dark,
 ```
 
-- [ ] **Step 9: The key,** in `src/main.ts`:
+- [x] **Step 9: The key,** in `src/main.ts`:
 
 ```diff
 --- a/src/main.ts
@@ -1342,13 +1342,13 @@ export function stepJournal(state: GameState, journal: JournalState, input: Game
  /** Loading finishes before the first frame; until then the page shows its background. */
 ```
 
-- [ ] **Step 10: Run the tests.**
+- [x] **Step 10: Run the tests.**
 
 Run: `npm run typecheck && npx vitest run tests/unit/journal.test.ts`
 Expected: PASS — 33 tests. Then `npm run test`: 916 tests, every file green; the
 architecture test now also checks `journal.ts`.
 
-- [ ] **Step 11:** `npm run check`, then commit —
+- [x] **Step 11:** `npm run check`, then commit —
   `Remember the whole input, and open the journal with J`. The body says why the state holds
   the whole input now: the journal needs presses of three actions, and one field per key does
   not scale.
@@ -1371,7 +1371,7 @@ architecture test now also checks `journal.ts`.
   `tabBox(k): Box`; `tabTitleOrigin(k, length): Point`;
   `drawJournal(renderer, state, journal, content, settings): void`.
 
-- [ ] **Step 1: Create `tests/unit/draw-journal.test.ts`:**
+- [x] **Step 1: Create `tests/unit/draw-journal.test.ts`:**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -1613,12 +1613,12 @@ describe('the journal in the scene (0020)', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and see it fail.**
+- [x] **Step 2: Run it and see it fail.**
 
 Run: `npx vitest run tests/unit/draw-journal.test.ts`
 Expected: FAIL — `src/render/draw-journal` does not exist.
 
-- [ ] **Step 3: Create `src/render/draw-journal.ts`:**
+- [x] **Step 3: Create `src/render/draw-journal.ts`:**
 
 ```ts
 import type { Box, Point } from '../engine/tiled';
@@ -1730,7 +1730,7 @@ export function drawJournal(
 }
 ```
 
-- [ ] **Step 4: Let the scene draw it,** in `src/render/draw-scene.ts`:
+- [x] **Step 4: Let the scene draw it,** in `src/render/draw-scene.ts`:
 
 ```diff
 --- a/src/render/draw-scene.ts
@@ -1766,12 +1766,12 @@ export function drawJournal(
    renderer.clear(PAGE_BACKGROUND);
 ```
 
-- [ ] **Step 5: Run the tests.**
+- [x] **Step 5: Run the tests.**
 
 Run: `npm run typecheck && npx vitest run tests/unit/draw-journal.test.ts`
 Expected: PASS — 11 tests. Then `npm run test`: 927 tests.
 
-- [ ] **Step 6:** `npm run check`, then commit — `Draw the journal instead of the world`.
+- [x] **Step 6:** `npm run check`, then commit — `Draw the journal instead of the world`.
 
 ---
 
@@ -1780,7 +1780,7 @@ Expected: PASS — 11 tests. Then `npm run test`: 927 tests.
 **Files:**
 - Test: `tests/e2e/smoke.spec.ts`
 
-- [ ] **Step 1: Add the test** at the end of the file. The keys are held until the state
+- [x] **Step 1: Add the test** at the end of the file. The keys are held until the state
   shows them, because the game reads the held keys once per frame:
 
 ```ts
@@ -1815,14 +1815,14 @@ test('J opens the journal on the creatures and closes it again', async ({ page }
 });
 ```
 
-- [ ] **Step 2: Run.**
+- [x] **Step 2: Run.**
 
 Run: `npm run test:e2e`
 Expected: PASS — eleven tests, three skipped (they need the container). If a dev server
 already runs on port 5173, Playwright uses it. This test passes at once: Tasks 2 and 3 built
 what it checks.
 
-- [ ] **Step 3:** `npm run check`, then commit — `Open and close the journal in the smoke spec`.
+- [x] **Step 3:** `npm run check`, then commit — `Open and close the journal in the smoke spec`.
 
 ---
 
@@ -1832,20 +1832,20 @@ what it checks.
 - Modify: `docs/spec/gameplay.md`, `docs/spec/world.md`, `docs/spec/architecture.md`,
   `docs/spec/visual.md`, `docs/spec/testing.md`, `README.md`
 
-- [ ] **Step 1: `gameplay.md`.** §7: add a paragraph **As built** (feature 0020): `J` opens
+- [x] **Step 1: `gameplay.md`.** §7: add a paragraph **As built** (feature 0020): `J` opens
   the journal on the creatures and closes it; the left and right keys of walking turn the
   three tabs, and stop at either end; the game stands still while it is open; a species has
   its entry as soon as one of it is captured — its picture, its name and two to four lines;
   the cases and the policy say in one line that they are empty until M5; no count of
   captures, no pages yet. §8: the list of keys gains `J`.
 
-- [ ] **Step 2: `world.md` §4,** at the snippet: its displayed name is `Schnipsel`, in English
+- [x] **Step 2: `world.md` §4,** at the snippet: its displayed name is `Schnipsel`, in English
   `Snippet`, and its journal text is fixed with feature 0020 — replace the sentence that says
   both are fixed with the journal (M4). Keep the note on the name check in the words of the
   spec's settled question: a dictionary word, fixed by the author's decision; no trademark
   register was searched.
 
-- [ ] **Step 3: `architecture.md`.** §1 directory list: `game/journal.ts` and
+- [x] **Step 3: `architecture.md`.** §1 directory list: `game/journal.ts` and
   `render/draw-journal.ts`. §2: `journal` is `null` or `{ tab }`; `held` is the last step's
   input and replaces `talkHeld` — an action is pressed when the input holds it and `held` does
   not; a step is now one of four kinds — dark, journal, dialogue, ordinary — and what the
@@ -1856,34 +1856,34 @@ what it checks.
   with their rectangles and origins. §8: the kinds `journal` and `creature` and the rule of
   each.
 
-- [ ] **Step 4: `visual.md` §3:** "The display" gains the journal: a dark screen, three tabs
+- [x] **Step 4: `visual.md` §3:** "The display" gains the journal: a dark screen, three tabs
   in two blues — `#3a4466` open, `#262b44` closed — a rule in the open tab's colour, the
   creature's own 16x16 picture beside its name.
 
-- [ ] **Step 5: `testing.md` §2.** The INV-1 row gains the round trips at the start and with
+- [x] **Step 5: `testing.md` §2.** The INV-1 row gains the round trips at the start and with
   the journal open on the cases (0020). The INV-4 row gains the rules of the journal's texts.
   Add where the section speaks of regression: the 600 recorded steps on the floor whose
   digest was taken before 0020.
 
-- [ ] **Step 6: `README.md`:** one sentence after the one on the language — `J` opens the
+- [x] **Step 6: `README.md`:** one sentence after the one on the language — `J` opens the
   journal with its three tabs; a captured snippet has its entry there (feature 0020).
   Milestone M4 is complete with this feature: say so where the README says that M3 is, and
   in `docs/plan.md` §4 end the M4 section with "M4 is done: 0020 was the last of the five" —
   in Task 8, with the status.
 
-- [ ] **Step 7:** `npm run check`, then commit — `Move the journal into the spec`.
+- [x] **Step 7:** `npm run check`, then commit — `Move the journal into the spec`.
 
 ---
 
 ### Task 6: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
   `Tick the full check of 0020`.
 
 ---
