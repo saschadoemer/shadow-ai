@@ -9,8 +9,13 @@ import { en } from './en';
 /** German first, English second (vision.md §7). */
 export const LANGUAGES = ['de', 'en'] as const;
 export type Language = (typeof LANGUAGES)[number];
-/** The language the game shows until it can be switched (0019). */
+/** The language of every load; `L` switches it while the game runs (0019). */
 export const DEFAULT_LANGUAGE: Language = 'de';
+
+/** The language after `language` in LANGUAGES, the first after the last (0019). */
+export function nextLanguage(language: Language): Language {
+  return LANGUAGES[(LANGUAGES.indexOf(language) + 1) % LANGUAGES.length] ?? DEFAULT_LANGUAGE;
+}
 
 /** The ids of the table: the keys of `de`. */
 export type TextId = keyof typeof de;
