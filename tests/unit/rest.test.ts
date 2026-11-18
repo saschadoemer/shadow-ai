@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Box } from '../../src/engine/collision';
 import type { NamedPoint, NamedRect, TileMap } from '../../src/engine/tiled';
+import { type GameInput, NO_INPUT } from '../../src/game/player';
 import {
   REGION_PREFIX,
   REST_PREFIX,
@@ -16,12 +17,16 @@ import {
   restInReach,
   restsOf,
   restUnderShadow,
+  takeRest,
 } from '../../src/game/rest';
 import { wallsOf } from '../../src/game/shadow';
+import { type GameState, REST_RESULTS } from '../../src/game/state';
 import { tracesOf } from '../../src/game/trace';
-import { createInitialState } from '../../src/game/update';
+import { createInitialState, newGame, update } from '../../src/game/update';
 import { grassMap } from './grass-map';
 
+const NONE = NO_INPUT;
+const TALK: GameInput = { ...NONE, talk: true };
 const rect = (name: string, x: number, y: number, width = 16, height = 16): NamedRect => ({
   name,
   x,
@@ -41,6 +46,13 @@ const mapAt = (
   rects: readonly NamedRect[] = [COFFEE],
   points: readonly NamedPoint[] = [],
 ): TileMap => grassMap(20, 12, { x, y }, points, rects);
+const run = (map: TileMap, start: GameState, ...inputs: readonly GameInput[]): GameState =>
+  inputs.reduce((state, input) => update(state, input, map), start);
+/** The state with `current` of five hearts. */
+const tired = (map: TileMap, current = 2): GameState => ({
+  ...createInitialState(map),
+  overview: { current, max: 5 },
+});
 
 describe('the rests among the rectangles of a map (0027)', () => {
   const rects = [
@@ -106,6 +118,7 @@ describe('the rests among the rectangles of a map (0027)', () => {
 
   it('starts a map with rests like one without: the state has nothing of them', () => {
     expect(createInitialState(mapAt(40, 40))).toStrictEqual(createInitialState(mapAt(40, 40, [])));
+    expect(createInitialState(mapAt(40, 40)).rested).toBeNull();
   });
 });
 
@@ -202,5 +215,159 @@ describe('a rest under shadow (0027)', () => {
   it('is not under shadow once the region is cleared, from the step that solved its case', () => {
     expect(restUnderShadow(shadowed, rects, [{ region: 'hr', at: 500 }])).toBe(false);
     expect(restUnderShadow(shadowed, rects, [{ region: 'sales', at: 500 }])).toBe(true);
+  });
+});
+
+describe('a coffee (0027)', () => {
+  const rects = [COFFEE, SHADOWED, HR];
+  /** The player 24 px below the open machine. */
+  const OPEN = mapAt(168, 112, rects);
+  /** The player 24 px below the machine in HR. */
+  const DARK = mapAt(72, 112, rects);
+
+  it('has three results', () => {
+    expect(REST_RESULTS).toStrictEqual(['restored', 'full', 'shadow']);
+  });
+
+  it('fills overview at a rest that is not under shadow, and remembers the step', () => {
+    const start = tired(OPEN);
+    const drunk = update(start, TALK, OPEN);
+    expect(drunk.overview).toStrictEqual({ current: 5, max: 5 });
+    expect(drunk.rested).toStrictEqual({ at: 1, result: 'restored' });
+    expect(drunk.tick).toBe(1);
+  });
+
+  it('fills it from any number of hearts, and to a maximum a solved case has raised', () => {
+    for (const current of [0, 1, 4]) {
+      expect(update(tired(OPEN, current), TALK, OPEN).overview).toStrictEqual({
+        current: 5,
+        max: 5,
+      });
+    }
+    const grown: GameState = { ...tired(OPEN), overview: { current: 3, max: 6 } };
+    expect(update(grown, TALK, OPEN).overview).toStrictEqual({ current: 6, max: 6 });
+  });
+
+  it('changes no heart with overview full, and says so', () => {
+    const drunk = update(createInitialState(OPEN), TALK, OPEN);
+    expect(drunk.overview).toStrictEqual({ current: 5, max: 5 });
+    expect(drunk.rested).toStrictEqual({ at: 1, result: 'full' });
+  });
+
+  it('changes no heart at a rest under shadow, whatever the hearts', () => {
+    for (const current of [2, 5]) {
+      const drunk = update(tired(DARK, current), TALK, DARK);
+      expect(drunk.overview).toStrictEqual({ current, max: 5 });
+      expect(drunk.rested).toStrictEqual({ at: 1, result: 'shadow' });
+    }
+  });
+
+  it('restores at that rest once its region is cleared', () => {
+    const cleared: GameState = { ...tired(DARK), tick: 700, solved: [{ region: 'hr', at: 650 }] };
+    const drunk = update(cleared, TALK, DARK);
+    expect(drunk.overview).toStrictEqual({ current: 5, max: 5 });
+    expect(drunk.rested).toStrictEqual({ at: 701, result: 'restored' });
+  });
+
+  it('is an ordinary step otherwise: only overview, rested, tick and held change', () => {
+    const start = tired(OPEN);
+    expect(update(start, TALK, OPEN)).toStrictEqual({
+      ...start,
+      tick: 1,
+      held: TALK,
+      overview: { current: 5, max: 5 },
+      rested: { at: 1, result: 'restored' },
+    });
+  });
+
+  it('lets the world go on in the same step: the figure walks', () => {
+    const walking = update(tired(OPEN), { ...TALK, right: true }, OPEN);
+    expect(walking.player.x).toBeGreaterThan(168);
+    expect(walking.rested?.result).toBe('restored');
+  });
+
+  it('does not save from a creature that reaches the figure in the same step', () => {
+    // A snippet at 6-8-10 from the spawn hits in step 1 (0009).
+    const map = mapAt(168, 112, rects, [{ name: 'snippet', x: 162, y: 104 }]);
+    const hit = update(tired(map), TALK, map);
+    expect(hit.rested).toStrictEqual({ at: 1, result: 'restored' });
+    expect(hit.overview).toStrictEqual({ current: 4, max: 5 });
+  });
+
+  it('is taken once by a key that is held: the next press takes the next', () => {
+    const held = run(OPEN, tired(OPEN), TALK, TALK, TALK);
+    expect(held.rested).toStrictEqual({ at: 1, result: 'restored' });
+    const again = run(OPEN, held, NONE, TALK);
+    expect(again.rested).toStrictEqual({ at: 5, result: 'full' });
+  });
+
+  it('is not taken with the lamp held or during a push', () => {
+    const start = tired(OPEN);
+    expect(update(start, { ...TALK, lamp: true }, OPEN).rested).toBeNull();
+    const pushed: GameState = {
+      ...start,
+      player: { ...start.player, recoil: { dx: 3, dy: 0, steps: 8 } },
+    };
+    const during = update(pushed, TALK, OPEN);
+    expect(during.rested).toBeNull();
+    expect(during.overview).toStrictEqual({ current: 2, max: 5 });
+  });
+
+  it('is taken with Space held by a player who has no lamp: there is none to hold (0026)', () => {
+    const called = run(OPEN, newGame(OPEN), TALK, NONE, TALK, NONE, TALK, NONE);
+    expect(called.lamp.owned).toBe(false);
+    const drunk = update(called, { ...TALK, lamp: true }, OPEN);
+    expect(drunk.rested).toStrictEqual({ at: called.tick + 1, result: 'full' });
+  });
+
+  it('is not taken out of reach: the step is an ordinary one', () => {
+    const far = mapAt(168, 121, rects);
+    expect(update(tired(far), TALK, far).rested).toBeNull();
+  });
+
+  it('is not taken in the dark, with the help open, with the journal open or in a dialogue', () => {
+    const start = tired(OPEN);
+    const frozen: readonly GameState[] = [
+      { ...start, dark: 10 },
+      { ...start, help: true },
+      { ...start, journal: { tab: 'creatures' } },
+      { ...start, dialogue: { speaker: 'story', index: 0, page: 0 } },
+    ];
+    for (const state of frozen) {
+      const stepped = update(state, TALK, OPEN);
+      expect(stepped.rested).toBeNull();
+      expect(stepped.overview.current).toBeLessThanOrEqual(2);
+    }
+  });
+
+  it('is not taken by the press that opens the journal', () => {
+    const opened = update(tired(OPEN), { ...TALK, journal: true }, OPEN);
+    expect(opened.journal).toStrictEqual({ tab: 'creatures' });
+    expect(opened.rested).toBeNull();
+  });
+
+  it('gives way to a speaker in reach: the press opens the dialogue and takes no rest', () => {
+    const map = mapAt(168, 112, rects, [{ name: 'figure:officer', x: 192, y: 112 }]);
+    const opened = update(tired(map), TALK, map);
+    expect(opened.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
+    expect(opened.rested).toBeNull();
+    expect(opened.overview).toStrictEqual({ current: 2, max: 5 });
+  });
+
+  it('is what takeRest says, and takeRest changes nothing itself', () => {
+    const start = tired(OPEN);
+    const before = JSON.stringify(start);
+    expect(takeRest(start, TALK, OPEN)).toStrictEqual({
+      overview: { current: 5, max: 5 },
+      rested: { at: 1, result: 'restored' },
+    });
+    expect(takeRest(start, NONE, OPEN)).toBeNull();
+    expect(takeRest({ ...start, held: TALK }, TALK, OPEN)).toBeNull();
+    expect(JSON.stringify(start)).toBe(before);
+  });
+
+  it('survives a JSON round trip after a coffee (INV-1)', () => {
+    const drunk = update(tired(OPEN), TALK, OPEN);
+    expect(JSON.parse(JSON.stringify(drunk))).toStrictEqual(drunk);
   });
 });
