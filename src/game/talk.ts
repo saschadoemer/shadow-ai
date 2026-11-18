@@ -6,13 +6,15 @@ import { COLLEAGUES, type Colleague, type Figure, pagesOfRoute } from './cast';
 import type { Route } from './mover';
 import { BOX_HEIGHT, type GameInput, pressed } from './player';
 import type { Dialogue, Facing, GameState, MoverState, SpeakerKind } from './state';
+import { SCENES, type Scene, scenePages } from './story';
 
 /**
  * Talking (gameplay.md §8, features 0017 and 0018). A press of `talk` near a speaker — a
  * standing figure, or a colleague on its round — opens a dialogue: the two turn to each other
  * and the speaker's first page is shown. A press turns to the next page; a press on the last
  * page closes the dialogue. While it is open nothing in the world is stepped — time passes,
- * and that is all. Pure data and pure functions.
+ * and that is all. A scene of the story is a dialogue too, with no speaker on the floor (0026).
+ * Pure data and pure functions.
  */
 
 /** Tune: two and a half tiles between the feet of the two — across a counter (0018). */
@@ -45,6 +47,7 @@ export function facingToward(from: Point, to: Point, current: Facing): Facing {
 
 /** Someone who can be spoken to, where it is in this step: the feet in map pixels. */
 export interface Speaker extends Point {
+  /** A figure or a colleague; the story is no speaker on the floor (0026). */
   readonly speaker: SpeakerKind;
   /** The index in `GameState.figures` or in `GameState.movers`. */
   readonly index: number;
@@ -91,6 +94,21 @@ export function speakerOf(dialogue: Dialogue, speakers: readonly Speaker[]): Spe
   return speakers.find(
     (speaker) => speaker.speaker === dialogue.speaker && speaker.index === dialogue.index,
   );
+}
+
+/**
+ * The pages of a dialogue (0026): a scene's own when the story speaks, else those of its
+ * speaker among the speakers of the step; none when neither is there.
+ */
+export function pagesOf(
+  dialogue: Dialogue,
+  speakers: readonly Speaker[],
+  scenes: readonly Scene[] = SCENES,
+): readonly TextKey[] {
+  if (dialogue.speaker === 'story') {
+    return scenePages(dialogue.index, scenes);
+  }
+  return speakerOf(dialogue, speakers)?.pages ?? [];
 }
 
 /**
@@ -198,7 +216,7 @@ export function stepDialogue(
   input: GameInput,
   speakers: readonly Speaker[],
 ): GameState {
-  const pages = speakerOf(dialogue, speakers)?.pages.length ?? 0;
+  const pages = pagesOf(dialogue, speakers).length;
   const page = talkPressed(state, input) ? dialogue.page + 1 : dialogue.page;
   return {
     ...state,
