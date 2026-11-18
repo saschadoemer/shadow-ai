@@ -316,7 +316,12 @@ to date with `main`; Chrome, and a second device on another network — a phone 
 - Does the address look like something you would send to a colleague, or does the custom
   domain have to come before M8?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–20, in the third walk on a fresh project. The first walk
+failed at step 1 (a fresh project's propagation delays and the missing Cloud Billing API), the
+second at step 10 (an arm64 image from a Mac with an Apple chip); both are fixed on the branch.
+Feel: the first load after 15 minutes idle is acceptable — "Ist ok", no seconds given; the
+address is good enough until M8, and the author has a redirect of their own in place, so the
+custom domain stays with M8.
 
 ## Open questions
 
