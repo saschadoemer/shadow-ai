@@ -50,5 +50,5 @@ in two.
 | [0026](0026-the-call.md) | The call | M5 | implemented 2026-11-18 |
 | [0027](0027-overview-won-back.md) | Overview won back | M5 | implemented 2026-11-18 |
 | [0028](0028-the-case-of-marketing.md) | The case of Marketing | M6 | implemented 2026-11-18 |
-| [0029](0029-the-wider-cone.md) | The wider cone | M6 | approved 2026-11-18 |
+| [0029](0029-the-wider-cone.md) | The wider cone | M6 | implemented 2026-11-19 |
 | [0030](0030-cloud-run-deployment.md) | Cloud Run deployment | M8 | implemented 2026-11-18 |
