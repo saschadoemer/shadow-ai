@@ -320,3 +320,24 @@ test('H opens the help, the game stands still under it, and H closes it again', 
   await expect.poll(help, { message: 'a second press of H closes it' }).toBe(false);
   await page.keyboard.up('KeyH');
 });
+
+test('the reception keeps its colours: no shadow lies over it', async ({ page }) => {
+  await page.goto('/');
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.camera), {
+      message: 'the first view is the reception',
+    })
+    .toStrictEqual({ x: 96, y: 624 });
+  // Cell (7, 43) is carpet, with no furniture and on no route. Its corner is at (16, 64) on the
+  // surface, the factor is 4, and the corner pixel of the carpet tile is its base colour.
+  const canvas = page.locator('canvas#game');
+  await expect
+    .poll(
+      () =>
+        canvas.evaluate((element: HTMLCanvasElement) =>
+          Array.from(element.getContext('2d')?.getImageData(16 * 4, 64 * 4, 1, 1).data ?? []),
+        ),
+      { message: 'the pixel is the carpet #8b9bb4, not its grey under shadow #5a6988' },
+    )
+    .toStrictEqual([0x8b, 0x9b, 0xb4, 255]);
+});
