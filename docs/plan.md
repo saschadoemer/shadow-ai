@@ -98,8 +98,8 @@ is the whole feature. Then everyday lines for the four colleagues who walk the f
 0015: they have to stop and turn before they can be spoken to. The language switch after that,
 when there is enough text for English to be worth looking at; the title screen that will hold
 the switch is M8, so M4 needs an interim one. The journal last: its three tabs are text and
-pictures, and its first content — the captured snippet — exists since 0008. 0016 is
-implemented and 0017 drafted; the others are named here and specified when their turn comes.
+pictures, and its first content — the captured snippet — exists since 0008. 0016 and 0017
+are implemented; 0018, 0019 and 0020 are drafted.
 
 ## 5. Deferred, with reasons
 
