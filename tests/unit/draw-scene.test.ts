@@ -155,6 +155,7 @@ const state = (
   movers: [],
   shadowWalls: [],
   traces: [],
+  solved: [],
   figures: [],
   dialogue: null,
   journal: null,

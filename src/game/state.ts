@@ -102,6 +102,12 @@ export interface TraceState {
   readonly found: number | null;
 }
 
+/** A solved case (0024): its region, and the tick of the step that solved it. */
+export interface SolvedCase {
+  readonly region: string;
+  readonly at: number;
+}
+
 /** A standing figure of the cast (0017). Its place stays in the map, its pages in game/cast. */
 export interface FigureState {
   /** The index of the figure in `figuresOf(map.points)`. */
@@ -164,6 +170,8 @@ export interface GameState {
   readonly shadowWalls: readonly ShadowWallState[];
   /** The traces of the map, in file order (0022): found or not, all of them. */
   readonly traces: readonly TraceState[];
+  /** The solved cases, in the order they were solved (0024). */
+  readonly solved: readonly SolvedCase[];
   /** The standing figures of the map, in file order (0017). */
   readonly figures: readonly FigureState[];
   /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */

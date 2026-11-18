@@ -98,6 +98,7 @@ const reading = (tab: JournalTab, snippets = 0): GameState => ({
   movers: [],
   shadowWalls: [],
   traces: [],
+  solved: [],
   figures: [],
   dialogue: null,
   journal: { tab },

@@ -1,0 +1,326 @@
+import { describe, expect, it } from 'vitest';
+import type { NamedPoint, NamedRect, TileMap } from '../../src/engine/tiled';
+import {
+  answeredCase,
+  CASE_OVERVIEW,
+  CASES,
+  type Case,
+  isReady,
+  isSolved,
+  outcomeOf,
+  type Progress,
+  pagesIn,
+  policyBlocks,
+  progressOf,
+  solve,
+} from '../../src/game/cases';
+import { routesOf } from '../../src/game/mover';
+import { CASE_NOTICE_STEPS, noticeOf } from '../../src/game/notice';
+import { type GameInput, NO_INPUT } from '../../src/game/player';
+import type { GameState, TraceState } from '../../src/game/state';
+import { speakerOf, speakersOf } from '../../src/game/talk';
+import type { Trace } from '../../src/game/trace';
+import { createInitialState, update } from '../../src/game/update';
+import { textKey } from '../../src/text/text';
+import { grassMap } from './grass-map';
+
+const NONE = NO_INPUT;
+const TALK: GameInput = { ...NONE, talk: true };
+const EVERYDAY = [textKey('talk.sales-everyday')];
+const ANSWER = [textKey('talk.sales-source-1'), textKey('talk.sales-source-2')];
+const AFTER = [textKey('talk.sales-after')];
+/** The colleague of Sales on a route of two points, waiting ten seconds on the first. */
+const SOURCE: readonly NamedPoint[] = [
+  { name: 'person:sales:1', x: 64, y: 48, pause: 600 },
+  { name: 'person:sales:2', x: 128, y: 48 },
+];
+const trace = (x: number): NamedRect => ({ name: 'trace:sales', x, y: 80, width: 16, height: 16 });
+/** 20x12 cells of open floor: the player 40 px right of the source, two traces of Sales. */
+const MAP: TileMap = grassMap(20, 12, { x: 104, y: 48 }, SOURCE, [trace(160), trace(192)]);
+const found = (...ticks: readonly (number | null)[]): TraceState[] =>
+  ticks.map((tick, index) => ({ trace: index, light: 0, found: tick }));
+/** The start of MAP with its two traces found, or not, as given. */
+const withTraces = (...ticks: readonly (number | null)[]): GameState => ({
+  ...createInitialState(MAP),
+  traces: found(...ticks),
+});
+const run = (start: GameState, ...inputs: readonly GameInput[]): GameState =>
+  inputs.reduce((state, input) => update(state, input, MAP), start);
+/** The pages of the speaker of the state's open dialogue. */
+const spoken = (state: GameState) =>
+  state.dialogue === null
+    ? null
+    : speakerOf(
+        state.dialogue,
+        speakersOf([], state.movers, routesOf(MAP.points), undefined, progressOf(state, MAP)),
+      )?.pages;
+/** Both traces were found long ago: the game is at step 1000, and no notice of a find is due. */
+const T0 = 1000;
+const READY: GameState = { ...withTraces(10, 20), tick: T0 };
+
+describe('the cases (0024)', () => {
+  it('holds the case of Sales: its source, its answer, its afterwards, its outcome, its block', () => {
+    expect(CASES).toStrictEqual([
+      {
+        region: 'sales',
+        source: 'person:sales',
+        answer: ANSWER,
+        after: AFTER,
+        outcome: textKey('case.sales-outcome'),
+        policy: textKey('policy.sales'),
+      },
+    ]);
+    expect(CASE_OVERVIEW).toBe(1);
+  });
+});
+
+describe('a case that is ready (0024)', () => {
+  const places: Trace[] = [
+    { region: 'sales', box: { x: 0, y: 0, width: 16, height: 16 } },
+    { region: 'sales', box: { x: 16, y: 0, width: 16, height: 16 } },
+    { region: 'hr', box: { x: 32, y: 0, width: 16, height: 16 } },
+  ];
+  const progress = (...ticks: readonly (number | null)[]): Progress => ({
+    traces: found(...ticks),
+    places,
+    solved: [],
+  });
+
+  it('is ready exactly when every trace of its region on the map is found', () => {
+    expect(isReady('sales', progress(null, null, null))).toBe(false);
+    expect(isReady('sales', progress(10, null, 30))).toBe(false);
+    expect(isReady('sales', progress(10, 20, null))).toBe(true);
+    expect(isReady('hr', progress(10, 20, null))).toBe(false);
+    expect(isReady('hr', progress(null, null, 30))).toBe(true);
+  });
+
+  it('is never ready for a region without traces on the map', () => {
+    expect(isReady('marketing', progress(10, 20, 30))).toBe(false);
+    expect(isReady('sales', { traces: [], places: [], solved: [] })).toBe(false);
+  });
+
+  it('with four of five found is not ready, and with five it is', () => {
+    const five: Trace[] = [0, 1, 2, 3, 4].map((n) => ({
+      region: 'sales',
+      box: { x: 16 * n, y: 0, width: 16, height: 16 },
+    }));
+    const of = (...ticks: readonly (number | null)[]): Progress => ({
+      traces: found(...ticks),
+      places: five,
+      solved: [],
+    });
+    expect(isReady('sales', of(1, 2, 3, 4, null))).toBe(false);
+    expect(isReady('sales', of(1, 2, 3, 4, 5))).toBe(true);
+  });
+
+  it('is solved when its region is in the list', () => {
+    expect(isSolved('sales', [])).toBe(false);
+    expect(isSolved('sales', [{ region: 'sales', at: 9 }])).toBe(true);
+    expect(isSolved('hr', [{ region: 'sales', at: 9 }])).toBe(false);
+  });
+});
+
+describe('what a colleague says (0024)', () => {
+  const places: Trace[] = [{ region: 'sales', box: { x: 0, y: 0, width: 16, height: 16 } }];
+  const at = (tick: number | null, solved = false): Progress => ({
+    traces: found(tick),
+    places,
+    solved: solved ? [{ region: 'sales', at: 50 }] : [],
+  });
+
+  it('is the everyday line of the source while its case is not ready', () => {
+    expect(pagesIn(at(null), 'person:sales', EVERYDAY)).toBe(EVERYDAY);
+  });
+
+  it("is the source's answer while the case is ready and not solved", () => {
+    expect(pagesIn(at(10), 'person:sales', EVERYDAY)).toStrictEqual(ANSWER);
+  });
+
+  it('is "afterwards" once the case is solved', () => {
+    expect(pagesIn(at(10, true), 'person:sales', EVERYDAY)).toStrictEqual(AFTER);
+  });
+
+  it('stays the everyday line of everyone who is no source, in all three states', () => {
+    const lines = [textKey('talk.reception-everyday')];
+    for (const progress of [at(null), at(10), at(10, true)]) {
+      for (const route of ['person:reception', 'person:marketing', 'person:support']) {
+        expect(pagesIn(progress, route, lines)).toBe(lines);
+      }
+    }
+  });
+
+  it('reads the cases it is given: the game passes its own', () => {
+    const cases: readonly Case[] = [{ ...(CASES[0] as Case), source: 'person:hr' }];
+    expect(pagesIn(at(10), 'person:hr', EVERYDAY, cases)).toStrictEqual(ANSWER);
+    expect(pagesIn(at(10), 'person:sales', EVERYDAY, cases)).toBe(EVERYDAY);
+  });
+
+  it('reaches the dialogue through the speakers of the step', () => {
+    expect(spoken(run(withTraces(10, null), TALK))).toStrictEqual(EVERYDAY);
+    expect(spoken(run(READY, TALK))).toStrictEqual(ANSWER);
+    const solved: GameState = { ...READY, solved: [{ region: 'sales', at: 1 }] };
+    expect(spoken(run(solved, TALK))).toStrictEqual(AFTER);
+  });
+});
+
+describe('solving the case (0024)', () => {
+  it('starts with no case solved', () => {
+    expect(createInitialState(MAP).solved).toStrictEqual([]);
+  });
+
+  it('opens the answer on page 0, turns to page 1, and the press on page 1 solves', () => {
+    const opened = run(READY, TALK);
+    expect(opened.dialogue).toStrictEqual({ speaker: 'mover', index: 0, page: 0 });
+    expect(opened.solved).toStrictEqual([]);
+    const second = run(opened, NONE, TALK);
+    expect(second.dialogue).toStrictEqual({ speaker: 'mover', index: 0, page: 1 });
+    expect(second.solved).toStrictEqual([]);
+    const closed = run(second, NONE, TALK);
+    expect(closed.tick).toBe(T0 + 5);
+    expect(closed.dialogue).toBeNull();
+    expect(closed.solved).toStrictEqual([{ region: 'sales', at: T0 + 5 }]);
+    expect(closed.overview).toStrictEqual({ current: 6, max: 6 });
+  });
+
+  it('changes nothing in that step but the tick, the input, the dialogue, solved and overview', () => {
+    const second = run(READY, TALK, NONE, TALK, NONE);
+    const closed = update(second, TALK, MAP);
+    expect(closed).toStrictEqual({
+      ...second,
+      tick: T0 + 5,
+      held: TALK,
+      dialogue: null,
+      solved: [{ region: 'sales', at: T0 + 5 }],
+      overview: { current: 6, max: 6 },
+    });
+  });
+
+  it('fills overview from any stand: two of five become six of six', () => {
+    const hurt: GameState = { ...READY, overview: { current: 2, max: 5 } };
+    expect(run(hurt, TALK, NONE, TALK, NONE, TALK).overview).toStrictEqual({ current: 6, max: 6 });
+  });
+
+  it('solves nothing while the answer is open: 600 steps with every key but talk', () => {
+    const opened = run(READY, TALK);
+    const others: GameInput = {
+      ...NONE,
+      up: true,
+      down: true,
+      left: true,
+      right: true,
+      lamp: true,
+    };
+    let state = opened;
+    for (let step = 0; step < 600; step += 1) {
+      state = update(state, others, MAP);
+    }
+    expect(state.solved).toStrictEqual([]);
+    expect(state.dialogue).toStrictEqual(opened.dialogue);
+    expect(state.overview).toStrictEqual(opened.overview);
+  });
+
+  it('solves nothing by a held key: it turns one page', () => {
+    const held = run(READY, TALK, TALK, TALK, TALK);
+    expect(held.dialogue).toStrictEqual({ speaker: 'mover', index: 0, page: 0 });
+    expect(held.solved).toStrictEqual([]);
+  });
+
+  it('solves nothing when the everyday line is closed', () => {
+    const closed = run(withTraces(10, null), TALK, NONE, TALK);
+    expect(closed.dialogue).toBeNull();
+    expect(closed.solved).toStrictEqual([]);
+    expect(closed.overview).toStrictEqual({ current: 5, max: 5 });
+  });
+
+  it('solves a case once: closing "afterwards" changes neither solved nor overview', () => {
+    const solved = run(READY, TALK, NONE, TALK, NONE, TALK);
+    const again = run(solved, NONE, TALK);
+    expect(spoken(again)).toStrictEqual(AFTER);
+    const closed = run(again, NONE, TALK);
+    expect(closed.dialogue).toBeNull();
+    expect(closed.solved).toStrictEqual(solved.solved);
+    expect(closed.overview).toStrictEqual({ current: 6, max: 6 });
+  });
+
+  it('is what answeredCase and solve say', () => {
+    const second = run(READY, TALK, NONE, TALK, NONE);
+    const routes = routesOf(MAP.points);
+    const dialogue = second.dialogue ?? { speaker: 'mover', index: 0, page: 1 };
+    expect(answeredCase(dialogue, second, routes, progressOf(second, MAP))?.region).toBe('sales');
+    const figure = { speaker: 'figure', index: 0, page: 0 } as const;
+    expect(answeredCase(figure, second, routes, progressOf(second, MAP))).toBeNull();
+    const notReady = withTraces(10, null);
+    expect(answeredCase(dialogue, notReady, routes, progressOf(notReady, MAP))).toBeNull();
+    expect(solve({ ...second, tick: 40 }, 'sales')).toStrictEqual({
+      ...second,
+      tick: 40,
+      solved: [{ region: 'sales', at: 40 }],
+      overview: { current: 6, max: 6 },
+    });
+  });
+
+  it('keeps the solved case through the wake', () => {
+    const solved = run(READY, TALK, NONE, TALK, NONE, TALK);
+    const woken = update({ ...solved, dark: 44 }, NONE, MAP);
+    expect(woken.dark).toBe(45);
+    expect(woken.solved).toStrictEqual([{ region: 'sales', at: T0 + 5 }]);
+    expect(woken.overview).toStrictEqual({ current: 6, max: 6 });
+  });
+
+  it('survives a JSON round trip with the case solved (INV-1)', () => {
+    const solved = run(READY, TALK, NONE, TALK, NONE, TALK);
+    expect(JSON.parse(JSON.stringify(solved))).toStrictEqual(solved);
+  });
+});
+
+describe('the notice of a solved case (0024)', () => {
+  const solved = run(READY, TALK, NONE, TALK, NONE, TALK);
+  const key = textKey('notice.case-solved');
+
+  it('is shown for 120 steps from the solving step and not after', () => {
+    expect(CASE_NOTICE_STEPS).toBe(120);
+    expect(noticeOf(run(READY, TALK, NONE, TALK, NONE))).toBeNull();
+    expect(noticeOf(solved)).toBe(key);
+    expect(noticeOf({ ...solved, tick: T0 + 5 + 119 })).toBe(key);
+    expect(noticeOf({ ...solved, tick: T0 + 5 + 120 })).toBeNull();
+  });
+
+  it('comes before a found trace and after a wall that holds', () => {
+    // Both traces found a step before the case was solved: both notices are due.
+    const both: GameState = { ...solved, traces: found(T0 + 4, T0 + 4) };
+    expect(noticeOf(both)).toBe(key);
+    expect(noticeOf({ ...both, solved: [] })).toBe(textKey('notice.trace-found'));
+    const holding: GameState = {
+      ...both,
+      lamp: { on: true, strength: 1 },
+      shadowWalls: [{ wall: 0, lit: true, light: 0 }],
+    };
+    expect(noticeOf(holding)).toBe(textKey('notice.shadow-too-dense'));
+  });
+});
+
+describe('what the journal takes from the cases (0024)', () => {
+  it('gives a solved case its outcome and an unsolved one none', () => {
+    expect(outcomeOf('sales', [])).toBeNull();
+    expect(outcomeOf('sales', [{ region: 'sales', at: 5 }])).toBe(textKey('case.sales-outcome'));
+    expect(outcomeOf('hr', [{ region: 'hr', at: 5 }])).toBeNull();
+  });
+
+  it('gives the policy one block per solved case, in the order they were solved', () => {
+    expect(policyBlocks([])).toStrictEqual([]);
+    expect(policyBlocks([{ region: 'sales', at: 5 }])).toStrictEqual([textKey('policy.sales')]);
+    const two: readonly Case[] = [
+      { ...(CASES[0] as Case), region: 'hr', policy: textKey('policy.sales') },
+      CASES[0] as Case,
+    ];
+    expect(
+      policyBlocks(
+        [
+          { region: 'sales', at: 5 },
+          { region: 'hr', at: 9 },
+        ],
+        two,
+      ),
+    ).toHaveLength(2);
+  });
+});
