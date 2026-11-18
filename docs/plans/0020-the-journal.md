@@ -1909,12 +1909,12 @@ what it checks.
 
 ### Task 8: The pull request
 
-- [ ] **Step 1:** merge the latest `main` again and rerun Task 6. If the merge changed code,
+- [x] **Step 1:** merge the latest `main` again and rerun Task 6. If the merge changed code,
   the walk is run again.
-- [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
+- [x] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`; in `docs/plan.md` §4 change "0020 is approved" to say that all
   five are implemented and that M4 is done: 0020 was the last of the five; commit —
   `Mark 0020 implemented`.
-- [ ] **Step 3:** push the branch and open the pull request against `main`, titled
+- [x] **Step 3:** push the branch and open the pull request against `main`, titled
   `Feature 0020: the journal`, with the walk's result and feel notes in its description. CI
   must be green. The author merges.
