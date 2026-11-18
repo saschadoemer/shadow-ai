@@ -31,7 +31,8 @@ src/
                  game/cases.ts the cases, when one is ready, what its source says, the
                  step that solves it (0024) and what goes with the region's shadow (0025);
                  game/story.ts the scenes of the story — text with no figure — and the
-                 scene a game opens with (0026)
+                 scene a game opens with (0026); game/rest.ts the rests, which one is in
+                 reach and what a press at it does (0027)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene); render/font.ts the glyph order and the
                  cell size of the font, render/draw-text.ts text by TextKey, line by line
@@ -187,7 +188,10 @@ With `dark` above 0 a step is `stepDark` and nothing else: `dark` and `tick` gro
 is off, the input is not read; in the step `dark` becomes 45 the figure stands on the wake point
 facing down, standing, not safe and not pushed, overview is full and every creature still in the
 array is at its home with `light` 0, `captured` unchanged, the camera on the figure; in the step
-it would become 90 it is 0. The wake point is the map's point named `wake`, the spawn when there
+it would become 90 it is 0. `rested` is `null`, or `{ at, result }` (feature 0027, `game/rest`):
+the last rest the player took — `at` the `tick` of the state that step gave, `result` one of
+`REST_RESULTS`, `restored`, `full` or `shadow`. It is `null` at the start, the wake keeps it,
+and the notice of a rest is derived from it (§8). The wake point is the map's point named `wake`, the spawn when there
 is none; two stop the game at the start (`createInitialState`).
 
 `movers` is an array of `{ kind, look, route, x, y, facing, frame, frameTimer, target, wait }`,
@@ -361,7 +365,15 @@ is the larger one, up or down otherwise, unchanged on the same spot), the player
 0, timer 0, the lamp is off, and `tick` grows by 1. A colleague that is spoken to gets `frame` 0,
 `frameTimer` 0 and the facing toward the player, and nothing else of it changes, so `game/mover`
 steps it on unchanged after the dialogue. Without such a press the
-step is the one described above. Every step, of every kind, sets `held` from its input, so a
+step is the one described above, with one addition (feature 0027, `takeRest`): when `talk` is
+pressed, `lamp` is not held — as `update` counts it —, the player is not pushed and a rest is in
+reach (§6), the player takes it before anything else of the step. The result is `shadow` when
+the rest's cell is under shadow — `veilOf` on the areas not cleared, above 0 —, else `full` when
+`overview.current` equals `overview.max`, else `restored`, and only then `overview.current`
+becomes `overview.max`. `rested` is set to `{ at: tick + 1, result }`, and the step goes on from
+there as an ordinary one: the hit of this step, if there is one, takes its point from the
+filled overview. A speaker in reach comes first, because the opening of a dialogue is looked at
+before; so do the journal and the help. Every step, of every kind, sets `held` from its input, so a
 key held down is pressed once. The wake keeps `figures` and `held` and has no dialogue and no
 journal, and its help is closed: the help does not open in the dark, and no dark begins while it
 is open. A state without speakers, in which `talk` is never held, steps exactly as before 0018;
@@ -763,13 +775,14 @@ stands; its position is the feet. It is no route point and makes no creature: `i
 point object "figure:officer"`). A map without such points has no figures; a figure of the cast
 without a point is simply not there.
 
-**Kinds of rectangle** (features 0022, 0023). A rectangle has a kind by the prefix of its name:
-`shadow:` a shadow wall, `trace:` a trace, `region:` an area of a region. `game/rects` is the one
-place that knows the prefixes;
+**Kinds of rectangle** (features 0022, 0023, 0027). A rectangle has a kind by the prefix of its
+name: `shadow:` a shadow wall, `trace:` a trace, `region:` an area of a region, `rest:` a rest.
+`game/rects` is the one place that knows the prefixes, and holds `isCell`, the test for a box
+that is exactly one cell;
 `rectsOf(rects, prefix)` gives the rectangles of one kind in file order and refuses a map with a
 rectangle of no known kind (`unknown rectangle object "door"`), whichever kind is asked for.
-`game/shadow`, `game/trace` and `game/region` read their rectangles through it and skip the
-other kinds; none imports another's rectangles.
+`game/shadow`, `game/trace`, `game/region` and `game/rest` read their rectangles through it and
+skip the other kinds; none imports another's rectangles.
 
 **Shadow walls** (feature 0014). A rectangle named `shadow:<region>` is a shadow wall: a strip
 4 px thick on the top or the left edge of whole cells, where a doorway's wall strip is missing. A
@@ -805,6 +818,19 @@ overlap, 0 for a cell in no area or only in areas of density 0. A cell with a ve
 under shadow — asked of the areas that are not cleared, `shadowedAreas(areas, solved)` (feature
 0025, §5): the areas of a region whose case is solved drop out of it. No coordinate of an area is in `src/` (INV-7); `tools/floor-layout.ts` builds the
 floor's ten, `REGION_AREAS`, from its rooms, each with its upper and its left wall (`areaBox`).
+
+**Rests** (feature 0027). A rectangle named `rest:<what>` is a rest: exactly one cell, on the
+cell of the thing it is. `game/rest` reads them with `restsOf(map.rects)` in file order as
+`{ what, box }` and refuses the map for a box that is not one cell (`rest rest:coffee (568, 418,
+16, 16) is not one cell`); `createInitialState` calls it once, and the state keeps nothing of the
+rests. A rest is **in reach** (`restInReach`) when the centre of its cell is at most
+`REST_DISTANCE`, 32 px, from the player's feet and no opaque box of the map as loaded lies on
+the line from the centre of the player's box, (x, y − 4), to that centre — the lamp's
+`sightBlocked`. So a machine in the wall's row of its room is reached from inside the room and
+not from the corridor behind the wall. Of two in reach the nearer counts, of two equally near
+the first in the file. `restUnderShadow` asks the rest's cell of the areas not cleared (§5).
+No coordinate of a rest is in `src/` (INV-7); `tools/floor-layout.ts` holds the floor's eight,
+`RESTS`, written after the areas with the ids 116 to 123.
 
 Flipped and rotated tiles, more than one tileset per map, embedded tilesets, encoded or
 compressed data and infinite maps stay rejected until a feature needs one and lifts its rule. A
@@ -1093,7 +1119,9 @@ The notice is the first text: `game/notice` derives from the state, in every fra
 it shows, if any. While the lamp is on and a standing shadow wall has `lit` true and `light` 0 —
 a wall in the light that holds (0014) — it is `notice.shadow-too-dense`; otherwise, for two
 seconds from the step that solved a case, `notice.case-solved` (0024); otherwise, for two
-seconds from the last find of a trace, `notice.trace-found` (0022); otherwise, while the lamp is
+seconds from the last find of a trace, `notice.trace-found` (0022); otherwise, for two seconds
+(`REST_NOTICE_STEPS`, 120) from a press at a rest, the line of its result — `notice.rest`,
+`notice.rest-full` or `notice.rest-shadow` (0027, `NOTICE_REST`); otherwise, while the lamp is
 owned and was never on, `notice.lamp`, the line that names its key (0026) — it has no time and
 does not come back; otherwise there is none.
 The state has no field for it (INV-1). A notice stays one line.

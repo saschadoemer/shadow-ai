@@ -127,6 +127,14 @@ are no longer under shadow, whatever its density in the table: the density stays
 region, and the solved case is what takes the shadow off it. Sales is the first cleared region;
 every other region with a density above 0 stays under shadow until its case is solved.
 
+**As built** (feature 0027): every coffee machine of the floor is a **rest** — a rectangle named
+`rest:coffee` in the `objects` layer, on the cell of the machine. There are eight: one in the
+meeting room north (104, 8), one in Accounting (27, 19), one in Development (52, 19), two in the
+break room (35, 26) and (42, 26), one in Sales (104, 26), one in Marketing (12, 78) and one in
+Support (52, 78). A rest fills overview where its cell is not under shadow (`gameplay.md` §4):
+at the start the two of the break room, after the case of Sales the one of Sales too. The
+water dispensers, the sofas and the table football are no rests.
+
 | Area | Cells | Density |
 |---|---|---|
 | `region:hr` | (1, 1)–(21, 19) | 2 |
