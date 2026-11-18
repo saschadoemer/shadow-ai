@@ -29,7 +29,9 @@ src/
                  game/region.ts the areas of the regions and the veil of a cell (0023), the
                  cleared regions and the veil of a clearing (0025);
                  game/cases.ts the cases, when one is ready, what its source says, the
-                 step that solves it (0024) and what goes with the region's shadow (0025)
+                 step that solves it (0024) and what goes with the region's shadow (0025);
+                 game/story.ts the scenes of the story — text with no figure — and the
+                 scene a game opens with (0026)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene); render/font.ts the glyph order and the
                  cell size of the font, render/draw-text.ts text by TextKey, line by line
@@ -132,7 +134,23 @@ start, and kept in the state so a saved game comes back as it was left.
 `createInitialState(map)` lives in `game/update` beside `update`, so that `game/state` holds
 types and constants only.
 
-`lamp` is `{ on, strength }` (features 0007, 0014): `on` in every step whose input holds `lamp`,
+There are two starts (feature 0026). `createInitialState(map)` is a game **past its opening**:
+no dialogue open, the lamp owned and used, `started` 0. The tests of the earlier features step
+from it. `newGame(map)` is what a player gets, and what `main.ts` starts with: the same state
+with `dialogue` `{ speaker: 'story', index: 0, page: 0 }` — the call on its first page —,
+`lamp` `{ on: false, strength: 1, owned: false, used: false }` and `started` `null`.
+
+`started` is the `tick` of the step in which the game's opening ended, or `null` while it has
+not (feature 0026). The step that closes the call sets it to its own `tick`; no other step
+changes it, and the wake keeps it. The start hint of the help counts from it (§5).
+
+`lamp` is `{ on, strength, owned, used }` (features 0007, 0014, 0026): `owned` says whether the
+player has the lamp, and `used` whether it was on in any step since — `false` after the first
+meeting, `true` from the first step in which `on` is `true`, and never `false` again. While the
+lamp is not owned, the input's `lamp` counts as not held everywhere in `update`: `on` stays
+`false`, `stepPlayer` gets the input without it, so the figure walks, and a press of `talk`
+opens a dialogue with the key held. `held` still remembers the input as it came. The wake keeps
+`owned` and `used`. `on` is true in every step whose input holds `lamp` once the lamp is owned,
 derived from the input and kept in the state so the renderer knows what to draw; `strength` is
 `BASE_STRENGTH`, 1, from `createInitialState` on, and no step changes it before the upgrades of
 M6 — the wake keeps it. A later field, charge (M6), joins them. While it is on, `stepPlayer` keeps the feet where they are, resets
@@ -255,6 +273,21 @@ was spoken to. A standing figure never moves and is not solid. `dialogue` is `nu
 `{ speaker, index, page }` (feature 0018): `speaker` is `'figure'` or `'mover'`, `index` the index
 of the speaker in `figures` or in `movers`, and `page` the page shown, from 0.
 
+A third kind of speaker is the story itself (feature 0026): `{ speaker: 'story', index, page }`,
+with `index` the index of a **scene** in `SCENES` (`game/story`). A scene is pages with no figure
+that speaks; `SCENES` holds one, the call, and `OPENING_SCENE`, 0, names it as the scene a game
+opens with. A scene is no speaker of a step — nobody can walk up to it, and nobody turns. The
+pages of a dialogue are `pagesOf(dialogue, speakers)` in `game/talk`: the scene's own for
+`'story'`, else those of the speaker among the speakers of the step. A scene's dialogue is
+stepped like any other. The game opens a scene, never a press; in this feature only `newGame`
+does.
+
+The **first meeting** (feature 0026) is data of `game/cast`: `FIRST_MEETING` names the figure
+that hands the lamp over, `officer`, and its pages, `talk.officer-rules-1` and
+`talk.officer-meeting-2`. While the lamp is not owned, `figuresIn(figures, owned)` gives that
+figure the meeting's pages instead of its own; `update` and the scene both build the speakers
+from it, so the box shows the pages the dialogue has.
+
 `held` is the last step's input, a plain `GameInput`, every action false at the start
 (`NO_INPUT`); it replaced `talkHeld`, the `talk` of the last step, with feature 0020, because the
 journal needs presses of three actions. An action is **pressed** in a step when the input holds
@@ -270,8 +303,9 @@ outcome, `outcomeOf`; the policy's blocks are the solved cases' blocks in the or
 solved, `policyBlocks` — both derived from `solved` in every frame (feature 0024).
 `help` is a boolean, `false` at the start: whether the help is open (feature 0021,
 `game/help`). The rows the help shows and whether the start hint is due are not in the state:
-the rows are constants of `render/draw-help`, and the hint is derived from `tick` in every frame
-(`helpHintDue`).
+the rows are constants of `render/draw-help`, and the hint is derived from `tick` and `started`
+in every frame (`startHintDue`, feature 0026: `started` is not `null` and `tick` − `started` <
+`HELP_HINT_STEPS`; `helpHintDue` is the same test on the steps since the start).
 
 The **speakers** of a step (feature 0018, `speakersOf` in `game/talk`) are the standing figures in
 file order, then the movers of the kind `person` whose route is in `COLLEAGUES` (`game/cast`), in
@@ -309,11 +343,16 @@ the left and the upper edge included) leaves `creatures`, wherever it is; `captu
 change, and a creature at home outside the region stays. The step changes
 `tick`, `held`, `dialogue`, `solved`, `overview`, `shadowWalls` and `creatures` and nothing
 else; no other step solves a case, and a solved case is not solved again. The wake brings back
-only the creatures still in `creatures`, so none that left this way. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
+only the creatures still in `creatures`, so none that left this way. Two more closings change
+something (feature 0026): the step that closes the call — the scene `OPENING_SCENE`, while
+`started` is `null` — sets `started` to its `tick`; and the step that closes the first meeting
+(`isFirstMeeting`: the lamp is not owned, and the speaker is the figure of `FIRST_MEETING`) sets
+`lamp.owned` to `true` and leaves `lamp.used` `false`. Closing any other dialogue changes
+neither. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
 the input holds: `tick` grows by 1, `held` is set, and nothing else changes in this step — a
 figure in mid-step, a push and a lamp that is on stay as they are and go on when it closes
 (`openJournal`). This comes before a press of `talk` is looked at. Otherwise a press of `talk` while the input does not
-hold `lamp`, the player is not pushed and a speaker stands at most 40 px (`TALK_DISTANCE`) from
+hold `lamp` — or the player has no lamp to hold (feature 0026) —, the player is not pushed and a speaker stands at most 40 px (`TALK_DISTANCE`) from
 the player's feet and in sight opens a dialogue with the nearest one — the first in the speakers'
 order of two equally near — on page 0, and nothing else is stepped. In sight (`inSight`) is the
 lamp's `sightBlocked` between the centres of the two boxes, (x, y − 4) of each, against the opaque
@@ -412,6 +451,10 @@ Alt or Cmd; it never reaches the game. `language` (feature 0019) is handled the 
 the last frame as `switchedAt`, and sets the `lang` attribute of the page's root element. A held
 key switches once; with Ctrl, Alt or Cmd the browser keeps its shortcut and the language stays;
 before the content has loaded the key does nothing. The game still gets its eight actions.
+
+The input is what the keys say, not what the player can do with them: `lamp` is on while Space
+is held also before the player has the lamp (feature 0026). `update` is the place that knows
+the lamp is not owned and counts the action as not held; `held` keeps the input as it came.
 
 ## 5. The renderer interface
 
@@ -535,8 +578,9 @@ every frame. `SceneContent` holds loaded content only. Every text of the scene i
 (8, 158, 304, 18) in `#181425` and the line centred in it — when `switchedAt` is not null and
 0 ≤ `tick` − `switchedAt` < `LANGUAGE_NOTICE_STEPS` (120, two seconds), no dialogue is open and
 no notice shows. The start hint (feature 0021), the key `notice.help`, is drawn the same way
-when `tick` < `HELP_HINT_STEPS` (600, ten seconds, `helpHintDue` in `game/help`), no dialogue is
-open, no notice shows and the language line is not due. The dialogue box comes first, then the
+when it is due — `startHintDue` in `game/help`: the opening has ended, `started` is not `null`,
+and `tick` − `started` < `HELP_HINT_STEPS` (600, ten seconds; feature 0026, it was `tick` <
+600) —, no dialogue is open, no notice shows and the language line is not due. The dialogue box comes first, then the
 notice, then the language line, then the start hint: where a text is on screen, that text
 changes with the language and is the answer to a switch. `quietLine` names the line of the bar
 where no dialogue is open and no notice shows: none while the help is open, else the language
@@ -547,9 +591,10 @@ A standing figure (feature 0017) is drawn from its own sheet, `<id>.png`, like a
 stands: frame facing × 5, top-left corner at (round(x) − 8 − camera.x, round(y) − 24 −
 camera.y). The figures are rebuilt from `map.points` every frame, as in `update`. While a dialogue
 is open the dialogue box is drawn in the notice's place, on the surface and not shifted by the
-camera, and no notice is drawn. The page is the speaker's (feature 0018): the scene finds it
-among the speakers of the frame with `speakerOf` — built with `progressOf(state, map)`, as in
-`update` (feature 0024) — and draws no box when the map does not have it.
+camera, and no notice is drawn. The page is the speaker's (feature 0018) or the scene's (feature
+0026): the scene finds it with `pagesOf` among the speakers of the frame — built with
+`progressOf(state, map)` (feature 0024) and `figuresIn(figures, lamp.owned)` (feature 0026), as
+in `update` — and draws no box when neither the map nor the story has it.
 The box is a rectangle (8, 134, 304, 42) in `#181425` — the notice's bar
 grown upwards to three lines, with the same bottom edge —, the page's lines left-aligned from
 (12, 138), and, while ⌊tick / 30⌋ is even, the marker: three rectangles in `#ffffff`, (299, 169,
@@ -1048,7 +1093,9 @@ The notice is the first text: `game/notice` derives from the state, in every fra
 it shows, if any. While the lamp is on and a standing shadow wall has `lit` true and `light` 0 —
 a wall in the light that holds (0014) — it is `notice.shadow-too-dense`; otherwise, for two
 seconds from the step that solved a case, `notice.case-solved` (0024); otherwise, for two
-seconds from the last find of a trace, `notice.trace-found` (0022); otherwise there is none.
+seconds from the last find of a trace, `notice.trace-found` (0022); otherwise, while the lamp is
+owned and was never on, `notice.lamp`, the line that names its key (0026) — it has no time and
+does not come back; otherwise there is none.
 The state has no field for it (INV-1). A notice stays one line.
 
 The language is a setting of the player (feature 0019), not a fact of the game. `main.ts` holds
@@ -1093,6 +1140,12 @@ to four lines of at most 47 and no empty line. The source's answer and what it s
 are pages of the kind `talk`, `talk.<region>-source-<n>` and `talk.<region>-after`, under the
 rule of a page; `notice.case-solved` is a notice. `game/cases` names them by key in `CASES`,
 and the rule test covers both new kinds in both languages.
+
+The story (feature 0026) adds the kind `story`: `story.<scene>-<n>` is a page of a scene, under
+the rule of a page of talk — at most three lines of at most 47 characters, none empty — and the
+test of that rule covers both kinds. `game/story` names the pages by key in `SCENES`.
+`talk.officer-meeting-2` is the page of the first meeting that hands the lamp over, named in
+`FIRST_MEETING`; `notice.lamp` is a notice.
 
 ## 9. Tooling
 

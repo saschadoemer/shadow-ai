@@ -31,6 +31,10 @@ Two purposes, in this order:
    what, and nothing about why. The line that names the lamp's key when the lamp is handed
    over (feature 0026) is of the same kind.
 
+The game is presented by LMIS, and one real product stands in its world: Harmonic (§10). Both
+serve the second purpose and are bound by the order above. Where they pull against the game
+people play at home, the game wins.
+
 And a third, quietly: a project the author enjoys building. That is allowed to show.
 
 ## 3. The message
@@ -51,6 +55,13 @@ Everybody wants to get their work done faster.
 offer in the answer of a public AI chatbot. The managing director stands in your door: find out
 how that could happen. On the way to Sales, where the offer came from, you see the shadow for the
 first time.
+
+*As built* (feature 0026): the trigger is three pages of text before the first step — the
+customer's call, the managing director's order, the first sight of the shadow. The customer and
+the managing director say one sentence each and are not on the map in the first act. The
+managing director stops the player at the reception, where the game begins: the floor has no
+room of the player's own, so nobody can stand in its door. The third page points next door, to
+the data protection officer, who hands the lamp over in the first talk.
 
 **The shadow.** A residue, not a being. Wherever data leaves the house without anybody watching,
 something stays behind and grows with the flow. It darkens rooms, lies over screens, blocks
@@ -87,7 +98,9 @@ rules of the shadow:
 already there when you arrive in a department. Never an enemy. He sells what fills real gaps and
 knows it. Over the game he changes: he sees what his tools do, and he becomes an advisor who
 helps you solve problems he helped cause. At the end he stands at your side. What was sold in the
-shadow becomes a partnership in the light.
+shadow becomes a partnership in the light. He has no part in Harmonic (§10): his company is
+fictional, the alternatives he supplies as advisor are fictional products, and nobody should
+recognize LMIS in him.
 
 **The hero.** Silent, like Link. No name, no character editor, a neutral 16x24 sprite with a
 lanyard and a lamp. His attitude — *I am not here to punish anyone* — shows in what happens when
@@ -127,7 +140,9 @@ Dialogue and descriptions are written by many hands, some of them agents. This i
 
 - Sarcasm about employees, their age, their department or their competence.
 - Lecturing. No line that would fit on a compliance slide.
-- Real company or product names, or thin disguises of them.
+- Real company or product names, or thin disguises of them. LMIS and Harmonic are the two
+  exceptions (§10).
+- Praise for a product. Nobody recommends Harmonic, says what it costs or where to get it.
 - Threats, warnings, consequences for a person.
 - Jokes that need the player to know the industry.
 
@@ -143,10 +158,10 @@ English.
 
 Considered and deliberately cut. A feature that needs one of these stops and asks.
 
-No quiz · no compliance training, no certificate · no real product or company names · no
-multiplayer · no mobile or touch version · no money, no shop · no character editor · no analytics,
-no accounts · no morality system or branching case outcomes in the first draft (see
-`docs/plan.md`, deferred) · no speaking hero.
+No quiz · no compliance training, no certificate · no real product or company names beyond LMIS
+and Harmonic (§10) · no multiplayer · no mobile or touch version · no money, no shop · no
+character editor · no analytics, no accounts · no morality system or branching case outcomes in
+the first draft (see `docs/plan.md`, deferred) · no speaking hero.
 
 ## 9. Title and licence
 
@@ -154,5 +169,47 @@ The title is **Shadow AI** — the term the audience knows and searches for, and
 languages. A subtitle may come later.
 
 The repository is public. Code is licensed under MIT. Art, maps and texts are licensed separately
-so that the game cannot be re-skinned and sold; CC BY-NC 4.0 is the proposal. The licence texts
-and their split have to be checked by a competent person before the first public release.
+so that the game cannot be re-skinned and sold; CC BY-NC 4.0 is the proposal. The names LMIS and
+Harmonic belong to their owners and are covered by neither licence; the licence texts have to
+say so. The licence texts and their split have to be checked by a competent person before the
+first public release.
+
+## 10. LMIS and Harmonic
+
+Two real names are in the game, and only these two (§6, §8): **LMIS**, the author's employer,
+which presents the game, and **Harmonic**, a safe AI workplace a company can approve for its
+people. Harmonic is made by a partner of LMIS, and LMIS sells it. Its maker has agreed to the
+name appearing in the game.
+
+**LMIS is the frame, not the world.** The name stands where the game is presented: on the title
+screen, as in `LMIS präsentiert`. The teaser is shown before the title screen exists (M8), so it
+gets a place of its own for the line, decided in its feature. Any further place — an end card,
+credits — is decided in the feature that builds it. LMIS is never the company in the game.
+That company stays fictional (`world.md` §5): it is the house the data leaks from, and no real
+company is put in that place.
+
+**Harmonic is the approved way, made visible.** The message says the shadow gives way where it
+becomes unnecessary (§3). A Harmonic station is a desk in a department where that has happened:
+the people there have a safe way, so the creatures of the room have nothing left to feed on, and
+they go. That is why a real product may stand in this world at all. It does not sit beside the
+message; it is an instance of it. What a station does is `gameplay.md` §10. Where the stations
+stand is `world.md` §6.
+
+The rules both are held to:
+
+- **Every player meets Harmonic once.** One station stands on the way through Sales in Act 1, so
+  the visitor at the booth and the player at home both see the name and can use it.
+- **It is rare.** Three stations in the whole game (`docs/plan.md` §3), each placed by hand.
+  Nothing about Harmonic is left to chance.
+- **It shortens a case and never solves one.** A station takes the fight out of a room. The
+  traces and the conversation with the source stay the player's. A tool does not replace the
+  talk between two people.
+- **It is shown, not praised.** The player sees the effect, one dry line names the product, and
+  the case in the journal carries a mark. No figure recommends Harmonic, says what it costs or
+  where to get it (§6).
+- **A name, not a logo.** Both names are written in the game's own font. No logo of either is
+  drawn, so INV-6 needs no exception.
+- **The vendor is somebody else** (§4). He does not sell Harmonic, and no station is his.
+- **The advertising is recognizable.** The presenter's line tells a player that the product in
+  the game is there on purpose. Whether that is enough has to be checked by a competent person
+  before the first public release, together with the licences (§9).

@@ -46,8 +46,10 @@ region's (feature 0023). With all five traces found, the colleague of Sales answ
 the case is solved, the journal records its outcome and the first block of the policy, and
 overview grows by one (feature 0024). In the same moment the room gets its colours back, its
 veil thins out over two seconds, and its shadow wall and the snippets that were left in it are
-gone (feature 0025). Every merge to `main` is deployed to Cloud Run (feature 0030). The
-roadmap is in [docs/plan.md](docs/plan.md).
+gone (feature 0025). The game opens with the call — three pages of story — and without the
+lamp: the data protection officer next door hands it over in the first talk (feature 0026).
+Every merge to `main` is deployed to Cloud Run (feature 0030). The roadmap is in
+[docs/plan.md](docs/plan.md).
 
 ## Run it
 

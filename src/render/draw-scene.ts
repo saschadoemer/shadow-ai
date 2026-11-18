@@ -1,9 +1,9 @@
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
 import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { progressOf } from '../game/cases';
-import { type Figure, figuresOf } from '../game/cast';
+import { type Figure, figuresIn, figuresOf } from '../game/cast';
 import { CREATURE_SIZE } from '../game/creature';
-import { HELP_HINT, helpHintDue } from '../game/help';
+import { HELP_HINT, startHintDue } from '../game/help';
 import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
@@ -22,7 +22,7 @@ import {
   type Species,
   type TraceState,
 } from '../game/state';
-import { speakerOf, speakersOf } from '../game/talk';
+import { pagesOf, speakersOf } from '../game/talk';
 import { FIND_STEPS, tracesOf } from '../game/trace';
 import { type Language, type TextKey, textKey, textOf } from '../text/text';
 import { drawHelp } from './draw-help';
@@ -304,7 +304,7 @@ export function quietLine(state: GameState, settings: SceneSettings): TextKey | 
   if (languageNoticeVisible(state.tick, settings.switchedAt)) {
     return LANGUAGE_NOTICE;
   }
-  return helpHintDue(state.tick) ? HELP_HINT : null;
+  return startHintDue(state) ? HELP_HINT : null;
 }
 
 /** The dialogue box (0017): the notice's bar grown upwards to three lines, the same bottom edge. */
@@ -481,16 +481,17 @@ export function drawScene(
   const page =
     state.dialogue === null
       ? undefined
-      : speakerOf(
+      : pagesOf(
           state.dialogue,
           speakersOf(
-            figures,
+            // As in `update`: without the lamp the officer says the first meeting (0026).
+            figuresIn(figures, state.lamp.owned),
             state.movers,
             routesOf(content.map.points),
             undefined,
             progressOf(state, content.map),
           ),
-        )?.pages[state.dialogue.page];
+        )[state.dialogue.page];
   const notice = noticeOf(state);
   if (page !== undefined) {
     renderer.fillRect(

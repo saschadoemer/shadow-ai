@@ -303,12 +303,61 @@ describe('the language table (INV-4, 0016)', () => {
     }
   });
 
-  it('gives a page of talk at most three lines of at most 47 characters, none empty', () => {
+  it('holds the words of the call, the first meeting and the lamp in both languages (0026)', () => {
+    const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
+      textOf(textKey(id), language).split('\n');
+    expect(lines('story.call-1', 'de')).toStrictEqual([
+      'Montagmorgen. Das Telefon – ein Kunde:',
+      '„Sätze aus unserem vertraulichen Angebot stehen',
+      'in der Antwort eines öffentlichen Chatbots.“',
+    ]);
+    expect(lines('story.call-1', 'en')).toStrictEqual([
+      'Monday morning. The phone – a customer:',
+      '“Sentences from our confidential offer are in',
+      'the answer of a public chatbot.”',
+    ]);
+    expect(lines('story.call-2', 'de')).toStrictEqual([
+      'Die Geschäftsführung fängt dich am Empfang ab:',
+      '„Das Angebot kam aus dem Vertrieb. Finde',
+      'heraus, wie das passieren konnte.“',
+    ]);
+    expect(lines('story.call-2', 'en')).toStrictEqual([
+      'The managing director stops you at reception:',
+      '“The offer came from Sales. Find out how',
+      'that could happen.”',
+    ]);
+    expect(lines('story.call-3', 'de')).toStrictEqual([
+      'Über den Türen im Flur liegt etwas, das',
+      'vorher nicht da war. Nebenan, bei der',
+      'Datenschutzbeauftragten, brennt Licht.',
+    ]);
+    expect(lines('story.call-3', 'en')).toStrictEqual([
+      'Something lies over the doors in the corridor',
+      'that was not there before. Next door, the',
+      'data protection officer has her light on.',
+    ]);
+    expect(lines('talk.officer-meeting-2', 'de')).toStrictEqual([
+      'Nimm die Lampe: Sie hält fest, was sich darin',
+      'regt – nicht um es zu vertreiben, sondern um',
+      'es zu verstehen.',
+    ]);
+    expect(lines('talk.officer-meeting-2', 'en')).toStrictEqual([
+      'Take the lamp: it holds still whatever stirs',
+      'in it – not to drive it away, but to',
+      'understand it.',
+    ]);
+    expect(lines('notice.lamp', 'de')).toStrictEqual(['Die Lampe: Leertaste halten.']);
+    expect(lines('notice.lamp', 'en')).toStrictEqual(['The lamp: hold Space.']);
+  });
+
+  it('gives a page of talk and of the story at most three lines of at most 47 characters, none empty', () => {
+    const kinds = new Set<string>();
     for (const language of LANGUAGES) {
       for (const [key, text] of Object.entries(TABLE[language])) {
-        if (!key.startsWith('talk.')) {
+        if (!key.startsWith('talk.') && !key.startsWith('story.')) {
           continue;
         }
+        kinds.add(key.slice(0, key.indexOf('.')));
         const lines = text.split('\n');
         expect(lines.length, `${language} ${key}`).toBeLessThanOrEqual(3);
         for (const line of lines) {
@@ -317,6 +366,7 @@ describe('the language table (INV-4, 0016)', () => {
         }
       }
     }
+    expect([...kinds].sort()).toStrictEqual(['story', 'talk']);
   });
 
   it('keeps a notice on one line', () => {

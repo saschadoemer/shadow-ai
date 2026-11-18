@@ -1,6 +1,6 @@
 import type { NamedPoint, Point } from '../engine/tiled';
 import { type TextKey, textKey } from '../text/text';
-import type { FigureState } from './state';
+import type { Dialogue, FigureState } from './state';
 
 /**
  * The cast (world.md §3, feature 0017): the figures that can be spoken to and what they say.
@@ -25,6 +25,21 @@ export const CAST: readonly CastMember[] = [
     pages: [textKey('talk.officer-rules-1'), textKey('talk.officer-rules-2')],
   },
 ];
+
+/**
+ * The first meeting (world.md §3, feature 0026): while the player has no lamp, this figure says
+ * these pages instead of its own, and the step that closes them hands the lamp over.
+ */
+export interface Meeting {
+  /** The id of the figure in the cast. */
+  readonly figure: string;
+  readonly pages: readonly TextKey[];
+}
+
+export const FIRST_MEETING: Meeting = {
+  figure: 'officer',
+  pages: [textKey('talk.officer-rules-1'), textKey('talk.officer-meeting-2')],
+};
 
 /** The lines of a colleague who walks the floor (0018), by the name of its route. */
 export interface Colleague {
@@ -89,4 +104,36 @@ export function figuresOf(
 /** Every figure of the map looking down: the figures a game starts with. */
 export function figuresFrom(figures: readonly Figure[]): FigureState[] {
   return figures.map((_figure, figure) => ({ figure, facing: 'down' }));
+}
+
+/**
+ * The figures as they speak in a step (0026): while the lamp is not owned, the figure of the
+ * first meeting has the meeting's pages; with the lamp owned every figure has its own.
+ */
+export function figuresIn(
+  figures: readonly Figure[],
+  lampOwned: boolean,
+  meeting: Meeting = FIRST_MEETING,
+): readonly Figure[] {
+  if (lampOwned) {
+    return figures;
+  }
+  return figures.map((figure) =>
+    figure.id === meeting.figure ? { ...figure, pages: meeting.pages } : figure,
+  );
+}
+
+/**
+ * Whether the dialogue is the first meeting: the lamp is not owned, and the speaker is the
+ * figure that hands it over. The step that closes such a dialogue gives the lamp.
+ */
+export function isFirstMeeting(
+  dialogue: Dialogue,
+  figures: readonly Figure[],
+  lampOwned: boolean,
+  meeting: Meeting = FIRST_MEETING,
+): boolean {
+  return (
+    !lampOwned && dialogue.speaker === 'figure' && figures[dialogue.index]?.id === meeting.figure
+  );
 }

@@ -86,6 +86,7 @@ const ENGLISH: SceneSettings = { language: 'en', switchedAt: null };
 /** A game with the journal open on `tab`: five hearts, the lamp on, `snippets` captured. */
 const reading = (tab: JournalTab, snippets = 0): GameState => ({
   tick: 100,
+  started: 0,
   player: {
     x: 160,
     y: 96,
@@ -96,7 +97,7 @@ const reading = (tab: JournalTab, snippets = 0): GameState => ({
     recoil: NO_RECOIL,
   },
   camera: { x: 0, y: 0 },
-  lamp: { on: true, strength: 1 },
+  lamp: { on: true, strength: 1, owned: true, used: true },
   creatures: [],
   movers: [],
   shadowWalls: [],

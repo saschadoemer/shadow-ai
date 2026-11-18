@@ -45,6 +45,27 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'The lamp holds still whatever stirs in it –',
     'not to drive it away, but to understand it.',
   ].join('\n'),
+  'talk.officer-meeting-2': [
+    'Take the lamp: it holds still whatever stirs',
+    'in it – not to drive it away, but to',
+    'understand it.',
+  ].join('\n'),
+  'story.call-1': [
+    'Monday morning. The phone – a customer:',
+    '“Sentences from our confidential offer are in',
+    'the answer of a public chatbot.”',
+  ].join('\n'),
+  'story.call-2': [
+    'The managing director stops you at reception:',
+    '“The offer came from Sales. Find out how',
+    'that could happen.”',
+  ].join('\n'),
+  'story.call-3': [
+    'Something lies over the doors in the corridor',
+    'that was not there before. Next door, the',
+    'data protection officer has her light on.',
+  ].join('\n'),
+  'notice.lamp': 'The lamp: hold Space.',
   'talk.reception-everyday': [
     'Morning! Three people have asked already',
     'whether we finally have a network for guests.',

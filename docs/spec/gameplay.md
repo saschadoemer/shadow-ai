@@ -35,6 +35,13 @@ the chest, 12 px above the feet, is 48 px long — three tiles — and opens wit
 side, so it is as wide at its end as it is long; both numbers *tune*. It is drawn as a yellow
 checkerboard under the figure. The battery arrives with M6.
 
+**As built** (feature 0026): the player starts without the lamp. Until the data protection
+officer hands it over, Space does nothing: no cone, nothing freezes, no wall is lit, no trace is
+seen, and the figure walks with the key held. The creatures hit as always, and the dark wakes
+the figure in her office — beside her. From the step that closes the first meeting a line at
+the bottom says `Die Lampe: Leertaste halten.`, until the lamp is held once; it does not come
+back.
+
 **As built** (feature 0008): a creature whose body is in the cone, with no solid tile between it
 and the figure, freezes. After one second of unbroken light — 60 steps, *tune* — it is captured
 and gone. A break starts the second again. Solid tiles block the light: walls, and fences and
@@ -187,6 +194,9 @@ policy tab shows one block per solved case, in the order they were solved, two t
 each; until a case is solved it shows its line for nothing. Two blocks fit the screen; pages
 within the tab come with the third (M6).
 
+**As built** (feature 0026): the journal does not open while the call is read, like under any
+dialogue. After it, J opens it with or without the lamp.
+
 ## 8. Controls and presentation
 
 Desktop browser with keyboard; a gamepad is deferred (`docs/plan.md` §5); touch and
@@ -218,12 +228,21 @@ language, for two seconds: `Sprache: Deutsch` or `Language: English`. A held key
 Every load starts in German, and nothing is remembered. The title screen of M8 will hold the
 switch.
 
+**As built** (feature 0026): the game opens with the call — three pages in the dialogue box
+that the story itself says, with no figure speaking. E or Enter turns the page and closes the
+third; until then the world stands still and the other keys do nothing, as with every dialogue.
+There is no way to skip it before M8. In the first meeting the data protection officer says her
+first page and then the page that hands the lamp over; afterwards she says her two pages of
+0017. A press of E opens a dialogue with Space held as long as the player has no lamp.
+
 **As built** (feature 0021): a press of H opens the help, a box over the game with seven rows —
 a key and what it does — and a second press closes it. The game stands still while it is open,
 and everything goes on where it stood when it closes. The help opens over a dialogue and over
 the journal, which keep their page and their tab, and not in the dark. For the first ten
 seconds of a game one line in the notice's bar names the key — `Hilfe: Taste H` or
 `Help: press H` — behind every other text, and it does not come back. A held key counts once.
+Since feature 0026 the ten seconds begin when the call is closed, so that the call does not
+hide the line.
 
 ## 9. Deliberately simple in the first draft
 
@@ -231,3 +250,36 @@ Named here so nobody adds them by habit: no branching case outcomes, no morality
 system, no partial clearing of regions, no speaking hero, no dialogue choices beyond the trace
 gesture, no crafting, no money. Each is either a non-goal (`vision.md` §8) or deferred with its
 reason in `docs/plan.md`.
+
+## 10. The Harmonic station
+
+Settled with the vision (`vision.md` §10) and built by its own feature. A station is a desk in a
+region whose screen shows the name Harmonic. It is the one place where a real product acts in
+the game, and it is not a tool the player carries: the lamp stays the only one (§2).
+
+- **What it does.** A press of E or Enter at a station sets it running. Reach and sight are a
+  figure's (§8). In that step every creature whose home is in the station's region leaves the
+  game, by the rule of a solved case (§3): none is captured, the journal counts none, and none
+  comes back.
+- **When it does it.** Only once the species of the region is in the journal — the player has
+  captured one of its creatures with the lamp. Until then a press gets one line and changes
+  nothing. Every species is met by hand once, and the gesture at the source may pick a creature
+  from the journal (§6): a station that emptied a room before the first capture could make its
+  case unsolvable.
+- **Once.** A station runs once and stays running. After that it is furniture with a name.
+- **What it leaves alone.** A shadow wall: a station stands behind the wall of its region and
+  lifts none, so density against strength stays the one gate (§5). The shadow over the room: a
+  region is cleared exactly when its case is solved (§6), and there is no partial clearing (§9).
+  The traces, which the lamp still finds one by one. The source, which gives way only to the
+  conversation (§3). And every creature whose home is outside the region.
+- **How the player knows.** The creatures go in the step the station starts. A line in the
+  notice's bar names Harmonic for two seconds. The entry of the region's case in the journal
+  carries a mark that Harmonic ran there.
+- **How many.** Three in the whole game (`docs/plan.md` §3), at fixed places (`world.md` §6).
+  None is found by chance, none is collected, and nothing about a station can be saved up.
+
+The texts — the line of a station that cannot run yet, the line that names Harmonic, the mark in
+the journal — are fixed in the feature that builds the first station, against the tone sheet
+(`vision.md` §6). None of them is tutorial text (`vision.md` §2): the line of a station that
+cannot run yet says what is, as the line of a shadow wall that holds does (§2), and tells the
+player nothing to do.
