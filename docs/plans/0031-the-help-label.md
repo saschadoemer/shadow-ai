@@ -2075,18 +2075,18 @@ index ddc3ca6..f56f0e8 100644
 
 ### Task 8: The acceptance walk
 
-- [ ] **Step 1:** start the game as the spec's preconditions say (`npm run dev`), and tell the
+- [x] **Step 1:** start the game as the spec's preconditions say (`npm run dev`), and tell the
   author in one message: the URL, a desktop browser, a window of at least 1280x720, arrow
   keys or WASD to walk, `E` or `Enter` to talk, `J` for the journal, `L` for the language,
   `H` for the help, and that the walk begins with a reload. Wait until the author is ready.
-- [ ] **Step 2:** guide the author through steps 1–20 of the spec's acceptance plan, one action
+- [x] **Step 2:** guide the author through steps 1–20 of the spec's acceptance plan, one action
   step with its expected step per message, in the spec's numbering and words. Record each
   answer as given. Never answer a step yourself, and do not look at the game in a browser
   beforehand: the automated checks are the only pre-check.
-- [ ] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
+- [x] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
   decision — rerun Task 7, and start again at step 1.
-- [ ] **Step 4:** after step 20 ask the six feel questions, one per message.
-- [ ] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–20`, followed by the feel notes,
+- [x] **Step 4:** after step 20 ask the six feel questions, one per message.
+- [x] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–20`, followed by the feel notes,
   into the spec and commit it — `Record the walk of 0031`. A feel note that wants something
   else — a colon, no frame, another corner, the label on the journal's screen, a line at the
   start after all — becomes a new draft, not a change on this branch.

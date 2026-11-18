@@ -258,7 +258,11 @@ WASD walk, `E` or `Enter` talks, `J` opens and closes the journal, `L` switches 
 - The label stays while the help is open and during a dialogue. Right?
 - The journal's screen has no label. Right?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–20. Feel: the label is quiet enough — forgotten while
+playing, found when looked for; seen at the start without looking for it, and the line at the
+bottom is not missed; `H Hilfe` and `H Help` read as "press H for help", no colon needed; the
+frame, the size and the corner are right; that it stays while the help is open and during a
+dialogue is right; that the journal's screen has none is right.
 
 ## Open questions
 
