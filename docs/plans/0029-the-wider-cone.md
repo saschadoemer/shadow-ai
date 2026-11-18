@@ -125,7 +125,7 @@ prototype.
 **Interfaces:**
 - Produces: the text id `notice.upgrade-wide-cone`, in both languages.
 
-- [ ] **Step 1: Write the failing test:**
+- [x] **Step 1: Write the failing test:**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -148,11 +148,11 @@ prototype.
      const rules: readonly (readonly [(id: string) => boolean, number, number, number])[] = [
 ```
 
-- [ ] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 24
+- [x] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 24
   tests. `npx tsc --noEmit` reports two errors, both in this test: the id is not an id of
   the table yet.
 
-- [ ] **Step 3: The words,** in both tables:
+- [x] **Step 3: The words,** in both tables:
 
 ```diff
 --- a/src/text/de.ts
@@ -180,11 +180,11 @@ prototype.
      'minutes instead of two days, and we saved',
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/text.test.ts tests/unit/draw-scene.test.ts` —
+- [x] **Step 4: Run** `npx vitest run tests/unit/text.test.ts tests/unit/draw-scene.test.ts` —
   green; the tests that keep a notice on one line and inside the bar's 49 characters cover
   the new line. Then `npm run check`: 1359 unit tests.
 
-- [ ] **Step 5: Commit** — `Add the line of the wider cone`.
+- [x] **Step 5: Commit** — `Add the line of the wider cone`.
 
 ---
 
@@ -209,7 +209,7 @@ prototype.
   `traceInLight(trace, player, lampOn, map, spread)`,
   `stepTraces(states, traces, player, lampOn, map, tick, spread)` in `game/trace`.
 
-- [ ] **Step 1: Write the failing tests.** Each file gets imports and blocks at its end; no
+- [x] **Step 1: Write the failing tests.** Each file gets imports and blocks at its end; no
   older test is edited. `tests/unit/lamp.test.ts`:
 
 ```diff
@@ -477,7 +477,7 @@ prototype.
 +});
 ```
 
-- [ ] **Step 2: Run them** —
+- [x] **Step 2: Run them** —
   `npx vitest run tests/unit/lamp.test.ts tests/unit/shadow.test.ts tests/unit/creature.test.ts tests/unit/trace.test.ts`.
   Expected: FAIL, 19 tests: 6 of 41 in `lamp.test.ts`, 8 of 50 in `shadow.test.ts`, 3 of 32
   in `creature.test.ts`, 2 of 32 in `trace.test.ts`. `npx tsc --noEmit` reports 28 errors,
@@ -486,7 +486,7 @@ prototype.
   cone to what it was — one half, 48 px long, and the same with and without the argument —
   twelve in `lamp.test.ts` (three for each facing) and two in `shadow.test.ts`.
 
-- [ ] **Step 3: The lamp:**
+- [x] **Step 3: The lamp:**
 
 ```diff
 --- a/src/game/lamp.ts
@@ -543,7 +543,7 @@ prototype.
  }
 ```
 
-- [ ] **Step 4: The walls,** the creatures and the traces take the spread and hand it on:
+- [x] **Step 4: The walls,** the creatures and the traces take the spread and hand it on:
 
 ```diff
 --- a/src/game/shadow.ts
@@ -725,10 +725,10 @@ prototype.
      return state.light + 1 < FIND_STEPS
 ```
 
-- [ ] **Step 5: Run** the four test files of Step 2 — green, every older test of 0007, 0008,
+- [x] **Step 5: Run** the four test files of Step 2 — green, every older test of 0007, 0008,
   0014 and 0022 unchanged. Then `npm run check`: 1392 unit tests.
 
-- [ ] **Step 6: Commit** — `Give the cone a spread`. Body: the light tests take the spread as
+- [x] **Step 6: Commit** — `Give the cone a spread`. Body: the light tests take the spread as
   a last argument and test the narrow cone without it, so nothing that calls them changes.
 
 ---
@@ -747,7 +747,7 @@ prototype.
   `newGame`; every step keeps it, the wake included; an ordinary step lights with
   `spreadOf(state.upgrades)`.
 
-- [ ] **Step 1: Write the failing tests.** `tests/unit/state.test.ts` — four literals get the
+- [x] **Step 1: Write the failing tests.** `tests/unit/state.test.ts` — four literals get the
   field, and one block is new, at the end:
 
 ```diff
@@ -1056,7 +1056,7 @@ prototype.
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/state.test.ts tests/unit/overview.test.ts`.
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/state.test.ts tests/unit/overview.test.ts`.
   Expected: FAIL, 9 tests: 8 of 85 in `state.test.ts`, 1 of 26 in `overview.test.ts` — the
   wake, whose literal now has the field. `npx tsc --noEmit` reports 15 errors: `upgrades`
   is no field of the state. Four tests of the new block are green already, and that is
@@ -1065,7 +1065,7 @@ prototype.
   feature only reaches. Then `npx playwright test -g "no upgrade"`. Expected: FAIL,
   `Received: undefined`.
 
-- [ ] **Step 3: The field:**
+- [x] **Step 3: The field:**
 
 ```diff
 --- a/src/game/state.ts
@@ -1084,7 +1084,7 @@ prototype.
    /** The movers on their routes, in route order (0015). */
 ```
 
-- [ ] **Step 4: The step** starts with no upgrade, derives the spread and hands it on, and
+- [x] **Step 4: The step** starts with no upgrade, derives the spread and hands it on, and
   keeps the upgrades:
 
 ```diff
@@ -1161,7 +1161,7 @@ prototype.
      rested,
 ```
 
-- [ ] **Step 5: The wake** keeps them:
+- [x] **Step 5: The wake** keeps them:
 
 ```diff
 --- a/src/game/overview.ts
@@ -1176,10 +1176,10 @@ prototype.
        x: creature.home.x,
 ```
 
-- [ ] **Step 6: Run** the two test files of Step 2 — green — then `npm run check`: 1403 unit
+- [x] **Step 6: Run** the two test files of Step 2 — green — then `npm run check`: 1403 unit
   tests, and `npx playwright test -g "no upgrade"`: 1 passed.
 
-- [ ] **Step 7: Commit** — `Keep the upgrades in the state`. Body: the spread follows from
+- [x] **Step 7: Commit** — `Keep the upgrades in the state`. Body: the spread follows from
   them in every step; no step earns one yet.
 
 ---
@@ -1195,7 +1195,7 @@ prototype.
 - Produces: `earn(state: GameState, region: string, upgrades: readonly Upgrade[] = UPGRADES): GameState`
   in `game/cases`; the step that solves a case calls it.
 
-- [ ] **Step 1: Write the failing tests.** `tests/unit/cases.test.ts` — imports, and one
+- [x] **Step 1: Write the failing tests.** `tests/unit/cases.test.ts` — imports, and one
   block at the end:
 
 ```diff
@@ -1438,7 +1438,7 @@ prototype.
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/cases.test.ts tests/unit/floor.test.ts`.
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/cases.test.ts tests/unit/floor.test.ts`.
   Expected: FAIL, 10 tests: 8 of 52 in `cases.test.ts`, 2 of 104 in `floor.test.ts`.
   `npx tsc --noEmit` reports one error: `cases.ts` has no exported member `earn`. Six tests
   of the diffs are green already, and that is right: they say what must **not** happen or
@@ -1446,7 +1446,7 @@ prototype.
   trip; the room below the three walls, and the walls that hold with the basic lamp and the
   wall of Development that holds with the stronger one.
 
-- [ ] **Step 3: Earning:**
+- [x] **Step 3: Earning:**
 
 ```diff
 --- a/src/game/cases.ts
@@ -1491,7 +1491,7 @@ prototype.
   * every creature whose home lies in an area of the region leaves `creatures`, wherever it is.
 ```
 
-- [ ] **Step 4: The solving step** earns:
+- [x] **Step 4: The solving step** earns:
 
 ```diff
 --- a/src/game/update.ts
@@ -1526,10 +1526,10 @@ prototype.
  /**
 ```
 
-- [ ] **Step 5: Run** the two test files of Step 2 — green, the tests of 0024, 0025 and 0028
+- [x] **Step 5: Run** the two test files of Step 2 — green, the tests of 0024, 0025 and 0028
   unchanged. Then `npm run check`: 1419 unit tests, the two recorded digests among them.
 
-- [ ] **Step 6: Commit** — `Earn the upgrade of a region with its case`. Body: the upgrade
+- [x] **Step 6: Commit** — `Earn the upgrade of a region with its case`. Body: the upgrade
   comes in the step that solves the case; solving stays what it was, and earning is a step
   of its own after it.
 
@@ -1547,7 +1547,7 @@ prototype.
   `UPGRADE_NOTICE_STEPS = 120`; `noticeOf` with the upgrade's line after the solved case's
   and before a found trace's.
 
-- [ ] **Step 1: Write the failing tests** — the imports, and one block at the end:
+- [x] **Step 1: Write the failing tests** — the imports, and one block at the end:
 
 ```diff
 --- a/tests/unit/notice.test.ts
@@ -1682,12 +1682,12 @@ prototype.
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/notice.test.ts`. Expected: FAIL, 5 of
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/notice.test.ts`. Expected: FAIL, 5 of
   30 tests. `npx tsc --noEmit` reports two errors: the two names are not exported. Two tests
   of the block are green already: no line after Sales, and none for an upgrade the player
   does not have.
 
-- [ ] **Step 3: The notice:**
+- [x] **Step 3: The notice:**
 
 ```diff
 --- a/src/game/notice.ts
@@ -1762,10 +1762,10 @@ prototype.
    );
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/notice.test.ts` — green, the tests of 0016,
+- [x] **Step 4: Run** `npx vitest run tests/unit/notice.test.ts` — green, the tests of 0016,
   0022, 0024, 0026 and 0027 unchanged — then `npm run check`: 1426 unit tests.
 
-- [ ] **Step 5: Commit** — `Say what the case of Marketing earned`. Body: the line follows the
+- [x] **Step 5: Commit** — `Say what the case of Marketing earned`. Body: the line follows the
   line of the solved case, so the player reads first that the case is solved and then what
   it earned.
 
@@ -1788,7 +1788,7 @@ prototype.
   - `encodeLampWidePng()` in `tools/gen-sprites.ts`
   - `public/sprites/lamp-wide.png`, 288x72
 
-- [ ] **Step 1: Write the failing tests.** `tests/unit/lamp.test.ts`:
+- [x] **Step 1: Write the failing tests.** `tests/unit/lamp.test.ts`:
 
 ```diff
 --- a/tests/unit/lamp.test.ts
@@ -1981,13 +1981,13 @@ prototype.
    });
 ```
 
-- [ ] **Step 2: Run them** —
+- [x] **Step 2: Run them** —
   `npx vitest run tests/unit/lamp.test.ts tests/unit/gen-sprites.test.ts tests/unit/assets.test.ts`.
   Expected: FAIL: 3 of 44 in `lamp.test.ts`, 1 of 25 in `assets.test.ts`, and
   `gen-sprites.test.ts` does not load — it imports names that do not exist, so the file
   fails as a whole and none of its tests runs. `npx tsc --noEmit` reports 8 errors.
 
-- [ ] **Step 3: The frames** of the wide sheet, in `game/lamp`:
+- [x] **Step 3: The frames** of the wide sheet, in `game/lamp`:
 
 ```diff
 --- a/src/game/lamp.ts
@@ -2015,7 +2015,7 @@ prototype.
    return { apex: { x: player.x, y: player.y - LAMP_HEIGHT }, facing: player.facing };
 ```
 
-- [ ] **Step 4: The generator.** Both sheets come from one loop; the lamp's sheet must come
+- [x] **Step 4: The generator.** Both sheets come from one loop; the lamp's sheet must come
   out as it was:
 
 ```diff
@@ -2159,17 +2159,17 @@ prototype.
    for (const look of PERSON_SHIRTS.keys()) {
 ```
 
-- [ ] **Step 5: Generate** — `npm run gen-sprites`. Then `git status --short public` shows one
+- [x] **Step 5: Generate** — `npm run gen-sprites`. Then `git status --short public` shows one
   line, `?? public/sprites/lamp-wide.png`: no other sheet changed.
   `shasum -a 256 public/sprites/lamp-wide.png` gives
   `fd1f4422d52389261422fb67a11af997a1858d979de233bc24d9a109addbe5cd`.
   If another sheet changed, stop.
 
-- [ ] **Step 6: Run** the three test files of Step 2 — green, the tests of the lamp sheet of
+- [x] **Step 6: Run** the three test files of Step 2 — green, the tests of the lamp sheet of
   0007 unchanged. Then `npm run check`: 1437 unit tests. The asset test holds the new sheet
   to the palette with every other PNG.
 
-- [ ] **Step 7: Commit** — `Draw the sheet of the wider cone`, with the PNG.
+- [x] **Step 7: Commit** — `Draw the sheet of the wider cone`, with the PNG.
 
 ---
 
@@ -2187,7 +2187,7 @@ prototype.
   `lampFrameOrigin(player, camera, apexes = FRAME_APEX)`; the scene draws the cone from the
   wide sheet while `upgrades` holds `wide-cone`.
 
-- [ ] **Step 1: Write the failing tests.** The three scene fixtures get the sheet, and
+- [x] **Step 1: Write the failing tests.** The three scene fixtures get the sheet, and
   `tests/unit/draw-scene.test.ts` gets one block at its end:
 
 ```diff
@@ -2324,12 +2324,12 @@ prototype.
    shadowWallSheet: sheet(16, 16),
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/draw-scene.test.ts`. Expected: FAIL, 3
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/draw-scene.test.ts`. Expected: FAIL, 3
   of 106 tests. `npx tsc --noEmit` reports 10 errors: `lampWideSheet` is no field of the
   content, and `lampFrameOrigin` takes two arguments. Two tests of the block are green
   already: the narrow cone as in 0007, and no cone with the lamp off.
 
-- [ ] **Step 3: The scene:**
+- [x] **Step 3: The scene:**
 
 ```diff
 --- a/src/render/draw-scene.ts
@@ -2395,7 +2395,7 @@ prototype.
    for (const standing of state.shadowWalls) {
 ```
 
-- [ ] **Step 4: The loader:**
+- [x] **Step 4: The loader:**
 
 ```diff
 --- a/src/main.ts
@@ -2431,11 +2431,11 @@ prototype.
        snippet: {
 ```
 
-- [ ] **Step 5: Run** `npx vitest run tests/unit/draw-scene.test.ts tests/unit/draw-journal.test.ts tests/unit/draw-help.test.ts` —
+- [x] **Step 5: Run** `npx vitest run tests/unit/draw-scene.test.ts tests/unit/draw-journal.test.ts tests/unit/draw-help.test.ts` —
   green, the tests of the lamp in the scene of 0007 unchanged. Then `npm run check`: 1442
   unit tests, and `npm run test:e2e` twice: 18 passed, 3 skipped, both times.
 
-- [ ] **Step 6: Commit** — `Draw the wider cone from its own sheet`.
+- [x] **Step 6: Commit** — `Draw the wider cone from its own sheet`.
 
 ---
 
@@ -2450,7 +2450,7 @@ means it; do not change the words without a reason. `architecture.md` changes in
 too, beyond the sections the spec names: its directory listing names the generator's sheets,
 and §8 lists the notices in their order.
 
-- [ ] **Step 1: `gameplay.md`** §2 and §5:
+- [x] **Step 1: `gameplay.md`** §2 and §5:
 
 ```diff
 --- a/docs/spec/gameplay.md
@@ -2488,7 +2488,7 @@ and §8 lists the notices in their order.
  
 ```
 
-- [ ] **Step 2: `world.md`** §1:
+- [x] **Step 2: `world.md`** §1:
 
 ```diff
 --- a/docs/spec/world.md
@@ -2507,7 +2507,7 @@ and §8 lists the notices in their order.
  upper and its left wall. The meeting rooms have two areas, one per room. A room whose region has
 ```
 
-- [ ] **Step 3: `visual.md`** §3:
+- [x] **Step 3: `visual.md`** §3:
 
 ```diff
 --- a/docs/spec/visual.md
@@ -2527,7 +2527,7 @@ and §8 lists the notices in their order.
  of the maximum. And the notice (feature 0016), while there is one: a bar in `#181425` at the
 ```
 
-- [ ] **Step 4: `architecture.md`** §1, §2, §5, §7 and §8:
+- [x] **Step 4: `architecture.md`** §1, §2, §5, §7 and §8:
 
 ```diff
 --- a/docs/spec/architecture.md
@@ -2643,7 +2643,7 @@ and §8 lists the notices in their order.
  `notice.rest-full` or `notice.rest-shadow` (0027, `NOTICE_REST`); otherwise, while the lamp is
 ```
 
-- [ ] **Step 5: `testing.md`** §2:
+- [x] **Step 5: `testing.md`** §2:
 
 ```diff
 --- a/docs/spec/testing.md
@@ -2675,7 +2675,7 @@ and §8 lists the notices in their order.
  
 ```
 
-- [ ] **Step 6: `README.md`:**
+- [x] **Step 6: `README.md`:**
 
 ```diff
 --- a/README.md
@@ -2702,19 +2702,19 @@ and §8 lists the notices in their order.
  
 ```
 
-- [ ] **Step 7:** `npm run check`, then commit — `Move the wider cone into the spec`.
+- [x] **Step 7:** `npm run check`, then commit — `Move the wider cone into the spec`.
 
 ---
 
 ### Task 9: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 18 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 18 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 9 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 9 in this file and commit —
   `Tick the full check of 0029`.
 
 ---
