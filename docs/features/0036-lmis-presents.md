@@ -71,9 +71,6 @@ starts with the card again, as it starts with the call.
 is shown. `newGame` starts with `null`. `createInitialState`, the game past its opening
 (0026), starts with 0: the tests of the earlier features never see the card.
 
-The opening counts from the card as it counted from the first step: `started` (0026) is the
-step that closes the call, as before.
-
 ## Acceptance criteria
 
 1. A new game has `presented` `null`; the game past its opening has 0. The state survives a
