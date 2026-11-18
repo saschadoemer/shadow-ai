@@ -269,7 +269,12 @@ begins with a reload.
 - The line names a key. Is that right, or should the game say nothing?
 - Is the managing director as a sentence of text enough, or is a person missed?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–26. Feel: three pages are the right length for a start,
+also at a booth — but after the call it is not clear where to go, so the start needs a hint;
+the third page alone does not send the player next door, the officer needs a visible mark as
+the figure to look for; the walk without the lamp is a good minute; the line that names the
+key is right; the managing director as a sentence of text is enough. The two notes on the way
+to the officer become a new draft, not a change on this branch.
 
 ## Open questions
 

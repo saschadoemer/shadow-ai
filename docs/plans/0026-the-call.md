@@ -2927,17 +2927,17 @@ index e1293b7..ddc3ca6 100644
 
 ### Task 9: The acceptance walk
 
-- [ ] **Step 1:** start the game as the spec's preconditions say (`npm run dev`), and tell the
+- [x] **Step 1:** start the game as the spec's preconditions say (`npm run dev`), and tell the
   author in one message: the URL, a desktop browser, a window of at least 1280x720, arrow
   keys or WASD to walk, `Space` for the lamp, `E` or `Enter` to talk, `L` for the language,
   and that the walk begins with a reload. Wait until the author is ready.
-- [ ] **Step 2:** guide the author through steps 1–26 of the spec's acceptance plan, one action
+- [x] **Step 2:** guide the author through steps 1–26 of the spec's acceptance plan, one action
   step with its expected step per message, in the spec's numbering and words. Record each answer
   as given. Never answer a step yourself.
-- [ ] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
+- [x] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
   decision — rerun Task 8, and start again at step 1.
-- [ ] **Step 4:** after step 26 ask the five feel questions, one per message.
-- [ ] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–26`, followed by the feel notes,
+- [x] **Step 4:** after step 26 ask the five feel questions, one per message.
+- [x] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–26`, followed by the feel notes,
   into the spec and commit it — `Record the walk of 0026`. A feel note that wants something
   else — fewer pages, other words, a figure for the managing director, no line for the key —
   becomes a new draft, not a change on this branch.
