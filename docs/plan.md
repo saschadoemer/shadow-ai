@@ -119,7 +119,23 @@ returns, more colleagues see the shadow, overview grows by one. The call last of
 the customer on the phone, the first sight of the shadow and the lamp handed over can be told
 once there is a case to walk into. Overview won back closes the milestone; `gameplay.md` §4
 has left it open since 0009. 0022, 0023 and 0024 are implemented; 0025
-and 0026 are approved; 0027 is named here and specified when its turn comes.
+and 0026 are approved; 0027 is drafted.
+
+### M6 — The cases of Act 2
+
+The cases come one department at a time, and each brings what Act 2 has more than Act 1. The
+first three features, each its own pull request with its own acceptance plan: 0028 the case
+of Marketing · 0029 the wider cone · 0030 the creature of Marketing. The case first, by the
+rules the case of Sales set — traces, the source's answer, the journal, the cleared room — so
+that a second case proves the first one's rules before anything is added to them. The wider
+cone after it, because the case of Marketing earns it and HR and Accounting open with it. The
+creature of Marketing third: every case has its species (`world.md` §4), and the second
+species brings what the journal still lacks — a choice among its entries, and pages.
+
+Named here without a number and specified when their turn comes: the case of Support · the
+cases of HR and Accounting · the colour filter · the case of Development · the meeting rooms'
+side case · the vendor in every department · the intern in the break room and the hints ·
+who sees the shadow · the two keys · Management and the last case. 0028 and 0029 are drafted.
 
 ## 5. Deferred, with reasons
 
