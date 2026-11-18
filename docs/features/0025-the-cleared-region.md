@@ -187,7 +187,10 @@ lamp, `E` or `Enter` talks.
 - The scrap that was left simply is not there any more. Does it need to be seen going?
 - Does the room read as a different place afterwards?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–16. Feel: the clearing is a moment, seen and enough for
+the end of the first act; colour at once and the dots in three steps is right as it is; two
+seconds are right; the scrap that was left need not be seen going; the room reads as a
+different place afterwards.
 
 ## Open questions
 
