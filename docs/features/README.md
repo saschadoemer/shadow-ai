@@ -39,4 +39,4 @@ in two.
 | [0015](0015-the-moving-floor.md) | The moving floor | M3 | implemented 2026-11-13 |
 | [0016](0016-text-on-screen.md) | Text on screen | M4 | implemented 2026-11-17 |
 | [0017](0017-talking.md) | Talking | M4 | implemented 2026-11-17 |
-| [0017](0017-cloud-run-deployment.md) | Cloud Run deployment | M8 | approved 2026-11-17 |
+| [0018](0018-cloud-run-deployment.md) | Cloud Run deployment | M8 | approved 2026-11-17 |
