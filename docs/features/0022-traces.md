@@ -1,6 +1,6 @@
 # 0022 — Traces
 
-**Status:** approved 2026-11-18
+**Status:** implemented 2026-11-18
 **Milestone:** M5
 **Drafted:** 2026-11-18
 

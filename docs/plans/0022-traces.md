@@ -2310,17 +2310,17 @@ once: Task 2 built what it checks.
 
 ### Task 8: The acceptance walk
 
-- [ ] **Step 1:** start the game as the spec's preconditions say (`npm run dev`), and tell the
+- [x] **Step 1:** start the game as the spec's preconditions say (`npm run dev`), and tell the
   author in one message: the URL, a desktop browser, a window of at least 1280x720, the figure
   in the reception, arrow keys or WASD to walk, `Space` for the lamp, `J` for the journal, `L`
   for the language. Wait until the author is ready.
-- [ ] **Step 2:** guide the author through steps 1–22 of the spec's acceptance plan, one action
+- [x] **Step 2:** guide the author through steps 1–22 of the spec's acceptance plan, one action
   step with its expected step per message, in the spec's numbering and words. Record each answer
   as given. Never answer a step yourself.
-- [ ] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
+- [x] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
   decision — rerun Task 7, and start again at step 1.
-- [ ] **Step 4:** after step 22 ask the five feel questions, one per message.
-- [ ] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–22`, followed by the feel notes,
+- [x] **Step 4:** after step 22 ask the five feel questions, one per message.
+- [x] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–22`, followed by the feel notes,
   into the spec and commit it — `Record the walk of 0022`. A feel note that wants something
   else — a hint where to look, another time, a trace that stays, other words — becomes a new
   draft, not a change on this branch.
@@ -2329,9 +2329,9 @@ once: Task 2 built what it checks.
 
 ### Task 9: The pull request
 
-- [ ] **Step 1:** merge the latest `main` again and rerun Task 7. If the merge changed code,
+- [x] **Step 1:** merge the latest `main` again and rerun Task 7. If the merge changed code,
   the walk is run again.
-- [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
+- [x] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`, and in `docs/plan.md` §4, in the M5 section, change "0022 is
   approved" to say that 0022 is implemented; commit — `Mark 0022 implemented`. The row of
   0023 stays as it is.
