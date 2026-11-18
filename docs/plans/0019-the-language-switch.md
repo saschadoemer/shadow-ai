@@ -863,9 +863,9 @@ Expected: FAIL in the new test — the check reports nothing.
 
 ### Task 8: The pull request
 
-- [ ] **Step 1:** merge the latest `main` again and rerun Task 6. If the merge changed code,
+- [x] **Step 1:** merge the latest `main` again and rerun Task 6. If the merge changed code,
   the walk is run again.
-- [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
+- [x] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`, and in `docs/plan.md` §4 change "0019 is approved" to say that
   0019 is implemented; commit — `Mark 0019 implemented`. The row of 0020 stays as it is.
 - [ ] **Step 3:** push the branch and open the pull request against `main`, titled
