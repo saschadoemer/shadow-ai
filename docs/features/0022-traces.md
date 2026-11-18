@@ -281,7 +281,13 @@ lamp, `J` opens and closes the journal, `L` switches the language.
 - Does `Spuren: 2 von 5` say enough on the cases tab for now?
 - Do the scraps in the room make the search tense in a good way, or do they only disturb?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–22. Feel:
+
+- The search: searching sixteen desks for five traces is right as it is; the room needs no hint.
+- The find: one second is right, and the growing pattern reads as residue coming off.
+- The line: it is the right answer to a find, and two seconds are right.
+- The cases tab: `Spuren: 2 von 5` says enough for now.
+- The scraps: they make the search tense in a good way.
 
 ## Open questions
 
