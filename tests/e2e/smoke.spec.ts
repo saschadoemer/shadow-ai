@@ -86,21 +86,17 @@ test('the game opens with the call, without the lamp, and three presses of E clo
       () =>
         page.evaluate(() => {
           const state = window.shadowAi?.state;
-          return state === undefined
-            ? undefined
-            : { dialogue: state.dialogue, lamp: state.lamp, started: state.started };
+          return state === undefined ? undefined : { dialogue: state.dialogue, lamp: state.lamp };
         }),
-      { message: 'a new game: the call on page 0, no lamp, the opening not ended' },
+      { message: 'a new game: the call on page 0, no lamp' },
     )
     .toStrictEqual({
       dialogue: call(0),
       lamp: { on: false, strength: 1, owned: false, used: false },
-      started: null,
     });
   await start(page);
   const state = await page.evaluate(() => window.shadowAi?.state);
   expect(state?.dialogue).toBeNull();
-  expect(state?.started).toBeGreaterThan(0);
   expect(state?.lamp.owned).toBe(false);
 });
 

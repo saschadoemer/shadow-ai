@@ -10,18 +10,12 @@ import {
   parseTileset,
   type TileMap,
 } from '../../src/engine/tiled';
-import {
-  HELP_HINT,
-  HELP_HINT_STEPS,
-  helpHintDue,
-  openHelp,
-  startHintDue,
-  stepHelp,
-} from '../../src/game/help';
+import * as help from '../../src/game/help';
+import { openHelp, stepHelp } from '../../src/game/help';
 import { type GameInput, NO_INPUT, pressed } from '../../src/game/player';
 import type { GameState } from '../../src/game/state';
-import { createInitialState, newGame, update } from '../../src/game/update';
-import { textKey } from '../../src/text/text';
+import { createInitialState, update } from '../../src/game/update';
+import { TABLE } from '../../src/text/text';
 import { grassMap } from './grass-map';
 
 const NONE = NO_INPUT;
@@ -255,20 +249,14 @@ describe('the world while the help is open (0021)', () => {
   });
 });
 
-describe('the start hint (0021)', () => {
-  it('is the line that names the key, due for the first 600 steps', () => {
-    expect(HELP_HINT).toBe(textKey('notice.help'));
-    expect(HELP_HINT_STEPS).toBe(600);
-    expect([0, 599, 600, 601].map(helpHintDue)).toStrictEqual([true, true, false, false]);
+describe('what game/help knows (0031)', () => {
+  it('is the step of the help and nothing of a hint', () => {
+    expect(Object.keys(help).sort()).toStrictEqual(['openHelp', 'stepHelp']);
   });
 
-  it('runs out behind an open help: the tick grows in its steps', () => {
-    let state = opened;
-    for (let step = 0; step < 599; step += 1) {
-      state = update(state, NONE, OPEN);
-    }
-    expect(state.help).toBe(true);
-    expect(helpHintDue(state.tick)).toBe(false);
+  it("has no words of its own: the label that names the key is the scene's", () => {
+    expect(Object.keys(TABLE.de)).not.toContain('notice.help');
+    expect(Object.keys(TABLE.en)).not.toContain('notice.help');
   });
 });
 
@@ -339,75 +327,5 @@ describe('a game in which the help is never opened (0021)', () => {
     expect(talked).toBe(true);
     expect(turned).toBe(true);
     expect(hash.digest('hex')).toBe(RECORDED);
-  });
-});
-
-describe('the start hint and the call (0026)', () => {
-  const due = (tick: number, started: number | null): boolean => startHintDue({ tick, started });
-
-  it('is not due at any tick while the opening has not ended', () => {
-    expect([0, 1, 599, 600, 5000].map((tick) => due(tick, null))).toStrictEqual([
-      false,
-      false,
-      false,
-      false,
-      false,
-    ]);
-  });
-
-  it('is due for 600 steps from the step that closed the call', () => {
-    for (const started of [40, 900]) {
-      expect(due(started, started), `closed at ${started}`).toBe(true);
-      expect(due(started + 599, started)).toBe(true);
-      expect(due(started + 600, started)).toBe(false);
-      expect(due(started + 6000, started)).toBe(false);
-    }
-  });
-
-  it('is as in 0021 in a game past its opening: due at 0 and at 599 and not at 600', () => {
-    expect([0, 599, 600, 601].map((tick) => due(tick, 0))).toStrictEqual([
-      true,
-      true,
-      false,
-      false,
-    ]);
-    const start = createInitialState(OPEN);
-    expect(start.started).toBe(0);
-    expect(startHintDue(start)).toBe(helpHintDue(start.tick));
-  });
-
-  it('follows the game: not due under the call, due when it closes, gone 600 steps later', () => {
-    let state = newGame(OPEN);
-    for (let step = 0; step < 35; step += 1) {
-      state = update(state, NONE, OPEN);
-      expect(startHintDue(state)).toBe(false);
-    }
-    for (const input of [TALK, NONE, TALK, NONE, TALK]) {
-      state = update(state, input, OPEN);
-    }
-    expect(state.dialogue).toBeNull();
-    expect(state.started).toBe(40);
-    expect(startHintDue(state)).toBe(true);
-    for (let step = 0; step < 599; step += 1) {
-      state = update(state, NONE, OPEN);
-    }
-    expect(state.tick).toBe(639);
-    expect(startHintDue(state)).toBe(true);
-    expect(startHintDue(update(state, NONE, OPEN))).toBe(false);
-  });
-
-  it('runs on behind an open help, as in 0021', () => {
-    let state = [TALK, NONE, TALK, NONE, TALK].reduce(
-      (now, input) => update(now, input, OPEN),
-      newGame(OPEN),
-    );
-    state = update(update(state, NONE, OPEN), HELP, OPEN);
-    expect(state.help).toBe(true);
-    for (let step = 0; step < 598; step += 1) {
-      state = update(state, NONE, OPEN);
-    }
-    expect(state.started).toBe(5);
-    expect(state.tick).toBe(605);
-    expect(startHintDue(state)).toBe(false);
   });
 });

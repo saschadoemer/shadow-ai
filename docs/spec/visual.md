@@ -65,16 +65,17 @@ cone it is a 72x72 frame per facing from a sheet of its own, `lamp-wide.png`: 72
 its end and still 48 px long, so a third of the frame along the facing stays empty. Either
 frame is placed by its apex pixel, the middle of the edge the cone opens from.
 
-**The display.** Two things are drawn over the world. The row of overview hearts in the
+**The display.** Three things are drawn over the world. The row of overview hearts in the
 top-left corner (features 0009, 0012): 8x8, 4 px from the corner, one every 10 px, one per point
-of the maximum. And the notice (feature 0016), while there is one: a bar in `#181425` at the
+of the maximum. The help label in the top-right corner (feature 0031): the words `H Hilfe` or
+`H Help` in white on a field in `#181425` with a frame of 1 px in `#3a4466` — the colours of the
+help's box —, 47x14 in German and 41x14 in English, 4 px from the corner; the frame's right edge
+stays where it is in both languages. And the notice (feature 0016), while there is one: a bar in `#181425` at the
 bottom, 8 px from the left, the right and the bottom edge, 304x18, with one white line centred in
 it. While a dialogue is open the dialogue box (feature 0017) is drawn in the notice's place: the
 notice's bar grown upwards to three lines, (8, 134, 304, 42) in `#181425`, with the page's white
 lines left-aligned from (12, 138), 12 px apart, and in its lower right corner a small white
-triangle that points down and blinks once a second — a press goes on. For the first ten
-seconds of a game the same bar holds the start hint (feature 0021), one white line that names
-the key of the help, where no other text has the bar. A heart is 7x7 with a rim
+triangle that points down and blinks once a second — a press goes on. A heart is 7x7 with a rim
 in `#181425`, red `#e43b44` when full and
 `#3a4466` when empty. The screen of the dark is two rectangles in `#181425` that close from the top
 and the bottom; nothing is blended, so no pixel leaves the palette.

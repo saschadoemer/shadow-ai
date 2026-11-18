@@ -3,7 +3,6 @@ import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { progressOf } from '../game/cases';
 import { type Figure, figuresIn, figuresOf } from '../game/cast';
 import { CREATURE_SIZE } from '../game/creature';
-import { HELP_HINT, startHintDue } from '../game/help';
 import { FRAME_APEX, LAMP_HEIGHT, WIDE_CONE, WIDE_FRAME_APEX } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
@@ -26,7 +25,7 @@ import {
 import { pagesOf, speakersOf } from '../game/talk';
 import { FIND_STEPS, tracesOf } from '../game/trace';
 import { type Language, type TextKey, textKey, textOf } from '../text/text';
-import { drawHelp } from './draw-help';
+import { drawHelp, drawHelpLabel } from './draw-help';
 import { drawJournal } from './draw-journal';
 import { drawLayer, drawVeil, type Shadow } from './draw-map';
 import { drawText } from './draw-text';
@@ -302,17 +301,14 @@ export function languageNoticeVisible(tick: number, switchedAt: number | null): 
 /**
  * The line the bar shows where no dialogue is open and no notice shows, or null. Where a text
  * is on screen, that text changes with the language; the language line answers a switch only
- * where nothing else would (0019). The start hint has the last place (0021). With the help
- * open the bar shows neither: the box is the answer.
+ * where nothing else would (0019). With the help open the bar does not show it: the box is the
+ * answer. The start hint of 0021 had the last place here until 0031 took it away.
  */
 export function quietLine(state: GameState, settings: SceneSettings): TextKey | null {
   if (state.help) {
     return null;
   }
-  if (languageNoticeVisible(state.tick, settings.switchedAt)) {
-    return LANGUAGE_NOTICE;
-  }
-  return startHintDue(state) ? HELP_HINT : null;
+  return languageNoticeVisible(state.tick, settings.switchedAt) ? LANGUAGE_NOTICE : null;
 }
 
 /** The dialogue box (0017): the notice's bar grown upwards to three lines, the same bottom edge. */
@@ -362,17 +358,17 @@ export function lidHeight(dark: number): number {
  * above, the drones (0015), all shifted by the camera. The sprite's top-left corner is at (round(x) − 8 − camera.x,
  * round(y) − 24 − camera.y): the feet are its bottom centre, and the camera is already whole
  * pixels (engine/camera). The cone lies under the figure, so the body hides the apex. After
- * `above` come the hearts of overview, on the surface and not shifted by the camera; then,
+ * `above` come the hearts of overview, on the surface and not shifted by the camera, and the
+ * label that names the help's key in the top right corner (0031, render/draw-help); then,
  * while a dialogue is open, the dialogue box with the page's lines and its blinking marker
  * (0017), else the notice — the bar and its line (0016) — else, for two seconds after a switch
  * of the language, the language line in the same bar (0019); all on the surface and not
  * shifted by the camera; and last the two lids of the dark (0009). Every text is drawn in the
  * language of the settings. A safe figure blinks; its cone and the movers do not. While the
- * journal is open the frame is the journal's alone (0020, render/draw-journal).
+ * journal is open the frame is the journal's alone (0020, render/draw-journal), without the
+ * label.
  * While the help is open (0021, render/draw-help) its box is drawn last but for the lids, over
- * the world and over the journal alike, and the bar shows neither the language line nor the
- * start hint — the line that names the help's key in the first ten seconds of a game, which
- * has the bar only where nothing else has it.
+ * the world and over the journal alike, and the bar does not show the language line.
  */
 export function drawScene(
   renderer: Renderer,
@@ -489,6 +485,8 @@ export function drawScene(
       HEART_MARGIN,
     );
   }
+  // The label that names the help's key (0031): in every frame of the world, whatever else is on it.
+  drawHelpLabel(renderer, content.fontSheet, language);
   const page =
     state.dialogue === null
       ? undefined

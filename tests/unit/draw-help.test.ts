@@ -3,6 +3,7 @@ import { NO_INPUT } from '../../src/game/player';
 import { type GameState, NO_RECOIL } from '../../src/game/state';
 import {
   drawHelp,
+  drawHelpLabel,
   HELP_DOES,
   HELP_DOES_CAPACITY,
   HELP_FIELD,
@@ -10,14 +11,18 @@ import {
   HELP_FRAME_COLOUR,
   HELP_KEY_CAPACITY,
   HELP_KEYS,
+  HELP_LABEL,
+  HELP_LABEL_CAPACITY,
   HELP_ROW_PITCH,
   HELP_ROWS,
+  helpLabelPlace,
 } from '../../src/render/draw-help';
 import { JOURNAL_RULE } from '../../src/render/draw-journal';
 import {
   DIALOGUE_BOX,
   drawScene,
   HEART_MARGIN,
+  HEART_PITCH,
   HEART_SIZE,
   type SceneContent,
   type SceneSettings,
@@ -84,10 +89,9 @@ const GERMAN: SceneSettings = { language: 'de', switchedAt: null };
 const FRAME = 'fillRect 48,30 224x98 #3a4466';
 const FIELD = 'fillRect 49,31 222x96 #181425';
 const BAR = 'fillRect 8,158 304x18 #181425';
-/** A game past the start hint with five hearts and the officer standing; the help as `fields` say. */
+/** A game with five hearts and the officer standing; the help as `fields` say. */
 const playing = (fields: Partial<GameState> = {}): GameState => ({
   tick: 700,
-  started: 0,
   rested: null,
   upgrades: [],
   player: {
@@ -229,11 +233,94 @@ describe('the help on the surface (0021)', () => {
   });
 });
 
+describe('the help label on the surface (0031)', () => {
+  const label = (language: SceneSettings['language']): string[] => {
+    const renderer = recordingRenderer();
+    drawHelpLabel(renderer, CONTENT.fontSheet, language);
+    return renderer.calls;
+  };
+
+  it('is the key `help.label`, of at most 8 characters in both languages', () => {
+    expect(HELP_LABEL).toBe(textKey('help.label'));
+    expect(HELP_LABEL_CAPACITY).toBe(8);
+    for (const language of LANGUAGES) {
+      expect(textOf(HELP_LABEL, language).length, language).toBeLessThanOrEqual(
+        HELP_LABEL_CAPACITY,
+      );
+    }
+  });
+
+  it('places the frame, the field and the words by the number of characters', () => {
+    for (const n of [1, 6, 7, 8]) {
+      expect(helpLabelPlace(n), `${n} characters`).toStrictEqual({
+        frame: { x: 311 - 6 * n, y: 4, width: 6 * n + 5, height: 14 },
+        field: { x: 312 - 6 * n, y: 5, width: 6 * n + 3, height: 12 },
+        text: { x: 314 - 6 * n, y: 6 },
+      });
+    }
+    expect(helpLabelPlace(7).frame).toStrictEqual({ x: 269, y: 4, width: 47, height: 14 });
+    expect(helpLabelPlace(6).frame).toStrictEqual({ x: 275, y: 4, width: 41, height: 14 });
+  });
+
+  it('ends 4 px from the right edge and begins 4 px from the top, whatever its length', () => {
+    for (const n of [1, 6, 7, 8]) {
+      const { frame } = helpLabelPlace(n);
+      expect(frame.x + frame.width, `${n} characters`).toBe(316);
+      expect(frame.y).toBe(HEART_MARGIN);
+    }
+  });
+
+  it('keeps clear of seven hearts and of the box of the help', () => {
+    const longest = helpLabelPlace(HELP_LABEL_CAPACITY).frame;
+    // Seven hearts (0028) end at x = 71.
+    expect(HEART_MARGIN + 6 * HEART_PITCH + HEART_SIZE).toBe(72);
+    expect(longest.x).toBe(263);
+    expect(longest.y + longest.height).toBe(18);
+    expect(longest.y + longest.height).toBeLessThan(HELP_FRAME.y);
+  });
+
+  it('draws the frame, the field and `H Hilfe` in German', () => {
+    // `H` is glyph 40, `i` 73, `l` 76, `f` 70, `e` 69; the space is not drawn.
+    expect(label('de')).toStrictEqual([
+      'fillRect 269,4 47x14 #3a4466',
+      'fillRect 270,5 45x12 #181425',
+      'drawSprite 40 at 272,6',
+      'drawSprite 40 at 284,6',
+      'drawSprite 73 at 290,6',
+      'drawSprite 76 at 296,6',
+      'drawSprite 70 at 302,6',
+      'drawSprite 69 at 308,6',
+    ]);
+  });
+
+  it('draws `H Help` in English: narrower, with the same right edge', () => {
+    // `p` is glyph 80.
+    expect(label('en')).toStrictEqual([
+      'fillRect 275,4 41x14 #3a4466',
+      'fillRect 276,5 39x12 #181425',
+      'drawSprite 40 at 278,6',
+      'drawSprite 40 at 290,6',
+      'drawSprite 69 at 296,6',
+      'drawSprite 76 at 302,6',
+      'drawSprite 80 at 308,6',
+    ]);
+  });
+
+  it('draws its glyphs from the font sheet and nothing else', () => {
+    const renderer = recordingRenderer();
+    drawHelpLabel(renderer, CONTENT.fontSheet, 'de');
+    expect(renderer.sheets).toHaveLength(6);
+    expect(renderer.sheets.every((used) => used === CONTENT.fontSheet)).toBe(true);
+  });
+});
+
 describe('the help in the scene (0021)', () => {
   it('lies over the world: everything the scene draws without it, then the help, and nothing after', () => {
     const without = scene(playing());
     expect(without).not.toContain(FRAME);
-    expect(without.at(-1)).toBe('drawSprite 0 at 44,4');
+    // The last heart, and after it the help label (0031), whose last glyph is the `e` of `Hilfe`.
+    expect(without).toContain('drawSprite 0 at 44,4');
+    expect(without.at(-1)).toBe('drawSprite 69 at 308,6');
     expect(scene(playing({ help: true }))).toStrictEqual([...without, ...help('de')]);
   });
 
@@ -242,15 +329,14 @@ describe('the help in the scene (0021)', () => {
     expect(english.slice(-100)).toStrictEqual(help('en'));
   });
 
-  it('shows no language line and no start hint while it is open', () => {
+  it('shows no language line while it is open', () => {
     for (const tick of [100, 219, 700, 819]) {
       for (const switchedAt of [100, 700, null]) {
         const calls = scene(playing({ help: true, tick }), { language: 'en', switchedAt });
         expect(calls, `tick ${tick}, switched at ${switchedAt}`).not.toContain(BAR);
       }
     }
-    // Without the help the same frames have the bar: the hint, or the language line.
-    expect(scene(playing({ tick: 100 }))).toContain(BAR);
+    // Without the help the frame of a switch has the bar: the language line.
     expect(scene(playing({ tick: 700 }), { language: 'en', switchedAt: 700 })).toContain(BAR);
   });
 

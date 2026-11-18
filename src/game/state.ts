@@ -174,11 +174,6 @@ export interface Overview {
 export interface GameState {
   /** Logic steps since the start; one step is 1/60 s (INV-3). */
   readonly tick: number;
-  /**
-   * The tick of the step in which the game's opening ended — the step that closed the call — or
-   * null while it has not (0026). The start hint of the help counts from it.
-   */
-  readonly started: number | null;
   readonly player: PlayerState;
   /**
    * The view's top-left corner in map pixels, two integers (0006). Derived from the player after
