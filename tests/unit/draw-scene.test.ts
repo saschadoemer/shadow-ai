@@ -96,7 +96,8 @@ const MAP: TileMap = {
 const CONTENT: SceneContent = {
   map: MAP,
   tileset: { image: {} as ImageBitmap, columns: 7 },
-  shadowTileset: { image: {} as ImageBitmap, columns: 7 },
+  // Its own image, so that toStrictEqual tells the two tilesets apart.
+  shadowTileset: { image: { shadow: true } as unknown as ImageBitmap, columns: 7 },
   veilSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   playerSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 },
   lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
