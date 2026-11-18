@@ -19,7 +19,7 @@ All four run in CI on every pull request (`ops.md` §4). Red blocks the merge.
 
 | Invariant | Test |
 |---|---|
-| INV-1 plain state | `JSON.parse(JSON.stringify(state))` deep-equals a populated `GameState` whose player has walked and whose lamp is on, and one with a frozen creature and a captured count of 1, one in the middle of a push and one at step 30 of the dark; the initial state with a standing figure, and one with a dialogue open on page 1 (0017) |
+| INV-1 plain state | `JSON.parse(JSON.stringify(state))` deep-equals a populated `GameState` whose player has walked and whose lamp is on, and one with a frozen creature and a captured count of 1, one in the middle of a push and one at step 30 of the dark; the initial state with a standing figure, and one with a dialogue open on page 1 (0017); one with a colleague speaking, on maps built in the test and on `talkers.tmj` (0018) |
 | INV-2 no browser in `game/` | `tests/arch/` fails on any import of `render/` or any occurrence of `window`, `document`, `HTMLCanvasElement`, `Image`, `fetch` in `src/game/` |
 | INV-3 fixed step | loop tests: 16.7 ms elapsed yields one step, 100 ms yields five and drops the rest, 8 ms yields none and carries the remainder; frames alternating 16.5 and 16.8 ms yield exactly one step each, frames of 8.4 ms one every second frame, 17 ms is not snapped; the loop driver with a fake frame scheduler advances at most five steps after a ten-second gap; the input is read once per frame and every step of the frame sees it |
 | INV-4 text through keys | the compiler, via `TextKey`: `drawText`, `textOf` and `textKey` are type-tested with `expectTypeOf` — a string is no `TextKey` and `textKey` accepts only the ids of the table (0016); unit tests that `de` and `en` have identical key sets and no empty string, that every character of both tables has a glyph in the font — line breaks skipped —, and that every notice fits the bar and has no line break; every page of the kind `talk` has at most three lines of at most 47 characters and no empty line, in both languages, and fits the dialogue box (0017) |
@@ -114,7 +114,9 @@ tileset, the four maps of 0008 with named points: `points.tmj`, `point-without-n
 kind of mover with `pause` properties, on the tiles of `points.tmj`, and `walls.tmj` of 0014,
 three shadow walls on open floor, with the four maps it rejects: `rect-without-name.tmj`,
 `rect-rotated.tmj`, `rect-outside.tmj` and `object-ellipse.tmj`, and `figures.tmj` of 0017, 20x12
-on the tiles of `points.tmj`, with the spawn, a snippet and `figure:officer` at (160, 96)), a tiny
+on the tiles of `points.tmj`, with the spawn, a snippet and `figure:officer` at (160, 96), and
+`talkers.tmj` of 0018, 20x12 on the same tiles, with the spawn, `figure:officer` at (160, 96), the
+route `person:reception` of two points and a route `dog:reception`), a tiny
 PNG with one off-palette pixel.
 Fixtures are hand-made and committed; they are never generated from the real content, so a
 change to the floor map cannot silently change what a test proves.

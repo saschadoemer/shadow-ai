@@ -32,6 +32,11 @@ const FIGURES_MAP = loadMap(
   'tests/fixtures/maps/figures.tmj',
   'tests/fixtures/maps/fixture-tiles.tsj',
 );
+/** The officer, a colleague with lines on a route of two points and a dog, on open floor (0018). */
+const TALKERS_MAP = loadMap(
+  'tests/fixtures/maps/talkers.tmj',
+  'tests/fixtures/maps/fixture-tiles.tsj',
+);
 /** The floor the game loads. */
 const FLOOR_MAP = loadMap('public/maps/floor.tmj', 'public/tiles/placeholder.tsj');
 
@@ -628,5 +633,36 @@ describe('standing figures in the state (0017)', () => {
   it('survives a JSON round trip at the start (INV-1)', () => {
     const state = createInitialState(FIGURES_MAP);
     expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
+  });
+});
+
+describe('colleagues with lines in the state (0018)', () => {
+  const TALK: GameInput = { ...NONE, talk: true };
+
+  it('starts on the fixture with the officer, the colleague waiting on its point 1 and the dog', () => {
+    const state = createInitialState(TALKERS_MAP);
+    expect(state.player).toMatchObject({ x: 104, y: 48 });
+    expect(state.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
+    expect(state.movers.map((mover) => mover.kind)).toStrictEqual(['person', 'dog']);
+    expect(state.movers[0]).toMatchObject({ x: 64, y: 48, wait: 600, target: 1, facing: 'down' });
+    expect(state.dialogue).toBeNull();
+  });
+
+  it('opens a dialogue with the colleague 40 px from the spawn, and closes it with the next press', () => {
+    const start = createInitialState(TALKERS_MAP);
+    const opened = update(start, TALK, TALKERS_MAP);
+    expect(opened.dialogue).toStrictEqual({ speaker: 'mover', index: 0, page: 0 });
+    expect(opened.movers[0]).toStrictEqual({ ...start.movers[0], facing: 'right' });
+    expect(opened.movers[1]).toStrictEqual(start.movers[1]);
+    expect(opened.figures).toStrictEqual(start.figures);
+    const closed = update(update(opened, NONE, TALKERS_MAP), TALK, TALKERS_MAP);
+    expect(closed.dialogue).toBeNull();
+    expect(closed.tick).toBe(3);
+  });
+
+  it('survives a JSON round trip with the colleague speaking (INV-1)', () => {
+    const opened = update(createInitialState(TALKERS_MAP), TALK, TALKERS_MAP);
+    expect(opened.dialogue).not.toBeNull();
+    expect(JSON.parse(JSON.stringify(opened))).toStrictEqual(opened);
   });
 });

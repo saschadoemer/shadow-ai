@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { NamedPoint } from '../../src/engine/tiled';
-import { CAST, type CastMember, figuresFrom, figuresOf, isFigurePoint } from '../../src/game/cast';
+import {
+  CAST,
+  type CastMember,
+  COLLEAGUES,
+  figuresFrom,
+  figuresOf,
+  isFigurePoint,
+  pagesOfRoute,
+} from '../../src/game/cast';
 import { creaturesFrom } from '../../src/game/creature';
 import { isRoutePoint, routesOf } from '../../src/game/mover';
 import { textKey } from '../../src/text/text';
@@ -88,5 +96,28 @@ describe('a figure point among the other points (0017)', () => {
     expect(creatures.map((creature) => [creature.species, creature.x])).toStrictEqual([
       ['snippet', 200],
     ]);
+  });
+});
+
+describe('the colleagues and their lines (0018)', () => {
+  it('gives each of the four routes of the floor one saying of one page', () => {
+    expect(COLLEAGUES).toStrictEqual([
+      { route: 'person:reception', pages: [textKey('talk.reception-everyday')] },
+      { route: 'person:marketing', pages: [textKey('talk.marketing-everyday')] },
+      { route: 'person:support', pages: [textKey('talk.support-everyday')] },
+      { route: 'person:sales', pages: [textKey('talk.sales-everyday')] },
+    ]);
+  });
+
+  it('finds the pages of a route, and none for a route without lines', () => {
+    expect(pagesOfRoute('person:sales')).toStrictEqual([textKey('talk.sales-everyday')]);
+    expect(pagesOfRoute('person:hr')).toStrictEqual([]);
+    expect(pagesOfRoute('dog:reception')).toStrictEqual([]);
+  });
+
+  it('reads a table it is given: the game passes its own', () => {
+    const table = [{ route: 'person:hr', pages: [FIRST] }];
+    expect(pagesOfRoute('person:hr', table)).toStrictEqual([FIRST]);
+    expect(pagesOfRoute('person:sales', table)).toStrictEqual([]);
   });
 });

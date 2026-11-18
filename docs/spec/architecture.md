@@ -19,7 +19,8 @@ src/
                  world data — densities, the lamp's strength, the upgrades — and its gating
                  check; game/shadow.ts the shadow walls, their light test and their step (0014);
                  game/notice.ts which notice a state shows (0016); game/cast.ts the cast and
-                 the standing figures of a map, game/talk.ts the rules of talking (0017)
+                 the standing figures of a map, and the colleagues' lines (0018),
+                 game/talk.ts the rules of talking (0017, 0018)
   render/        the Renderer interface and its Canvas 2D implementation; scaling and letterbox;
                  the draw order of a frame (draw-scene); render/font.ts the glyph order and the
                  cell size of the font, render/draw-text.ts text by TextKey, line by line
@@ -200,22 +201,33 @@ order (feature 0017, `game/cast`). `figure` is the index of the figure among
 the state: `update` and the scene rebuild the figures from `map.points` on every call and keep
 them nowhere. `facing` is `down` at the start and then where the figure turned the last time it
 was spoken to. A standing figure never moves and is not solid. `dialogue` is `null`, or
-`{ figure, page }`: the index of the figure that speaks and the page shown, from 0. `talkHeld` is
+`{ speaker, index, page }` (feature 0018): `speaker` is `'figure'` or `'mover'`, `index` the index
+of the speaker in `figures` or in `movers`, and `page` the page shown, from 0. `talkHeld` is
 the `talk` of the last step's input, false at the start; `talk` is **pressed** in a step when the
 input holds it and `talkHeld` is false (`game/talk`, `talkPressed`).
+
+The **speakers** of a step (feature 0018, `speakersOf` in `game/talk`) are the standing figures in
+file order, then the movers of the kind `person` whose route is in `COLLEAGUES` (`game/cast`), in
+the order of `movers`; each is where it is in this step — a figure at its point, a colleague at its
+`x` and `y` in the state, not rounded. Like the figures they are rebuilt on every call and kept
+nowhere. A person whose route has no lines, a dog, a vacuum and a drone are no speakers.
 
 A step is one of three kinds. **Dark:** with `dark` above 0 it is `stepDark`, as above. **Dialogue:**
 with a dialogue open, `tick` grows by 1, `talkHeld` is set, and a press turns to the next page or,
 on the last page, sets `dialogue` to `null`; nothing else changes — not the player, the lamp, the
 creatures, the movers or the walls. **Ordinary:** otherwise, a press while the input does not
-hold `lamp`, the player is not pushed and a figure stands at most 24 px (`TALK_DISTANCE`) from
-the player's feet opens a dialogue with the nearest one — the first in file order of two equally
-near — on page 0, and nothing else is stepped: the two turn to each other (left or right when the
-horizontal distance is the larger one, up or down otherwise, unchanged on the same spot), the
-player stands at phase 0, timer 0, the lamp is off, and `tick` grows by 1. Without such a press the
+hold `lamp`, the player is not pushed and a speaker stands at most 40 px (`TALK_DISTANCE`) from
+the player's feet and in sight opens a dialogue with the nearest one — the first in the speakers'
+order of two equally near — on page 0, and nothing else is stepped. In sight (`inSight`) is the
+lamp's `sightBlocked` between the centres of the two boxes, (x, y − 4) of each, against the opaque
+boxes of the map as loaded. The two turn to each other (left or right when the horizontal distance
+is the larger one, up or down otherwise, unchanged on the same spot), the player stands at phase
+0, timer 0, the lamp is off, and `tick` grows by 1. A colleague that is spoken to gets `frame` 0,
+`frameTimer` 0 and the facing toward the player, and nothing else of it changes, so `game/mover`
+steps it on unchanged after the dialogue. Without such a press the
 step is the one described above. Every step, of every kind, sets `talkHeld` from its input, so a
 key held down is pressed once. The wake keeps `figures` and `talkHeld` and has no dialogue. A
-state without figures, in which `talk` is never held, steps exactly as before 0017.
+state without speakers, in which `talk` is never held, steps exactly as before 0018.
 
 Static content — the tile map, tileset properties, sprite definitions, the language table — is
 not state. It is loaded once and passed in read-only. The rule of thumb: if it would be saved in a
@@ -370,7 +382,9 @@ A standing figure (feature 0017) is drawn from its own sheet, `<id>.png`, like a
 stands: frame facing × 5, top-left corner at (round(x) − 8 − camera.x, round(y) − 24 −
 camera.y). The figures are rebuilt from `map.points` every frame, as in `update`. While a dialogue
 is open the dialogue box is drawn in the notice's place, on the surface and not shifted by the
-camera, and no notice is drawn: a rectangle (8, 134, 304, 42) in `#181425` — the notice's bar
+camera, and no notice is drawn. The page is the speaker's (feature 0018): the scene finds it
+among the speakers of the frame with `speakerOf`, and draws no box when the map does not have it.
+The box is a rectangle (8, 134, 304, 42) in `#181425` — the notice's bar
 grown upwards to three lines, with the same bottom edge —, the page's lines left-aligned from
 (12, 138), and, while ⌊tick / 30⌋ is even, the marker: three rectangles in `#ffffff`, (299, 169,
 5, 1), (300, 170, 3, 1) and (301, 171, 1, 1), a small triangle that points down and blinks once a
@@ -769,7 +783,8 @@ A string of the table may hold line breaks; each starts a new line (feature 0017
 dialogue is one key of the kind `talk`, with at most three lines of at most 47 characters and no
 empty line; the break is written in the table, and the game computes none, so a translation
 decides its own breaks. A test holds every page of both languages to that rule; the glyph test
-skips the line breaks. The cast (`game/cast`) names its pages by key.
+skips the line breaks. The cast (`game/cast`) names its pages by key, and so does `COLLEAGUES`,
+the colleagues' lines by the name of their route (feature 0018).
 
 ## 9. Tooling
 

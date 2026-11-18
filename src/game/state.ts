@@ -99,10 +99,15 @@ export interface FigureState {
   readonly facing: Facing;
 }
 
-/** An open dialogue (0017). */
+/** Who speaks in a dialogue (0018): a standing figure of the cast, or a colleague on its round. */
+export const SPEAKER_KINDS = ['figure', 'mover'] as const;
+export type SpeakerKind = (typeof SPEAKER_KINDS)[number];
+
+/** An open dialogue (0017, 0018). */
 export interface Dialogue {
-  /** The index of the figure that speaks. */
-  readonly figure: number;
+  readonly speaker: SpeakerKind;
+  /** The index of the speaker in `GameState.figures` or in `GameState.movers`. */
+  readonly index: number;
   /** The page shown, from 0. */
   readonly page: number;
 }

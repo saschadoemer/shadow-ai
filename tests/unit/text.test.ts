@@ -63,6 +63,51 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the four sayings of the colleagues in both languages (0018)', () => {
+    const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
+      textOf(textKey(id), language).split('\n');
+    expect(lines('talk.reception-everyday', 'de')).toStrictEqual([
+      'Morgen! Heute haben schon drei Leute gefragt,',
+      'ob wir endlich ein WLAN für Gäste haben.',
+      'Ich sage dann immer: Frag die IT. Also dich.',
+    ]);
+    expect(lines('talk.reception-everyday', 'en')).toStrictEqual([
+      'Morning! Three people have asked already',
+      'whether we finally have a network for guests.',
+      'I always say: ask IT. So – you.',
+    ]);
+    expect(lines('talk.marketing-everyday', 'de')).toStrictEqual([
+      'Der Drucker druckt seit Montag alles doppelt.',
+      'Angeblich hat ihn jemand „optimiert“.',
+      'Ich hole trotzdem jedes Blatt einzeln ab.',
+    ]);
+    expect(lines('talk.marketing-everyday', 'en')).toStrictEqual([
+      'The printer has printed everything twice',
+      'since Monday. They say someone “optimised” it.',
+      'I still pick up every single sheet.',
+    ]);
+    expect(lines('talk.support-everyday', 'de')).toStrictEqual([
+      'Vierzig Tickets vor dem ersten Kaffee.',
+      'Die Hälfte davon in Sprachen, die hier',
+      'keiner spricht. Irgendwie geht es immer.',
+    ]);
+    expect(lines('talk.support-everyday', 'en')).toStrictEqual([
+      'Forty tickets before the first coffee.',
+      'Half of them in languages nobody here',
+      'speaks. Somehow it always works out.',
+    ]);
+    expect(lines('talk.sales-everyday', 'de')).toStrictEqual([
+      'Drei Angebote bis heute Abend, und jedes soll',
+      'klingen, als hätte ich eine Woche Zeit gehabt.',
+      'Erst mal Kaffee.',
+    ]);
+    expect(lines('talk.sales-everyday', 'en')).toStrictEqual([
+      'Three offers by tonight, and each one should',
+      'sound as if I had had a week for it.',
+      'Coffee first.',
+    ]);
+  });
+
   it('gives a page of talk at most three lines of at most 47 characters, none empty', () => {
     for (const language of LANGUAGES) {
       for (const [key, text] of Object.entries(TABLE[language])) {

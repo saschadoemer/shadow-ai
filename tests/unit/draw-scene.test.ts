@@ -794,7 +794,7 @@ describe('the dialogue box in the scene (0017)', () => {
     ...state({ x: 20, y: 30 }),
     tick,
     figures: [{ figure: 0, facing: 'left' }],
-    dialogue: { figure: 0, page },
+    dialogue: { speaker: 'figure', index: 0, page },
     overview: { current: 1, max: 2 },
   });
   const BOX = 'fillRect 8,134 304x42 #181425';
@@ -865,6 +865,43 @@ describe('the dialogue box in the scene (0017)', () => {
       'fillRect 0,0 320x30 #181425',
       'fillRect 0,150 320x30 #181425',
     ]);
+  });
+
+  it('draws the page of a colleague that speaks, and the colleague standing as it turned (0018)', () => {
+    const walking: SceneContent = {
+      ...CONTENT,
+      map: {
+        ...MAP,
+        points: [
+          { name: 'person:reception:1', x: 40, y: 20, pause: 600 },
+          { name: 'person:reception:2', x: 40, y: 28 },
+        ],
+      },
+    };
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      {
+        ...state({ x: 20, y: 30 }),
+        movers: [mover({ kind: 'person', x: 40, y: 20, facing: 'left' })],
+        dialogue: { speaker: 'mover', index: 0, page: 0 },
+      },
+      walking,
+    );
+    const after = renderer.calls.slice(renderer.calls.indexOf(BOX) + 1);
+    expect(after[0]).toBe('drawSprite 45 at 12,138');
+    expect(spritesOn(renderer, walking.fontSheet)).toHaveLength(108);
+    expect(renderer.calls).toContain('drawSprite 10 at 32,-4');
+  });
+
+  it('draws no box for a dialogue whose speaker the map does not have', () => {
+    const renderer = recordingRenderer();
+    drawScene(
+      renderer,
+      { ...state({ x: 20, y: 30 }), dialogue: { speaker: 'mover', index: 0, page: 0 } },
+      CONTENT,
+    );
+    expect(renderer.calls).not.toContain(BOX);
   });
 
   it('draws no box without a dialogue', () => {

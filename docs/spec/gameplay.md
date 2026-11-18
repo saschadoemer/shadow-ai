@@ -139,12 +139,19 @@ figure and turns the pages of what it says, F toggles fullscreen.
 Scrolling camera on a 320x180 internal resolution (`visual.md`). Movement,
 collision and camera behaviour are specified in the feature that introduces them.
 
-**As built** (feature 0017): a press of E or Enter within 24 px of a standing figure — between
-the feet of the two — opens a dialogue. The two turn to each other, and the figure's first page
+**As built** (feature 0017): a press of E or Enter within 40 px of a standing figure (feature
+0018; it was 24) — between the feet of the two — opens a dialogue. The two turn to each other, and the figure's first page
 appears in a box at the bottom of the screen. A press turns to the next page; a press on the
 last page closes the box. While it is open the world stands still: nothing moves, nothing can
 hurt the player, the lamp is off and the other keys do nothing. A press does not open a dialogue
 while the lamp is held or while the player is being pushed. A held key counts once.
+
+**As built** (feature 0018): the four colleagues who walk the floor can be spoken to as well. A
+press reaches a speaker — a standing figure or a colleague — at most 40 px away and in sight,
+that is with nothing opaque between the two: a counter, a desk or a chair does not stop a
+conversation, a wall does. The colleague stands where it is and turns to the player. Each has one
+saying of one page, the same every time. After it the colleague goes on its round, and keeps its
+facing until it moves.
 
 ## 9. Deliberately simple in the first draft
 

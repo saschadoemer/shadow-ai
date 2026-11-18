@@ -1,17 +1,21 @@
-import type { Point } from '../engine/tiled';
-import type { Figure } from './cast';
-import type { GameInput } from './player';
-import type { Dialogue, Facing, GameState } from './state';
+import { sightBlocked } from '../engine/collision';
+import type { Point, TileMap } from '../engine/tiled';
+import type { TextKey } from '../text/text';
+import { COLLEAGUES, type Colleague, type Figure, pagesOfRoute } from './cast';
+import type { Route } from './mover';
+import { BOX_HEIGHT, type GameInput } from './player';
+import type { Dialogue, Facing, GameState, MoverState, SpeakerKind } from './state';
 
 /**
- * Talking (gameplay.md §8, feature 0017). A press of `talk` next to a standing figure opens a
- * dialogue: the two turn to each other and the figure's first page is shown. A press turns to
- * the next page; a press on the last page closes the dialogue. While it is open nothing in
- * the world is stepped — time passes, and that is all. Pure data and pure functions.
+ * Talking (gameplay.md §8, features 0017 and 0018). A press of `talk` near a speaker — a
+ * standing figure, or a colleague on its round — opens a dialogue: the two turn to each other
+ * and the speaker's first page is shown. A press turns to the next page; a press on the last
+ * page closes the dialogue. While it is open nothing in the world is stepped — time passes,
+ * and that is all. Pure data and pure functions.
  */
 
-/** Tune: a tile and a half between the feet of the two. */
-export const TALK_DISTANCE = 24;
+/** Tune: two and a half tiles between the feet of the two — across a counter (0018). */
+export const TALK_DISTANCE = 40;
 
 /**
  * Whether `talk` is pressed in this step: the input holds it and the last step's did not. The
@@ -38,17 +42,82 @@ export function facingToward(from: Point, to: Point, current: Facing): Facing {
   return dy > 0 ? 'down' : 'up';
 }
 
+/** Someone who can be spoken to, where it is in this step: the feet in map pixels. */
+export interface Speaker extends Point {
+  readonly speaker: SpeakerKind;
+  /** The index in `GameState.figures` or in `GameState.movers`. */
+  readonly index: number;
+  readonly pages: readonly TextKey[];
+}
+
 /**
- * The index of the figure a press speaks to: the nearest whose feet are at most TALK_DISTANCE
- * from the player's, the first in the map's order of two equally near; null when none is.
+ * The speakers of a step (0018): the standing figures in the map's order, then the colleagues
+ * — the movers of the kind `person` whose route has lines — in the order of the state's
+ * movers. A person without lines, a dog, a vacuum and a drone are no speakers.
  */
-export function figureInReach(player: Point, figures: readonly Figure[]): number | null {
-  let nearest: number | null = null;
+export function speakersOf(
+  figures: readonly Figure[],
+  movers: readonly MoverState[],
+  routes: readonly Route[],
+  colleagues: readonly Colleague[] = COLLEAGUES,
+): Speaker[] {
+  const standing = figures.map(
+    (figure, index): Speaker => ({
+      speaker: 'figure',
+      index,
+      x: figure.x,
+      y: figure.y,
+      pages: figure.pages,
+    }),
+  );
+  const walking = movers.flatMap((mover, index): Speaker[] => {
+    const pages =
+      mover.kind === 'person' ? pagesOfRoute(routes[mover.route]?.name ?? '', colleagues) : [];
+    return pages.length === 0 ? [] : [{ speaker: 'mover', index, x: mover.x, y: mover.y, pages }];
+  });
+  return [...standing, ...walking];
+}
+
+/** The speaker of a dialogue among the speakers of the step; undefined when it is not there. */
+export function speakerOf(dialogue: Dialogue, speakers: readonly Speaker[]): Speaker | undefined {
+  return speakers.find(
+    (speaker) => speaker.speaker === dialogue.speaker && speaker.index === dialogue.index,
+  );
+}
+
+/**
+ * In sight (0018): no opaque box of the map lies on the line from the centre of the player's
+ * box to the point as high above the other's feet. The lamp's test, against the map as loaded:
+ * a wall stops a conversation; a counter, a desk or a chair does not.
+ */
+export function inSight(player: Point, place: Point, map: TileMap): boolean {
+  return !sightBlocked(
+    { x: player.x, y: player.y - BOX_HEIGHT / 2 },
+    { x: place.x, y: place.y - BOX_HEIGHT / 2 },
+    { width: map.width, height: map.height, solids: map.opaque },
+  );
+}
+
+/**
+ * The speaker a press speaks to: the nearest whose feet are at most TALK_DISTANCE from the
+ * player's and who is in sight, the first in the speakers' order of two equally near; null
+ * when none is.
+ */
+export function speakerInReach(
+  player: Point,
+  speakers: readonly Speaker[],
+  map: TileMap,
+): Speaker | null {
+  let nearest: Speaker | null = null;
   let reach = TALK_DISTANCE;
-  for (const [index, figure] of figures.entries()) {
-    const distance = Math.hypot(figure.x - player.x, figure.y - player.y);
-    if (distance <= reach && (nearest === null || distance < reach)) {
-      nearest = index;
+  for (const speaker of speakers) {
+    const distance = Math.hypot(speaker.x - player.x, speaker.y - player.y);
+    if (
+      distance <= reach &&
+      (nearest === null || distance < reach) &&
+      inSight(player, speaker, map)
+    ) {
+      nearest = speaker;
       reach = distance;
     }
   }
@@ -57,22 +126,22 @@ export function figureInReach(player: Point, figures: readonly Figure[]): number
 
 /**
  * The state after a press that opens a dialogue, or null when this step opens none: `talk` is
- * not pressed, the lamp is held, the player is being pushed, or no figure is in reach. The
- * player and the figure turn to each other, the player stands, the lamp is off; nothing else
- * is stepped.
+ * not pressed, the lamp is held, the player is being pushed, or no speaker is in reach. The
+ * player and the speaker turn to each other, the player stands, a colleague stands where it
+ * is, the lamp is off; nothing else is stepped.
  */
 export function openDialogue(
   state: GameState,
   input: GameInput,
-  figures: readonly Figure[],
+  speakers: readonly Speaker[],
+  map: TileMap,
 ): GameState | null {
   if (!talkPressed(state, input) || input.lamp || state.player.recoil.steps > 0) {
     return null;
   }
   const { player } = state;
-  const index = figureInReach(player, figures);
-  const figure = index === null ? undefined : figures[index];
-  if (index === null || figure === undefined) {
+  const speaker = speakerInReach(player, speakers, map);
+  if (speaker === null) {
     return null;
   }
   return {
@@ -81,17 +150,33 @@ export function openDialogue(
     talkHeld: true,
     player: {
       ...player,
-      facing: facingToward(player, figure, player.facing),
+      facing: facingToward(player, speaker, player.facing),
       frame: 0,
       frameTimer: 0,
     },
     lamp: { on: false, strength: state.lamp.strength },
-    figures: state.figures.map((standing) =>
-      standing.figure === index
-        ? { figure: index, facing: facingToward(figure, player, standing.facing) }
-        : standing,
-    ),
-    dialogue: { figure: index, page: 0 },
+    figures:
+      speaker.speaker === 'figure'
+        ? state.figures.map((standing, index) =>
+            index === speaker.index
+              ? { ...standing, facing: facingToward(speaker, player, standing.facing) }
+              : standing,
+          )
+        : state.figures,
+    movers:
+      speaker.speaker === 'mover'
+        ? state.movers.map((mover, index) =>
+            index === speaker.index
+              ? {
+                  ...mover,
+                  facing: facingToward(speaker, player, mover.facing),
+                  frame: 0,
+                  frameTimer: 0,
+                }
+              : mover,
+          )
+        : state.movers,
+    dialogue: { speaker: speaker.speaker, index: speaker.index, page: 0 },
   };
 }
 
@@ -103,14 +188,14 @@ export function stepDialogue(
   state: GameState,
   dialogue: Dialogue,
   input: GameInput,
-  figures: readonly Figure[],
+  speakers: readonly Speaker[],
 ): GameState {
-  const pages = figures[dialogue.figure]?.pages.length ?? 0;
+  const pages = speakerOf(dialogue, speakers)?.pages.length ?? 0;
   const page = talkPressed(state, input) ? dialogue.page + 1 : dialogue.page;
   return {
     ...state,
     tick: state.tick + 1,
     talkHeld: input.talk,
-    dialogue: page < pages ? { figure: dialogue.figure, page } : null,
+    dialogue: page < pages ? { ...dialogue, page } : null,
   };
 }

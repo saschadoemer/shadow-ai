@@ -26,6 +26,29 @@ export const CAST: readonly CastMember[] = [
   },
 ];
 
+/** The lines of a colleague who walks the floor (0018), by the name of its route. */
+export interface Colleague {
+  /** The route's name, `person:<room>`. */
+  readonly route: string;
+  /** What it says, page by page; at least one. */
+  readonly pages: readonly TextKey[];
+}
+
+export const COLLEAGUES: readonly Colleague[] = [
+  { route: 'person:reception', pages: [textKey('talk.reception-everyday')] },
+  { route: 'person:marketing', pages: [textKey('talk.marketing-everyday')] },
+  { route: 'person:support', pages: [textKey('talk.support-everyday')] },
+  { route: 'person:sales', pages: [textKey('talk.sales-everyday')] },
+];
+
+/** The pages of the colleague on a route; none when the route has no lines. */
+export function pagesOfRoute(
+  route: string,
+  colleagues: readonly Colleague[] = COLLEAGUES,
+): readonly TextKey[] {
+  return colleagues.find((colleague) => colleague.route === route)?.pages ?? [];
+}
+
 export function isFigurePoint(name: string): boolean {
   return name.startsWith(FIGURE_PREFIX);
 }

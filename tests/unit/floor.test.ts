@@ -5,10 +5,10 @@ import { describe, expect, it } from 'vitest';
 import { cameraFor } from '../../src/engine/camera';
 import { moveBox } from '../../src/engine/collision';
 import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../src/engine/tiled';
-import { figuresOf } from '../../src/game/cast';
+import { COLLEAGUES, figuresOf, pagesOfRoute } from '../../src/game/cast';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
 import { standingWalls, wallsOf, withWalls } from '../../src/game/shadow';
-import { TALK_DISTANCE } from '../../src/game/talk';
+import { speakerInReach, speakersOf, TALK_DISTANCE } from '../../src/game/talk';
 import { createInitialState } from '../../src/game/update';
 import {
   type CellRect,
@@ -1119,5 +1119,66 @@ describe('the standing figures of the floor (0017)', () => {
         ).toBeGreaterThan(TALK_DISTANCE);
       });
     }
+  });
+});
+
+describe('the colleagues of the floor and their lines (0018)', () => {
+  const routes = routesOf(floor.points);
+  const start = createInitialState(floor);
+  /** The speakers of the floor with the colleague of `route` put on its point `n`, from 1. */
+  const speakersWith = (route: string, n: number) => {
+    const index = routes.findIndex((candidate) => candidate.name === route);
+    const at = routes[index]?.points[n - 1] ?? { x: -1, y: -1 };
+    const movers = start.movers.map((mover) =>
+      mover.route === index ? { ...mover, x: at.x, y: at.y } : mover,
+    );
+    return { at, speakers: speakersOf(figuresOf(floor.points), movers, routes) };
+  };
+
+  it('gives every person route its lines, and has no lines for a route the floor lacks', () => {
+    const persons = routes.filter((route) => route.kind === 'person').map((route) => route.name);
+    expect(persons).toStrictEqual(COLLEAGUES.map((colleague) => colleague.route));
+    for (const name of persons) {
+      expect(pagesOfRoute(name), name).toHaveLength(1);
+    }
+  });
+
+  it('has five speakers: the officer, then the four colleagues in the order of the movers', () => {
+    const speakers = speakersOf(figuresOf(floor.points), start.movers, routes);
+    expect(speakers.map((speaker) => [speaker.speaker, speaker.index])).toStrictEqual([
+      ['figure', 0],
+      ['mover', 0],
+      ['mover', 1],
+      ['mover', 2],
+      ['mover', 3],
+    ]);
+  });
+
+  it('reaches the colleague of the reception across the counter', () => {
+    const { at, speakers } = speakersWith('person:reception', 1);
+    expect(at).toMatchObject({ x: 200, y: 648 });
+    expect(reached({ x: 200, y: 680 })).toBe(true);
+    expect(blocked(boxAt({ x: 200, y: 664 }))).toBe(true);
+    expect(speakerInReach({ x: 200, y: 680 }, speakers, floor)).toMatchObject({
+      speaker: 'mover',
+      index: 0,
+    });
+    // 40 px is enough for the 32 px across the counter, a tile to either side.
+    expect(speakerInReach({ x: 176, y: 680 }, speakers, floor)?.index).toBe(0);
+    expect(speakerInReach({ x: 224, y: 680 }, speakers, floor)?.index).toBe(0);
+  });
+
+  it('does not reach the colleague of Sales at the coffee from the north corridor', () => {
+    const { at, speakers } = speakersWith('person:sales', 3);
+    expect(at).toMatchObject({ x: 1672, y: 440 });
+    expect(reached({ x: 1672, y: 416 })).toBe(true);
+    expect(Math.hypot(0, 440 - 416)).toBeLessThan(TALK_DISTANCE);
+    expect(speakerInReach({ x: 1672, y: 416 }, speakers, floor)).toBeNull();
+    // From inside the room, as far below the colleague, it is reached.
+    expect(reached({ x: 1672, y: 464 })).toBe(true);
+    expect(speakerInReach({ x: 1672, y: 464 }, speakers, floor)).toMatchObject({
+      speaker: 'mover',
+      index: 3,
+    });
   });
 });

@@ -54,7 +54,8 @@ to four points and waits a pause at each; there is no random wandering and no pa
 mover leaves its room. Nothing that moves is solid: the figure, the creatures and the light pass
 through it. A colleague, a dog or a vacuum stands while the figure's feet are closer than 20 px;
 a drone flies on. The routes live in the map's `objects` layer; the tables in
-`docs/features/0015-the-moving-floor.md` are the routes until the art pass.
+`docs/features/0015-the-moving-floor.md` are the routes until the art pass. Since feature 0018
+the four colleagues can be spoken to, and stop where they are while they speak.
 
 | Region | Role |
 |---|---|
@@ -145,7 +146,8 @@ Kept as small as the story allows. About thirty figures in all.
   Since feature 0017 she stands in her office at tile (16, 29), two tiles from the wake point,
   and can be spoken to. She says the three sentences that explain the shadow and the lamp, the
   same two pages every time, until M5 brings the first meeting. She has no name yet and is not
-  solid: the player walks through her.
+  solid: the player walks through her. Feature 0018 changed nothing for her but the distance
+  from which she can be spoken to: 40 px, and in sight.
 - **The vendor.** See `vision.md` §4. Recurring in every department, never an enemy, changing
   over the game from seller to advisor. As advisor he supplies the approved alternatives that
   solve the later cases.
@@ -158,7 +160,7 @@ Kept as small as the story allows. About thirty figures in all.
 - **Per department, three to five figures.** The source, the head of department, two or three
   colleagues with hints and everyday lines.
   The colleagues of the reception, Marketing, Support and Sales walk the floor since feature
-  0015, without a name and without a line; their lines come with M4.
+  0015. Since feature 0018 each has one everyday saying; they still have no name.
 - **The managing director.** The last case.
 - **The customer.** A voice on the phone at the start. One line in the epilogue: he called again.
 
