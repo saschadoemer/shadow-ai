@@ -20,11 +20,16 @@ export const NOTICE_TRACE_FOUND: TextKey = textKey('notice.trace-found');
 /** Tune: two seconds from the find. */
 export const TRACE_NOTICE_STEPS = 120;
 
+/** The lamp's key (0026): shown from the step the lamp is handed over until it is held once. */
+export const NOTICE_LAMP: TextKey = textKey('notice.lamp');
+
 /**
  * The notice a state shows, or null. A wall that is lit with a count of 0 is a wall the light
  * is on and cannot lift: a wall that gives way counts from 1 in its first step; that notice
  * comes first. Then, for CASE_NOTICE_STEPS steps from the solving step, that a case is solved
  * (0024). Then, for TRACE_NOTICE_STEPS steps from the last find, that a trace was found (0022).
+ * Last, while the lamp is owned and was never on, the line that names its key (0026): it has no
+ * time, and it does not come back.
  */
 export function noticeOf(state: GameState): TextKey | null {
   const holds = state.shadowWalls.some((wall) => wall.lit && wall.light === 0);
@@ -38,5 +43,8 @@ export function noticeOf(state: GameState): TextKey | null {
   const found = state.traces.some(
     (trace) => trace.found !== null && state.tick - trace.found < TRACE_NOTICE_STEPS,
   );
-  return found ? NOTICE_TRACE_FOUND : null;
+  if (found) {
+    return NOTICE_TRACE_FOUND;
+  }
+  return state.lamp.owned && !state.lamp.used ? NOTICE_LAMP : null;
 }
