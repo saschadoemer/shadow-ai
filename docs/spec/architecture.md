@@ -25,7 +25,7 @@ src/
                  journal's tabs, entries and step (0020); game/rects.ts the kinds of
                  rectangle a map holds, by the prefix of the name; game/trace.ts the traces,
                  their light test, their step and the entries of the cases tab (0022);
-                 game/help.ts the help's step and when the start hint is due (0021);
+                 game/help.ts the help's step (0021);
                  game/region.ts the areas of the regions and the veil of a cell (0023), the
                  cleared regions and the veil of a clearing (0025);
                  game/cases.ts the cases, when one is ready, what its source says, the
@@ -136,14 +136,13 @@ start, and kept in the state so a saved game comes back as it was left.
 types and constants only.
 
 There are two starts (feature 0026). `createInitialState(map)` is a game **past its opening**:
-no dialogue open, the lamp owned and used, `started` 0. The tests of the earlier features step
+no dialogue open, the lamp owned and used. The tests of the earlier features step
 from it. `newGame(map)` is what a player gets, and what `main.ts` starts with: the same state
-with `dialogue` `{ speaker: 'story', index: 0, page: 0 }` — the call on its first page —,
-`lamp` `{ on: false, strength: 1, owned: false, used: false }` and `started` `null`.
+with `dialogue` `{ speaker: 'story', index: 0, page: 0 }` — the call on its first page — and
+`lamp` `{ on: false, strength: 1, owned: false, used: false }`.
 
-`started` is the `tick` of the step in which the game's opening ended, or `null` while it has
-not (feature 0026). The step that closes the call sets it to its own `tick`; no other step
-changes it, and the wake keeps it. The start hint of the help counts from it (§5).
+The state does not record when the opening ended. Feature 0026 kept that as `started`, for the
+start hint of the help alone; feature 0031 took the hint and the field away.
 
 `lamp` is `{ on, strength, owned, used }` (features 0007, 0014, 0026): `owned` says whether the
 player has the lamp, and `used` whether it was on in any step since — `false` after the first
@@ -306,10 +305,8 @@ traces in every frame by `caseEntries` (feature 0022). A solved case's entry als
 outcome, `outcomeOf`; the policy's blocks are the solved cases' blocks in the order they were
 solved, `policyBlocks` — both derived from `solved` in every frame (feature 0024).
 `help` is a boolean, `false` at the start: whether the help is open (feature 0021,
-`game/help`). The rows the help shows and whether the start hint is due are not in the state:
-the rows are constants of `render/draw-help`, and the hint is derived from `tick` and `started`
-in every frame (`startHintDue`, feature 0026: `started` is not `null` and `tick` − `started` <
-`HELP_HINT_STEPS`; `helpHintDue` is the same test on the steps since the start).
+`game/help`). The rows the help shows and the label that names its key (feature 0031) are not
+in the state: they are constants of `render/draw-help`, and no rule of the game reads them.
 
 The **speakers** of a step (feature 0018, `speakersOf` in `game/talk`) are the standing figures in
 file order, then the movers of the kind `person` whose route is in `COLLEAGUES` (`game/cast`), in
@@ -347,9 +344,8 @@ the left and the upper edge included) leaves `creatures`, wherever it is; `captu
 change, and a creature at home outside the region stays. The step changes
 `tick`, `held`, `dialogue`, `solved`, `overview`, `shadowWalls` and `creatures` and nothing
 else; no other step solves a case, and a solved case is not solved again. The wake brings back
-only the creatures still in `creatures`, so none that left this way. Two more closings change
-something (feature 0026): the step that closes the call — the scene `OPENING_SCENE`, while
-`started` is `null` — sets `started` to its `tick`; and the step that closes the first meeting
+only the creatures still in `creatures`, so none that left this way. One more closing changes
+something (feature 0026): the step that closes the first meeting
 (`isFirstMeeting`: the lamp is not owned, and the speaker is the figure of `FIRST_MEETING`) sets
 `lamp.owned` to `true` and leaves `lamp.used` `false`. Closing any other dialogue changes
 neither. **Ordinary:** otherwise, a press of `journal` opens the journal on `creatures`, whatever else
@@ -495,7 +491,7 @@ over the cells under shadow (feature 0023) and over those of a region that is cl
 the light is on in array order (feature 0022), the ground movers whose feet y is at most the player's in array order, the standing figures whose feet y is
 at most the player's (feature 0017), the creatures in array order, the player, the other
 standing figures, the other ground movers in array order, `above` (§6), the drones (feature
-0015), the hearts of overview, the dialogue box while a dialogue is open or else the notice
+0015), the hearts of overview, the help label (feature 0031), the dialogue box while a dialogue is open or else the notice
 (features 0016, 0017), the help while it is open (feature 0021), the lids of the dark. A ground mover is a person, a dog or a vacuum; comparing the feet makes walking past a colleague read as depth, and a
 drone flies over the tops of `above`. The player's sprite has its top-left corner at
 (round(x) − 8 − camera.x, round(y) − 24 − camera.y): the feet are the bottom centre of the
@@ -563,8 +559,20 @@ camera: heart i, for i below `max`, has its top-left corner at (4 + 10i, 4), wit
 steps, stay closed for 30 and open in 30. While `grace` is above 0 the player's sprite is left
 out in every frame in which ⌊grace / 4⌋ is odd; the cone is drawn as before.
 
+The help label (feature 0031, `drawHelpLabel` in `render/draw-help`) is drawn on the surface,
+not shifted by the camera, directly after the hearts, in every frame in which the scene draws
+the world: nothing of the state decides it — not `tick`, not a dialogue, not a notice, not the
+help, not the dark. With n the number of characters of the key `help.label` in the language of
+the settings, `helpLabelPlace(n)` gives the frame, a rectangle (311 − 6n, 4, 6n + 5, 14) in
+`#3a4466`; the field, (312 − 6n, 5, 6n + 3, 12) in `#181425`; and the origin of the words,
+(314 − 6n, 6). In German that is (269, 4, 47, 14), (270, 5, 45, 12) and (272, 6); in English
+(275, 4, 41, 14), (276, 5, 39, 12) and (278, 6). The frame ends 4 px from the surface's right
+edge in every language. A label of 8 characters, the most the rule allows, begins at x = 263,
+right of seven hearts, which end at x = 71; the label ends at y = 17, above the help's box. The
+journal's screen has no label: its third tab has that corner.
+
 The notice (feature 0016) is drawn on the surface, not shifted by the camera, after the hearts
-and before the lids: when `game/notice` names one, a rectangle (8, 158, 304, 18) in `#181425`,
+and the help label and before the lids: when `game/notice` names one, a rectangle (8, 158, 304, 18) in `#181425`,
 then its line, a string of n characters from (160 − 3n, 162). The bar leaves 4 px around the
 10 px line and holds at most 49 characters; a test holds every notice of the table to that in
 both languages. Text is drawn by `render/draw-text`, the one function that draws it: it takes a
@@ -589,15 +597,13 @@ every frame. `SceneContent` holds loaded content only. Every text of the scene i
 `language`. The language line, the key `notice.language`, is drawn like the notice — the bar
 (8, 158, 304, 18) in `#181425` and the line centred in it — when `switchedAt` is not null and
 0 ≤ `tick` − `switchedAt` < `LANGUAGE_NOTICE_STEPS` (120, two seconds), no dialogue is open and
-no notice shows. The start hint (feature 0021), the key `notice.help`, is drawn the same way
-when it is due — `startHintDue` in `game/help`: the opening has ended, `started` is not `null`,
-and `tick` − `started` < `HELP_HINT_STEPS` (600, ten seconds; feature 0026, it was `tick` <
-600) —, no dialogue is open, no notice shows and the language line is not due. The dialogue box comes first, then the
-notice, then the language line, then the start hint: where a text is on screen, that text
-changes with the language and is the answer to a switch. `quietLine` names the line of the bar
-where no dialogue is open and no notice shows: none while the help is open, else the language
-line when it is due, else the start hint when it is due. The lids of the dark close over the
-line as over everything.
+no notice shows. The dialogue box comes first, then the notice, then the language line: where
+a text is on screen, that text changes with the language and is the answer to a switch.
+`quietLine` names the line of the bar where no dialogue is open and no notice shows: none while
+the help is open, else the language line when it is due, else none. The start hint of feature
+0021, a line that named the help's key for ten seconds, had the last place in the bar until
+feature 0031 replaced it with the help label. The lids of the dark close over the line as over
+everything.
 
 A standing figure (feature 0017) is drawn from its own sheet, `<id>.png`, like a colleague who
 stands: frame facing × 5, top-left corner at (round(x) − 8 − camera.x, round(y) − 24 −
@@ -636,8 +642,8 @@ second ending at y = 142. `draw-journal` imports only types
 from `draw-scene`, and `draw-scene` imports `drawJournal`.
 
 The help (feature 0021, `render/draw-help`). While `help` is `true`, `drawScene` draws what it
-draws otherwise — the world with its hearts and the dialogue box or the notice, or the journal —
-but neither the language line nor the start hint, and then the help: after everything else and
+draws otherwise — the world with its hearts, the help label and the dialogue box or the notice,
+or the journal — but not the language line, and then the help: after everything else and
 before the lids, and after the journal when the journal is open. The lids never meet it: the
 help does not open in the dark, and no dark begins while it is open. In the language of the
 settings, on the surface and not shifted by the camera, it draws the frame, a rectangle
@@ -648,7 +654,7 @@ fullscreen, help — row k from 0 with its key from (56, 38 + 12k) and what it d
 of 16 characters ends at x = 266; the last row ends at y = 120, 7 px above the field's lower
 edge. The box keeps clear of the hearts (to y = 12), the journal's tabs and rule (to y = 24) and
 the dialogue box (from y = 134). `draw-help` imports nothing from `draw-scene`, and `draw-scene`
-imports `drawHelp`.
+imports `drawHelp` and `drawHelpLabel`.
 
 The interface exists so the implementation can change (ADR-0001 names PixiJS as the candidate)
 without touching `game/`. It is not an abstraction for its own sake: it has exactly one
@@ -1160,9 +1166,10 @@ one line of at most 24 characters, and every region with a trace on the floor ha
 of a language: `render/draw-text` draws it with `drawNumber`, which takes a number and nothing
 else, and it needs no key; `drawText` still takes a `TextKey` only.
 
-The help (feature 0021) adds the key `notice.help`, the start hint, one line that the notice's
-bar holds like every notice, and one kind. `help.key-<what>` is the name of a key, one line of
-at most 17 characters; `help.do-<what>` what it does, one line of at most 16. `HELP_ROWS` in
+The help (feature 0021) adds one kind. `help.key-<what>` is the name of a key, one line of
+at most 17 characters; `help.do-<what>` what it does, one line of at most 16; and `help.label`
+(feature 0031) the words of the help label, one line of at most 8. The key `notice.help`, the
+start hint of 0021, is gone with feature 0031. `HELP_ROWS` in
 `render/draw-help` names them by key, seven rows in the order walk, lamp, talk, journal,
 language, fullscreen, help; a test holds every key of the kind to the rule of its kind in both
 languages. The letter of a key is a string of the table like every other text, also where it is
