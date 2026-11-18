@@ -40,3 +40,21 @@ export function drawText(
     column += 1;
   }
 }
+
+/**
+ * A whole number of 0 or more (0022): its decimal digits from the left, digit n with its
+ * top-left corner at (x + 6n, y). It takes a number and nothing else — a number is no text of
+ * a language and needs no key (INV-4); words still go through `drawText`.
+ */
+export function drawNumber(
+  renderer: Renderer,
+  font: SpriteSheet,
+  value: number,
+  x: number,
+  y: number,
+): void {
+  const digits = String(Math.max(0, Math.floor(value)));
+  for (const [n, digit] of [...digits].entries()) {
+    renderer.drawSprite(font, glyphIndex(digit), x + n * GLYPH_WIDTH, y);
+  }
+}

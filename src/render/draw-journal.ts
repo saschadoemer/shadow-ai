@@ -1,9 +1,10 @@
 import type { Box, Point } from '../engine/tiled';
-import { ENTRY_TEXT, entriesOf, TAB_TEXT } from '../game/journal';
+import { CASE_TEXT, ENTRY_TEXT, entriesOf, REGION_NAME, TAB_TEXT } from '../game/journal';
 import { type GameState, JOURNAL_TABS, type JournalState } from '../game/state';
-import { textOf } from '../text/text';
+import { caseEntries, tracesOf } from '../game/trace';
+import { type TextKey, textOf } from '../text/text';
 import type { SceneContent, SceneSettings } from './draw-scene';
-import { drawText } from './draw-text';
+import { drawNumber, drawText } from './draw-text';
 import { GLYPH_WIDTH } from './font';
 import { PAGE_BACKGROUND, type PaletteColour } from './palette';
 import type { Renderer } from './renderer';
@@ -35,6 +36,10 @@ export const ENTRY_LINES: Point = { x: 16, y: 54 };
 export const ENTRY_PITCH = 72;
 /** The creature as the light shows it: the frozen frame of its sheet. */
 export const ENTRY_FRAME = 2;
+/** A case k, from 0, starts CASE_PITCH below case k − 1: the region's name, then its traces (0022). */
+export const CASE_NAME: Point = { x: 16, y: 36 };
+export const CASE_LINE: Point = { x: 16, y: 48 };
+export const CASE_PITCH = 36;
 
 /** The rectangle of tab k. */
 export function tabBox(k: number): Box {
@@ -79,9 +84,11 @@ export function drawJournal(
     JOURNAL_RULE.height,
     TAB_OPEN,
   );
-  // Only the creatures have entries so far; the cases and the policy come with M5.
   const entries = journal.tab === 'creatures' ? entriesOf(state.captured) : [];
-  if (entries.length === 0) {
+  // The cases are the regions with a found trace (0022); the policy comes with M5.
+  const cases =
+    journal.tab === 'cases' ? caseEntries(state.traces, tracesOf(content.map.rects)) : [];
+  if (entries.length === 0 && cases.length === 0) {
     drawText(
       renderer,
       content.fontSheet,
@@ -91,6 +98,28 @@ export function drawJournal(
       NOTHING_TEXT.y,
     );
     return;
+  }
+  for (const [k, entry] of cases.entries()) {
+    const down = k * CASE_PITCH;
+    const name = REGION_NAME[entry.region];
+    if (name !== undefined) {
+      drawText(renderer, content.fontSheet, name, language, CASE_NAME.x, CASE_NAME.y + down);
+    }
+    // `Spuren: 1 von 5`: four parts, one empty cell between two.
+    let x = CASE_LINE.x;
+    const y = CASE_LINE.y + down;
+    const word = (key: TextKey): void => {
+      drawText(renderer, content.fontSheet, key, language, x, y);
+      x += (textOf(key, language).length + 1) * GLYPH_WIDTH;
+    };
+    const count = (value: number): void => {
+      drawNumber(renderer, content.fontSheet, value, x, y);
+      x += (String(value).length + 1) * GLYPH_WIDTH;
+    };
+    word(CASE_TEXT.traces);
+    count(entry.found);
+    word(CASE_TEXT.of);
+    count(entry.all);
   }
   for (const [k, species] of entries.entries()) {
     const down = k * ENTRY_PITCH;
