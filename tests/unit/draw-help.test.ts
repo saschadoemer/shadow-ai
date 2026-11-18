@@ -3,6 +3,7 @@ import { NO_INPUT } from '../../src/game/player';
 import { type GameState, NO_RECOIL } from '../../src/game/state';
 import {
   drawHelp,
+  drawHelpLabel,
   HELP_DOES,
   HELP_DOES_CAPACITY,
   HELP_FIELD,
@@ -10,14 +11,18 @@ import {
   HELP_FRAME_COLOUR,
   HELP_KEY_CAPACITY,
   HELP_KEYS,
+  HELP_LABEL,
+  HELP_LABEL_CAPACITY,
   HELP_ROW_PITCH,
   HELP_ROWS,
+  helpLabelPlace,
 } from '../../src/render/draw-help';
 import { JOURNAL_RULE } from '../../src/render/draw-journal';
 import {
   DIALOGUE_BOX,
   drawScene,
   HEART_MARGIN,
+  HEART_PITCH,
   HEART_SIZE,
   type SceneContent,
   type SceneSettings,
@@ -223,6 +228,87 @@ describe('the help on the surface (0021)', () => {
     drawHelp(renderer, CONTENT.fontSheet, 'de');
     expect(renderer.calls.filter((call) => call.startsWith('fillRect'))).toHaveLength(2);
     expect(renderer.sheets).toHaveLength(111);
+    expect(renderer.sheets.every((used) => used === CONTENT.fontSheet)).toBe(true);
+  });
+});
+
+describe('the help label on the surface (0031)', () => {
+  const label = (language: SceneSettings['language']): string[] => {
+    const renderer = recordingRenderer();
+    drawHelpLabel(renderer, CONTENT.fontSheet, language);
+    return renderer.calls;
+  };
+
+  it('is the key `help.label`, of at most 8 characters in both languages', () => {
+    expect(HELP_LABEL).toBe(textKey('help.label'));
+    expect(HELP_LABEL_CAPACITY).toBe(8);
+    for (const language of LANGUAGES) {
+      expect(textOf(HELP_LABEL, language).length, language).toBeLessThanOrEqual(
+        HELP_LABEL_CAPACITY,
+      );
+    }
+  });
+
+  it('places the frame, the field and the words by the number of characters', () => {
+    for (const n of [1, 6, 7, 8]) {
+      expect(helpLabelPlace(n), `${n} characters`).toStrictEqual({
+        frame: { x: 311 - 6 * n, y: 4, width: 6 * n + 5, height: 14 },
+        field: { x: 312 - 6 * n, y: 5, width: 6 * n + 3, height: 12 },
+        text: { x: 314 - 6 * n, y: 6 },
+      });
+    }
+    expect(helpLabelPlace(7).frame).toStrictEqual({ x: 269, y: 4, width: 47, height: 14 });
+    expect(helpLabelPlace(6).frame).toStrictEqual({ x: 275, y: 4, width: 41, height: 14 });
+  });
+
+  it('ends 4 px from the right edge and begins 4 px from the top, whatever its length', () => {
+    for (const n of [1, 6, 7, 8]) {
+      const { frame } = helpLabelPlace(n);
+      expect(frame.x + frame.width, `${n} characters`).toBe(316);
+      expect(frame.y).toBe(HEART_MARGIN);
+    }
+  });
+
+  it('keeps clear of seven hearts and of the box of the help', () => {
+    const longest = helpLabelPlace(HELP_LABEL_CAPACITY).frame;
+    // Seven hearts (0028) end at x = 71.
+    expect(HEART_MARGIN + 6 * HEART_PITCH + HEART_SIZE).toBe(72);
+    expect(longest.x).toBe(263);
+    expect(longest.y + longest.height).toBe(18);
+    expect(longest.y + longest.height).toBeLessThan(HELP_FRAME.y);
+  });
+
+  it('draws the frame, the field and `H Hilfe` in German', () => {
+    // `H` is glyph 40, `i` 73, `l` 76, `f` 70, `e` 69; the space is not drawn.
+    expect(label('de')).toStrictEqual([
+      'fillRect 269,4 47x14 #3a4466',
+      'fillRect 270,5 45x12 #181425',
+      'drawSprite 40 at 272,6',
+      'drawSprite 40 at 284,6',
+      'drawSprite 73 at 290,6',
+      'drawSprite 76 at 296,6',
+      'drawSprite 70 at 302,6',
+      'drawSprite 69 at 308,6',
+    ]);
+  });
+
+  it('draws `H Help` in English: narrower, with the same right edge', () => {
+    // `p` is glyph 80.
+    expect(label('en')).toStrictEqual([
+      'fillRect 275,4 41x14 #3a4466',
+      'fillRect 276,5 39x12 #181425',
+      'drawSprite 40 at 278,6',
+      'drawSprite 40 at 290,6',
+      'drawSprite 69 at 296,6',
+      'drawSprite 76 at 302,6',
+      'drawSprite 80 at 308,6',
+    ]);
+  });
+
+  it('draws its glyphs from the font sheet and nothing else', () => {
+    const renderer = recordingRenderer();
+    drawHelpLabel(renderer, CONTENT.fontSheet, 'de');
+    expect(renderer.sheets).toHaveLength(6);
     expect(renderer.sheets.every((used) => used === CONTENT.fontSheet)).toBe(true);
   });
 });
