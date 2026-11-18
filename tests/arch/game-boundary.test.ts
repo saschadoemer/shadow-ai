@@ -69,6 +69,18 @@ describe('src/game/ touches no browser and no renderer (INV-2)', () => {
     expect(checkGameSource('src/game/ok.ts', source)).toStrictEqual([]);
   });
 
+  it('reports the type Language: the game does not know the language (0019)', () => {
+    const source = [
+      "import { type Language, type TextKey } from '../text/text';",
+      'const spoken: Language = pick();',
+      '// the language of the scene is a setting',
+    ].join('\n');
+    expect(checkGameSource('src/game/bad.ts', source)).toStrictEqual([
+      "src/game/bad.ts:1: uses the type 'Language'",
+      "src/game/bad.ts:2: uses the type 'Language'",
+    ]);
+  });
+
   it('allows imports from engine/ and text/', () => {
     const source =
       "import { clamp } from '../engine/math';\nimport type { TextKey } from '../text/keys';\n";

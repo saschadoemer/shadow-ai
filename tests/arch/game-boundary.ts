@@ -1,9 +1,14 @@
 /**
  * The rule behind INV-2: nothing in src/game/ reaches src/render/ or the browser. The check runs
  * over the source text, line by line — comments included — so a forbidden name cannot hide.
+ * Since 0019 it also keeps the type `Language` out: the game passes keys and does not know
+ * which language they are drawn in.
  */
 
 const FORBIDDEN_NAMES = ['window', 'document', 'HTMLCanvasElement', 'Image', 'fetch'] as const;
+
+/** The type of the player's language setting (text/text.ts). Case matters: `language` is a word. */
+const LANGUAGE_TYPE = /\bLanguage\b/;
 
 /** `from '…'`, `import '…'` and `import('…')` — the specifier is group 1. */
 const IMPORT_SPECIFIER = /\b(?:from\s*|import\s*\(?\s*)['"]([^'"]+)['"]/g;
@@ -26,6 +31,9 @@ export function checkGameSource(file: string, source: string): string[] {
       if (new RegExp(`\\b${name}\\b`).test(line)) {
         findings.push(`${file}:${lineNumber}: uses the browser name '${name}'`);
       }
+    }
+    if (LANGUAGE_TYPE.test(line)) {
+      findings.push(`${file}:${lineNumber}: uses the type 'Language'`);
     }
   }
   return findings;
