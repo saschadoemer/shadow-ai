@@ -56,7 +56,7 @@ known kind is still an error. A map without such rectangles has no areas, and a 
 the world data without an area on a map is simply not on it.
 
 On the floor, `tools/floor-layout.ts` builds the areas from its rooms, and `floor.tmj` gets
-ten more rectangles after the traces, with the ids 104 to 113; `nextobjectid` is 114. An
+ten more rectangles after the traces, with the ids 106 to 115; `nextobjectid` is 116. An
 area is the room as the layout knows it: its cells with its upper and its left wall, which
 are strips on those cells (0010).
 
@@ -139,9 +139,9 @@ against a floor that has none.
 
 ## Acceptance criteria
 
-1. `floor.tmj` holds the ten rectangles of the table with the ids 104 to 113 after the
-   objects of 0022, which are unchanged; `wallsOf` still gives eight walls and the traces
-   three.
+1. `floor.tmj` holds the ten rectangles of the table with the ids 106 to 115 after the
+   objects of 0022, which are unchanged; `wallsOf` still gives eight walls, and the floor
+   still has five traces.
 2. `game/region` gives the floor ten areas with the regions, boxes and densities of the
    table; a map with a `region:` rectangle of an unknown region or of a box that is not whole
    cells does not start, each with its message; a map without such rectangles has no areas.
@@ -252,25 +252,16 @@ lamp.
 
 ## Open questions
 
-1. **Darker and grey.** A shadowed room is drawn in greys one step darker than its colours.
-   With the placeholder tiles the carpet is grey already, so a room that only lost its
-   colours would look almost the same. The alternative is the same brightness without
-   colour. I propose the step darker; it is also what `vision.md` §4 says: the shadow
-   darkens rooms.
-2. **The veil.** One, two and four of sixteen pixels in violet for the densities 1, 2 and 3,
-   standing still. `visual.md` §4 asks for form and motion beside the colour; the veil has
-   form, and the walls and the creatures carry the motion. A veil that moves over whole
-   rooms risks the shimmer that `visual.md` §2 warns of. Are these the densities, and may
-   the veil stand still?
-3. **People in colour.** The player, the colleagues, the dogs, the creatures and everything
-   else that is not a tile keep their colours and get no veil. I propose it: nobody in the
-   game is shadow, and they stay easy to see.
-4. **The areas.** A region's area is its room as the layout knows it — with its upper and
-   left wall, without the walls it shares with what lies below and right of it. So the grey
-   ends a few pixels differently on the four sides. The exact alternative is a rule for
-   walls, which I propose to leave to the art pass.
-5. **One feature.** The grey tiles and the veil are one feature here. They can be cut in
-   two; I propose one, because each alone is half a look, and the walk is short.
-6. **No clearing yet.** Nothing gets its colours back in this feature: the first region
-   clears with the case of Sales (0024, 0025). Until then four rooms the player can enter
-   are grey for good. Is that acceptable for the time between the features?
+None. Six were settled on 2026-11-18, each as drafted:
+
+- Darker and grey: a room under shadow is drawn in the greys of the ramp, one step darker
+  than its colours.
+- The veil: two, four and eight of sixteen pixels in violet for the densities 1, 2 and 3,
+  standing still.
+- People in colour: the player, the colleagues, the dogs, the creatures and everything else
+  that is no tile keep their colours and get no veil.
+- The areas: a region's area is its room as the layout knows it, with its upper and its left
+  wall. A rule for the other walls is left to the art pass.
+- One feature: the grey tiles and the veil are built together.
+- No clearing yet: until the case of Sales is solved (0024, 0025), the four rooms the player
+  can enter stay grey. That is accepted for the time between the features.

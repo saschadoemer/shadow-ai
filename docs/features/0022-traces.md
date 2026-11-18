@@ -9,11 +9,11 @@
 The player can find traces. A trace is shadow residue on a device: it cannot be seen until the
 lamp's light is on it, it shows more of itself the longer the light stays, and after one second
 it is found. A found trace goes into the journal: the cases tab gets its first entry — the
-department, and how many of its traces are found. Sales has three.
+department, and how many of its traces are found. Sales has five.
 
 ## Scope
 
-Built on 0020 as merged. No tile changes; the floor gets three rectangles.
+Built on 0020 as merged. No tile changes; the floor gets five rectangles.
 
 **In:**
 
@@ -59,17 +59,20 @@ in file order and refuses the map in `createInitialState`:
 rectangles named `trace:`, and a rectangle that is neither is still an error. A map without
 such rectangles has no traces.
 
-On the floor, `tools/floor-layout.ts` gets `TRACES`, and `floor.tmj` three more rectangles
-after the figure's point, with the ids 101 to 103; `nextobjectid` is 104. Each lies on a desk
+On the floor, `tools/floor-layout.ts` gets `TRACES`, and `floor.tmj` five more rectangles
+after the figure's point, with the ids 101 to 105; `nextobjectid` is 106. Each lies on a desk
 with a screen in a cubicle of Sales:
 
 | Trace | Cell | Rectangle | Cubicle |
 |---|---|---|---|
 | `trace:sales` | (83, 28) | (1328, 448, 16, 16) | first row, first from the left |
+| `trace:sales` | (98, 28) | (1568, 448, 16, 16) | first row, fourth from the left |
 | `trace:sales` | (93, 34) | (1488, 544, 16, 16) | second row, third from the left |
+| `trace:sales` | (88, 40) | (1408, 640, 16, 16) | third row, second from the left |
 | `trace:sales` | (98, 46) | (1568, 736, 16, 16) | fourth row, fourth from the left |
 
-Sales has sixteen such desks; thirteen carry nothing.
+Sales has sixteen such desks, in four rows of four; eleven carry nothing. Every row has at
+least one trace.
 
 ### Finding a trace
 
@@ -119,9 +122,9 @@ Entry k, counted from 0, is two lines:
    region, a space, the key `journal.of`, a space, and the number of all its traces on the
    map. One empty cell of 6 px lies between two parts.
 
-In German the second line of Sales reads `Spuren: 1 von 3`: the label from x = 16, `1` at
-x = 64, `von` from x = 76, `3` at x = 100. In English it reads `Traces: 1 of 3`, with `of`
-from x = 76 and `3` at x = 94.
+In German the second line of Sales reads `Spuren: 1 von 5`: the label from x = 16, `1` at
+x = 64, `von` from x = 76, `5` at x = 100. In English it reads `Traces: 1 of 5`, with `of`
+from x = 76 and `5` at x = 94.
 
 `src/render/draw-text.ts` gets `drawNumber(renderer, font, value, x, y)`: the decimal digits
 of a whole number of 0 or more, from the left, 6 px apart. It takes a number and nothing
@@ -156,11 +159,11 @@ motion beside the colour.
 
 ## Acceptance criteria
 
-1. The loader's rectangles and `game/trace` give the floor three traces, all of `sales`, on
+1. The loader's rectangles and `game/trace` give the floor five traces, all of `sales`, on
    the cells of the table; a map with a `trace:` rectangle of an unknown region or of another
    size does not start, each with its message; a map without such rectangles starts with
    `traces` empty.
-2. `floor.tmj` holds the three rectangles with the ids 101 to 103 after the objects of 0017,
+2. `floor.tmj` holds the five rectangles with the ids 101 to 105 after the objects of 0017,
    which are unchanged; `wallsOf` still gives the eight walls of 0014.
 3. Each trace of the floor lies on a cell whose `detail` tile is a desk with a screen, with
    the desk's chair on the cell below it, and is in the light of a player who looks up from
@@ -185,9 +188,9 @@ motion beside the colour.
     2 and 2 at its cell, after the walls and before the movers; it draws none with `light` 0
     and none that is found.
 13. `drawNumber` draws 0, 7, 10 and 123 as 1, 1, 2 and 3 glyphs from x, 6 px apart.
-14. With one of the three traces found, the cases tab draws `Vertrieb` from (16, 36) and
-    `Spuren:`, `1`, `von` and `3` from (16, 48), (64, 48), (76, 48) and (100, 48), and not its
-    line for nothing; in English `Sales`, `Traces:`, `1`, `of` and `3` from x = 16, 16, 64,
+14. With one of the five traces found, the cases tab draws `Vertrieb` from (16, 36) and
+    `Spuren:`, `1`, `von` and `5` from (16, 48), (64, 48), (76, 48) and (100, 48), and not its
+    line for nothing; in English `Sales`, `Traces:`, `1`, `of` and `5` from x = 16, 16, 64,
     76 and 94. With none found it draws its line for nothing.
 15. A state on a map without traces steps exactly as before this feature: the 600 recorded
     steps of 0020 give the same digest.
@@ -205,7 +208,7 @@ motion beside the colour.
   criterion 8 with a dialogue and with the journal; the digest of criterion 15.
 - **Unit, `game/notice`:** criterion 9 at 0, 119 and 120 steps after the find; both notices
   due; two finds 60 steps apart.
-- **Unit, floor:** the three rectangles and their ids; the objects of 0017 unchanged;
+- **Unit, floor:** the five rectangles and their ids; the objects of 0017 unchanged;
   criterion 3 — the `detail` tiles under and below each trace, and the light from every
   feet position on the cell below the chair; every region with a trace has a name key.
 - **Unit, text:** the four keys in both languages; their rules; the rule test of 0020 covers
@@ -213,12 +216,12 @@ motion beside the colour.
 - **Unit, `draw-text`:** criterion 13.
 - **Unit, scene:** criterion 12 — the frame per `light`, the place, the order against a wall
   and a mover.
-- **Unit, `draw-journal`:** criterion 14 in both languages, with one and with three found;
+- **Unit, `draw-journal`:** criterion 14 in both languages, with one and with five found;
   the creatures tab and the policy tab as in 0020.
 - **Unit, sprites:** the generator against the committed sheet; the pixel counts.
 - **Assets:** the sheet against Endesga 32, and the list of shadow assets.
 - **Architecture:** unchanged, now covering `src/game/trace.ts`.
-- **Smoke:** after loading, `window.shadowAi.state.traces` holds three traces, none found.
+- **Smoke:** after loading, `window.shadowAi.state.traces` holds five traces, none found.
 - **Fixtures:** `tests/fixtures/maps/traces.tmj`, 20x12 on the tiles of `points.tmj`: the
   spawn, a rectangle `trace:sales` on cell (10, 5) and a rectangle `shadow:marketing`.
 
@@ -257,45 +260,42 @@ lamp, `J` opens and closes the journal, `L` switches the language.
 14. Expected: the pattern starts small again, grows, and is gone after about a second; the
     line `Spur gefunden. Sie steht im Journal.` appears.
 15. Press `J`, then the right arrow.
-16. Expected: the tab `Fälle` shows `Vertrieb` and below it `Spuren: 2 von 3`. The line
+16. Expected: the tab `Fälle` shows `Vertrieb` and below it `Spuren: 2 von 5`. The line
     `Noch kein Fall aufgenommen.` is gone.
 17. Press `L`.
-18. Expected: the entry reads `Sales` and `Traces: 2 of 3`.
-19. Press `L`, then `J`. Walk to the fourth row of desks, to the desk at its right end, and
-    find its trace in the same way.
-20. Expected: the pattern, then the line at the bottom.
+18. Expected: the entry reads `Sales` and `Traces: 2 of 5`.
+19. Press `L`, then `J`. Find the trace of the desk at the right end of the first row, of the
+    second desk from the left in the third row, and of the desk at the right end of the
+    fourth row, each from below its chair.
+20. Expected: at each of the three the pattern grows and goes, and the line appears at the
+    bottom.
 21. Press `J`, then the right arrow.
-22. Expected: `Spuren: 3 von 3`.
+22. Expected: `Spuren: 5 von 5`.
 
 **Feel:**
 
-- A trace cannot be seen until the lamp is on it. Is searching sixteen desks for three a
+- A trace cannot be seen until the lamp is on it. Is searching sixteen desks for five a
   pleasure or a chore — should the room give a hint where to look?
 - Is one second right for a find? Is the growing pattern read as "something is coming off"?
 - Is the line at the bottom the right answer to a find — and are two seconds right?
-- Does `Spuren: 2 von 3` say enough on the cases tab for now?
+- Does `Spuren: 2 von 5` say enough on the cases tab for now?
 - Do the scraps in the room make the search tense in a good way, or do they only disturb?
 
 **Result:** not yet walked.
 
 ## Open questions
 
-1. **Seen only in the light.** A trace is invisible until the lamp is on it; the player
-   sweeps the desks. The alternative is a faint mark that is always there. I propose the
-   invisible trace: it makes the lamp the tool of the search, as `gameplay.md` §2 says, and
-   the count `von 3` on the cases tab tells how many are left.
-2. **Three in Sales, on these desks.** Three traces on the screens of the table. More makes
-   the search longer; fewer makes the count pointless. Are three right, and are these the
-   desks?
-3. **One second, and gone.** A trace is found by one second of unbroken light, the number of
-   a capture, and is not drawn again. The alternative is a found trace that stays visible. I
-   propose that it goes: found means it is in the journal now.
-4. **The words.** `Vertrieb`, `Spuren: 1 von 3` and `Spur gefunden. Sie steht im Journal.`,
-   with their English, are my proposal.
-5. **One feature.** The trace in the world and its line on the cases tab are one feature
-   here, with `drawNumber` between them. They can be cut in two; I propose one, because a
-   trace that goes into a journal which shows nothing of it cannot be walked.
-6. **The cut of M5.** `docs/plan.md` §4 cuts M5 into six features with this draft: 0022
-   traces · 0023 the shadow over the regions · 0024 the case of Sales · 0025 the cleared
-   region · 0026 the call · 0027 overview won back. The help of 0021 stands beside them. Is
-   this the cut?
+None. Six were settled on 2026-11-18; five as drafted, one changed:
+
+- Seen only in the light: a trace is invisible until the lamp is on it, and the count on the
+  cases tab tells how many are left.
+- Five in Sales — the draft had three: on the desks of the table, spread over the room, at
+  least one in every row.
+- One second, and gone: a trace is found by one second of unbroken light and is not drawn
+  again.
+- The words: `Vertrieb`, `Spuren: 1 von 5` and `Spur gefunden. Sie steht im Journal.`, with
+  their English, as in the table under "The text".
+- One feature: the trace in the world, its line on the cases tab and `drawNumber` are built
+  together.
+- The cut of M5: six features — 0022 traces · 0023 the shadow over the regions · 0024 the
+  case of Sales · 0025 the cleared region · 0026 the call · 0027 overview won back.
