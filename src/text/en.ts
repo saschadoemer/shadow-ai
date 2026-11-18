@@ -4,6 +4,19 @@ import type { de } from './de';
 export const en: Readonly<Record<keyof typeof de, string>> = {
   'notice.shadow-too-dense': 'This shadow is too dense for the lamp.',
   'notice.language': 'Language: English',
+  'journal.tab-creatures': 'Creatures',
+  'journal.tab-cases': 'Cases',
+  'journal.tab-policy': 'Policy',
+  'journal.no-creatures': 'No creature captured yet.',
+  'journal.no-cases': 'No case opened yet.',
+  'journal.no-policy': 'The policy is still empty.',
+  'creature.snippet-name': 'Snippet',
+  'creature.snippet-text': [
+    'A piece of text somebody pasted into a public',
+    'chatbot. It lives on whatever is pasted',
+    'there – and it goes as soon as everyone knows',
+    'which data may go where.',
+  ].join('\n'),
   'talk.officer-rules-1': [
     'So you can see the shadow too.',
     'It stays behind wherever data leaves the house',

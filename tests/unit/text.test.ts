@@ -121,6 +121,68 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the words of the journal in both languages (0020)', () => {
+    const both = (id: Parameters<typeof textKey>[0]): string[] => [
+      textOf(textKey(id), 'de'),
+      textOf(textKey(id), 'en'),
+    ];
+    expect(both('journal.tab-creatures')).toStrictEqual(['Kreaturen', 'Creatures']);
+    expect(both('journal.tab-cases')).toStrictEqual(['Fälle', 'Cases']);
+    expect(both('journal.tab-policy')).toStrictEqual(['Richtlinie', 'Policy']);
+    expect(both('journal.no-creatures')).toStrictEqual([
+      'Noch keine Kreatur gefangen.',
+      'No creature captured yet.',
+    ]);
+    expect(both('journal.no-cases')).toStrictEqual([
+      'Noch kein Fall aufgenommen.',
+      'No case opened yet.',
+    ]);
+    expect(both('journal.no-policy')).toStrictEqual([
+      'Die Richtlinie ist noch leer.',
+      'The policy is still empty.',
+    ]);
+    expect(both('creature.snippet-name')).toStrictEqual(['Schnipsel', 'Snippet']);
+    expect(textOf(textKey('creature.snippet-text'), 'de').split('\n')).toStrictEqual([
+      'Ein Stück Text, das jemand in einen',
+      'öffentlichen Chatbot kopiert hat. Es lebt von',
+      'allem, was dort eingefügt wird – und geht,',
+      'sobald klar ist, welche Daten wohin dürfen.',
+    ]);
+    expect(textOf(textKey('creature.snippet-text'), 'en').split('\n')).toStrictEqual([
+      'A piece of text somebody pasted into a public',
+      'chatbot. It lives on whatever is pasted',
+      'there – and it goes as soon as everyone knows',
+      'which data may go where.',
+    ]);
+  });
+
+  it('holds every text of the journal to the rule of its kind (0020)', () => {
+    /** The most lines and the most characters per line a key may have, by what its id starts or ends with. */
+    const rules: readonly (readonly [(id: string) => boolean, number, number, number])[] = [
+      [(id) => id.startsWith('journal.tab-'), 1, 1, 16],
+      [(id) => id.startsWith('journal.no-'), 1, 1, 47],
+      [(id) => id.startsWith('creature.') && id.endsWith('-name'), 1, 1, 24],
+      [(id) => id.startsWith('creature.') && id.endsWith('-text'), 2, 4, 47],
+    ];
+    for (const language of LANGUAGES) {
+      for (const [key, text] of Object.entries(TABLE[language])) {
+        if (!key.startsWith('journal.') && !key.startsWith('creature.')) {
+          continue;
+        }
+        const rule = rules.find(([applies]) => applies(key));
+        expect(rule, `${key} has a rule`).toBeDefined();
+        const [, fewest, most, width] = rule ?? [null, 0, 0, 0];
+        const lines = text.split('\n');
+        expect(lines.length, `${language} ${key}`).toBeGreaterThanOrEqual(fewest);
+        expect(lines.length, `${language} ${key}`).toBeLessThanOrEqual(most);
+        for (const line of lines) {
+          expect(line.length, `${language} ${key}: "${line}"`).toBeLessThanOrEqual(width);
+          expect(line.trim(), `${language} ${key}`).not.toBe('');
+        }
+      }
+    }
+  });
+
   it('gives a page of talk at most three lines of at most 47 characters, none empty', () => {
     for (const language of LANGUAGES) {
       for (const [key, text] of Object.entries(TABLE[language])) {
