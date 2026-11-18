@@ -8,7 +8,6 @@ export const de = {
   'notice.shadow-too-dense': 'Dieser Schatten ist zu dicht für die Lampe.',
   'notice.language': 'Sprache: Deutsch',
   'notice.trace-found': 'Spur gefunden. Sie steht im Journal.',
-  'notice.help': 'Hilfe: Taste H',
   'help.key-walk': 'Pfeiltasten, WASD',
   'help.do-walk': 'Gehen',
   'help.key-lamp': 'Leertaste',

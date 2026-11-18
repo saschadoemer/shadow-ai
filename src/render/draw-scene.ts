@@ -3,7 +3,6 @@ import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { progressOf } from '../game/cases';
 import { type Figure, figuresIn, figuresOf } from '../game/cast';
 import { CREATURE_SIZE } from '../game/creature';
-import { HELP_HINT, startHintDue } from '../game/help';
 import { FRAME_APEX, LAMP_HEIGHT } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
@@ -294,17 +293,14 @@ export function languageNoticeVisible(tick: number, switchedAt: number | null): 
 /**
  * The line the bar shows where no dialogue is open and no notice shows, or null. Where a text
  * is on screen, that text changes with the language; the language line answers a switch only
- * where nothing else would (0019). The start hint has the last place (0021). With the help
- * open the bar shows neither: the box is the answer.
+ * where nothing else would (0019). With the help open the bar does not show it: the box is the
+ * answer. The start hint of 0021 had the last place here until 0031 took it away.
  */
 export function quietLine(state: GameState, settings: SceneSettings): TextKey | null {
   if (state.help) {
     return null;
   }
-  if (languageNoticeVisible(state.tick, settings.switchedAt)) {
-    return LANGUAGE_NOTICE;
-  }
-  return startHintDue(state) ? HELP_HINT : null;
+  return languageNoticeVisible(state.tick, settings.switchedAt) ? LANGUAGE_NOTICE : null;
 }
 
 /** The dialogue box (0017): the notice's bar grown upwards to three lines, the same bottom edge. */
@@ -364,9 +360,7 @@ export function lidHeight(dark: number): number {
  * journal is open the frame is the journal's alone (0020, render/draw-journal), without the
  * label.
  * While the help is open (0021, render/draw-help) its box is drawn last but for the lids, over
- * the world and over the journal alike, and the bar shows neither the language line nor the
- * start hint — the line that names the help's key in the first ten seconds of a game, which
- * has the bar only where nothing else has it.
+ * the world and over the journal alike, and the bar does not show the language line.
  */
 export function drawScene(
   renderer: Renderer,

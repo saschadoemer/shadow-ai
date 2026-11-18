@@ -31,8 +31,8 @@ describe('the scenes of the story (0026)', () => {
     expect(scenePages(0)).toStrictEqual(CALL);
     expect(scenePages(1)).toStrictEqual([]);
     expect(scenePages(-1)).toStrictEqual([]);
-    const scenes: readonly Scene[] = [{ id: 'other', pages: [textKey('notice.help')] }];
-    expect(scenePages(0, scenes)).toStrictEqual([textKey('notice.help')]);
+    const scenes: readonly Scene[] = [{ id: 'other', pages: [textKey('notice.language')] }];
+    expect(scenePages(0, scenes)).toStrictEqual([textKey('notice.language')]);
   });
 
   it('is no speaker of a step: the pages of its dialogue are its own, whoever stands near', () => {

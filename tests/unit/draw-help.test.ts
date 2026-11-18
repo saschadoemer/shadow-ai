@@ -88,7 +88,7 @@ const GERMAN: SceneSettings = { language: 'de', switchedAt: null };
 const FRAME = 'fillRect 48,30 224x98 #3a4466';
 const FIELD = 'fillRect 49,31 222x96 #181425';
 const BAR = 'fillRect 8,158 304x18 #181425';
-/** A game past the start hint with five hearts and the officer standing; the help as `fields` say. */
+/** A game with five hearts and the officer standing; the help as `fields` say. */
 const playing = (fields: Partial<GameState> = {}): GameState => ({
   tick: 700,
   started: 0,
@@ -328,15 +328,14 @@ describe('the help in the scene (0021)', () => {
     expect(english.slice(-100)).toStrictEqual(help('en'));
   });
 
-  it('shows no language line and no start hint while it is open', () => {
+  it('shows no language line while it is open', () => {
     for (const tick of [100, 219, 700, 819]) {
       for (const switchedAt of [100, 700, null]) {
         const calls = scene(playing({ help: true, tick }), { language: 'en', switchedAt });
         expect(calls, `tick ${tick}, switched at ${switchedAt}`).not.toContain(BAR);
       }
     }
-    // Without the help the same frames have the bar: the hint, or the language line.
-    expect(scene(playing({ tick: 100 }))).toContain(BAR);
+    // Without the help the frame of a switch has the bar: the language line.
     expect(scene(playing({ tick: 700 }), { language: 'en', switchedAt: 700 })).toContain(BAR);
   });
 

@@ -5,7 +5,6 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
   'notice.shadow-too-dense': 'This shadow is too dense for the lamp.',
   'notice.language': 'Language: English',
   'notice.trace-found': 'Trace found. It is in the journal.',
-  'notice.help': 'Help: press H',
   'help.key-walk': 'Arrow keys, WASD',
   'help.do-walk': 'Walk',
   'help.key-lamp': 'Space',

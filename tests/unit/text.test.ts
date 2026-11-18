@@ -320,7 +320,6 @@ describe('the language table (INV-4, 0016)', () => {
       textOf(textKey(id), 'de'),
       textOf(textKey(id), 'en'),
     ];
-    expect(both('notice.help')).toStrictEqual(['Hilfe: Taste H', 'Help: press H']);
     expect(both('help.key-walk')).toStrictEqual(['Pfeiltasten, WASD', 'Arrow keys, WASD']);
     expect(both('help.do-walk')).toStrictEqual(['Gehen', 'Walk']);
     expect(both('help.key-lamp')).toStrictEqual(['Leertaste', 'Space']);
