@@ -180,7 +180,14 @@ lamp, `E` or `Enter` talks, `L` switches the language.
 - Does the English of the three sentences and of the notice read right?
 - The game always starts in German. Should it follow the browser's language before M8?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-18, steps 1–20. Feel:
+
+- The key: `L` is right. The game as a whole needs a small help menu that can be called up,
+  and a hint to it after the game starts — a new draft, not part of 0019.
+- The line: two seconds are right, and the line is wanted.
+- The English of the three sentences and of the notice reads right.
+- The start: the game stays German on every load until M8; it does not follow the browser's
+  language.
 
 ## Open questions
 
