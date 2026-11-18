@@ -87,8 +87,9 @@ first cleared region in M5. M3 is done: 0014 was the last of the nine.
 
 ### M4 — Dialogue, language table and journal
 
-Five features, each its own pull request with its own acceptance plan, in this order: 0016 text
-on screen · 0017 talking · 0018 everyday lines · 0019 the language switch · 0020 the journal.
+Six features, each its own pull request with its own acceptance plan, in this order: 0016 text
+on screen · 0017 talking · 0018 everyday lines · 0019 the language switch · 0020 the journal ·
+0021 help.
 Text first, because everything else in the milestone is made of it: the font, the language
 table in German and English and the `TextKey` arrive with one sentence — the line that says a
 shadow wall is too dense for the lamp, which 0014 left to M4. Talking after it, so the dialogue
@@ -97,9 +98,12 @@ data protection officer as the first figure with text — one who stands, so tha
 is the whole feature. Then everyday lines for the four colleagues who walk the floor since
 0015: they have to stop and turn before they can be spoken to. The language switch after that,
 when there is enough text for English to be worth looking at; the title screen that will hold
-the switch is M8, so M4 needs an interim one. The journal last: its three tabs are text and
+the switch is M8, so M4 needs an interim one. The journal after it: its three tabs are text and
 pictures, and its first content — the captured snippet — exists since 0008. 0016, 0017,
 0018 and 0019 are implemented, and 0020 is drafted.
+Help last: a box that lists every key, and a line at the start that names its own. It came out
+of the walk of 0019, and it follows the journal because it lists the journal's key and uses its
+press. 0021 is approved.
 
 ## 5. Deferred, with reasons
 
