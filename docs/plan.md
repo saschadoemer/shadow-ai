@@ -9,7 +9,8 @@ and sequence. It is **not** a source of product rules — those live in `CLAUDE.
 A browser game in pixel-art 2D, in the tradition of early top-down adventures, about shadow AI
 in a mid-sized company. The player is the head of IT, the weapon is a lamp, the enemy is the
 shadow that remains where data leaves the house unseen. Two to three hours of play; the first act
-doubles as a fifteen-minute trade-fair teaser. German first, English second. Public repository,
+doubles as a fifteen-minute trade-fair teaser. Presented by LMIS, with one real product in its
+world, Harmonic. German first, English second. Public repository,
 MIT code. Built spec-first, feature by feature, each feature approved before any code.
 
 ## 2. Roadmap
@@ -46,6 +47,7 @@ Upper limits. Whoever wants more changes the number here first, then the content
 | Lamp upgrades | 3 |
 | Keys | 2 |
 | Policy blocks | 8 |
+| Harmonic stations | 3 (one in Sales, two in Act 2) |
 | Playing time | 2–3 hours in total; Act 1 about 15 minutes |
 
 ## 4. Open milestones, specified
@@ -121,6 +123,10 @@ once there is a case to walk into. Overview won back closes the milestone; `game
 has left it open since 0009. 0022, 0023, 0024 and 0025 are implemented;
 0026 and 0027 are approved.
 
+Named here without a number and specified when their turn comes, both for the teaser
+(`vision.md` §10): the Harmonic station of Sales · the line that says LMIS presents the
+game, which needs a place before the title screen of M8.
+
 ### M6 — The cases of Act 2
 
 The cases come one department at a time, and each brings what Act 2 has more than Act 1. The
@@ -135,7 +141,8 @@ species brings what the journal still lacks — a choice among its entries, and 
 Named here without a number and specified when their turn comes: the case of Support · the
 cases of HR and Accounting · the colour filter · the case of Development · the meeting rooms'
 side case · the vendor in every department · the intern in the break room and the hints ·
-who sees the shadow · the two keys · Management and the last case. 0028 and 0029 are approved.
+who sees the shadow · the two keys · Management and the last case · the two Harmonic stations
+of Act 2, each in its case spec. 0028 and 0029 are approved.
 
 ## 5. Deferred, with reasons
 

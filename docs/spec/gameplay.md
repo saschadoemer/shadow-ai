@@ -231,3 +231,36 @@ Named here so nobody adds them by habit: no branching case outcomes, no morality
 system, no partial clearing of regions, no speaking hero, no dialogue choices beyond the trace
 gesture, no crafting, no money. Each is either a non-goal (`vision.md` §8) or deferred with its
 reason in `docs/plan.md`.
+
+## 10. The Harmonic station
+
+Settled with the vision (`vision.md` §10) and built by its own feature. A station is a desk in a
+region whose screen shows the name Harmonic. It is the one place where a real product acts in
+the game, and it is not a tool the player carries: the lamp stays the only one (§2).
+
+- **What it does.** A press of E or Enter at a station sets it running. Reach and sight are a
+  figure's (§8). In that step every creature whose home is in the station's region leaves the
+  game, by the rule of a solved case (§3): none is captured, the journal counts none, and none
+  comes back.
+- **When it does it.** Only once the species of the region is in the journal — the player has
+  captured one of its creatures with the lamp. Until then a press gets one line and changes
+  nothing. Every species is met by hand once, and the gesture at the source may pick a creature
+  from the journal (§6): a station that emptied a room before the first capture could make its
+  case unsolvable.
+- **Once.** A station runs once and stays running. After that it is furniture with a name.
+- **What it leaves alone.** A shadow wall: a station stands behind the wall of its region and
+  lifts none, so density against strength stays the one gate (§5). The shadow over the room: a
+  region is cleared exactly when its case is solved (§6), and there is no partial clearing (§9).
+  The traces, which the lamp still finds one by one. The source, which gives way only to the
+  conversation (§3). And every creature whose home is outside the region.
+- **How the player knows.** The creatures go in the step the station starts. A line in the
+  notice's bar names Harmonic for two seconds. The entry of the region's case in the journal
+  carries a mark that Harmonic ran there.
+- **How many.** Three in the whole game (`docs/plan.md` §3), at fixed places (`world.md` §6).
+  None is found by chance, none is collected, and nothing about a station can be saved up.
+
+The texts — the line of a station that cannot run yet, the line that names Harmonic, the mark in
+the journal — are fixed in the feature that builds the first station, against the tone sheet
+(`vision.md` §6). None of them is tutorial text (`vision.md` §2): the line of a station that
+cannot run yet says what is, as the line of a shadow wall that holds does (§2), and tells the
+player nothing to do.

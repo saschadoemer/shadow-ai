@@ -75,8 +75,12 @@ change that weakens the test has violated the invariant.
   concern — audio, for example — needs an ADR first.
 - No `any`, no `@ts-ignore`, no disabled lint rule without a comment that says why.
 - No fractional scaling, no `imageSmoothingEnabled = true`, no sub-pixel camera position.
-- No real product, company or person names in the game, in content or in tests. A fictional name
-  is checked against real trademarks before it is fixed.
+- No real product, company or person names in the game, in content or in tests — with two
+  exceptions, and only these two: **LMIS**, which presents the game, and **Harmonic**, the
+  product LMIS sells as a partner (`docs/spec/vision.md` §10). Both appear as a name in the
+  game's own font, never as a logo. Everything else is fictional, and a fictional name is
+  checked against real trademarks before it is fixed.
+- No praise for a product. No figure recommends Harmonic, says what it costs or where to get it.
 - No feature, however small, without an approved spec (§3).
 
 ---
@@ -164,10 +168,10 @@ Harness changes approved in conversation may go directly to `main`.
 Considered and deliberately cut. Do not implement, do not scaffold, do not leave TODOs. If a
 requirement seems to demand one of these, stop and ask.
 
-No quiz · no compliance training, no certificate · no real product or company names · no
-multiplayer · no mobile or touch version · no money, no shop · no character editor · no analytics,
-no accounts · no branching case outcomes or morality system in the first draft (deferred,
-`docs/plan.md` §5) · no speaking hero · no game framework.
+No quiz · no compliance training, no certificate · no real product or company names beyond LMIS
+and Harmonic (§2) · no multiplayer · no mobile or touch version · no money, no shop · no
+character editor · no analytics, no accounts · no branching case outcomes or morality system in
+the first draft (deferred, `docs/plan.md` §5) · no speaking hero · no game framework.
 
 ---
 
@@ -178,9 +182,9 @@ these.
 
 | File | Covers |
 |---|---|
-| `docs/spec/vision.md` | purpose, message, the story in three acts, the vendor, design pillars, tone sheet, language, non-goals, title and licence |
-| `docs/spec/world.md` | the floor and its regions, shadow densities, the cases, order and gating, the cast, creature rules, the naming rule |
-| `docs/spec/gameplay.md` | the lamp, the three layers, overview, progression, resolving a case, the journal |
+| `docs/spec/vision.md` | purpose, message, the story in three acts, the vendor, design pillars, tone sheet, language, non-goals, title and licence, LMIS as presenter and Harmonic |
+| `docs/spec/world.md` | the floor and its regions, shadow densities, the cases, order and gating, the cast, creature rules, the naming rule, where the Harmonic stations stand |
+| `docs/spec/gameplay.md` | the lamp, the three layers, overview, progression, resolving a case, the journal, the Harmonic station |
 | `docs/spec/visual.md` | 320x180, integer scaling, tiles and figures, Endesga 32 and the signature colour, the asset pipeline, frame rate |
 | `docs/spec/architecture.md` | directory structure, the state model, the loop, input, the renderer interface, maps and the Tiled pipeline, text plumbing, tooling, dependency policy |
 | `docs/spec/ops.md` | build, the container, nginx and headers, running locally, CI, the Cloud Run target |
