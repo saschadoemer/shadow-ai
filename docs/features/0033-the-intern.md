@@ -171,7 +171,10 @@ lamp. Arrow keys or WASD walk, `Space` holds the lamp, `E` or `Enter` talks.
 - Is one page enough, or does he need a first line of his own before the hint?
 - Would you have found him without being told that he is there?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–14. Feel: he helps without taking the finding away —
+yes; he sounds like somebody who knows everything and likes to say it, and is still likeable —
+yes; one page is enough, he needs no first line of his own; the author would have found him
+without being told that he is there.
 
 ## Open questions
 
