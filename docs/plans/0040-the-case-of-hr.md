@@ -3581,13 +3581,13 @@ test('0040 — the case of HR: the acceptance plan, steps 1 to 22', async ({ pag
 
 ### Task 9: The pull request
 
-- [ ] **Step 1:** merge the latest `main` again and rerun Task 7. If the merge changed code,
+- [x] **Step 1:** merge the latest `main` again and rerun Task 7. If the merge changed code,
   the walk is played again.
-- [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
+- [x] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`. In `docs/plan.md` §4, in the M6 section, say that 0040 is
   implemented, and that the next are the creature of HR and the works council. Do not
   declare the milestone M6 done. Commit — `Mark 0040 implemented`.
-- [ ] **Step 3:** push the branch and open the pull request against `main`, titled
+- [x] **Step 3:** push the branch and open the pull request against `main`, titled
   `Feature 0040: the case of HR`, with the walk's result and feel notes in its description.
   Say in two lines that the branch also carries a change of the harness the author asked
   for in conversation: the agent now plays the acceptance walk, by `npm run walk`, and

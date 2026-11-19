@@ -151,8 +151,9 @@ only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034
 built in this order. A seventh came between the last two: 0039 the lamp from the start — the
 player has the lamp from the first step, and the data protection officer explains it without
 handing it over. All seven are implemented: 0032 to 0034 and 0036 to 0039. M6 is not done:
-its other cases are still open. The next is the case of HR, the first behind the denser
-shadow: 0040 is approved.
+its other cases are still open. The case of HR, the first behind the denser shadow, is
+implemented: 0040. The next are the creature of HR and the works council, each a feature of
+its own.
 The creature first, so that the second room has opposition; it is cut small — the choice
 among the journal's entries and its pages wait for a later case and the third species. The
 intern after it: the hint system `world.md` §3 has named since M1, one figure in the break
