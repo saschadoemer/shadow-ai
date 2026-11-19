@@ -10,6 +10,7 @@ import { openJournal, stepJournal } from './journal';
 import { spreadOf } from './lamp';
 import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
 import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from './overview';
+import { openPanes, panesOf } from './pane';
 import { type GameInput, NO_INPUT, stepPlayer } from './player';
 import { areasOf } from './region';
 import { restsOf, takeRest } from './rest';
@@ -71,6 +72,7 @@ export function createInitialState(map: TileMap): GameState {
     shadowWalls: standingWalls(walls),
     traces: hiddenTraces(tracesOf(map.rects)),
     solved: [],
+    panes: openPanes(panesOf(map)),
     rested: null,
     finished: null,
     presented: 0,
@@ -240,6 +242,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
       spread,
     ),
     solved: state.solved,
+    panes: state.panes,
     rested,
     finished: state.finished,
     presented: state.presented,

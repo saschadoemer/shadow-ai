@@ -87,6 +87,7 @@ describe('GameState (INV-1)', () => {
   it('starts at tick 0 with the player at the spawn, facing down, standing, the camera on it', () => {
     expect(createInitialState(MAP)).toStrictEqual({
       tick: 0,
+      panes: [],
       rested: null,
       finished: null,
       presented: 0,
@@ -159,6 +160,7 @@ describe('update', () => {
     const next = update(
       {
         tick: 41,
+        panes: [],
         rested: null,
         finished: null,
         presented: 0,
@@ -191,6 +193,7 @@ describe('update', () => {
   it('leaves its input unchanged', () => {
     const state: GameState = {
       tick: 7,
+      panes: [],
       rested: null,
       finished: null,
       presented: 0,
@@ -215,6 +218,7 @@ describe('update', () => {
     update(state, RIGHT, MAP);
     expect(state).toStrictEqual({
       tick: 7,
+      panes: [],
       rested: null,
       finished: null,
       presented: 0,

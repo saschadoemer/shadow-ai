@@ -150,6 +150,14 @@ export interface Dialogue {
   readonly page: number;
 }
 
+/** A pane that is open (0038). A closed pane has left the list for good. */
+export interface PaneState {
+  /** Index among the panes of the map. */
+  readonly pane: number;
+  /** Whether the lamp's light was on it in the last step: the light does not hold it. */
+  readonly lit: boolean;
+}
+
 /** The tabs of the journal (gameplay.md §7), in their order on the screen (0020). */
 export const JOURNAL_TABS = ['creatures', 'cases', 'policy'] as const;
 export type JournalTab = (typeof JOURNAL_TABS)[number];
@@ -200,6 +208,8 @@ export interface GameState {
   readonly traces: readonly TraceState[];
   /** The solved cases, in the order they were solved (0024). */
   readonly solved: readonly SolvedCase[];
+  /** The open panes, in the map's order (0038). */
+  readonly panes: readonly PaneState[];
   /** The last rest taken, or null (0027); the notice of a rest is derived from it. */
   readonly rested: Rested | null;
   /**

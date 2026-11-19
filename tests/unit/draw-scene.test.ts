@@ -199,6 +199,7 @@ const state = (
   lampOn = false,
 ): GameState => ({
   tick: QUIET_TICK,
+  panes: [],
   rested: null,
   finished: null,
   presented: 0,

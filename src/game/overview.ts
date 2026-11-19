@@ -1,6 +1,7 @@
 import type { Point, TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
 import { DIRECTIONS } from './lamp';
+import { restedPanes } from './pane';
 import { restedWalls } from './shadow';
 import {
   type CreatureState,
@@ -145,6 +146,7 @@ function woken(state: GameState, map: TileMap): GameState {
     shadowWalls: restedWalls(state.shadowWalls),
     traces: restedTraces(state.traces),
     solved: state.solved,
+    panes: restedPanes(state.panes),
     rested: state.rested,
     finished: state.finished,
     presented: state.presented,

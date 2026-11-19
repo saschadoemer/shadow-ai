@@ -96,6 +96,7 @@ const ENGLISH: SceneSettings = { language: 'en', switchedAt: null };
 /** A game with the journal open on `tab`: five hearts, the lamp on, `snippets` captured. */
 const reading = (tab: JournalTab, snippets = 0): GameState => ({
   tick: 100,
+  panes: [],
   rested: null,
   finished: null,
   presented: 0,
