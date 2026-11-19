@@ -193,6 +193,15 @@ region is cleared exactly when its case is solved; nothing else is stored about 
 colleagues who see the shadow, as a rule of the game, come with M6, and the first act has no
 end card: it ends in the cleared room, and the game goes on.
 
+**As built** (feature 0034): the game says when the player has done everything there is. This
+is no end card of an act: it follows the last case of the game, not Act 1, and nothing ends.
+Five seconds after the step that solved the last case — the line of the solved case and the
+line of an upgrade are over, and a second of quiet has followed — the story opens a scene of
+three pages by itself (`vision.md` §4). It waits while the dark, the help, the journal, a talk
+or a push has the step, and it comes before the journal and before a talk in the step it
+opens. E or Enter turns its pages; the last press closes it, and it never opens again. The
+rule reads the list of the cases: a case that is added moves the close behind it.
+
 **As built** (feature 0028): the case of Marketing, by the same rules and with nothing added
 to them. Its source is the colleague in the red shirt who walks between the desk islands and
 the printer. Its five traces lie on four screens and on the printer. With all five found the

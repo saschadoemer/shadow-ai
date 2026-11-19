@@ -57,7 +57,8 @@ shirt is the source of the second case; the two cases can be solved in either or
 a half times as wide, and the shadow walls of HR and Accounting give way to it (feature 0029).
 Marketing has a creature of its own: the mirage, a framed picture that moves only while nobody
 looks at it (feature 0032). An intern stands in the break room and says, when asked, where the
-next step is (feature 0033).
+next step is (feature 0033). Five seconds after the last case there is, the story says once
+that the rest of the floor follows, and the game goes on (feature 0034).
 Every merge to `main` is deployed to Cloud Run (feature 0030).
 The roadmap is in [docs/plan.md](docs/plan.md).
 
