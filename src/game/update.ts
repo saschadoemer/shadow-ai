@@ -10,7 +10,7 @@ import { openJournal, stepJournal } from './journal';
 import { spreadOf } from './lamp';
 import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
 import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from './overview';
-import { coveredCells, openPanes, panesOf, stepPanes } from './pane';
+import { closePane, coveredCells, openPanes, panesOf, stepPanes } from './pane';
 import { type GameInput, NO_INPUT, stepPlayer } from './player';
 import { areasOf } from './region';
 import { restsOf, takeRest } from './rest';
@@ -195,8 +195,12 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   if (opened !== null) {
     return opened;
   }
+  // A press at an open pane in reach closes it, and its lurker drops to the floor (0038); a
+  // pane comes before a rest. The step goes on from there.
+  const shut = closePane(state, input, content);
+  const open = shut === null ? state.panes : shut.panes;
   // A press at a coffee machine in reach takes the rest (0027); the step goes on from there.
-  const rest = takeRest(state, input, content);
+  const rest = shut === null ? takeRest(state, input, content) : null;
   const rested = rest === null ? state.rested : rest.rested;
   const before = rest === null ? state.overview : rest.overview;
   const on = input.lamp && state.player.recoil.steps === 0;
@@ -228,7 +232,8 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     camera: followPlayer(player, content),
     lamp,
     upgrades: state.upgrades,
-    creatures,
+    // The lurker of a pane closed in this step is stepped from the next step on.
+    creatures: shut === null ? creatures : [...creatures, shut.lurker],
     movers: stepMovers(state.movers, routes, player),
     // The light on a wall is tested against the map as loaded: a wall does not block itself.
     shadowWalls: stepWalls(state.shadowWalls, walls, stepped, lamp, content, spread),
@@ -242,11 +247,11 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
       state.tick + 1,
       spread,
       // A trace under an open pane is hidden (0038).
-      coveredCells(state.panes, panes),
+      coveredCells(open, panes),
     ),
     solved: state.solved,
     // The light does not hold a lurker in its pane; the pane only knows it is lit.
-    panes: stepPanes(state.panes, panes, stepped, lamp.on, walled, spread),
+    panes: stepPanes(open, panes, stepped, lamp.on, walled, spread),
     rested,
     finished: state.finished,
     presented: state.presented,

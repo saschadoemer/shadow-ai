@@ -1,8 +1,9 @@
-import type { Box } from '../engine/collision';
+import { type Box, sightBlocked } from '../engine/collision';
 import { type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { SPREAD } from './lamp';
+import { BOX_HEIGHT, type GameInput, pressed } from './player';
 import { isCell, PANE_PREFIX, rectsOf } from './rects';
-import type { PaneState, PlayerState } from './state';
+import type { CreatureState, GameState, PaneState, PlayerState } from './state';
 import { traceInLight } from './trace';
 import { densityOf } from './world';
 
@@ -106,6 +107,80 @@ export function stepPanes(
     const lit = pane !== undefined && traceInLight(pane, player, lampOn, map, spread);
     return lit === state.lit ? state : { ...state, lit };
   });
+}
+
+/** Tune: the reach of a talk (0017), two and a half tiles from the feet to the cell's centre. */
+export const PANE_DISTANCE = 40;
+
+/** The centre of a pane's cell. */
+export function paneCentre(pane: Pane): Point {
+  return { x: pane.box.x + pane.box.width / 2, y: pane.box.y + pane.box.height / 2 };
+}
+
+/**
+ * The open pane a press closes: the nearest whose cell centre is at most PANE_DISTANCE from
+ * the player's feet and in sight — no opaque box of the map as loaded on the line from the
+ * centre of the player's box to that centre, the test of a talk — the first in the map's order
+ * of two equally near; null when none is. A desk, a chair and a partition are low and do not
+ * block the line.
+ */
+export function paneInReach(
+  player: Point,
+  states: readonly PaneState[],
+  panes: readonly Pane[],
+  map: TileMap,
+): PaneState | null {
+  let nearest: PaneState | null = null;
+  let reach = PANE_DISTANCE;
+  for (const state of states) {
+    const pane = panes[state.pane];
+    if (pane === undefined) {
+      continue;
+    }
+    const centre = paneCentre(pane);
+    const distance = Math.hypot(centre.x - player.x, centre.y - player.y);
+    if (
+      distance <= reach &&
+      (nearest === null || distance < reach) &&
+      !sightBlocked({ x: player.x, y: player.y - BOX_HEIGHT / 2 }, centre, {
+        width: map.width,
+        height: map.height,
+        solids: map.opaque,
+      })
+    ) {
+      nearest = state;
+      reach = distance;
+    }
+  }
+  return nearest;
+}
+
+/**
+ * What a press at an open pane in reach changes, or null when this step closes none: `talk`
+ * is not pressed, the lamp is held, the player is being pushed, or no open pane is in reach.
+ * The pane leaves the open ones for good, and its lurker drops to the floor: a creature at
+ * the pane's drop point, which is its home too. The caller steps the world from the result
+ * and adds the lurker after the creatures of the step: it is stepped from the next step on.
+ */
+export function closePane(
+  state: GameState,
+  input: GameInput,
+  map: TileMap,
+): { readonly panes: PaneState[]; readonly lurker: CreatureState } | null {
+  if (!pressed(state.held, input, 'talk') || input.lamp || state.player.recoil.steps > 0) {
+    return null;
+  }
+  const panes = panesOf(map);
+  const open = paneInReach(state.player, state.panes, panes, map);
+  const pane = open === null ? undefined : panes[open.pane];
+  if (open === null || pane === undefined) {
+    return null;
+  }
+  const { drop } = pane;
+  return {
+    panes: state.panes.filter((candidate) => candidate !== open),
+    lurker: { species: 'lurker', x: drop.x, y: drop.y, light: 0, home: { x: drop.x, y: drop.y } },
+  };
 }
 
 /** The panes when the figure wakes (0009): the open ones stay open, and none is lit. */

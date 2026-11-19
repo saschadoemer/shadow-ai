@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import type { NamedPoint, NamedRect, TileMap } from '../../src/engine/tiled';
+import { clearRegion } from '../../src/game/cases';
 import { SPREAD } from '../../src/game/lamp';
 import { NOTICE_PANE_OPEN, NOTICE_SHADOW_TOO_DENSE, noticeOf } from '../../src/game/notice';
 import {
+  closePane,
   coveredCells,
   dropPoint,
   openPanes,
+  PANE_DISTANCE,
+  paneCentre,
+  paneInReach,
   panesOf,
   restedPanes,
   stepPanes,
@@ -13,7 +18,7 @@ import {
 import { type GameInput, NO_INPUT } from '../../src/game/player';
 import { PANE_PREFIX, rectsOf } from '../../src/game/rects';
 import { restsOf } from '../../src/game/rest';
-import type { GameState } from '../../src/game/state';
+import type { CreatureState, GameState } from '../../src/game/state';
 import { stepTraces, tracesOf } from '../../src/game/trace';
 import { createInitialState, newGame, update } from '../../src/game/update';
 import { textKey } from '../../src/text/text';
@@ -21,6 +26,7 @@ import { grassMap } from './grass-map';
 
 const NONE = NO_INPUT;
 const SHINE: GameInput = { ...NONE, lamp: true };
+const TALK: GameInput = { ...NONE, talk: true };
 const rect = (name: string, x: number, y: number, width = 16, height = 16): NamedRect => ({
   name,
   x,
@@ -262,5 +268,171 @@ describe('an open pane (0038)', () => {
       rested: { at: lit.tick, result: 'restored' },
     };
     expect(noticeOf(busy)).toBe(NOTICE_PANE_OPEN);
+  });
+});
+
+describe('closing a pane (0038)', () => {
+  const start = createInitialState(MAP);
+  const panes = panesOf(MAP);
+  /** The lurker of the near pane, where it drops: two cells right of the pane and one below. */
+  const LURKER: CreatureState = {
+    species: 'lurker',
+    x: 136,
+    y: 152,
+    light: 0,
+    home: { x: 136, y: 152 },
+  };
+  const run = (from: GameState, ...inputs: readonly GameInput[]): GameState =>
+    inputs.reduce((state, input) => update(state, input, MAP), from);
+
+  it('has the reach of a talk: 40 px from the feet to the centre of the cell', () => {
+    expect(PANE_DISTANCE).toBe(40);
+    const [near] = panes;
+    expect(near === undefined ? null : paneCentre(near)).toStrictEqual({ x: 104, y: 136 });
+    expect(paneInReach({ x: 104, y: 96 }, start.panes, panes, MAP)).toStrictEqual(start.panes[0]);
+    expect(paneInReach({ x: 104, y: 95 }, start.panes, panes, MAP)).toBeNull();
+    // A closed pane is in nobody's reach.
+    expect(paneInReach({ x: 104, y: 100 }, [{ pane: 1, lit: false }], panes, MAP)).toBeNull();
+  });
+
+  it('is the nearest of two in reach, and the first in the order of the map of two equally near', () => {
+    // Two panes side by side, two cells apart: their centres are (104, 136) and (136, 136).
+    const two = mapAt(120, 110, [NEAR, rect('pane:support', 128, 128)]);
+    const open = createInitialState(two).panes;
+    const both = panesOf(two);
+    expect(paneInReach({ x: 120, y: 110 }, open, both, two)).toStrictEqual(open[0]);
+    expect(paneInReach({ x: 124, y: 110 }, open, both, two)).toStrictEqual(open[1]);
+    expect(paneInReach({ x: 116, y: 110 }, open, both, two)).toStrictEqual(open[0]);
+  });
+
+  it('removes the pane and drops its lurker at the drop point, which is its home', () => {
+    const closed = update(start, TALK, MAP);
+    expect(closed.panes).toStrictEqual([{ pane: 1, lit: false }]);
+    expect(closed.creatures).toStrictEqual([LURKER]);
+    expect(closed.captured).toStrictEqual(start.captured);
+    expect(closed.tick).toBe(1);
+    expect(closePane(start, TALK, MAP)).toStrictEqual({
+      panes: [{ pane: 1, lit: false }],
+      lurker: LURKER,
+    });
+    expect(closePane(start, NONE, MAP)).toBeNull();
+  });
+
+  it('steps the lurker from the next step on: it comes at the figure', () => {
+    const closed = update(start, TALK, MAP);
+    // 61 px from the figure: inside the 64 px at which it notices.
+    const [lurker] = update(closed, NONE, MAP).creatures;
+    expect(lurker?.x).toBeLessThan(136);
+    expect(lurker?.y).toBeLessThan(152);
+    expect(lurker?.home).toStrictEqual({ x: 136, y: 152 });
+  });
+
+  it('adds the lurker after the creatures of the map', () => {
+    const map = mapAt(104, 100, RECTS, [{ name: 'snippet', x: 280, y: 170 }]);
+    const closed = update(createInitialState(map), TALK, map);
+    expect(closed.creatures.map((creature) => creature.species)).toStrictEqual([
+      'snippet',
+      'lurker',
+    ]);
+  });
+
+  it('is not taken out of reach', () => {
+    // The centre of the pane is 46 px below the feet.
+    const far = mapAt(104, 90);
+    const pressed = update(createInitialState(far), TALK, far);
+    expect(pressed.panes).toHaveLength(2);
+    expect(pressed.creatures).toStrictEqual([]);
+  });
+
+  it('is not taken behind an opaque box, and is taken over a low one', () => {
+    const box = { x: 96, y: 112, width: 16, height: 16 };
+    const at = 7 * 20 + 6;
+    const walled: TileMap = {
+      ...MAP,
+      opaque: MAP.opaque.map((boxes, i) => (i === at ? [box] : boxes)),
+    };
+    expect(update(createInitialState(walled), TALK, walled).panes).toHaveLength(2);
+    // A desk is solid and low: it stops the walk and not the line.
+    const low: TileMap = {
+      ...MAP,
+      solids: MAP.solids.map((boxes, i) => (i === at ? [box] : boxes)),
+    };
+    expect(update(createInitialState(low), TALK, low).panes).toHaveLength(1);
+  });
+
+  it('is not taken with the lamp held or during a push', () => {
+    const held = update(start, { ...TALK, lamp: true }, MAP);
+    expect(held.panes).toStrictEqual([
+      { pane: 0, lit: true },
+      { pane: 1, lit: false },
+    ]);
+    expect(held.creatures).toStrictEqual([]);
+    const pushed: GameState = {
+      ...start,
+      player: { ...start.player, recoil: { dx: 3, dy: 0, steps: 8 } },
+    };
+    expect(update(pushed, TALK, MAP).panes).toHaveLength(2);
+  });
+
+  it('gives way to a talk: with a speaker in reach the talk opens, and the pane stays open', () => {
+    const map = mapAt(104, 100, RECTS, [{ name: 'figure:officer', x: 128, y: 100 }]);
+    const talking = update(createInitialState(map), TALK, map);
+    expect(talking.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
+    expect(talking.panes).toHaveLength(2);
+    expect(talking.creatures).toStrictEqual([]);
+  });
+
+  it('does nothing at a closed pane: a second press finds none in reach', () => {
+    const closed = update(start, TALK, MAP);
+    const again = run(closed, NONE, TALK);
+    expect(again.panes).toStrictEqual(closed.panes);
+    expect(again.creatures.filter((creature) => creature.species === 'lurker')).toHaveLength(1);
+  });
+
+  it('comes before a rest: the press closes the pane, and the next one takes the coffee', () => {
+    // A coffee machine on cell (7, 7): its centre is 26 px from the feet.
+    const map = mapAt(104, 100, [...RECTS, rect('rest:coffee', 112, 112)]);
+    const closed = update(createInitialState(map), TALK, map);
+    expect(closed.panes).toHaveLength(1);
+    expect(closed.rested).toBeNull();
+    const drunk = update(update(closed, NONE, map), TALK, map);
+    expect(drunk.rested).toStrictEqual({ at: 3, result: 'full' });
+  });
+
+  it('lets the trace under it be found: in the 60th lit step after it is closed', () => {
+    // The lurker would come and push; it is taken out of this state.
+    const closed: GameState = { ...update(start, TALK, MAP), creatures: [] };
+    const before = steps(update(closed, NONE, MAP), SHINE, 59);
+    expect(before.traces[0]).toStrictEqual({ trace: 0, light: 59, found: null });
+    const found = update(before, SHINE, MAP);
+    expect(found.traces[0]).toStrictEqual({ trace: 0, light: 0, found: found.tick });
+  });
+
+  it('keeps a closed pane closed at the wake, and brings a free lurker back to its drop point', () => {
+    const moved = steps(update(start, TALK, MAP), NONE, 20);
+    expect(moved.creatures[0]?.x).not.toBe(136);
+    // The 44th step of the dark is the wake (0009).
+    const woken = update({ ...moved, dark: 44 }, NONE, MAP);
+    expect(woken.dark).toBe(45);
+    expect(woken.panes).toStrictEqual([{ pane: 1, lit: false }]);
+    expect(woken.creatures).toStrictEqual([LURKER]);
+  });
+
+  it('goes with the shadow of its region when the case is solved: no lurker drops, none is counted', () => {
+    // The lower half of the map is the area of Support; a third pane belongs to Sales.
+    const map = mapAt(104, 100, [
+      ...RECTS,
+      rect('pane:sales', 240, 112),
+      rect('region:support', 0, 96, 320, 96),
+    ]);
+    const outside: CreatureState = { ...LURKER, x: 280, y: 72, home: { x: 280, y: 72 } };
+    const state: GameState = { ...createInitialState(map), creatures: [LURKER, outside] };
+    expect(state.panes).toHaveLength(3);
+    const cleared = clearRegion(state, 'support', map);
+    // Both panes of Support leave, the open ones too; the pane of Sales stays.
+    expect(cleared.panes).toStrictEqual([{ pane: 2, lit: false }]);
+    // By the rule of 0025: the lurker at home in the area leaves, the other stays.
+    expect(cleared.creatures).toStrictEqual([outside]);
+    expect(cleared.captured).toStrictEqual(state.captured);
   });
 });
