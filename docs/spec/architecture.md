@@ -350,7 +350,9 @@ figure that says them, `intern`; `HINTS` holds per case — by its region — th
 after the last case. `hintOf(lampOwned, progress)` picks one: without the lamp `HINT_LAMP`;
 else the first case of `CASES` that is not solved decides — `start` while no trace of its
 region is found, `traces` while some are and not all, `source` once it is ready (`isReady`);
-with every case solved `HINT_DONE`. `withHint(figures, hint)` gives `HINT_FIGURE` that one page
+with every case solved `HINT_DONE`. Since feature 0037 `HINTS` holds the three pages of Support
+too, and the cases are asked in the order Sales, Marketing, Support.
+`withHint(figures, hint)` gives `HINT_FIGURE` that one page
 instead of its own, after `figuresIn`; `update` and the scene both do it, so the box shows the
 page the dialogue has. The hint is derived on every call and is not in the state; a talk with
 the intern changes what a talk changes and nothing more. `CAST` holds the intern as its second
@@ -719,9 +721,13 @@ number of all the region's traces on the map — with one empty cell of 6 px bet
 `Spuren: 1 von 5`, the numbers drawn by `drawNumber`. A solved case (feature 0024) has a third
 line, its outcome, from (16, 60 + 36k) (`CASE_OUTCOME`), and is still 36 px high. On the policy
 tab (feature 0024) block k from 0 is the policy block of the k-th solved case, in the order
-they were solved, from (16, 36 + 60k) (`POLICY_BLOCK`, `POLICY_PITCH`) with lines 12 px apart;
-without a solved case the tab shows its line for nothing. Two blocks of four lines fit, the
-second ending at y = 142. `draw-journal` imports only types
+they were solved, with lines 12 px apart. Since feature 0037 the blocks are stacked by their
+height: `policyOrigins(blocks, language)` gives the first the origin (16, 36) (`POLICY_BLOCK`)
+and each further one the origin 12 px (`POLICY_GAP`) below the last line of the block before
+it, so a block of n lines is followed by the next one 12n + 12 px lower; the lines counted are
+those of the language the tab is drawn in. Without a solved case the tab shows its line for
+nothing. The three blocks of today — four, three and three lines in both languages — fit in
+every order, the last line ending at y = 178. `draw-journal` imports only types
 from `draw-scene`, and `draw-scene` imports `drawJournal`.
 
 The help (feature 0021, `render/draw-help`). While `help` is `true`, `drawScene` draws what it
@@ -893,7 +899,8 @@ the walls, and, in `createInitialState`, refuses the map — each with its messa
 not in the world data (`trace trace:cellar names no region`) and a box that is not one cell
 (`trace trace:sales (1330, 448, 16, 16) is not one cell`). A map without such rectangles has no
 traces. No coordinate of a trace is in `src/` (INV-7); `tools/floor-layout.ts` names the cells
-of the floor's ten, `TRACES`: five of Sales (feature 0022) and five of Marketing (feature 0028).
+of the floor's fifteen, `TRACES`: five of Sales (feature 0022), five of Marketing (feature 0028)
+and five of Support (feature 0037).
 
 **Areas of the regions** (feature 0023). A rectangle named `region:<id>` is an area of a region
 of the world data: whole cells, its corner on the grid, its width and its height multiples of 16
@@ -1183,8 +1190,9 @@ the rests, so that no object of an earlier feature changes its id: the five of M
 pixels; they become three point objects named `mirage` after those traces, ids 129–131, and
 `nextobjectid` is 132. The standing figures are `FIGURES`; the first (`FIRST_FIGURES`, 1), the
 officer, keeps her place after the shadow walls, and every later one is written at the end of
-the file: the intern (feature 0033) is the point `figure:intern` with the id 132, and
-`nextobjectid` is 133.
+the file: the intern (feature 0033) is the point `figure:intern` with the id 132. The traces
+from the eleventh on (`SECOND_TRACES`, 10) are written after him: the five of Support (feature
+0037) are rectangles with the ids 133–137, and `nextobjectid` is 138.
 `floor.tmj` has the layers `ground` (id 1), `detail` (id 3), `above` (id 4) and `objects` (id 2),
 in that order. Posts are
 derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper
@@ -1211,7 +1219,10 @@ the spec's table — each on a desk with a screen in Sales, its chair on the cel
 light of a player who looks up from every reached place on the cell below that chair; and the
 traces of 0028 against theirs — each in the area of Marketing, on a desk with a screen or on
 the printer, and in the light of a player who looks down from every reached place on the cell
-above — with the 123 objects before them held to a recorded digest. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
+above — with the 123 objects before them held to a recorded digest; and the traces of 0037
+against theirs — each in the area of Support, on a desk with a screen whose chair stands on the
+cell below, and in the light of a player who looks up from every reached place on the cell below
+that chair — with the 132 objects before them held to a recorded digest. The file's whitespace is not Tiled's; a save in Tiled reformats it and fails that
 test, so until the art pass the layout changes in `floor-layout.ts`. When the art pass takes the
 floor over by hand (`visual.md` §5), the layout, the generator and the determinism test are
 removed and `floor.tmj` is authored in Tiled like every other map; the layout test's
@@ -1287,7 +1298,8 @@ to four lines of at most 47 and no empty line. The source's answer and what it s
 are pages of the kind `talk`, `talk.<region>-source-<n>` and `talk.<region>-after`, under the
 rule of a page; `notice.case-solved` is a notice. `game/cases` names them by key in `CASES`,
 and the rule test covers both new kinds in both languages. The case of Marketing (feature
-0028) adds six keys — `region.marketing` and five of these — and no kind.
+0028) adds six keys — `region.marketing` and five of these — and no kind. The case of Support
+(feature 0037) adds nine: `region.support`, five of these, and the three hints of the intern.
 
 The story (feature 0026) adds the kind `story`: `story.<scene>-<n>` is a page of a scene, under
 the rule of a page of talk — at most three lines of at most 47 characters, none empty — and the

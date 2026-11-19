@@ -1,6 +1,6 @@
 # 0037 — The case of Support
 
-**Status:** approved 2026-11-19
+**Status:** implemented 2026-11-19
 **Milestone:** M6
 **Drafted:** 2026-11-19
 
@@ -236,7 +236,11 @@ journal.
 - Is the block of the policy something a team would accept — also the part about the list?
 - Three cases in any order: does the game still tell one story?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–22. Feel: a third case by the same rules — pass; twenty-seven
+screens and five traces — good, but a creature in Support would make it more fun (it comes with
+0038); the answer sounds like the colleague with the forty tickets — fits; the policy block,
+also the part about the list, is one a team would accept — fits; three cases in any order still
+tell one story — fits.
 
 ## Open questions
 

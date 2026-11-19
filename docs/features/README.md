@@ -60,5 +60,6 @@ in two.
 | [0034](0034-the-close.md) | The close | M6 | implemented 2026-11-19 |
 | [0035](0035-the-harmonic-station.md) | The Harmonic station | M5 | rejected 2026-11-19 |
 | [0036](0036-lmis-and-harmonic.md) | LMIS and Harmonic | M5 | implemented 2026-11-19 |
-| [0037](0037-the-case-of-support.md) | The case of Support | M6 | approved 2026-11-19 |
+| [0037](0037-the-case-of-support.md) | The case of Support | M6 | implemented 2026-11-19 |
 | [0038](0038-the-creature-of-support.md) | The creature of Support | M6 | approved 2026-11-19 |
+| [0039](0039-the-lamp-from-the-start.md) | The lamp from the start | M6 | approved 2026-11-19 |

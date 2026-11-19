@@ -62,7 +62,10 @@ that the rest of the floor follows, and the game goes on (feature 0034). A game 
 card that says who presents it — `LMIS präsentiert` over the title — for three seconds or
 until `E` is pressed; then the call follows. Three people name Harmonic, a monitoring product,
 once each and say what it would have shown: the data protection officer, the colleague of
-Sales after the case, and the management at the close (feature 0036).
+Sales after the case, and the management at the close (feature 0036). Support has five traces
+of its own, on five of its twenty-seven screens, and the colleague in the orange shirt is the
+source of the third case; the three cases can be solved in any order, and the close follows the
+last of them (feature 0037).
 Every merge to `main` is deployed to Cloud Run (feature 0030).
 The roadmap is in [docs/plan.md](docs/plan.md).
 

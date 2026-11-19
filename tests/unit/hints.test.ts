@@ -21,12 +21,14 @@ import { grassMap } from './grass-map';
 const NONE = NO_INPUT;
 const TALK: GameInput = { ...NONE, talk: true };
 const box = { x: 0, y: 0, width: 16, height: 16 };
-/** Two traces of Sales, then two of Marketing. */
+/** Two traces of Sales, then two of Marketing, then two of Support (0037). */
 const PLACES: readonly Trace[] = [
   { region: 'sales', box },
   { region: 'sales', box },
   { region: 'marketing', box },
   { region: 'marketing', box },
+  { region: 'support', box },
+  { region: 'support', box },
 ];
 /** The progress with the traces of the given indices found and the given regions solved. */
 const progress = (found: readonly number[], ...solved: readonly string[]): Progress => ({
@@ -42,6 +44,7 @@ const progress = (found: readonly number[], ...solved: readonly string[]): Progr
 });
 const SALES = HINTS.sales as CaseHints;
 const MARKETING = HINTS.marketing as CaseHints;
+const SUPPORT = HINTS.support as CaseHints;
 
 describe('the hints (0033)', () => {
   it('are said by the intern, a member of the cast', () => {
@@ -61,6 +64,11 @@ describe('the hints (0033)', () => {
         start: textKey('talk.intern-marketing-start'),
         traces: textKey('talk.intern-marketing-traces'),
         source: textKey('talk.intern-marketing-source'),
+      },
+      support: {
+        start: textKey('talk.intern-support-start'),
+        traces: textKey('talk.intern-support-traces'),
+        source: textKey('talk.intern-support-source'),
       },
     });
     expect([HINT_LAMP, HINT_DONE]).toStrictEqual([
@@ -105,16 +113,29 @@ describe('the hint of a moment (0033)', () => {
     expect(hintOf(true, progress([0, 1, 2, 3], 'sales'))).toBe(MARKETING.source);
   });
 
-  it('is the last page once every case is solved, in either order', () => {
-    expect(hintOf(true, progress([0, 1, 2, 3], 'sales', 'marketing'))).toBe(HINT_DONE);
-    expect(hintOf(true, progress([0, 1, 2, 3], 'marketing', 'sales'))).toBe(HINT_DONE);
+  it('goes on to Support once Sales and Marketing are solved, by the same rule (0037)', () => {
+    const both = ['sales', 'marketing'] as const;
+    expect(hintOf(true, progress([0, 1, 2, 3], ...both))).toBe(SUPPORT.start);
+    expect(hintOf(true, progress([0, 1, 2, 3, 4], ...both))).toBe(SUPPORT.traces);
+    expect(hintOf(true, progress([0, 1, 2, 3, 4, 5], ...both))).toBe(SUPPORT.source);
+    // Whatever is found in Support, the earlier cases come first.
+    expect(hintOf(true, progress([4, 5]))).toBe(SALES.start);
+    expect(hintOf(true, progress([0, 1, 4, 5], 'sales'))).toBe(MARKETING.start);
+  });
+
+  it('is the last page once every case is solved, in any order', () => {
+    const all = [0, 1, 2, 3, 4, 5];
+    expect(hintOf(true, progress(all, 'sales', 'marketing', 'support'))).toBe(HINT_DONE);
+    expect(hintOf(true, progress(all, 'support', 'marketing', 'sales'))).toBe(HINT_DONE);
+    expect(hintOf(true, progress(all, 'marketing', 'support', 'sales'))).toBe(HINT_DONE);
   });
 
   it('asks the cases in the order of the table it is given: the game passes its own', () => {
     const turned: readonly Case[] = [...CASES].reverse();
-    expect(hintOf(true, progress([]), turned)).toBe(MARKETING.start);
-    expect(hintOf(true, progress([0]), turned)).toBe(MARKETING.start);
-    expect(hintOf(true, progress([], 'marketing'), turned)).toBe(SALES.start);
+    expect(hintOf(true, progress([]), turned)).toBe(SUPPORT.start);
+    expect(hintOf(true, progress([0]), turned)).toBe(SUPPORT.start);
+    expect(hintOf(true, progress([], 'support'), turned)).toBe(MARKETING.start);
+    expect(hintOf(true, progress([], 'support', 'marketing'), turned)).toBe(SALES.start);
   });
 
   it('points to the start of a region that has no trace on the map', () => {

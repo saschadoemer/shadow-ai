@@ -779,9 +779,9 @@ describe('traces in the state (0022)', () => {
     return state;
   };
 
-  it('starts on the floor with ten traces, unseen and not found (0022, 0028)', () => {
+  it('starts on the floor with fifteen traces, unseen and not found (0022, 0028, 0037)', () => {
     expect(createInitialState(FLOOR_MAP).traces).toStrictEqual(
-      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((trace) => ({ trace, light: 0, found: null })),
+      Array.from({ length: 15 }, (_, trace) => ({ trace, light: 0, found: null })),
     );
     expect(createInitialState(MAP).traces).toStrictEqual([]);
   });
@@ -1234,7 +1234,10 @@ describe('the second species in the state (0032)', () => {
 
 describe('the close in the state (0034)', () => {
   const TALK: GameInput = { ...NONE, talk: true };
-  /** Both sources, each waiting ten seconds on its first point, and one trace of each case. */
+  /**
+   * The sources of the three cases (0037), each waiting ten seconds on its first point, and one
+   * trace of each case. The map kept its name from the time of two cases.
+   */
   const BOTH = grassMap(
     20,
     12,
@@ -1242,27 +1245,31 @@ describe('the close in the state (0034)', () => {
     [
       { name: 'person:sales:1', x: 64, y: 48, pause: 600 },
       { name: 'person:sales:2', x: 128, y: 48 },
-      { name: 'person:marketing:1', x: 64, y: 144, pause: 600 },
-      { name: 'person:marketing:2', x: 128, y: 144 },
+      { name: 'person:marketing:1', x: 64, y: 96, pause: 600 },
+      { name: 'person:marketing:2', x: 128, y: 96 },
+      { name: 'person:support:1', x: 64, y: 144, pause: 600 },
+      { name: 'person:support:2', x: 128, y: 144 },
     ],
     [
       { name: 'trace:sales', x: 240, y: 32, width: 16, height: 16 },
-      { name: 'trace:marketing', x: 240, y: 128, width: 16, height: 16 },
+      { name: 'trace:marketing', x: 240, y: 80, width: 16, height: 16 },
+      { name: 'trace:support', x: 240, y: 128, width: 16, height: 16 },
     ],
   );
   const start = createInitialState(BOTH);
-  /** Both cases solved, the later one at step 700; the game stands at the given tick. */
+  /** Every case solved, the last one at step 700; the game stands at the given tick. */
   const solvedAt = (tick: number, fields: Partial<GameState> = {}): GameState => ({
     ...start,
     tick,
-    // Far from both sources: a press of talk reaches nobody.
+    // Far from every source: a press of talk reaches nobody.
     player: { ...start.player, x: 280, y: 96 },
     traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
     solved: [
-      { region: 'sales', at: 400 },
-      { region: 'marketing', at: 700 },
+      { region: 'sales', at: 100 },
+      { region: 'marketing', at: 400 },
+      { region: 'support', at: 700 },
     ],
-    overview: { current: 7, max: 7 },
+    overview: { current: 8, max: 8 },
     ...fields,
   });
   const run = (from: GameState, ...inputs: readonly GameInput[]): GameState =>
@@ -1415,16 +1422,20 @@ describe('the close in the state (0034)', () => {
   });
 
   it('follows the solving step of a game: the last answer, 300 steps, the close', () => {
-    // Marketing ready, Sales solved long ago; the figure beside the colleague of Marketing.
+    // Support ready, the other two solved long ago; the figure beside the colleague of Support.
     let state: GameState = {
       ...start,
       tick: 1000,
       player: { ...start.player, x: 104, y: 144 },
       traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
-      solved: [{ region: 'sales', at: 400 }],
+      solved: [
+        { region: 'sales', at: 100 },
+        { region: 'marketing', at: 400 },
+      ],
+      overview: { current: 7, max: 7 },
     };
     state = run(state, TALK, NONE, TALK, NONE, TALK);
-    expect(state.solved[1]).toStrictEqual({ region: 'marketing', at: 1005 });
+    expect(state.solved[2]).toStrictEqual({ region: 'support', at: 1005 });
     const opensAt: number[] = [];
     for (let step = 0; step < 310; step += 1) {
       const next = update(state, NONE, BOTH);

@@ -166,7 +166,7 @@ alternative):
 
 1. Traces found in the region are shadow residue on devices, visible in the lamp's light; each
    goes into the journal. *As built* (feature 0022): the five traces of Sales; (feature 0028)
-   the five of Marketing.
+   the five of Marketing; (feature 0037) the five of Support.
 2. Conversations in the department and the break room lead to the source — the person where the
    data flow begins.
 3. At the source the player **shows a matching trace** from the journal. It is a gesture, not an
@@ -210,6 +210,14 @@ clears the room: overview grows by one again, to seven with both cases solved. T
 do not depend on each other: Marketing is open from the start, and the player may solve it
 before Sales. What a case of Act 2 has more than the first — its species, the upgrade it
 earns, the vendor — comes with features of their own.
+
+**As built** (feature 0037): the case of Support, by the same rules. Its source is the
+colleague in the orange shirt who walks between the cubicles and the printer. Its five traces
+lie on five screens, at least one in each row of cubicles. With all five found the colleague
+answers in two pages, and the press that closes the answer solves the case and clears the
+room: overview grows by one, to eight with all three cases solved. The three cases do not
+depend on each other and may be solved in any order. The case earns no upgrade. The close
+(feature 0034) follows the last case of the game, so it now waits for Support too.
 
 **As built** (feature 0036): three pages of talk name Harmonic, and no rule of a case changed
 (`vision.md` §10). The page the colleague of Sales says after the case no longer asks what to
@@ -259,6 +267,13 @@ within the tab come with the third (M6).
 below the first, in the order of the world data — Sales, then Marketing — whichever was
 solved first. The policy tab shows the two blocks in the order they were solved, the second
 60 px below the first.
+
+**As built** (feature 0037): with three cases the cases tab shows three entries, 36 px apart,
+in the order Sales, Marketing, Support. The policy tab stacks its blocks by their height: the
+first starts at (16, 36), and each further one 12 px below the last line of the block before
+it — after a block of four lines 60 px lower, as before, and after a block of three lines 48
+px lower. The three blocks of today, of four, three and three lines, fit the screen in every
+order: the last line ends at y = 178. Pages on this tab come with the fourth block.
 
 **As built** (feature 0032): with a second species the creatures tab shows two entries, the
 second 72 px below the first, in the order of the species — the snippet, then the mirage —

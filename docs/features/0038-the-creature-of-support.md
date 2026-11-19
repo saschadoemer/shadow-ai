@@ -15,7 +15,7 @@ journal's creatures tab gets pages.
 
 ## Scope
 
-Built on 0037 as merged. No tile changes; the floor gets three rectangles.
+Built on 0039 as merged. No tile changes; the floor gets three rectangles.
 
 **In:**
 
@@ -247,7 +247,7 @@ before. The cases tab and the policy tab have no pages; `up` and `down` do nothi
 
 **Preconditions:** `npm run dev`, a desktop browser, the window at least 1280x720. The game
 has just loaded; the figure stands in the reception with the lamp — the card (0036) and the
-call (0026) are passed and the lamp fetched first. Arrow keys or WASD walk, `Space` holds
+call (0026) are passed. Arrow keys or WASD walk, `Space` holds
 the lamp, `E` or `Enter` talks, `J` opens and closes the journal.
 
 **Steps:**

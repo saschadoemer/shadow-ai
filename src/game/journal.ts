@@ -54,6 +54,7 @@ export const CASE_TEXT = {
 export const REGION_NAME: Readonly<Partial<Record<string, TextKey>>> = {
   sales: textKey('region.sales'),
   marketing: textKey('region.marketing'),
+  support: textKey('region.support'),
 };
 
 /** The entries of the creatures tab: every species captured at least once, in SPECIES order. */

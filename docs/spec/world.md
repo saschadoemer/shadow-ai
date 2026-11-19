@@ -190,6 +190,18 @@ before they went to print. Its policy block, in the words of
 before it leaves the house — image or text, rather once too often. The two cases do not depend
 on each other: the player may solve Marketing before Sales.
 
+**Traces of Support** (feature 0037): five traces lie on five of the twenty-seven screens of
+the cubicles of Support, at least one in each of its three rows. The table of
+`docs/features/0037-the-case-of-support.md` is the placement until the art pass.
+
+**The case of Support** (feature 0037): the third case, by the rules of the first two. The
+customers' mails come in eleven languages and go into a translator from the web, and a browser
+extension reads the whole mailbox along. Its policy block, in the words of
+`docs/features/0037-the-case-of-support.md`: tools and extensions come from the approved list,
+and only from there — and a tool that is missing gets onto the list when somebody says so. The
+three cases do not depend on each other and may be solved in any order. The case earns no
+upgrade, and its species comes with feature 0038.
+
 **Order and gating.** Marketing and Support are open from the start (thin shadow). HR and
 Accounting open after the first upgrade, Development after the second. Management is last: without
 the filter nothing is visible there, and without the vendor as advisor there is no alternative
@@ -202,7 +214,9 @@ Kept as small as the story allows. About thirty figures in all.
 
 - **The data protection officer.** Mentor. Office beside the reception, which is also where the
   player wakes up after losing overview. The only person besides the player who sees the shadow
-  from the start. Gives the lamp and explains the rules of the world in three sentences.
+  from the start. Explains the rules of the world in three sentences. The lamp is the
+  player's own from the first step; she says what it is for and does not hand it over
+  (feature 0039).
   Since feature 0017 she stands in her office at tile (16, 29), two tiles from the wake point,
   and can be spoken to. She says the three sentences that explain the shadow and the lamp, the
   same two pages every time, until M5 brings the first meeting. She has no name yet and is not
@@ -236,7 +250,8 @@ Kept as small as the story allows. About thirty figures in all.
   says follows from the case: the everyday line while a trace is missing, the honest answer
   once all five are found, and the line afterwards once the case is solved.
   Since feature 0028 the colleague of Marketing — the one in the red shirt, with the printer —
-  is the source of the second case, by the same rule.
+  is the source of the second case, by the same rule. Since feature 0037 the colleague of
+  Support — the one in the orange shirt, with the forty tickets — is the source of the third.
 - **The managing director.** The last case. In the first act a sentence of the call (feature
   0026); a figure with the map of Management (M6).
 - **The customer.** A voice on the phone at the start — one sentence of the call (feature 0026).
