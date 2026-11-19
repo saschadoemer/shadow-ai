@@ -4233,19 +4233,19 @@ text where the diff means it; do not change the words without a reason.
 
 ### Task 12: The acceptance walk
 
-- [ ] **Step 1:** start the game as the spec's preconditions say (`npm run dev`), and tell the
+- [x] **Step 1:** start the game as the spec's preconditions say (`npm run dev`), and tell the
   author in one message: the URL, a desktop browser, a window of at least 1280x720, the keys
   of the spec's preconditions, and where to begin — the card and the call passed. Say one
   thing more, because it follows from the order of a press of `E`: if the colleague in the
   orange shirt stands within reach when `E` is pressed at a window, the talk opens instead;
   close it and press again once the colleague has walked on. Wait until the author is ready.
-- [ ] **Step 2:** guide the author through steps 1–16 of the spec's acceptance plan, one action
+- [x] **Step 2:** guide the author through steps 1–16 of the spec's acceptance plan, one action
   step with its expected step per message, in the spec's numbering and words. Record each answer
   as given. Never answer a step yourself.
-- [ ] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
+- [x] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
   decision — rerun Task 11, and start again at step 1.
-- [ ] **Step 4:** after step 16 ask the five feel questions, one per message.
-- [ ] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–16`, followed by the feel notes,
+- [x] **Step 4:** after step 16 ask the five feel questions, one per message.
+- [x] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–16`, followed by the feel notes,
   into the spec and commit it — `Record the walk of 0038`. A feel note that wants something
   else — a move of its own for the lurker, another place to drop, other words — becomes a
   new draft, not a change on this branch.

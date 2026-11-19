@@ -297,7 +297,10 @@ the lamp, `E` or `Enter` talks, `J` opens and closes the journal.
 - On the floor it is a snippet with another face. Enough, or does it need a move of its own?
 - Two pages in the journal: found without being told?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–16. Feel: pressing `E` at the screen without the
+intern — pass; the line under the lamp says enough — pass; the lurker drops beside the figure,
+fair — pass; a snippet with another face is enough — pass; the two pages of the journal found
+without being told — pass.
 
 ## Open questions
 
