@@ -1857,16 +1857,16 @@ text where the diff means it; do not change the words without a reason.
 
 ### Task 8: The pull request
 
-- [ ] **Step 1:** merge the latest `main` again and rerun Task 6. If the merge changed code,
+- [x] **Step 1:** merge the latest `main` again and rerun Task 6. If the merge changed code,
   the walk is run again.
-- [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
+- [x] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`. In `docs/plan.md` §4: in the M6 section say that 0032 to 0034
   and 0036 are implemented and the other two are approved; in the M5 section, where the
   text says that the one named below is not implemented and that M5 stays open until it is
   built, say that it is implemented. Do not declare the milestone done in other words than
   the text already uses for a finished milestone; if it is unclear whether M5 is done, ask
   the author. Commit — `Mark 0036 implemented`.
-- [ ] **Step 3:** push the branch and open the pull request against `main`, titled
+- [x] **Step 3:** push the branch and open the pull request against `main`, titled
   `Feature 0036: LMIS and Harmonic`, with the walk's result and feel notes in its
   description. Say in the description that the branch also carries the change of the
   specification: 0035, the Harmonic station, was rejected in its walk, and the rule about

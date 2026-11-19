@@ -124,8 +124,8 @@ once there is a case to walk into. Overview won back after it; `gameplay.md` §4
 open since 0009. The help label closes the milestone: the line that named the help's key for
 ten seconds, right after the call, was on screen too long, and a small label in the corner
 that stays takes its place. It comes after 0027 because it takes a field out of the state to
-which 0027 adds one. All seven are implemented; the one named below is not, so M5 stays
-open until it is built.
+which 0027 adds one. All seven are implemented, and so is the one named below. M5 is done:
+0036 was the last.
 
 One more, for the teaser (`vision.md` §10): 0036 LMIS and Harmonic — the card on which LMIS
 presents the game, before the call, which needs a place before the title screen of M8, and
@@ -147,7 +147,7 @@ species brings what the journal still lacks — a choice among its entries, and 
 Six features for a build that can be played from the call to a close by somebody who was
 only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034 the close ·
 0036 LMIS and Harmonic · 0037 the case of Support · 0038 the creature of Support. They are
-built in this order. 0032 to 0034 are implemented; the other three are approved.
+built in this order. 0032 to 0034 and 0036 are implemented; the other two are approved.
 The creature first, so that the second room has opposition; it is cut small — the choice
 among the journal's entries and its pages wait for a later case and the third species. The
 intern after it: the hint system `world.md` §3 has named since M1, one figure in the break
