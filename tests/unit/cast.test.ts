@@ -4,14 +4,9 @@ import {
   CAST,
   type CastMember,
   COLLEAGUES,
-  FIRST_MEETING,
-  type Figure,
   figuresFrom,
-  figuresIn,
   figuresOf,
   isFigurePoint,
-  isFirstMeeting,
-  type Meeting,
   pagesOfRoute,
 } from '../../src/game/cast';
 import { creaturesFrom } from '../../src/game/creature';
@@ -28,9 +23,10 @@ describe('the cast (0017)', () => {
     expect(CAST[0]).toStrictEqual({ id: 'officer', pages: [FIRST, SECOND, THIRD] });
   });
 
-  it('has the intern after her, with the one page he has before anything is known (0033)', () => {
+  it('has the intern after her, with the page he has before a step has picked one (0033, 0039)', () => {
     expect(CAST.map((member) => member.id)).toStrictEqual(['officer', 'intern']);
-    expect(CAST[1]?.pages).toStrictEqual([textKey('talk.intern-lamp')]);
+    // The first hint of a new game: where Sales is.
+    expect(CAST[1]?.pages).toStrictEqual([textKey('talk.intern-sales-start')]);
   });
 
   it('gives every member at least one page', () => {
@@ -130,46 +126,5 @@ describe('the colleagues and their lines (0018)', () => {
     const table = [{ route: 'person:hr', pages: [FIRST] }];
     expect(pagesOfRoute('person:hr', table)).toStrictEqual([FIRST]);
     expect(pagesOfRoute('person:sales', table)).toStrictEqual([]);
-  });
-});
-
-describe('the first meeting (0026)', () => {
-  const HANDS_OVER = textKey('talk.officer-meeting-2');
-  const officer: Figure = { id: 'officer', pages: [FIRST, SECOND], x: 160, y: 96 };
-  const other: Figure = { id: 'director', pages: [SECOND], x: 40, y: 40 };
-
-  it('is the officer with her first page and the page that hands the lamp over', () => {
-    expect(FIRST_MEETING).toStrictEqual({ figure: 'officer', pages: [FIRST, HANDS_OVER] });
-    expect(CAST.some((member) => member.id === FIRST_MEETING.figure)).toBe(true);
-  });
-
-  it('gives her the pages of the meeting while the lamp is not owned, and nobody else', () => {
-    expect(figuresIn([other, officer], false)).toStrictEqual([
-      other,
-      { ...officer, pages: [FIRST, HANDS_OVER] },
-    ]);
-  });
-
-  it('gives every figure its own pages once the lamp is owned', () => {
-    expect(figuresIn([other, officer], true)).toStrictEqual([other, officer]);
-  });
-
-  it('reads the meeting it is given: the game passes its own', () => {
-    const meeting: Meeting = { figure: 'director', pages: [FIRST] };
-    expect(figuresIn([other, officer], false, meeting)).toStrictEqual([
-      { ...other, pages: [FIRST] },
-      officer,
-    ]);
-  });
-
-  it('is the dialogue of that figure while the lamp is not owned, and no other', () => {
-    const figures = [other, officer];
-    expect(isFirstMeeting({ speaker: 'figure', index: 1, page: 1 }, figures, false)).toBe(true);
-    expect(isFirstMeeting({ speaker: 'figure', index: 1, page: 0 }, figures, false)).toBe(true);
-    expect(isFirstMeeting({ speaker: 'figure', index: 1, page: 1 }, figures, true)).toBe(false);
-    expect(isFirstMeeting({ speaker: 'figure', index: 0, page: 0 }, figures, false)).toBe(false);
-    expect(isFirstMeeting({ speaker: 'mover', index: 1, page: 0 }, figures, false)).toBe(false);
-    expect(isFirstMeeting({ speaker: 'story', index: 1, page: 0 }, figures, false)).toBe(false);
-    expect(isFirstMeeting({ speaker: 'figure', index: 5, page: 0 }, figures, false)).toBe(false);
   });
 });

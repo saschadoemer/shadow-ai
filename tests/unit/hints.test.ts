@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { NamedPoint, NamedRect, TileMap } from '../../src/engine/tiled';
 import { CASES, type Case, type Progress } from '../../src/game/cases';
-import { CAST, FIRST_MEETING, type Figure, figuresIn, figuresOf } from '../../src/game/cast';
+import { CAST, type Figure, figuresOf } from '../../src/game/cast';
 import {
   type CaseHints,
   HINT_DONE,
   HINT_FIGURE,
-  HINT_LAMP,
   HINTS,
   hintOf,
   withHint,
@@ -71,81 +70,73 @@ describe('the hints (0033)', () => {
         source: textKey('talk.intern-support-source'),
       },
     });
-    expect([HINT_LAMP, HINT_DONE]).toStrictEqual([
-      textKey('talk.intern-lamp'),
-      textKey('talk.intern-done'),
-    ]);
+    // No page sends the player for the lamp (0039): he has it.
+    expect(HINT_DONE).toBe(textKey('talk.intern-done'));
   });
 });
 
 describe('the hint of a moment (0033)', () => {
-  it('is the page of the lamp while the player has none, whatever is found or solved', () => {
-    expect(hintOf(false, progress([]))).toBe(HINT_LAMP);
-    expect(hintOf(false, progress([0, 1, 2, 3]))).toBe(HINT_LAMP);
-    expect(hintOf(false, progress([0, 1, 2, 3], 'sales', 'marketing'))).toBe(HINT_LAMP);
-  });
-
   it('is the start of Sales while no trace of Sales is found', () => {
-    expect(hintOf(true, progress([]))).toBe(SALES.start);
+    expect(hintOf(progress([]))).toBe(SALES.start);
   });
 
   it('is what to look at while some traces of Sales are found and not all', () => {
-    expect(hintOf(true, progress([0]))).toBe(SALES.traces);
-    expect(hintOf(true, progress([1]))).toBe(SALES.traces);
+    expect(hintOf(progress([0]))).toBe(SALES.traces);
+    expect(hintOf(progress([1]))).toBe(SALES.traces);
   });
 
   it('is whom to ask once every trace of Sales is found and the case is not solved', () => {
-    expect(hintOf(true, progress([0, 1]))).toBe(SALES.source);
+    expect(hintOf(progress([0, 1]))).toBe(SALES.source);
   });
 
   it('stays with Sales whatever is found or solved in Marketing', () => {
-    expect(hintOf(true, progress([2]))).toBe(SALES.start);
-    expect(hintOf(true, progress([2, 3]))).toBe(SALES.start);
-    expect(hintOf(true, progress([0, 2, 3]))).toBe(SALES.traces);
-    expect(hintOf(true, progress([0, 1, 2, 3]))).toBe(SALES.source);
-    expect(hintOf(true, progress([2, 3], 'marketing'))).toBe(SALES.start);
-    expect(hintOf(true, progress([0, 2, 3], 'marketing'))).toBe(SALES.traces);
+    expect(hintOf(progress([2]))).toBe(SALES.start);
+    expect(hintOf(progress([2, 3]))).toBe(SALES.start);
+    expect(hintOf(progress([0, 2, 3]))).toBe(SALES.traces);
+    expect(hintOf(progress([0, 1, 2, 3]))).toBe(SALES.source);
+    expect(hintOf(progress([2, 3], 'marketing'))).toBe(SALES.start);
+    expect(hintOf(progress([0, 2, 3], 'marketing'))).toBe(SALES.traces);
   });
 
   it('goes on to Marketing once Sales is solved, by the same rule', () => {
-    expect(hintOf(true, progress([0, 1], 'sales'))).toBe(MARKETING.start);
-    expect(hintOf(true, progress([0, 1, 2], 'sales'))).toBe(MARKETING.traces);
-    expect(hintOf(true, progress([0, 1, 2, 3], 'sales'))).toBe(MARKETING.source);
+    expect(hintOf(progress([0, 1], 'sales'))).toBe(MARKETING.start);
+    expect(hintOf(progress([0, 1, 2], 'sales'))).toBe(MARKETING.traces);
+    expect(hintOf(progress([0, 1, 2, 3], 'sales'))).toBe(MARKETING.source);
   });
 
   it('goes on to Support once Sales and Marketing are solved, by the same rule (0037)', () => {
     const both = ['sales', 'marketing'] as const;
-    expect(hintOf(true, progress([0, 1, 2, 3], ...both))).toBe(SUPPORT.start);
-    expect(hintOf(true, progress([0, 1, 2, 3, 4], ...both))).toBe(SUPPORT.traces);
-    expect(hintOf(true, progress([0, 1, 2, 3, 4, 5], ...both))).toBe(SUPPORT.source);
+    expect(hintOf(progress([0, 1, 2, 3], ...both))).toBe(SUPPORT.start);
+    expect(hintOf(progress([0, 1, 2, 3, 4], ...both))).toBe(SUPPORT.traces);
+    expect(hintOf(progress([0, 1, 2, 3, 4, 5], ...both))).toBe(SUPPORT.source);
     // Whatever is found in Support, the earlier cases come first.
-    expect(hintOf(true, progress([4, 5]))).toBe(SALES.start);
-    expect(hintOf(true, progress([0, 1, 4, 5], 'sales'))).toBe(MARKETING.start);
+    expect(hintOf(progress([4, 5]))).toBe(SALES.start);
+    expect(hintOf(progress([0, 1, 4, 5], 'sales'))).toBe(MARKETING.start);
   });
 
   it('is the last page once every case is solved, in any order', () => {
     const all = [0, 1, 2, 3, 4, 5];
-    expect(hintOf(true, progress(all, 'sales', 'marketing', 'support'))).toBe(HINT_DONE);
-    expect(hintOf(true, progress(all, 'support', 'marketing', 'sales'))).toBe(HINT_DONE);
-    expect(hintOf(true, progress(all, 'marketing', 'support', 'sales'))).toBe(HINT_DONE);
+    expect(hintOf(progress(all, 'sales', 'marketing', 'support'))).toBe(HINT_DONE);
+    expect(hintOf(progress(all, 'support', 'marketing', 'sales'))).toBe(HINT_DONE);
+    expect(hintOf(progress(all, 'marketing', 'support', 'sales'))).toBe(HINT_DONE);
   });
 
   it('asks the cases in the order of the table it is given: the game passes its own', () => {
     const turned: readonly Case[] = [...CASES].reverse();
-    expect(hintOf(true, progress([]), turned)).toBe(SUPPORT.start);
-    expect(hintOf(true, progress([0]), turned)).toBe(SUPPORT.start);
-    expect(hintOf(true, progress([], 'support'), turned)).toBe(MARKETING.start);
-    expect(hintOf(true, progress([], 'support', 'marketing'), turned)).toBe(SALES.start);
+    expect(hintOf(progress([]), turned)).toBe(SUPPORT.start);
+    expect(hintOf(progress([0]), turned)).toBe(SUPPORT.start);
+    expect(hintOf(progress([], 'support'), turned)).toBe(MARKETING.start);
+    expect(hintOf(progress([], 'support', 'marketing'), turned)).toBe(SALES.start);
   });
 
   it('points to the start of a region that has no trace on the map', () => {
     const none: Progress = { traces: [], places: [], solved: [] };
-    expect(hintOf(true, none)).toBe(SALES.start);
+    expect(hintOf(none)).toBe(SALES.start);
   });
 
   it('passes over a case without hints', () => {
-    expect(hintOf(true, progress([]), CASES, { marketing: MARKETING })).toBe(MARKETING.start);
-    expect(hintOf(true, progress([]), CASES, {})).toBe(HINT_DONE);
+    expect(hintOf(progress([]), CASES, { marketing: MARKETING })).toBe(MARKETING.start);
+    expect(hintOf(progress([]), CASES, {})).toBe(HINT_DONE);
   });
 });
 
@@ -180,8 +171,8 @@ describe('the intern speaks (0033)', () => {
   /** What the figures say in a state, as `update` and the scene put it together. */
   const pagesIn = (state: GameState) => {
     const said = withHint(
-      figuresIn(figuresOf(MAP.points), state.lamp.owned),
-      hintOf(state.lamp.owned, {
+      figuresOf(MAP.points),
+      hintOf({
         traces: state.traces,
         places: [{ region: 'sales', box: { x: 240, y: 32, width: 16, height: 16 } }],
         solved: state.solved,
@@ -211,21 +202,21 @@ describe('the intern speaks (0033)', () => {
     });
   });
 
-  it('says the page of the lamp in a game that has none, and the officer the first meeting', () => {
+  it('says where Sales is in a new game, and the officer her own pages (0039)', () => {
     // Past the card (0036).
-    const without: GameState = { ...newGame(MAP), presented: 0 };
-    expect(pagesIn(without)).toStrictEqual({
-      intern: [HINT_LAMP],
-      officer: FIRST_MEETING.pages,
+    const fresh: GameState = { ...newGame(MAP), presented: 0 };
+    expect(pagesIn(fresh)).toStrictEqual({
+      intern: [SALES.start],
+      officer: CAST[0]?.pages,
     });
-    // One press closes the call's last page first: the talk opens afterwards.
-    let state: GameState = { ...without, dialogue: null };
+    // The page the cast gives him is the same one.
+    expect(CAST[1]?.pages).toStrictEqual([SALES.start]);
+    // With the call closed, a press opens his talk and the next closes it.
+    let state: GameState = { ...fresh, dialogue: null };
     state = update(state, TALK, MAP);
     expect(state.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
     state = update(update(state, NONE, MAP), TALK, MAP);
     expect(state.dialogue).toBeNull();
-    // Reading the hint hands no lamp over.
-    expect(state.lamp.owned).toBe(false);
   });
 
   it('says the hint of the moment, and the officer her own pages', () => {

@@ -313,13 +313,18 @@ describe('a coffee (0027)', () => {
     expect(during.overview).toStrictEqual({ current: 2, max: 5 });
   });
 
-  it('is taken with Space held by a player who has no lamp: there is none to hold (0026)', () => {
+  it("is not taken with Space held in a new game either: the lamp is the player's from the first step (0039)", () => {
     // Past the card (0036): the first press turns the page of the call.
     const past: GameState = { ...newGame(OPEN), presented: 0 };
     const called = run(OPEN, past, TALK, NONE, TALK, NONE, TALK, NONE);
-    expect(called.lamp.owned).toBe(false);
-    const drunk = update(called, { ...TALK, lamp: true }, OPEN);
-    expect(drunk.rested).toStrictEqual({ at: called.tick + 1, result: 'full' });
+    const held = update(called, { ...TALK, lamp: true }, OPEN);
+    expect(held.rested).toBeNull();
+    expect(held.lamp.on).toBe(true);
+    // Without the lamp held the same press takes the coffee.
+    expect(update(called, TALK, OPEN).rested).toStrictEqual({
+      at: called.tick + 1,
+      result: 'full',
+    });
   });
 
   it('is not taken out of reach: the step is an ordinary one', () => {

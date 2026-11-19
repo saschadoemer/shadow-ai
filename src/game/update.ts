@@ -2,7 +2,7 @@ import type { TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
 import { cardShown, stepCard } from './card';
 import { answeredCase, clearRegion, earn, progressOf, solve } from './cases';
-import { figuresFrom, figuresIn, figuresOf, isFirstMeeting } from './cast';
+import { figuresFrom, figuresOf } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
 import { openHelp, stepHelp } from './help';
 import { hintOf, withHint } from './hints';
@@ -87,25 +87,25 @@ export function createInitialState(map: TileMap): GameState {
 
 /**
  * The state a played game starts with (0026): the initial state with the call open on its
- * first page and the lamp not yet owned — and, before the call, the card that says who
- * presents the game (0036). `main.ts` starts with it; the tests of the earlier features step
- * from `createInitialState`.
+ * first page and the lamp not yet used — and, before the call, the card that says who
+ * presents the game (0036). The lamp is the player's from the first step (0039). `main.ts`
+ * starts with it; the tests of the earlier features step from `createInitialState`.
  */
 export function newGame(map: TileMap): GameState {
   return {
     ...createInitialState(map),
-    lamp: { on: false, strength: BASE_STRENGTH, owned: false, used: false },
+    lamp: { on: false, strength: BASE_STRENGTH, owned: true, used: false },
     dialogue: { speaker: 'story', index: OPENING_SCENE, page: 0 },
     presented: null,
   };
 }
 
 /**
- * What the step that closed a dialogue changes besides closing it (0024, 0025, 0026). Closing
- * the first meeting hands the lamp over. Closing the source's answer of a ready case solves the
- * case, earns the upgrade of its region if it has one (0029), and what is left of the region's
- * shadow goes with it. Closing the close sets `finished` to the step's tick, so it opens once
- * (0034). Every other closing — that of the call among them — changes nothing more.
+ * What the step that closed a dialogue changes besides closing it (0024, 0025). Closing the
+ * source's answer of a ready case solves the case, earns the upgrade of its region if it has
+ * one (0029), and what is left of the region's shadow goes with it. Closing the close sets
+ * `finished` to the step's tick, so it opens once (0034). Every other closing — that of the
+ * call among them — changes nothing more.
  */
 function closed(
   stepped: GameState,
@@ -115,9 +115,6 @@ function closed(
 ): GameState {
   if (dialogue.speaker === 'story') {
     return dialogue.index === CLOSE_SCENE ? { ...stepped, finished: stepped.tick } : stepped;
-  }
-  if (isFirstMeeting(dialogue, figuresOf(content.points), before.lamp.owned)) {
-    return { ...stepped, lamp: { ...stepped.lamp, owned: true } };
   }
   const answered = answeredCase(
     dialogue,
@@ -175,12 +172,8 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   }
   const routes = routesOf(content.points);
   const progress = progressOf(state, content);
-  // Without the lamp the data protection officer says the first meeting (0026); the intern
-  // says the hint of this moment (0033).
-  const figures = withHint(
-    figuresIn(figuresOf(content.points), state.lamp.owned),
-    hintOf(state.lamp.owned, progress),
-  );
+  // The intern says the hint of this moment (0033); every other figure its own pages.
+  const figures = withHint(figuresOf(content.points), hintOf(progress));
   const speakers = speakersOf(figures, state.movers, routes, undefined, progress);
   if (state.dialogue !== null) {
     const stepped = stepDialogue(state, state.dialogue, input, speakers);

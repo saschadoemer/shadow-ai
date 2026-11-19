@@ -117,29 +117,27 @@ describe("the line that names the lamp's key (0026)", () => {
     inputs.reduce((state, input) => update(state, input, map), start);
   // Past the card (0036): the first press turns the page of the call.
   const called = run({ ...newGame(map), presented: 0 }, TALK, NONE, TALK, NONE, TALK);
-  const met = run(called, NONE, TALK, NONE, TALK, NONE, TALK);
 
   it('is the key `notice.lamp`', () => {
     expect(NOTICE_LAMP).toBe(textKey('notice.lamp'));
   });
 
-  it('is not shown in a new game, under the call or after it, before the first meeting', () => {
-    expect(noticeOf(newGame(map))).toBeNull();
-    expect(noticeOf(called)).toBeNull();
-    expect(noticeOf(run(called, NONE, TALK, NONE, TALK, NONE))).toBeNull();
-  });
-
-  it('is shown from the step that hands the lamp over, for as long as the lamp is not held', () => {
-    expect(met.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
-    let state = met;
+  it('is the notice of a new game from its first step, for as long as the lamp is not held (0039)', () => {
+    expect(noticeOf(newGame(map))).toBe(NOTICE_LAMP);
+    expect(called.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+    let state = called;
     for (let step = 0; step < 600; step += 1) {
       expect(noticeOf(state), `step ${step}`).toBe(NOTICE_LAMP);
       state = update(state, { ...NONE, right: step % 2 === 0 }, map);
     }
+    // A talk with the officer does not take it away.
+    const talked = run(called, NONE, TALK, NONE, TALK, NONE, TALK, NONE, TALK);
+    expect(talked.dialogue).toBeNull();
+    expect(noticeOf(talked)).toBe(NOTICE_LAMP);
   });
 
   it('is gone with the first step in which the lamp is on, and does not come back', () => {
-    const lit = run(met, NONE, SHINE);
+    const lit = run(called, NONE, SHINE);
     expect(noticeOf(lit)).toBeNull();
     let state = lit;
     for (let step = 0; step < 600; step += 1) {

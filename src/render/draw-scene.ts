@@ -2,7 +2,7 @@ import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
 import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { cardShown } from '../game/card';
 import { progressOf } from '../game/cases';
-import { type Figure, figuresIn, figuresOf } from '../game/cast';
+import { type Figure, figuresOf } from '../game/cast';
 import { CREATURE_SIZE, HABITS, isWatched } from '../game/creature';
 import { hintOf, withHint } from '../game/hints';
 import { FRAME_APEX, LAMP_HEIGHT, WIDE_CONE, WIDE_FRAME_APEX } from '../game/lamp';
@@ -513,9 +513,8 @@ export function drawScene(
       : pagesOf(
           state.dialogue,
           speakersOf(
-            // As in `update`: without the lamp the officer says the first meeting (0026), and
-            // the intern says the hint of this moment (0033).
-            withHint(figuresIn(figures, state.lamp.owned), hintOf(state.lamp.owned, progress)),
+            // As in `update`: the intern says the hint of this moment (0033).
+            withHint(figures, hintOf(progress)),
             state.movers,
             routesOf(content.map.points),
             undefined,

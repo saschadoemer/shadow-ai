@@ -1561,29 +1561,29 @@ describe('the story in the scene (0026)', () => {
     expect(owned.sheets).toContain(CONTENT.lampSheet);
   });
 
-  it('draws the page that hands the lamp over while the lamp is not owned, and her own page after', () => {
+  it('draws her own second page from the first talk: no page hands the lamp over (0039)', () => {
     const content: SceneContent = {
       ...CONTENT,
       map: { ...MAP, points: [{ name: 'figure:officer', x: 40, y: 20 }] },
     };
-    const meeting = (lamp: GameState['lamp']): GameState => ({
+    const talking = (page: number): GameState => ({
       ...state({ x: 20, y: 30 }),
-      lamp,
+      lamp: NO_LAMP,
       figures: [{ figure: 0, facing: 'left' }],
-      dialogue: { speaker: 'figure', index: 0, page: 1 },
+      dialogue: { speaker: 'figure', index: 0, page },
     });
-    const first = recordingRenderer();
-    drawScene(first, meeting(NO_LAMP), content);
-    // `Nimm die Lampe: …`: `N` is glyph 46.
-    expect(fontCalls(first, content)[0]).toBe('drawSprite 46 at 12,138');
-    const english = recordingRenderer();
-    drawScene(english, meeting(NO_LAMP), content, ENGLISH);
-    // `Take the lamp: …`: `T` is glyph 52.
-    expect(fontCalls(english, content)[0]).toBe('drawSprite 52 at 12,138');
-    const later = recordingRenderer();
-    drawScene(later, meeting({ ...NO_LAMP, owned: true }), content);
+    const second = recordingRenderer();
+    drawScene(second, talking(1), content);
     // `Mit der Lampe hältst du fest, …`: `M` is glyph 45.
-    expect(fontCalls(later, content)[0]).toBe('drawSprite 45 at 12,138');
+    expect(fontCalls(second, content)[0]).toBe('drawSprite 45 at 12,138');
+    const english = recordingRenderer();
+    drawScene(english, talking(1), content, ENGLISH);
+    // `The lamp holds still …`: `T` is glyph 52.
+    expect(fontCalls(english, content)[0]).toBe('drawSprite 52 at 12,138');
+    const third = recordingRenderer();
+    drawScene(third, talking(2), content);
+    // `Die Lampe hast nur du. …`: `D` is glyph 36.
+    expect(fontCalls(third, content)[0]).toBe('drawSprite 36 at 12,138');
   });
 
   it("shows the lamp's line in the bar from the hand-over until the lamp was held once", () => {
@@ -1987,15 +1987,6 @@ describe('the intern in the scene (0033)', () => {
   it('draws the hint of the moment in the box: the start of Sales, `V` or `S`', () => {
     expect(firstGlyph(beside(talking))).toBe('drawSprite 54 at 12,138');
     expect(firstGlyph(beside(talking), ENGLISH)).toBe('drawSprite 51 at 12,138');
-  });
-
-  it('draws the page of the lamp while the player has none: `D` or `O`', () => {
-    const without = beside({
-      ...talking,
-      lamp: { on: false, strength: 1, owned: false, used: false },
-    });
-    expect(firstGlyph(without)).toBe('drawSprite 36 at 12,138');
-    expect(firstGlyph(without, ENGLISH)).toBe('drawSprite 47 at 12,138');
   });
 
   it('draws the page that follows from the traces and the cases', () => {

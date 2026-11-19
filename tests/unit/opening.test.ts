@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { NamedPoint, NamedRect, TileMap } from '../../src/engine/tiled';
-import { figuresIn, figuresOf } from '../../src/game/cast';
+import { figuresOf } from '../../src/game/cast';
 import { routesOf } from '../../src/game/mover';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
-import type { Dialogue, GameState } from '../../src/game/state';
+import type { GameState } from '../../src/game/state';
 import { pagesOf, speakersOf } from '../../src/game/talk';
 import { createInitialState, newGame, update } from '../../src/game/update';
 import { textKey } from '../../src/text/text';
@@ -59,10 +59,11 @@ const spoken = (map: TileMap, state: GameState) =>
       );
 
 describe('the two starts (0026)', () => {
-  it('starts a played game with the card, the call open under it, and without the lamp', () => {
+  it('starts a played game with the card, the call open under it, and the lamp not yet used', () => {
+    // The lamp is the player's from the first step (0039).
     expect(newGame(MAP)).toStrictEqual({
       ...createInitialState(MAP),
-      lamp: { on: false, strength: 1, owned: false, used: false },
+      lamp: { on: false, strength: 1, owned: true, used: false },
       dialogue: { speaker: 'story', index: 0, page: 0 },
       presented: null,
     });
@@ -74,13 +75,11 @@ describe('the two starts (0026)', () => {
     expect(state.dialogue).toBeNull();
   });
 
-  it('survives a JSON round trip: at the start, on page 2 of the call, after the first meeting (INV-1)', () => {
+  it('survives a JSON round trip: at the start, on page 2 of the call, after the call (INV-1)', () => {
     const start = opening(MAP);
     const second = run(MAP, start, TALK, NONE, TALK);
-    const met = run(MAP, called(MAP), NONE, TALK, NONE, TALK, NONE, TALK);
     expect(second.dialogue).toStrictEqual({ speaker: 'story', index: 0, page: 2 });
-    expect(met.lamp.owned).toBe(true);
-    for (const state of [start, second, met, createInitialState(MAP)]) {
+    for (const state of [start, second, called(MAP), createInitialState(MAP)]) {
       expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
     }
   });
@@ -134,18 +133,19 @@ describe('the call (0026)', () => {
 });
 
 describe('no record of when the opening ended (0031)', () => {
-  it('has no field `started`: not at either start, not after the call, the meeting and the wake', () => {
+  it('has no field `started`: not at either start, not after the call, a talk and the wake', () => {
     const closed = called(MAP);
-    const met = run(MAP, closed, NONE, TALK, NONE, TALK, NONE, TALK);
-    expect(met.lamp.owned).toBe(true);
-    const woken = update({ ...met, dark: 44 }, NONE, MAP);
+    // The officer's three pages, read to the end.
+    const talked = run(MAP, closed, NONE, TALK, NONE, TALK, NONE, TALK, NONE, TALK);
+    expect(talked.dialogue).toBeNull();
+    const woken = update({ ...talked, dark: 44 }, NONE, MAP);
     expect(woken.dark).toBe(45);
     for (const state of [
       createInitialState(MAP),
       opening(MAP),
       closed,
       steps(MAP, closed, RIGHT, 600),
-      met,
+      talked,
       woken,
     ]) {
       expect(Object.keys(state)).not.toContain('started');
@@ -153,7 +153,7 @@ describe('no record of when the opening ended (0031)', () => {
   });
 });
 
-describe('without the lamp (0026)', () => {
+describe('the lamp from the first step (0039)', () => {
   const rect = (name: string, x: number, y: number, width: number, height: number): NamedRect => ({
     name,
     x,
@@ -175,157 +175,104 @@ describe('without the lamp (0026)', () => {
   );
   const start = called(LIT);
 
-  it('has the map for it: with the lamp owned the same keys light all three', () => {
-    const owned = steps(LIT, createInitialState(LIT), SHINE, 10);
-    expect(owned.lamp.on).toBe(true);
-    expect(owned.shadowWalls[0]?.lit).toBe(true);
-    expect(owned.traces[0]?.light).toBe(10);
-    expect(owned.creatures[0]?.light).toBe(10);
+  it('is on in the first step with the key held, right after the call, and was used from then', () => {
+    expect(start.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+    const first = update(start, SHINE, LIT);
+    expect(first.lamp).toStrictEqual({ on: true, strength: 1, owned: true, used: true });
   });
 
-  it('leaves the lamp off for 600 steps with the key held, and lights nothing', () => {
-    let state = start;
-    for (let i = 0; i < 600; i += 1) {
-      state = update(state, SHINE, LIT);
-      expect(state.lamp).toStrictEqual({ on: false, strength: 1, owned: false, used: false });
-      expect(state.creatures.every((creature) => creature.light === 0)).toBe(true);
-      expect(state.shadowWalls).toStrictEqual([{ wall: 0, lit: false, light: 0 }]);
-      expect(state.traces).toStrictEqual([{ trace: 0, light: 0, found: null }]);
-    }
-    expect(state.captured).toStrictEqual({ snippet: 0, mirage: 0 });
-  });
-
-  it('counts the key as not held: the world steps as without it, step for step', () => {
-    let held = start;
-    let free = start;
-    for (let i = 0; i < 600; i += 1) {
-      held = update(held, SHINE, LIT);
-      free = update(free, NONE, LIT);
-      expect({ ...held, held: NONE }).toStrictEqual(free);
+  it('lights the snippet, the wall and the trace of a new game, as in a game past its opening', () => {
+    for (const from of [start, createInitialState(LIT)]) {
+      const lit = steps(LIT, from, SHINE, 10);
+      expect(lit.lamp.on).toBe(true);
+      expect(lit.shadowWalls[0]?.lit).toBe(true);
+      expect(lit.traces[0]?.light).toBe(10);
+      expect(lit.creatures[0]?.light).toBe(10);
     }
   });
 
-  it('lets the figure walk with the key held, as without it', () => {
+  it('holds the figure in place with the key held, as 0007 says', () => {
     const both: GameInput = { ...RIGHT, lamp: true };
-    let held = start;
-    let free = start;
-    for (let i = 0; i < 60; i += 1) {
-      held = update(held, both, LIT);
-      free = update(free, RIGHT, LIT);
-      expect(held.player).toStrictEqual(free.player);
-    }
-    expect(held.player.x).toBeGreaterThan(104 + 50);
-  });
-
-  it('holds the figure in place with the lamp owned, as 0007 says', () => {
-    const both: GameInput = { ...RIGHT, lamp: true };
-    const owned = steps(LIT, createInitialState(LIT), both, 60);
-    expect(owned.player.x).toBe(104);
-    expect(owned.lamp.on).toBe(true);
-  });
-
-  it('is hit as always, and wakes without the lamp', () => {
-    const hit = steps(LIT, start, NONE, 120);
-    expect(hit.overview.current).toBeLessThan(5);
-    const woken = update({ ...start, dark: 44 }, SHINE, LIT);
-    expect(woken.dark).toBe(45);
-    expect(woken.lamp).toStrictEqual({ on: false, strength: 1, owned: false, used: false });
-  });
-});
-
-describe('the first meeting (0026)', () => {
-  const start = called(MAP);
-  const TALK_SHINE: GameInput = { ...TALK, lamp: true };
-
-  it('opens with the key of the lamp held while the player has none', () => {
-    const opened = run(MAP, start, NONE, TALK_SHINE);
-    expect(opened.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
-    expect(opened.lamp.on).toBe(false);
-  });
-
-  it('does not open with the lamp held once the lamp is owned, as in 0017', () => {
-    const held = run(MAP, createInitialState(MAP), TALK_SHINE);
-    expect(held.dialogue).toBeNull();
+    const held = steps(LIT, start, both, 60);
+    expect(held.player.x).toBe(104);
     expect(held.lamp.on).toBe(true);
   });
 
-  it('has her first page and the page that hands the lamp over', () => {
-    const opened = run(MAP, start, NONE, TALK);
-    expect(opened.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
-    const figures = figuresIn(figuresOf(MAP.points), opened.lamp.owned);
-    expect(pagesOf(opened.dialogue as Dialogue, speakersOf(figures, [], []))).toStrictEqual([
-      textKey('talk.officer-rules-1'),
-      textKey('talk.officer-meeting-2'),
-    ]);
-    const second = run(MAP, opened, NONE, TALK);
-    expect(second.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 1 });
-    // A third press closes it: the meeting has two pages.
-    expect(run(MAP, second, NONE, TALK).dialogue).toBeNull();
+  it('does nothing while the card is shown and while the call is open: 600 steps with the key held', () => {
+    // The card ends by itself in step 180; the call under it stays open without a press of talk.
+    const waiting = steps(LIT, newGame(LIT), SHINE, 600);
+    expect(waiting.presented).toBe(180);
+    expect(waiting.dialogue).toStrictEqual({ speaker: 'story', index: 0, page: 0 });
+    expect(waiting.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+    expect(waiting.creatures.every((creature) => creature.light === 0)).toBe(true);
+    expect(waiting.traces).toStrictEqual([{ trace: 0, light: 0, found: null }]);
   });
 
-  it('hands the lamp over in the step that closes it, and changes nothing else', () => {
-    const second = run(MAP, start, NONE, TALK, NONE, TALK, NONE);
-    expect(second.lamp).toStrictEqual({ on: false, strength: 1, owned: false, used: false });
-    const closed = update(second, TALK, MAP);
-    expect(closed).toStrictEqual({
-      ...second,
-      tick: second.tick + 1,
-      held: TALK,
-      dialogue: null,
-      lamp: { on: false, strength: 1, owned: true, used: false },
-    });
+  it('is hit as always, and wakes with the lamp', () => {
+    const hit = steps(LIT, start, NONE, 120);
+    expect(hit.overview.current).toBeLessThan(5);
+    const woken = update({ ...start, dark: 44 }, NONE, LIT);
+    expect(woken.dark).toBe(45);
+    expect(woken.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+    expect(update(woken, SHINE, LIT).dark).toBe(46);
   });
+});
 
-  it('gives no lamp while the dialogue is open, on either page', () => {
-    for (const inputs of [
-      [NONE, TALK],
-      [NONE, TALK, NONE, TALK],
-      [NONE, TALK, NONE, TALK, NONE],
-    ]) {
-      expect(run(MAP, start, ...inputs).lamp.owned).toBe(false);
+describe('the data protection officer from the first talk (0039)', () => {
+  const start = called(MAP);
+  const TALK_SHINE: GameInput = { ...TALK, lamp: true };
+  const HERS = [
+    textKey('talk.officer-rules-1'),
+    textKey('talk.officer-rules-2'),
+    textKey('talk.officer-rules-3'),
+  ];
+
+  it('opens no talk with the key of the lamp held, in a new game as in a game past its opening', () => {
+    for (const from of [update(start, NONE, MAP), createInitialState(MAP)]) {
+      const held = update(from, TALK_SHINE, MAP);
+      expect(held.dialogue).toBeNull();
+      expect(held.lamp.on).toBe(true);
     }
   });
 
-  it('gives none for the saying of a colleague', () => {
-    // 32 px below the colleague and 24 px left of the officer: the officer is nearer. Away from her:
-    const near: GameState = { ...start, player: { ...start.player, x: 136, y: 72 } };
-    const opened = run(MAP, near, NONE, TALK);
-    expect(opened.dialogue).toStrictEqual({ speaker: 'mover', index: 0, page: 0 });
-    const closed = run(MAP, opened, NONE, TALK);
-    expect(closed.dialogue).toBeNull();
-    expect(closed.lamp).toStrictEqual({ on: false, strength: 1, owned: false, used: false });
+  it('says her own three pages in the first talk of a new game: there is no first meeting', () => {
+    const opened = run(MAP, start, NONE, TALK);
+    expect(opened.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
+    expect(spoken(MAP, opened)).toStrictEqual(HERS);
+    const third = run(MAP, opened, NONE, TALK, NONE, TALK);
+    expect(third.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 2 });
+    // A fourth press closes it.
+    expect(run(MAP, third, NONE, TALK).dialogue).toBeNull();
   });
 
-  it('says her own three pages once the lamp is owned, and closing them changes neither field', () => {
-    const met = run(MAP, start, NONE, TALK, NONE, TALK, NONE, TALK);
-    const again = run(MAP, met, NONE, TALK);
-    expect(again.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
-    // The two pages of 0017 and the third of 0036.
-    const closed = run(MAP, again, NONE, TALK, NONE, TALK, NONE, TALK);
-    expect(closed.dialogue).toBeNull();
-    expect(closed.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
-    const past = run(MAP, createInitialState(MAP), TALK, NONE, TALK, NONE, TALK, NONE, TALK);
-    expect(past.dialogue).toBeNull();
-    expect(past.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: true });
+  it('changes nothing but tick, held and dialogue in the step that closes her talk', () => {
+    const third = run(MAP, start, NONE, TALK, NONE, TALK, NONE, TALK, NONE);
+    expect(third.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 2 });
+    const closed = update(third, TALK, MAP);
+    expect(closed).toStrictEqual({
+      ...third,
+      tick: third.tick + 1,
+      held: TALK,
+      dialogue: null,
+    });
+    expect(closed.lamp).toStrictEqual(start.lamp);
   });
 
-  it('keeps both fields through the wake', () => {
-    const met = run(MAP, start, NONE, TALK, NONE, TALK, NONE, TALK);
-    const woken = update({ ...met, dark: 44 }, NONE, MAP);
-    expect(woken.dark).toBe(45);
-    expect(woken.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+  it('says the same three pages in a game past its opening', () => {
+    const opened = run(MAP, createInitialState(MAP), TALK);
+    expect(spoken(MAP, opened)).toStrictEqual(HERS);
   });
 });
 
 describe('the lamp used for the first time (0026)', () => {
-  const met = run(MAP, called(MAP), NONE, TALK, NONE, TALK, NONE, TALK);
+  const start = called(MAP);
 
   it('is not used by steps without the key', () => {
-    expect(steps(MAP, met, RIGHT, 600).lamp.used).toBe(false);
+    expect(steps(MAP, start, RIGHT, 600).lamp.used).toBe(false);
   });
 
   it('is used from the first step in which the lamp is on, and stays so', () => {
-    const first = run(MAP, met, NONE, SHINE);
+    const first = run(MAP, start, NONE, SHINE);
     expect(first.lamp).toStrictEqual({ on: true, strength: 1, owned: true, used: true });
     const off = update(first, NONE, MAP);
     expect(off.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: true });
@@ -335,8 +282,8 @@ describe('the lamp used for the first time (0026)', () => {
 
   it('is not used by a key held during a push: the lamp is off there', () => {
     const pushed: GameState = {
-      ...met,
-      player: { ...met.player, recoil: { dx: 3, dy: 0, steps: 8 } },
+      ...start,
+      player: { ...start.player, recoil: { dx: 3, dy: 0, steps: 8 } },
     };
     const during = update(pushed, SHINE, MAP);
     expect(during.lamp.on).toBe(false);
@@ -344,8 +291,8 @@ describe('the lamp used for the first time (0026)', () => {
   });
 });
 
-describe('card, call and first meeting in a row (0036)', () => {
-  it('goes from the card through the call to the lamp, one press each', () => {
+describe('card, call and the first light in a row (0039)', () => {
+  it('goes from the card through the call to the lamp, with no talk in between', () => {
     let state = newGame(MAP);
     expect(state.presented).toBeNull();
     // The press that ends the card.
@@ -356,31 +303,13 @@ describe('card, call and first meeting in a row (0036)', () => {
     // Three presses read the call.
     state = run(MAP, state, NONE, TALK, NONE, TALK, NONE, TALK);
     expect(state.dialogue).toBeNull();
-    expect(state.lamp.owned).toBe(false);
-    // Three more are the first meeting: the lamp is handed over.
-    state = run(MAP, state, NONE, TALK, NONE, TALK, NONE, TALK);
-    expect(state.dialogue).toBeNull();
-    expect(state.lamp.owned).toBe(true);
+    expect(state.lamp.used).toBe(false);
+    // The lamp shines at the first held key: nobody had to hand it over.
+    state = run(MAP, state, NONE, SHINE);
+    expect(state.lamp.on).toBe(true);
+    expect(state.lamp.used).toBe(true);
     // The same game as one that began past the card, two steps later.
-    const met = run(MAP, called(MAP), NONE, TALK, NONE, TALK, NONE, TALK);
-    expect(state).toStrictEqual({ ...met, tick: met.tick + 2, presented: 1 });
-  });
-});
-
-describe('the officer after the meeting (0036)', () => {
-  it('says her three pages once the lamp is handed over, and a fourth press closes them', () => {
-    const met = run(MAP, called(MAP), NONE, TALK, NONE, TALK, NONE, TALK);
-    expect(met.lamp.owned).toBe(true);
-    const opened = run(MAP, met, NONE, TALK);
-    expect(opened.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
-    // The third is the page that names Harmonic; the first meeting did not have it.
-    expect(spoken(MAP, opened)).toStrictEqual([
-      textKey('talk.officer-rules-1'),
-      textKey('talk.officer-rules-2'),
-      textKey('talk.officer-rules-3'),
-    ]);
-    const third = run(MAP, opened, NONE, TALK, NONE, TALK);
-    expect(third.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 2 });
-    expect(run(MAP, third, NONE, TALK).dialogue).toBeNull();
+    const lit = run(MAP, called(MAP), NONE, SHINE);
+    expect(state).toStrictEqual({ ...lit, tick: lit.tick + 2, presented: 1 });
   });
 });

@@ -88,7 +88,7 @@ async function start(page: Page): Promise<void> {
   }
 }
 
-test('the game opens with the call, without the lamp, and three presses of E close it', async ({
+test('the game opens with the call and the lamp, and three presses of E close it', async ({
   page,
 }) => {
   await page.goto('/');
@@ -100,16 +100,16 @@ test('the game opens with the call, without the lamp, and three presses of E clo
           const state = window.shadowAi?.state;
           return state === undefined ? undefined : { dialogue: state.dialogue, lamp: state.lamp };
         }),
-      { message: 'a new game: the call on page 0, no lamp' },
+      { message: 'a new game: the call on page 0, the lamp not yet used' },
     )
     .toStrictEqual({
       dialogue: call(0),
-      lamp: { on: false, strength: 1, owned: false, used: false },
+      lamp: { on: false, strength: 1, owned: true, used: false },
     });
   await start(page);
   const state = await page.evaluate(() => window.shadowAi?.state);
   expect(state?.dialogue).toBeNull();
-  expect(state?.lamp.owned).toBe(false);
+  expect(state?.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
 });
 
 test('the page loads with its title, its canvas and the dark background', async ({ page }) => {
@@ -168,7 +168,7 @@ test('one second of ArrowRight moves the figure and the camera right by at least
   expect(state?.player.facing).toBe('right');
 });
 
-test('without the lamp a held Space turns no light on and does not hold the figure', async ({
+test('a held Space turns the lamp on and holds the figure, from the first step after the call', async ({
   page,
 }) => {
   await start(page);
@@ -178,21 +178,22 @@ test('without the lamp a held Space turns no light on and does not hold the figu
     })
     .toBe(256);
   await page.keyboard.down('Space');
+  // Nobody hands the lamp over (0039): it shines at the first held key.
   await expect
-    .poll(() => page.evaluate(() => window.shadowAi?.state.held.lamp), {
-      message: 'the state has seen Space held',
+    .poll(() => page.evaluate(() => window.shadowAi?.state.lamp), {
+      message: 'Space turns the lamp on',
     })
-    .toBe(true);
+    .toStrictEqual({ on: true, strength: 1, owned: true, used: true });
   await page.keyboard.down('ArrowRight');
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(300);
   const held = await page.evaluate(() => window.shadowAi?.state);
-  // The player has no lamp before the first meeting (0026): Space counts as not held. The lamp
-  // that shines and holds the figure is covered by the unit tests.
-  expect(held?.lamp).toStrictEqual({ on: false, strength: 1, owned: false, used: false });
-  expect(held?.player.x).toBeGreaterThanOrEqual(256 + 20);
+  // Nothing moves while the lamp is on; the direction key only turns the figure.
+  expect(held?.player.x).toBe(256);
   expect(held?.player.facing).toBe('right');
-  await page.keyboard.up('ArrowRight');
+  expect(held?.lamp.on).toBe(true);
   await page.keyboard.up('Space');
+  await expect.poll(() => page.evaluate(() => window.shadowAi?.state.lamp.on)).toBe(false);
+  await page.keyboard.up('ArrowRight');
 });
 
 test('the floor starts with three snippets and three mirages, and nothing captured', async ({
