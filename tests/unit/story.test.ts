@@ -73,7 +73,10 @@ describe('the scenes of the story (0026)', () => {
 describe('the close (0034)', () => {
   const CLOSE = [textKey('story.close-1'), textKey('story.close-2'), textKey('story.close-3')];
   const SALES = { region: 'sales', at: 400 };
-  const MARKETING = { region: 'marketing', at: 700 };
+  const MARKETING = { region: 'marketing', at: 550 };
+  /** The third case of the game since 0037, and here the one solved last. */
+  const SUPPORT = { region: 'support', at: 700 };
+  const ALL = [SALES, MARKETING, SUPPORT];
 
   it('is the second scene, with its three pages', () => {
     expect(SCENES).toStrictEqual([
@@ -94,28 +97,32 @@ describe('the close (0034)', () => {
     expect(closeDue(100000, [], null)).toBe(false);
     expect(closeDue(100000, [SALES], null)).toBe(false);
     expect(closeDue(100000, [MARKETING], null)).toBe(false);
+    // With Sales and Marketing solved and Support not, it is not due (0037).
+    expect(closeDue(100000, [SALES, MARKETING], null)).toBe(false);
+    expect(closeDue(100000, [SUPPORT, SALES], null)).toBe(false);
   });
 
   it('is due 300 steps after the step that solved the last case, and not one before', () => {
-    expect(closeDue(700, [SALES, MARKETING], null)).toBe(false);
-    expect(closeDue(999, [SALES, MARKETING], null)).toBe(false);
-    expect(closeDue(1000, [SALES, MARKETING], null)).toBe(true);
-    expect(closeDue(5000, [SALES, MARKETING], null)).toBe(true);
+    expect(closeDue(700, ALL, null)).toBe(false);
+    expect(closeDue(999, ALL, null)).toBe(false);
+    expect(closeDue(1000, ALL, null)).toBe(true);
+    expect(closeDue(5000, ALL, null)).toBe(true);
   });
 
-  it('counts from the later case, in either order', () => {
+  it('counts from the latest case, in any order', () => {
     const turned = [
-      { region: 'marketing', at: 400 },
-      { region: 'sales', at: 700 },
+      { region: 'support', at: 400 },
+      { region: 'sales', at: 550 },
+      { region: 'marketing', at: 700 },
     ];
     expect(closeDue(999, turned, null)).toBe(false);
     expect(closeDue(1000, turned, null)).toBe(true);
-    expect(closeDue(1000, [MARKETING, SALES], null)).toBe(true);
+    expect(closeDue(1000, [SUPPORT, MARKETING, SALES], null)).toBe(true);
   });
 
   it('is not due once it was closed', () => {
-    expect(closeDue(1000, [SALES, MARKETING], 1010)).toBe(false);
-    expect(closeDue(100000, [SALES, MARKETING], 0)).toBe(false);
+    expect(closeDue(1000, ALL, 1010)).toBe(false);
+    expect(closeDue(100000, ALL, 0)).toBe(false);
   });
 
   it('follows the table of cases it is given: a third case moves it behind that case', () => {

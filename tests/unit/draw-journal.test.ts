@@ -725,3 +725,107 @@ describe('the policy tab stacks its blocks (0037)', () => {
     }
   });
 });
+
+describe('three solved cases in the journal (0037)', () => {
+  /** Five traces each of Sales, Marketing and Support, in the order of the floor. */
+  const REGION_OF = ['sales', 'marketing', 'support'] as const;
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: Array.from({ length: 15 }, (_, n) => ({
+        name: `trace:${REGION_OF[Math.floor(n / 5)]}`,
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  const shown = (tab: JournalTab, solved: GameState['solved'], settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    const state: GameState = {
+      ...reading(tab),
+      traces: Array.from({ length: 15 }, (_, trace) => ({ trace, light: 0, found: 60 })),
+      solved,
+    };
+    drawJournal(renderer, state, { tab }, content, settings);
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+  /** The calls that draw on the line with its top at y. */
+  const at = (calls: readonly string[], y: number): string[] =>
+    calls.filter((call) => call.endsWith(`,${y}`));
+  /** The lowest top of a line that is drawn. */
+  const lowest = (calls: readonly string[]): number =>
+    Math.max(...calls.map((call) => Number(call.slice(call.lastIndexOf(',') + 1))));
+  const SALES = { region: 'sales', at: 900 };
+  const MARKETING = { region: 'marketing', at: 930 };
+  const SUPPORT = { region: 'support', at: 960 };
+
+  it('draws three entries on the cases tab, 36 px apart, each with its outcome', () => {
+    const entries = shown('cases', [SUPPORT, SALES, MARKETING]);
+    // The order is that of the cases, not the order they were solved in: `V`, `M`, `S`.
+    expect(at(entries, 36)[0]).toBe('drawSprite 54 at 16,36');
+    expect(at(entries, 72)[0]).toBe('drawSprite 45 at 16,72');
+    expect(at(entries, 108)[0]).toBe('drawSprite 51 at 16,108');
+    expect(at(entries, 108)).toHaveLength(7);
+    // `Spuren: 5 von 5`, and `Gelöst: …` on the third line of each entry.
+    expect(at(entries, 120)).toHaveLength(12);
+    expect([60, 96, 132].map((y) => at(entries, y)[0])).toStrictEqual([
+      'drawSprite 39 at 16,60',
+      'drawSprite 39 at 16,96',
+      'drawSprite 39 at 16,132',
+    ]);
+    // `Gelöst: Kundenmails gingen in einen Übersetzer.`: 42 glyphs.
+    expect(at(entries, 132)).toHaveLength(42);
+    expect(lowest(entries)).toBe(132);
+  });
+
+  it('draws the block of Support alone from (16, 36): three lines', () => {
+    const block = shown('policy', [SUPPORT]);
+    // `Werkzeuge und Erweiterungen …`: `W`.
+    expect(block[0]).toBe('drawSprite 55 at 16,36');
+    expect(block.every((call) => /,(36|48|60)$/.test(call))).toBe(true);
+  });
+
+  it('stacks the three blocks in the order they were solved, and none below y = 168', () => {
+    // Support, Marketing, Sales: three, three and four lines.
+    const calls = shown('policy', [SUPPORT, MARKETING, SALES]);
+    expect(at(calls, 36)[0]).toBe('drawSprite 55 at 16,36');
+    expect(at(calls, 84)[0]).toBe('drawSprite 55 at 16,84');
+    expect(at(calls, 132)[0]).toBe('drawSprite 42 at 16,132');
+    expect(at(calls, 72)).toStrictEqual([]);
+    expect(at(calls, 120)).toStrictEqual([]);
+    expect(lowest(calls)).toBe(168);
+    // Sales first: its four lines, then Support from y = 96 and Marketing from y = 144.
+    const salesFirst = shown('policy', [SALES, SUPPORT, MARKETING]);
+    expect(at(salesFirst, 36)[0]).toBe('drawSprite 42 at 16,36');
+    expect(at(salesFirst, 96)[0]).toBe('drawSprite 55 at 16,96');
+    expect(at(salesFirst, 144)[0]).toBe('drawSprite 55 at 16,144');
+    expect(lowest(salesFirst)).toBe(168);
+  });
+
+  it('keeps every order of the three inside the surface, in both languages', () => {
+    const orders = [
+      [SALES, MARKETING, SUPPORT],
+      [SALES, SUPPORT, MARKETING],
+      [MARKETING, SALES, SUPPORT],
+      [MARKETING, SUPPORT, SALES],
+      [SUPPORT, SALES, MARKETING],
+      [SUPPORT, MARKETING, SALES],
+    ];
+    for (const settings of [GERMAN, ENGLISH]) {
+      for (const order of orders) {
+        expect(lowest(shown('policy', order, settings))).toBe(168);
+      }
+    }
+  });
+
+  it('draws the cases tab in English: `Support`, and its outcome 42 glyphs', () => {
+    const entries = shown('cases', [SUPPORT], ENGLISH);
+    expect(at(entries, 108)[0]).toBe('drawSprite 51 at 16,108');
+    // `Solved: customer mails went into a translator.`
+    expect(at(entries, 132)[0]).toBe('drawSprite 51 at 16,132');
+    expect(at(entries, 132)).toHaveLength(40);
+  });
+});

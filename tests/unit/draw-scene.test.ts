@@ -2006,12 +2006,15 @@ describe('the intern in the scene (0033)', () => {
     expect(firstGlyph({ ...found, solved: [{ region: 'sales', at: 9 }] })).toBe(
       'drawSprite 33 at 12,138',
     );
-    // Both solved: `Mehr weiß ich …`, `M`.
+    // Both solved: Support is next (0037), `Dann der Support …`, `D`.
     const both = [
       { region: 'sales', at: 9 },
       { region: 'marketing', at: 19 },
     ];
-    expect(firstGlyph({ ...found, solved: both })).toBe('drawSprite 45 at 12,138');
+    expect(firstGlyph({ ...found, solved: both })).toBe('drawSprite 36 at 12,138');
+    // All three solved: `Mehr weiß ich …`, `M`.
+    const all = [...both, { region: 'support', at: 29 }];
+    expect(firstGlyph({ ...found, solved: all })).toBe('drawSprite 45 at 12,138');
   });
 
   it('draws no box while nobody talks', () => {

@@ -46,6 +46,14 @@ export const CASES: readonly Case[] = [
     outcome: textKey('case.marketing-outcome'),
     policy: textKey('policy.marketing'),
   },
+  {
+    region: 'support',
+    source: 'person:support',
+    answer: [textKey('talk.support-source-1'), textKey('talk.support-source-2')],
+    after: [textKey('talk.support-after')],
+    outcome: textKey('case.support-outcome'),
+    policy: textKey('policy.support'),
+  },
 ];
 
 /** Solving a case raises the maximum of overview by this much, and fills it. */

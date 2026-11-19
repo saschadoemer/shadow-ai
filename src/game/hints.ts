@@ -35,6 +35,11 @@ export const HINTS: Readonly<Partial<Record<string, CaseHints>>> = {
     traces: textKey('talk.intern-marketing-traces'),
     source: textKey('talk.intern-marketing-source'),
   },
+  support: {
+    start: textKey('talk.intern-support-start'),
+    traces: textKey('talk.intern-support-traces'),
+    source: textKey('talk.intern-support-source'),
+  },
 };
 
 /** The page while the player has no lamp. */

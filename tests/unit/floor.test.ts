@@ -2225,16 +2225,19 @@ describe('the close on the floor (0034)', () => {
     traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
   };
 
-  it('opens 300 steps after the second of the two cases of the floor, and not after the first', () => {
+  it('opens 300 steps after the last of the three cases of the floor, and not after the second', () => {
     let state = answer(beside(ready, 'person:sales'));
     expect(state.solved.map((entry) => entry.region)).toStrictEqual(['sales']);
+    state = answer(beside(state, 'person:marketing'));
+    expect(state.solved.map((entry) => entry.region)).toStrictEqual(['sales', 'marketing']);
+    // Support is not solved (0037): nothing opens, however long the figure waits.
     for (let step = 0; step < 400; step += 1) {
       state = update(state, NO_INPUT, floor);
     }
     expect(state.dialogue).toBeNull();
-    state = answer(beside(state, 'person:marketing'));
-    const last = state.solved[1];
-    expect(last?.region).toBe('marketing');
+    state = answer(beside(state, 'person:support'));
+    const last = state.solved[2];
+    expect(last?.region).toBe('support');
     while (state.tick < (last?.at ?? 0) + 300) {
       state = update(state, NO_INPUT, floor);
       expect(state.dialogue).toBeNull();
@@ -2383,5 +2386,110 @@ describe('the traces of Support on the floor (0037)', () => {
     expect(ready(found(...SALES, ...MARKETING, 10, 11, 12, 13))).toStrictEqual([true, true, false]);
     // Fifteen.
     expect(ready(found(...SALES, ...MARKETING, ...SUPPORT))).toStrictEqual([true, true, true]);
+  });
+});
+
+describe('the case of Support on the floor (0037)', () => {
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const areas = areasOf(floor.rects);
+  const walls = wallsOf(floor.rects);
+  const routes = routesOf(floor.points);
+  const start = createInitialState(floor);
+  /** The figure 24 px below the colleague of the given route, where it stands in the state. */
+  const beside = (state: GameState, route: string): GameState => {
+    const source = state.movers.find((mover) => routes[mover.route]?.name === route);
+    return {
+      ...state,
+      player: { ...state.player, x: source?.x ?? 0, y: (source?.y ?? 0) + 24 },
+    };
+  };
+  /** Every trace of the floor found long ago. */
+  const ready: GameState = {
+    ...start,
+    tick: 1000,
+    traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+  };
+  const answer = (from: GameState): GameState =>
+    [TALK, NO_INPUT, TALK, NO_INPUT, TALK, NO_INPUT].reduce(
+      (state, input) => update(state, input, floor),
+      from,
+    );
+  const regionsOf = (state: GameState): (string | undefined)[] =>
+    state.shadowWalls.map((standing) => walls[standing.wall]?.region);
+  const support = answer(beside(ready, 'person:support'));
+
+  it('is the case of every region that has traces on the floor: Sales, Marketing, Support', () => {
+    const regions = [...new Set(tracesOf(floor.rects).map((trace) => trace.region))];
+    expect(regions).toStrictEqual(CASES.map((entry) => entry.region));
+    expect(regions).toStrictEqual(['sales', 'marketing', 'support']);
+  });
+
+  it('has a source that stands free at the start, with room 24 px below it', () => {
+    expect(routes.some((route) => route.name === 'person:support')).toBe(true);
+    expect(reached(beside(ready, 'person:support').player)).toBe(true);
+  });
+
+  it('is solved from beside its source, before the other two: six of six and no upgrade', () => {
+    expect(support.solved).toStrictEqual([{ region: 'support', at: 1005 }]);
+    expect(support.overview).toStrictEqual({ current: 6, max: 6 });
+    expect(support.upgrades).toStrictEqual([]);
+  });
+
+  it('takes the shadow from the cells of Support and leaves it on the other regions', () => {
+    const cleared = shadowedAreas(areas, support.solved);
+    expect(veilOf(areas, 100, 70)).toBe(1);
+    expect(veilOf(cleared, 100, 70)).toBe(0);
+    expect(veilOf(cleared, 60, 60)).toBe(0);
+    // Marketing, Sales and HR.
+    expect([veilOf(cleared, 10, 70), veilOf(cleared, 90, 30), veilOf(cleared, 5, 5)]).toStrictEqual(
+      [1, 1, 2],
+    );
+  });
+
+  it('removes the shadow wall of Support and no other, and no creature', () => {
+    expect(regionsOf(ready).filter((region) => region === 'support')).toHaveLength(1);
+    expect(regionsOf(support)).not.toContain('support');
+    expect(regionsOf(support)).toContain('sales');
+    expect(regionsOf(support)).toContain('marketing');
+    expect(support.shadowWalls).toHaveLength(ready.shadowWalls.length - 1);
+    // No species is at home in Support yet (0038): every creature of the floor stays.
+    expect(support.creatures).toStrictEqual(ready.creatures);
+  });
+
+  it('is followed by the other two: eight of eight, the wider cone, three rooms clear', () => {
+    const two = answer(beside(support, 'person:sales'));
+    expect(two.overview).toStrictEqual({ current: 7, max: 7 });
+    const all = answer(beside(two, 'person:marketing'));
+    expect(all.solved.map((entry) => entry.region)).toStrictEqual([
+      'support',
+      'sales',
+      'marketing',
+    ]);
+    expect(all.overview).toStrictEqual({ current: 8, max: 8 });
+    expect(all.upgrades).toStrictEqual(['wide-cone']);
+    const cleared = shadowedAreas(areas, all.solved);
+    expect([
+      veilOf(cleared, 100, 70),
+      veilOf(cleared, 10, 70),
+      veilOf(cleared, 90, 30),
+    ]).toStrictEqual([0, 0, 0]);
+    expect(
+      regionsOf(all).filter((region) => ['sales', 'marketing', 'support'].includes(region ?? '')),
+    ).toStrictEqual([]);
+  });
+
+  it('gives the machine of Support its use once Support is solved', () => {
+    const machine = restsOf(floor.rects)[7];
+    expect(machine).toBeDefined();
+    if (machine !== undefined) {
+      // The eighth machine of the floor stands in Support.
+      expect(
+        areas
+          .filter((area) => area.region === 'support')
+          .some((area) => inArea(area, { x: machine.box.x, y: machine.box.y })),
+      ).toBe(true);
+      expect(restUnderShadow(machine, floor.rects, [])).toBe(true);
+      expect(restUnderShadow(machine, floor.rects, support.solved)).toBe(false);
+    }
   });
 });
