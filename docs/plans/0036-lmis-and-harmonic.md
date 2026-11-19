@@ -142,7 +142,7 @@ and the container was **not** run with the prototype.
 **Interfaces:**
 - Produces: the text ids `card.presents` and `card.title`, in both languages.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -190,11 +190,11 @@ and the container was **not** run with the prototype.
        textOf(textKey(id), language).split('\n');
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 3 of 31
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 3 of 31
   tests. `npx tsc --noEmit` reports three errors, all in this test: the two ids are not ids
   of the table yet.
 
-- [ ] **Step 3: The words,** at the end of both tables:
+- [x] **Step 3: The words,** at the end of both tables:
 
 ```diff
 --- a/src/text/de.ts
@@ -220,11 +220,11 @@ and the container was **not** run with the prototype.
  };
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green; the test that every
+- [x] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green; the test that every
   character of both tables has a glyph covers the two lines. Then `npm run check`: 1563 unit
   tests.
 
-- [ ] **Step 5: Commit** — `Add the words of the card`. Body: the presenter's name stands in
+- [x] **Step 5: Commit** — `Add the words of the card`. Body: the presenter's name stands in
   one key and a test keeps it out of every other, because LMIS presents the game and is
   nowhere in its world (`vision.md` §10).
 
@@ -247,7 +247,7 @@ and the container was **not** run with the prototype.
 After this task a new game steps the card, but the scene still draws the world and the call
 under it: the card is drawn in Task 3.
 
-- [ ] **Step 1: The field in every full literal of the state.** Ten literals in five files
+- [x] **Step 1: The field in every full literal of the state.** Ten literals in five files
   get `presented: 0,` after `finished: null,`:
 
 ```diff
@@ -355,7 +355,7 @@ under it: the card is drawn in Task 3.
        camera: { x: 0, y: 12 },
 ```
 
-- [ ] **Step 2: The tests of the card.** Create `tests/unit/card.test.ts`:
+- [x] **Step 2: The tests of the card.** Create `tests/unit/card.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -509,7 +509,7 @@ describe('the card a game opens with (0036)', () => {
 });
 ```
 
-- [ ] **Step 3: The tests of 0026 start past the card,** and one new test plays card, call
+- [x] **Step 3: The tests of 0026 start past the card,** and one new test plays card, call
   and first meeting in a row:
 
 ```diff
@@ -678,7 +678,7 @@ describe('the card a game opens with (0036)', () => {
        officer: FIRST_MEETING.pages,
 ```
 
-- [ ] **Step 4: The smoke helper** ends the card before it reads the call:
+- [x] **Step 4: The smoke helper** ends the card before it reads the call:
 
 ```diff
 --- a/tests/e2e/smoke.spec.ts
@@ -733,7 +733,7 @@ describe('the card a game opens with (0036)', () => {
  
 ```
 
-- [ ] **Step 5: Run** `npx tsc --noEmit` — 23 errors, in the files of Steps 1 to 4: the field
+- [x] **Step 5: Run** `npx tsc --noEmit` — 23 errors, in the files of Steps 1 to 4: the field
   and the module do not exist yet. Run `npx vitest run`. Expected: `card.test.ts` does not
   load, and four tests fail: `the 44th step, dark 45, sets the world right` (overview),
   `starts a played game with the card, the call open under it, and without the lamp` and
@@ -742,7 +742,7 @@ describe('the card a game opens with (0036)', () => {
   a dev server running, `npx playwright test -g "the close not closed"` fails in the helper:
   `the game opens with the card`, `Received: undefined`.
 
-- [ ] **Step 6: The card.** Create `src/game/card.ts`:
+- [x] **Step 6: The card.** Create `src/game/card.ts`:
 
 ```ts
 import { type TextKey, textKey } from '../text/text';
@@ -780,7 +780,7 @@ export function stepCard(state: GameState, input: GameInput): GameState {
 }
 ```
 
-- [ ] **Step 7: The state:**
+- [x] **Step 7: The state:**
 
 ```diff
 --- a/src/game/state.ts
@@ -799,7 +799,7 @@ export function stepCard(state: GameState, input: GameInput): GameState {
    /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
 ```
 
-- [ ] **Step 8: The step.** The initial state is past the card, a new game is not, and
+- [x] **Step 8: The step.** The initial state is past the card, a new game is not, and
   `update` gives the step to the card first:
 
 ```diff
@@ -880,7 +880,7 @@ export function stepCard(state: GameState, input: GameInput): GameState {
      journal: null,
 ```
 
-- [ ] **Step 9: The wake keeps it:**
+- [x] **Step 9: The wake keeps it:**
 
 ```diff
 --- a/src/game/overview.ts
@@ -895,11 +895,11 @@ export function stepCard(state: GameState, input: GameInput): GameState {
      journal: null,
 ```
 
-- [ ] **Step 10: Run** `npm run check` — 1580 unit tests: 15 in `card.test.ts`, one more in
+- [x] **Step 10: Run** `npm run check` — 1580 unit tests: 15 in `card.test.ts`, one more in
   `opening.test.ts`, and one of the architecture test for the new file. Then
   `npm run test:e2e`: 19 passed, 3 skipped.
 
-- [ ] **Step 11: Commit** — `Step the card before the call`. Body: a new game waits three
+- [x] **Step 11: Commit** — `Step the card before the call`. Body: a new game waits three
   seconds or for a press before the call; the state holds the tick in which the card ended,
   so the wake keeps it and the card never comes back.
 
@@ -917,7 +917,7 @@ export function stepCard(state: GameState, input: GameInput): GameState {
 - Produces: `CARD_PRESENTS_Y = 74`, `CARD_TITLE_Y = 94`, `centredX(length): number`,
   `drawCard(renderer, font, language)`.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/draw-scene.test.ts
@@ -1082,12 +1082,12 @@ export function stepCard(state: GameState, input: GameInput): GameState {
 +});
 ```
 
-- [ ] **Step 2: Run them.** `npx tsc --noEmit` reports one error: `draw-card` does not exist.
+- [x] **Step 2: Run them.** `npx tsc --noEmit` reports one error: `draw-card` does not exist.
   `npx vitest run tests/unit/draw-scene.test.ts` does not load. With a dev server running,
   `npx playwright test -g "card of its presenter"` fails at `the card: no map in the corner,
   no page of the call drawn` — the corner is carpet and the box holds the call.
 
-- [ ] **Step 3: The card.** Create `src/render/draw-card.ts`:
+- [x] **Step 3: The card.** Create `src/render/draw-card.ts`:
 
 ```ts
 import { CARD_PRESENTS, CARD_TITLE } from '../game/card';
@@ -1124,7 +1124,7 @@ export function drawCard(renderer: Renderer, font: SpriteSheet, language: Langua
 }
 ```
 
-- [ ] **Step 4: The scene** draws the card alone while it is shown:
+- [x] **Step 4: The scene** draws the card alone while it is shown:
 
 ```diff
 --- a/src/render/draw-scene.ts
@@ -1165,10 +1165,10 @@ export function drawCard(renderer: Renderer, font: SpriteSheet, language: Langua
      if (state.help) {
 ```
 
-- [ ] **Step 5: Run** `npm run check`: 1585 unit tests, and `npm run test:e2e` twice: 20
+- [x] **Step 5: Run** `npm run check`: 1585 unit tests, and `npm run test:e2e` twice: 20
   passed, 3 skipped, both times.
 
-- [ ] **Step 6: Commit** — `Draw the card and nothing of the world under it`. Body: two
+- [x] **Step 6: Commit** — `Draw the card and nothing of the world under it`. Body: two
   centred lines on the page colour, in the game's own font and the language of the
   settings; a name, never a logo.
 
@@ -1190,7 +1190,7 @@ export function drawCard(renderer: Renderer, font: SpriteSheet, language: Langua
 No rule of the game changes in this task. The words are fixed by the spec's table; copy them
 from the diffs and change nothing.
 
-- [ ] **Step 1: The words, tested line by line,** and the test that holds the name to the
+- [x] **Step 1: The words, tested line by line,** and the test that holds the name to the
   three pages:
 
 ```diff
@@ -1278,7 +1278,7 @@ from the diffs and change nothing.
        'So weit reicht das Spiel bis heute.',
 ```
 
-- [ ] **Step 2: The officer has three pages.** The cast, the speakers of a step, and the
+- [x] **Step 2: The officer has three pages.** The cast, the speakers of a step, and the
   floor's figures:
 
 ```diff
@@ -1355,7 +1355,7 @@ from the diffs and change nothing.
      expect(start.figures).toStrictEqual([
 ```
 
-- [ ] **Step 3: The tests that read her own talk to its end press once more,** and one new
+- [x] **Step 3: The tests that read her own talk to its end press once more,** and one new
   test reads the three pages after the meeting:
 
 ```diff
@@ -1431,7 +1431,7 @@ from the diffs and change nothing.
      expect(later.creatures[0]?.x).toBeLessThan(214);
 ```
 
-- [ ] **Step 4: The source of Sales** names it after the case and on no page before it:
+- [x] **Step 4: The source of Sales** names it after the case and on no page before it:
 
 ```diff
 --- a/tests/unit/cases.test.ts
@@ -1468,7 +1468,7 @@ from the diffs and change nothing.
 +});
 ```
 
-- [ ] **Step 5: Run** `npx tsc --noEmit` — four errors, one each in the tests of the cast,
+- [x] **Step 5: Run** `npx tsc --noEmit` — four errors, one each in the tests of the cast,
   the opening, the story and the text: the id is not an id of the table yet. Run
   `npx vitest run`. Expected: 14 tests fail in seven files —
   `holds the third page of the officer, which names Harmonic, in both languages (0036)`,
@@ -1485,7 +1485,7 @@ from the diffs and change nothing.
   and `says her three pages once the lamp is handed over, and a fourth press closes them`
   (opening); and the two tests of the floor's figures.
 
-- [ ] **Step 6: The words,** in both tables:
+- [x] **Step 6: The words,** in both tables:
 
 ```diff
 --- a/src/text/de.ts
@@ -1569,7 +1569,7 @@ from the diffs and change nothing.
    'policy.sales': [
 ```
 
-- [ ] **Step 7: The officer's third page:**
+- [x] **Step 7: The officer's third page:**
 
 ```diff
 --- a/src/game/cast.ts
@@ -1591,11 +1591,11 @@ from the diffs and change nothing.
    // page he has before anything is known.
 ```
 
-- [ ] **Step 8: Run** `npm run check` — 1589 unit tests. The test that gives a page of talk
+- [x] **Step 8: Run** `npm run check` — 1589 unit tests. The test that gives a page of talk
   and of the story at most three lines of at most 47 characters covers the three pages, and
   the test that every character has a glyph covers their quotation marks and the dash.
 
-- [ ] **Step 9: Commit** — `Name Harmonic in three pages of talk`. Body: the data protection
+- [x] **Step 9: Commit** — `Name Harmonic in three pages of talk`. Body: the data protection
   officer, the colleague of Sales after the case and the management in the close each say
   once what Harmonic would have shown; it is monitoring, it does nothing in the game, and
   nobody praises it (`vision.md` §10).
@@ -1611,7 +1611,7 @@ from the diffs and change nothing.
 The diffs are against the branch as it stands before Task 1. If a line has moved, put the
 text where the diff means it; do not change the words without a reason.
 
-- [ ] **Step 1: `vision.md`** §10. The text records what the author settled; do not reword
+- [x] **Step 1: `vision.md`** §10. The text records what the author settled; do not reword
   it and do not add advice of your own:
 
 ```diff
@@ -1636,7 +1636,7 @@ text where the diff means it; do not change the words without a reason.
 +and no table of the world data holds either name.
 ```
 
-- [ ] **Step 2: `gameplay.md`** §6 and §8:
+- [x] **Step 2: `gameplay.md`** §6 and §8:
 
 ```diff
 --- a/docs/spec/gameplay.md
@@ -1674,7 +1674,7 @@ text where the diff means it; do not change the words without a reason.
  nothing at a machine while the lamp is held or the figure is being pushed. The help still lists
 ```
 
-- [ ] **Step 3: `world.md`** §3:
+- [x] **Step 3: `world.md`** §3:
 
 ```diff
 --- a/docs/spec/world.md
@@ -1691,7 +1691,7 @@ text where the diff means it; do not change the words without a reason.
    solve the later cases. They are fictional products; Harmonic is not his (`vision.md` §10).
 ```
 
-- [ ] **Step 4: `architecture.md`** §2, §3 and §5:
+- [x] **Step 4: `architecture.md`** §2, §3 and §5:
 
 ```diff
 --- a/docs/spec/architecture.md
@@ -1756,7 +1756,7 @@ text where the diff means it; do not change the words without a reason.
  no lid. In the language of the settings it draws: the surface cleared in `#181425`; the three
 ```
 
-- [ ] **Step 5: `visual.md`** §3:
+- [x] **Step 5: `visual.md`** §3:
 
 ```diff
 --- a/docs/spec/visual.md
@@ -1775,7 +1775,7 @@ text where the diff means it; do not change the words without a reason.
  Every colour in the game comes from **Endesga 32** — thirty-two colours, warm, enough for office
 ```
 
-- [ ] **Step 6: `testing.md`** §2:
+- [x] **Step 6: `testing.md`** §2:
 
 ```diff
 --- a/docs/spec/testing.md
@@ -1795,7 +1795,7 @@ text where the diff means it; do not change the words without a reason.
  | INV-7 map truth | loader tests read the solid boxes as the union of the three tile layers, in map pixels, and the opaque boxes from the tiles that are not `low`, and reject, each with its message: an unknown layer name, a layer whose type does not match its name, a missing `ground` or `objects` layer or a name used twice, no spawn or two, a tile size other than 16x16, a map under 20x12 tiles, an infinite map or encoded, compressed or mis-sized layer data, a flipped or rotated tile, a gid outside the tileset, anything but one external `.tsj`, an animated tile in the tileset, a collision shape that is not a rectangle, a rotated one, one that is not whole pixels inside the tile, a tile that is `solid` and has collision shapes, a tile that is `low` and has no box, an orientation other than orthogonal, a spawn outside the map or in a solid box, a point object without a name, a named point outside the map or in a solid box, a `pause` that is not an `int` property (`architecture.md` §6); `game/mover` rejects a malformed route point, an unknown room, a pause outside 0–600, a number used twice or missing, a route of one or more than four points, a leg that is not straight and a ground leg across a solid box, each with its message, and a test proves every ground leg of the floor free (0015); the loader rejects an object that is neither a point nor a rectangle, a rectangle without a name, a rotated rectangle and one that is not whole pixels inside the map, and `game/rects` refuses a rectangle of no known kind (0022), `game/shadow` a region the world data does not know, a region without shadow and a box that is no strip on a cell edge, each with its message (0014), and `game/trace` a trace of a region the world data does not know and a trace that is not one cell, each with its message (0022), and `game/region` an area of a region the world data does not know and an area that is not whole cells, each with its message, and a test holds the floor's ten areas to its rooms (0023); `game/rest` refuses a rest that is not one cell, with its message, and a test holds the floor's eight rests to its coffee machines, none without a rest (0027); a test holds the floor's five traces of Marketing to the spec's table — each in the area of Marketing, on a desk with a screen or on the printer, and in the light from every reached place on the cell above — and the 123 objects of the floor before them to a recorded SHA-256 digest, so that no object of an earlier feature changes (0028); the world-data test, `gatingFaults` on `src/game/world.ts` and on four faulty tables, proves that no density lies outside 0–3 or above what the lamp reaches and that no upgrade is earned behind a wall the lamp cannot lift before it (0014); `game/cast` refuses a figure point whose id the cast does not have and two points with the same id, each with its message, and a figure point is no route point and makes no creature (0017) |
 ```
 
-- [ ] **Step 7: `README.md`:**
+- [x] **Step 7: `README.md`:**
 
 ```diff
 --- a/README.md
@@ -1815,20 +1815,20 @@ text where the diff means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 8:** `npm run check`, then commit — `Move the card and the three lines into the
+- [x] **Step 8:** `npm run check`, then commit — `Move the card and the three lines into the
   spec`.
 
 ---
 
 ### Task 6: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 20 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 20 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
   `Tick the full check of 0036`.
 
 ---
