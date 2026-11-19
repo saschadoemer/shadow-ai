@@ -147,6 +147,7 @@ function woken(state: GameState, map: TileMap): GameState {
     solved: state.solved,
     rested: state.rested,
     finished: state.finished,
+    presented: state.presented,
     figures: state.figures,
     dialogue: null,
     journal: null,

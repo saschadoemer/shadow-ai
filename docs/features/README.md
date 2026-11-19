@@ -9,6 +9,8 @@ workflow that moves it is `CLAUDE.md` §3 and is repeated here in one line each:
 - `implemented` — tests green, spec files updated, the author has walked the acceptance plan
   with the agent. Set on the branch after the walk, in the feature's own pull request, which the
   author merges.
+- `rejected` — turned down by the author, as a draft or in its walk. Nothing of it is on
+  `main`; the file stays as history.
 
 A feature spec refines the specification in `docs/spec/`; it never contradicts it. Where it
 would, the spec is changed first. Once a feature is implemented, what is durable about it lives in
@@ -56,7 +58,7 @@ in two.
 | [0032](0032-the-creature-of-marketing.md) | The creature of Marketing | M6 | implemented 2026-11-19 |
 | [0033](0033-the-intern.md) | The intern | M6 | implemented 2026-11-19 |
 | [0034](0034-the-close.md) | The close | M6 | implemented 2026-11-19 |
-| [0035](0035-the-harmonic-station.md) | The Harmonic station | M5 | approved 2026-11-19 |
-| [0036](0036-lmis-presents.md) | LMIS presents | M5 | approved 2026-11-19 |
+| [0035](0035-the-harmonic-station.md) | The Harmonic station | M5 | rejected 2026-11-19 |
+| [0036](0036-lmis-and-harmonic.md) | LMIS and Harmonic | M5 | implemented 2026-11-19 |
 | [0037](0037-the-case-of-support.md) | The case of Support | M6 | approved 2026-11-19 |
 | [0038](0038-the-creature-of-support.md) | The creature of Support | M6 | approved 2026-11-19 |

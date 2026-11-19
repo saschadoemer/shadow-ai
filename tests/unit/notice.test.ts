@@ -115,7 +115,8 @@ describe("the line that names the lamp's key (0026)", () => {
   const map = grassMap(20, 12, { x: 136, y: 96 }, [{ name: 'figure:officer', x: 160, y: 96 }]);
   const run = (start: GameState, ...inputs: readonly GameInput[]): GameState =>
     inputs.reduce((state, input) => update(state, input, map), start);
-  const called = run(newGame(map), TALK, NONE, TALK, NONE, TALK);
+  // Past the card (0036): the first press turns the page of the call.
+  const called = run({ ...newGame(map), presented: 0 }, TALK, NONE, TALK, NONE, TALK);
   const met = run(called, NONE, TALK, NONE, TALK, NONE, TALK);
 
   it('is the key `notice.lamp`', () => {

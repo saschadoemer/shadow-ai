@@ -31,7 +31,7 @@ Two purposes, in this order:
    0031). It says which key does what, and nothing about why. The line that names the lamp's key when the lamp is handed
    over (feature 0026) is of the same kind.
 
-The game is presented by LMIS, and one real product stands in its world: Harmonic (§10). Both
+The game is presented by LMIS, and one real product is named in its world: Harmonic (§10). Both
 serve the second purpose and are bound by the order above. Where they pull against the game
 people play at home, the game wins.
 
@@ -149,7 +149,8 @@ Dialogue and descriptions are written by many hands, some of them agents. This i
 - Lecturing. No line that would fit on a compliance slide.
 - Real company or product names, or thin disguises of them. LMIS and Harmonic are the two
   exceptions (§10).
-- Praise for a product. Nobody recommends Harmonic, says what it costs or where to get it.
+- Praise for a product. A figure may say what Harmonic would have shown (§10). Nobody says it
+  is good, tells the player to get it, says what it costs or where to get it.
 - Threats, warnings, consequences for a person.
 - Jokes that need the player to know the industry.
 
@@ -184,39 +185,57 @@ first public release.
 ## 10. LMIS and Harmonic
 
 Two real names are in the game, and only these two (§6, §8): **LMIS**, the author's employer,
-which presents the game, and **Harmonic**, a safe AI workplace a company can approve for its
-people. Harmonic is made by a partner of LMIS, and LMIS sells it. Its maker has agreed to the
-name appearing in the game.
+which presents the game, and **Harmonic**, a monitoring product: it makes visible which AI
+tools are used in a company and where data leaves it. It watches and reports; it is no
+workplace and no tool to work in. Harmonic is made by a partner of LMIS, and LMIS sells it. Its
+maker has agreed to the name appearing in the game.
 
 **LMIS is the frame, not the world.** The name stands where the game is presented: on the title
 screen, as in `LMIS präsentiert`. The teaser is shown before the title screen exists (M8), so it
-gets a place of its own for the line, decided in its feature. Any further place — an end card,
+gets a card of its own for the line (feature 0036). Any further place — an end card,
 credits — is decided in the feature that builds it. LMIS is never the company in the game.
 That company stays fictional (`world.md` §5): it is the house the data leaks from, and no real
 company is put in that place.
 
-**Harmonic is the approved way, made visible.** The message says the shadow gives way where it
-becomes unnecessary (§3). A Harmonic station is a desk in a department where that has happened:
-the people there have a safe way, so the creatures of the room have nothing left to feed on, and
-they go. That is why a real product may stand in this world at all. It does not sit beside the
-message; it is an instance of it. What a station does is `gameplay.md` §10. Where the stations
-stand is `world.md` §6.
+**Harmonic is the lamp for the whole house.** The shadow remains where data leaves the house
+unseen (§3), and at first only the player sees it. Harmonic is the real thing that does what
+the lamp does in the game: it makes visible, and it forbids nothing. That is why a real product
+may be named in this world at all. It does not sit beside the message; it is an instance of it.
+It is named in talks and nowhere else. Three voices say, each once, what it would have shown:
+the management, the data protection officer and a colleague.
 
 The rules both are held to:
 
-- **Every player meets Harmonic once.** One station stands on the way through Sales in Act 1, so
-  the visitor at the booth and the player at home both see the name and can use it.
-- **It is rare.** Three stations in the whole game (`docs/plan.md` §3), each placed by hand.
-  Nothing about Harmonic is left to chance.
-- **It shortens a case and never solves one.** A station takes the fight out of a room. The
-  traces and the conversation with the source stay the player's. A tool does not replace the
-  talk between two people.
-- **It is shown, not praised.** The player sees the effect, one dry line names the product, and
-  the case in the journal carries a mark. No figure recommends Harmonic, says what it costs or
-  where to get it (§6).
+- **Harmonic is a word in a talk, and nothing more.** No rule of the play knows the name: there
+  is no thing to use, no entry in the journal and no effect. The lamp, the traces and the talk
+  with the source carry every case, and no product takes any part of that over.
+- **Three voices, once each.** Three lines in the whole game name it (`docs/plan.md` §3). A
+  further line is a number in the budget first.
+- **Hindsight and wish, not praise.** A figure says what Harmonic would have shown — earlier,
+  to the house, to a colleague. No figure says it is good, tells the player to get it, says
+  what it costs or where to get it (§6).
+- **It sees; it does not catch.** No line about Harmonic is about finding out a person or about
+  consequences for one (§3, §6).
+- **A line claims nothing the product does not do.** What a figure says Harmonic shows is
+  checked against what the product does before the line is approved.
+- **LMIS is in no talk.** No figure names LMIS; the name stands only where the game is
+  presented.
 - **A name, not a logo.** Both names are written in the game's own font. No logo of either is
   drawn, so INV-6 needs no exception.
-- **The vendor is somebody else** (§4). He does not sell Harmonic, and no station is his.
+- **The vendor is somebody else** (§4). He does not sell Harmonic.
 - **The advertising is recognizable.** The presenter's line tells a player that the product in
   the game is there on purpose. Whether that is enough has to be checked by a competent person
   before the first public release, together with the licences (§9).
+
+*As built* (feature 0036). The presenter's line stands on a card before the call — `LMIS
+präsentiert` over the title, on an otherwise empty screen, for three seconds or until a press.
+It is the one text of the game that holds the presenter's name, and a test keeps it so. The
+card has no line about Harmonic; one is added if the person who checks the release asks for it.
+
+The three voices, each on one page of talk. The data protection officer, on the third page of
+her own talk, once the lamp is handed over: `Die Lampe hast nur du. Etwas wie Harmonic würde
+dem Haus zeigen, welche KI hier läuft und wohin die Daten gehen.` The colleague of Sales, on
+the page after the case: `Hätte mir etwas wie Harmonic vorher gezeigt, wohin der Text geht –
+ich hätte es gelassen.` The management, on the second page of the close: `Mit Harmonic hätten
+wir es vor dem Kunden gesehen.` A test holds the name to these three pages, in both languages,
+and no table of the world data holds either name.

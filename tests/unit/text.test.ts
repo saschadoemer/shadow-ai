@@ -76,6 +76,35 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the third page of the officer, which names Harmonic, in both languages (0036)', () => {
+    const third = textKey('talk.officer-rules-3');
+    expect(textOf(third, 'de').split('\n')).toStrictEqual([
+      'Die Lampe hast nur du. Etwas wie Harmonic',
+      'würde dem Haus zeigen, welche KI hier läuft',
+      'und wohin die Daten gehen.',
+    ]);
+    expect(textOf(third, 'en').split('\n')).toStrictEqual([
+      'Only you have the lamp. Something like Harmonic',
+      'would show the house which AI runs here',
+      'and where the data goes.',
+    ]);
+  });
+
+  it('names Harmonic in three pages of talk and nowhere else (0036)', () => {
+    for (const language of LANGUAGES) {
+      const named = Object.entries(TABLE[language])
+        .filter(([, text]) => text.toLowerCase().includes('harmonic'))
+        .map(([id]) => id);
+      // The officer, the management in the close and the source of Sales after its case, in
+      // the order of the table. No notice, no entry of the journal and no other page.
+      expect(named, language).toStrictEqual([
+        'talk.officer-rules-3',
+        'story.close-2',
+        'talk.sales-after',
+      ]);
+    }
+  });
+
   it('holds the four sayings of the colleagues in both languages (0018)', () => {
     const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
       textOf(textKey(id), language).split('\n');
@@ -191,15 +220,16 @@ describe('the language table (INV-4, 0016)', () => {
       'Where the text goes from there, I never',
       'thought about.',
     ]);
+    // Since 0036 the page after the case names Harmonic: what it would have shown.
     expect(lines('talk.sales-after', 'de')).toStrictEqual([
       'Danke, dass du gefragt hast statt zu schimpfen.',
-      'Sag mir einfach, womit ich es beim nächsten Mal',
-      'machen darf.',
+      'Hätte mir etwas wie Harmonic vorher gezeigt,',
+      'wohin der Text geht – ich hätte es gelassen.',
     ]);
     expect(lines('talk.sales-after', 'en')).toStrictEqual([
       'Thanks for asking instead of telling me off.',
-      'Just tell me what I may use for it',
-      'next time.',
+      'Had something like Harmonic shown me where',
+      'the text goes, I would have left it.',
     ]);
     expect(lines('case.sales-outcome', 'de')).toStrictEqual([
       'Gelöst: Angebote gingen in einen Chatbot.',
@@ -280,6 +310,38 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the two lines of the card in both languages (0036)', () => {
+    const both = (id: Parameters<typeof textKey>[0]): string[] => [
+      textOf(textKey(id), 'de'),
+      textOf(textKey(id), 'en'),
+    ];
+    expect(both('card.presents')).toStrictEqual(['LMIS präsentiert', 'LMIS presents']);
+    expect(both('card.title')).toStrictEqual(['Shadow AI', 'Shadow AI']);
+  });
+
+  it('keeps each line of the card on one line that fits the surface (0036)', () => {
+    const ids = Object.keys(TABLE.de).filter((id) => id.startsWith('card.'));
+    expect(ids).toStrictEqual(['card.presents', 'card.title']);
+    for (const language of LANGUAGES) {
+      for (const id of ['card.presents', 'card.title'] as const) {
+        const text = TABLE[language][id];
+        expect(text.includes('\n'), `${language} ${id}`).toBe(false);
+        // 320 px of surface, 6 px a character.
+        expect(text.length, `${language} ${id}`).toBeLessThanOrEqual(53);
+      }
+    }
+  });
+
+  it('names the presenter on the card and nowhere else (0036)', () => {
+    for (const language of LANGUAGES) {
+      const named = Object.entries(TABLE[language])
+        .filter(([, text]) => text.toLowerCase().includes('lmis'))
+        .map(([id]) => id);
+      // No page of a figure, no notice and no entry of the journal names who presents the game.
+      expect(named, language).toStrictEqual(['card.presents']);
+    }
+  });
+
   it('holds the three pages of the close in both languages (0034)', () => {
     const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
       textOf(textKey(id), language).split('\n');
@@ -293,15 +355,16 @@ describe('the language table (INV-4, 0016)', () => {
       'Where you have been, the colours are back –',
       'and nobody got into trouble.',
     ]);
+    // Since 0036 the management names Harmonic on the second page.
     expect(lines('story.close-2', 'de')).toStrictEqual([
-      'Die Geschäftsführung ruft an: „Gut. Aber das',
-      'war erst der Anfang, oder?“ Über den anderen',
-      'Türen liegt der Schatten noch.',
+      'Die Geschäftsführung ruft an: „Gut. Mit',
+      'Harmonic hätten wir es vor dem Kunden gesehen.“',
+      'Über den anderen Türen liegt der Schatten noch.',
     ]);
     expect(lines('story.close-2', 'en')).toStrictEqual([
-      'The managing director calls: “Good. But that',
-      'was only the beginning, was it not?” The',
-      'shadow still lies over the other doors.',
+      'The managing director calls: “Good. With',
+      'Harmonic we would have seen it before the',
+      'customer did.” Other doors are still in shadow.',
     ]);
     expect(lines('story.close-3', 'de')).toStrictEqual([
       'So weit reicht das Spiel bis heute.',

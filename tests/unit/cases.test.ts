@@ -24,7 +24,7 @@ import { speakerOf, speakersOf } from '../../src/game/talk';
 import type { Trace } from '../../src/game/trace';
 import { createInitialState, update } from '../../src/game/update';
 import { UPGRADES } from '../../src/game/world';
-import { textKey } from '../../src/text/text';
+import { type TextKey, textKey, textOf } from '../../src/text/text';
 import { grassMap } from './grass-map';
 
 const NONE = NO_INPUT;
@@ -671,5 +671,22 @@ describe('the upgrade a case earns (0029)', () => {
   it('survives a JSON round trip with the upgrade earned (INV-1)', () => {
     const solved = talk(beside(ready, 'marketing'));
     expect(JSON.parse(JSON.stringify(solved))).toStrictEqual(solved);
+  });
+});
+
+describe('Harmonic in the case of Sales (0036)', () => {
+  /** Whether a page of these names the product, in either language. */
+  const named = (keys: readonly TextKey[]): boolean =>
+    keys.some((key) =>
+      (['de', 'en'] as const).some((language) => textOf(key, language).includes('Harmonic')),
+    );
+
+  it('is named by the source on the page after the case, and on no page before it', () => {
+    const sales = CASES[0];
+    expect(sales?.region).toBe('sales');
+    expect(named(EVERYDAY)).toBe(false);
+    expect(named(sales?.answer ?? [])).toBe(false);
+    expect(sales?.after).toStrictEqual(AFTER);
+    expect(named(AFTER)).toBe(true);
   });
 });

@@ -314,7 +314,9 @@ describe('a coffee (0027)', () => {
   });
 
   it('is taken with Space held by a player who has no lamp: there is none to hold (0026)', () => {
-    const called = run(OPEN, newGame(OPEN), TALK, NONE, TALK, NONE, TALK, NONE);
+    // Past the card (0036): the first press turns the page of the call.
+    const past: GameState = { ...newGame(OPEN), presented: 0 };
+    const called = run(OPEN, past, TALK, NONE, TALK, NONE, TALK, NONE);
     expect(called.lamp.owned).toBe(false);
     const drunk = update(called, { ...TALK, lamp: true }, OPEN);
     expect(drunk.rested).toStrictEqual({ at: called.tick + 1, result: 'full' });

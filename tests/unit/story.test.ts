@@ -18,7 +18,11 @@ import { textKey } from '../../src/text/text';
 import { grassMap } from './grass-map';
 
 const CALL = [textKey('story.call-1'), textKey('story.call-2'), textKey('story.call-3')];
-const RULES = [textKey('talk.officer-rules-1'), textKey('talk.officer-rules-2')];
+const RULES = [
+  textKey('talk.officer-rules-1'),
+  textKey('talk.officer-rules-2'),
+  textKey('talk.officer-rules-3'),
+];
 const OFFICER: NamedPoint = { name: 'figure:officer', x: 160, y: 96 };
 /** The colleague of the reception, waiting ten seconds 32 px above the spawn. */
 const COLLEAGUE: readonly NamedPoint[] = [

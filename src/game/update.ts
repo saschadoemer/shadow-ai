@@ -1,5 +1,6 @@
 import type { TileMap } from '../engine/tiled';
 import { followPlayer } from './camera';
+import { cardShown, stepCard } from './card';
 import { answeredCase, clearRegion, earn, progressOf, solve } from './cases';
 import { figuresFrom, figuresIn, figuresOf, isFirstMeeting } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
@@ -33,8 +34,8 @@ import { BASE_STRENGTH } from './world';
  * every standing figure of the map facing down and no dialogue (0017); the journal closed and
  * no key remembered (0020); the help closed (0021); every trace of the map unseen and not found
  * (0022); no case solved (0024); no upgrade earned (0029). It is a game past its opening
- * (0026): the lamp is owned and was used, no scene is open, and the opening ended at tick 0;
- * `newGame` is the state a player starts with.
+ * (0026): the lamp is owned and was used, no scene is open, and the card ended at tick 0
+ * (0036); `newGame` is the state a player starts with.
  * A map with two wake points, a route that is malformed or crosses a solid tile, a
  * rectangle of no known kind, a shadow wall or a trace the world data or the grid refuses, an
  * area of a region the world data does not know or of a box that is not whole cells (0023), or
@@ -72,6 +73,7 @@ export function createInitialState(map: TileMap): GameState {
     solved: [],
     rested: null,
     finished: null,
+    presented: 0,
     figures: figuresFrom(figures),
     dialogue: null,
     journal: null,
@@ -85,14 +87,16 @@ export function createInitialState(map: TileMap): GameState {
 
 /**
  * The state a played game starts with (0026): the initial state with the call open on its
- * first page and the lamp not yet owned. `main.ts` starts with it; the tests of the earlier
- * features step from `createInitialState`.
+ * first page and the lamp not yet owned — and, before the call, the card that says who
+ * presents the game (0036). `main.ts` starts with it; the tests of the earlier features step
+ * from `createInitialState`.
  */
 export function newGame(map: TileMap): GameState {
   return {
     ...createInitialState(map),
     lamp: { on: false, strength: BASE_STRENGTH, owned: false, used: false },
     dialogue: { speaker: 'story', index: OPENING_SCENE, page: 0 },
+    presented: null,
   };
 }
 
@@ -128,7 +132,8 @@ function closed(
 
 /**
  * Advances the game by exactly one logic step and returns the new state; its arguments are not
- * mutated. In the dark the step is the dark sequence and nothing else (0009). With the help open
+ * mutated. While the card is shown the step is the card's and nothing else (0036, game/card).
+ * In the dark the step is the dark sequence and nothing else (0009). With the help open
  * the step is the help's and nothing else, and a press of `help` opens it over whatever is there
  * — an open journal and an open dialogue too (0021). With the journal open the step is the
  * journal's and nothing else (0020). With a dialogue open — a speaker's or a scene's (0026) —
@@ -152,6 +157,9 @@ function closed(
  * that the next step can tell a press from a held key (0017, 0020).
  */
 export function update(state: GameState, input: GameInput, content: TileMap): GameState {
+  if (cardShown(state)) {
+    return stepCard(state, input);
+  }
   if (state.dark > 0) {
     return { ...stepDark(state, content), held: input };
   }
@@ -243,6 +251,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     solved: state.solved,
     rested,
     finished: state.finished,
+    presented: state.presented,
     figures: state.figures,
     dialogue: null,
     journal: null,

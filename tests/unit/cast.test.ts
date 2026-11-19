@@ -21,10 +21,11 @@ import { textKey } from '../../src/text/text';
 const point = (name: string, x: number, y: number): NamedPoint => ({ name, x, y });
 const FIRST = textKey('talk.officer-rules-1');
 const SECOND = textKey('talk.officer-rules-2');
+const THIRD = textKey('talk.officer-rules-3');
 
 describe('the cast (0017)', () => {
-  it('has the officer with her two pages', () => {
-    expect(CAST[0]).toStrictEqual({ id: 'officer', pages: [FIRST, SECOND] });
+  it('has the officer with her three pages: the third names Harmonic (0036)', () => {
+    expect(CAST[0]).toStrictEqual({ id: 'officer', pages: [FIRST, SECOND, THIRD] });
   });
 
   it('has the intern after her, with the one page he has before anything is known (0033)', () => {
@@ -47,7 +48,7 @@ describe('figuresOf (0017)', () => {
       point('wake', 40, 40),
     ];
     expect(figuresOf(points)).toStrictEqual([
-      { id: 'officer', pages: [FIRST, SECOND], x: 160, y: 96 },
+      { id: 'officer', pages: [FIRST, SECOND, THIRD], x: 160, y: 96 },
     ]);
   });
 

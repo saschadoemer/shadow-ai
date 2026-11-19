@@ -95,6 +95,11 @@ frame the light shows, with its name beside it and its lines below. A case on th
 `Spuren: 1 von 5`. The help is the one thing drawn over the journal; its frame is what makes it
 a box on the journal's screen, which has the field's colour.
 
+**The card** a game opens with (feature 0036) is the page colour `#181425` over the whole
+surface and two lines in the game's font: the presenter's with its top at y = 74 and the title
+at y = 94, each centred — a line of n characters starts at x = 160 − 3n. No logo, no frame and
+no picture is on it.
+
 ## 4. Palette
 
 Every colour in the game comes from **Endesga 32** — thirty-two colours, warm, enough for office

@@ -211,6 +211,13 @@ do not depend on each other: Marketing is open from the start, and the player ma
 before Sales. What a case of Act 2 has more than the first — its species, the upgrade it
 earns, the vendor — comes with features of their own.
 
+**As built** (feature 0036): three pages of talk name Harmonic, and no rule of a case changed
+(`vision.md` §10). The page the colleague of Sales says after the case no longer asks what to
+use next time: it says that something like Harmonic would have shown where the text goes. On
+the second page of the close the management says that with Harmonic the house would have seen
+it before the customer did. The third is a page of the data protection officer (§8). No page
+of an answer and no everyday line holds the name.
+
 ## 7. The journal
 
 The only screen besides the game itself, and the only inventory. One screen, three tabs, nothing
@@ -304,6 +311,16 @@ There is no way to skip it before M8. In the first meeting the data protection o
 first page and then the page that hands the lamp over; afterwards she says her two pages of
 0017. A press of E opens a dialogue with Space held as long as the player has no lamp.
 
+**As built** (feature 0036): before the call a game shows a card — a dark screen with two
+lines in its middle, `LMIS präsentiert` and, below it, `Shadow AI`. It ends by itself after
+three seconds, or at a press of E or Enter, and the call follows on its first page; the press
+that ended the card does not turn that page. While the card is shown no other key of the game
+does anything. L switches the language on it as everywhere, and F toggles fullscreen. The
+card is the stand-in for the title screen of M8 and goes when that comes. A page that is
+loaded anew shows it again. The data protection officer's own talk has a third page since
+this feature, the one that compares Harmonic with the lamp; the first meeting keeps its two
+pages, so she says it only once the lamp is handed over.
+
 **As built** (feature 0027): E and Enter also take a coffee at a coffee machine (§4). A
 colleague or a figure in reach comes first: then the press opens the dialogue. The press does
 nothing at a machine while the lamp is held or the figure is being pushed. The help still lists
@@ -325,36 +342,3 @@ Named here so nobody adds them by habit: no branching case outcomes, no morality
 system, no partial clearing of regions, no speaking hero, no dialogue choices beyond the trace
 gesture, no crafting, no money. Each is either a non-goal (`vision.md` §8) or deferred with its
 reason in `docs/plan.md`.
-
-## 10. The Harmonic station
-
-Settled with the vision (`vision.md` §10) and built by its own feature. A station is a desk in a
-region whose screen shows the name Harmonic. It is the one place where a real product acts in
-the game, and it is not a tool the player carries: the lamp stays the only one (§2).
-
-- **What it does.** A press of E or Enter at a station sets it running. Reach and sight are a
-  figure's (§8). In that step every creature whose home is in the station's region leaves the
-  game, by the rule of a solved case (§3): none is captured, the journal counts none, and none
-  comes back.
-- **When it does it.** Only once the species of the region is in the journal — the player has
-  captured one of its creatures with the lamp. Until then a press gets one line and changes
-  nothing. Every species is met by hand once, and the gesture at the source may pick a creature
-  from the journal (§6): a station that emptied a room before the first capture could make its
-  case unsolvable.
-- **Once.** A station runs once and stays running. After that it is furniture with a name.
-- **What it leaves alone.** A shadow wall: a station stands behind the wall of its region and
-  lifts none, so density against strength stays the one gate (§5). The shadow over the room: a
-  region is cleared exactly when its case is solved (§6), and there is no partial clearing (§9).
-  The traces, which the lamp still finds one by one. The source, which gives way only to the
-  conversation (§3). And every creature whose home is outside the region.
-- **How the player knows.** The creatures go in the step the station starts. A line in the
-  notice's bar names Harmonic for two seconds. The entry of the region's case in the journal
-  carries a mark that Harmonic ran there.
-- **How many.** Three in the whole game (`docs/plan.md` §3), at fixed places (`world.md` §6).
-  None is found by chance, none is collected, and nothing about a station can be saved up.
-
-The texts — the line of a station that cannot run yet, the line that names Harmonic, the mark in
-the journal — are fixed in the feature that builds the first station, against the tone sheet
-(`vision.md` §6). None of them is tutorial text (`vision.md` §2): the line of a station that
-cannot run yet says what is, as the line of a shadow wall that holds does (§2), and tells the
-player nothing to do.

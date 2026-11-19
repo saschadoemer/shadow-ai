@@ -58,7 +58,11 @@ a half times as wide, and the shadow walls of HR and Accounting give way to it (
 Marketing has a creature of its own: the mirage, a framed picture that moves only while nobody
 looks at it (feature 0032). An intern stands in the break room and says, when asked, where the
 next step is (feature 0033). Five seconds after the last case there is, the story says once
-that the rest of the floor follows, and the game goes on (feature 0034).
+that the rest of the floor follows, and the game goes on (feature 0034). A game opens with a
+card that says who presents it — `LMIS präsentiert` over the title — for three seconds or
+until `E` is pressed; then the call follows. Three people name Harmonic, a monitoring product,
+once each and say what it would have shown: the data protection officer, the colleague of
+Sales after the case, and the management at the close (feature 0036).
 Every merge to `main` is deployed to Cloud Run (feature 0030).
 The roadmap is in [docs/plan.md](docs/plan.md).
 

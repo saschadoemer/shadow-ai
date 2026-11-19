@@ -220,9 +220,10 @@ describe('the pages of a dialogue (0017)', () => {
   });
 
   it('closes with a press on the last page; she keeps her facing; the next step is an ordinary one', () => {
-    const closed = run(map, opened, NONE, TALK, NONE, TALK);
+    // She has three pages since 0036.
+    const closed = run(map, opened, NONE, TALK, NONE, TALK, NONE, TALK);
     expect(closed.dialogue).toBeNull();
-    expect(closed.tick).toBe(5);
+    expect(closed.tick).toBe(7);
     expect(closed.figures).toStrictEqual([{ figure: 0, facing: 'right' }]);
     expect(closed.player.x).toBe(184);
     const walked = run(map, closed, NONE, RIGHT);
@@ -283,7 +284,7 @@ describe('the world while a dialogue is open (0017)', () => {
 
   it('moves again once it is closed', () => {
     const opened = update(start, TALK, map);
-    const closed = run(map, opened, NONE, TALK, NONE, TALK);
+    const closed = run(map, opened, NONE, TALK, NONE, TALK, NONE, TALK);
     expect(closed.dialogue).toBeNull();
     const later = run(map, closed, NONE, NONE);
     expect(later.creatures[0]?.x).toBeLessThan(214);

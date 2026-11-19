@@ -57,6 +57,11 @@ export const de = {
     'regt – nicht um es zu vertreiben, sondern um',
     'es zu verstehen.',
   ].join('\n'),
+  'talk.officer-rules-3': [
+    'Die Lampe hast nur du. Etwas wie Harmonic',
+    'würde dem Haus zeigen, welche KI hier läuft',
+    'und wohin die Daten gehen.',
+  ].join('\n'),
   'talk.officer-meeting-2': [
     'Nimm die Lampe: Sie hält fest, was sich darin',
     'regt – nicht um es zu vertreiben, sondern um',
@@ -83,9 +88,9 @@ export const de = {
     'niemand hat Ärger bekommen.',
   ].join('\n'),
   'story.close-2': [
-    'Die Geschäftsführung ruft an: „Gut. Aber das',
-    'war erst der Anfang, oder?“ Über den anderen',
-    'Türen liegt der Schatten noch.',
+    'Die Geschäftsführung ruft an: „Gut. Mit',
+    'Harmonic hätten wir es vor dem Kunden gesehen.“',
+    'Über den anderen Türen liegt der Schatten noch.',
   ].join('\n'),
   'story.close-3': [
     'So weit reicht das Spiel bis heute.',
@@ -119,8 +124,8 @@ export const de = {
   'talk.sales-source-2': ['Wohin der Text damit geht, habe ich mir nicht', 'überlegt.'].join('\n'),
   'talk.sales-after': [
     'Danke, dass du gefragt hast statt zu schimpfen.',
-    'Sag mir einfach, womit ich es beim nächsten Mal',
-    'machen darf.',
+    'Hätte mir etwas wie Harmonic vorher gezeigt,',
+    'wohin der Text geht – ich hätte es gelassen.',
   ].join('\n'),
   'case.sales-outcome': 'Gelöst: Angebote gingen in einen Chatbot.',
   'policy.sales': [
@@ -197,4 +202,6 @@ export const de = {
     'klingen, als hätte ich eine Woche Zeit gehabt.',
     'Erst mal Kaffee.',
   ].join('\n'),
+  'card.presents': 'LMIS präsentiert',
+  'card.title': 'Shadow AI',
 } as const;

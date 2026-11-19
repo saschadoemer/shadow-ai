@@ -32,8 +32,7 @@ changes, no new sprite; the floor gets five rectangles.
   §5, §6 and §8; `testing.md` §2; the README.
 
 **Out, explicitly:** the species of Support — every case has one (`world.md` §4); it comes
-with the next feature, 0038 · a Harmonic station in Support (`world.md` §6: decided in a
-case spec of Act 2; not this one) · an upgrade — the world
+with the next feature, 0038 · an upgrade — the world
 data has none for Support · the vendor (M6) · pages on the policy tab — three blocks fit;
 pages come with the fourth · the mailbox and the translator as things on the screens (art
 pass) · the browser extension as a creature or a device of its own · a second saying for
@@ -49,8 +48,8 @@ added to their data, and the one rule that changes.
 ### The traces
 
 `TRACES` gets five entries of the region `support`, after the five of Marketing, and
-`floor.tmj` five more rectangles, written after the objects of 0035 with the ids 134 to
-138; `nextobjectid` is 139. No object of an earlier feature changes its id. Each lies on
+`floor.tmj` five more rectangles, written after the objects of 0033 with the ids 133 to
+137; `nextobjectid` is 138. No object of an earlier feature changes its id. Each lies on
 the desk with a screen of a cubicle:
 
 | Trace | Cell | Rectangle | Where |
@@ -134,8 +133,8 @@ forbids is the shadow's cause. No brand and no person is named.
 
 ## Acceptance criteria
 
-1. `floor.tmj` holds the five rectangles of the table with the ids 134 to 138 after the
-   objects of 0035, which are unchanged; the traces of Sales and Marketing keep their order.
+1. `floor.tmj` holds the five rectangles of the table with the ids 133 to 137 after the
+   objects of 0033, which are unchanged; the traces of Sales and Marketing keep their order.
 2. Each of the five lies in the area of Support on a cell whose `detail` tile is a desk
    with a screen, with a chair on the cell below, and is in the light of a player who looks
    up from any place on the cell below that chair; every row of cubicles has at least one.

@@ -11,6 +11,7 @@ import {
   type PlayerState,
   type ShadowWallState,
 } from '../../src/game/state';
+import { CARD_PRESENTS_Y, CARD_TITLE_Y, centredX } from '../../src/render/draw-card';
 import { drawHelpLabel, HELP_LABEL, helpLabelPlace } from '../../src/render/draw-help';
 import {
   creatureFrame,
@@ -47,7 +48,7 @@ import {
   wallLook,
   wallSegments,
 } from '../../src/render/draw-scene';
-import { GLYPH_WIDTH } from '../../src/render/font';
+import { GLYPH_WIDTH, glyphIndex } from '../../src/render/font';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
 import { LANGUAGES, TABLE, textOf } from '../../src/text/text';
 import { grassMap } from './grass-map';
@@ -199,6 +200,7 @@ const state = (
   tick: QUIET_TICK,
   rested: null,
   finished: null,
+  presented: 0,
   upgrades: [],
   player: player(fields),
   camera,
@@ -2050,5 +2052,80 @@ describe('the close in the scene (0034)', () => {
 
   it('draws no page beyond the third', () => {
     expect(firstGlyph(closing(3))).toBeUndefined();
+  });
+});
+
+describe('the card in the scene (0036)', () => {
+  /** A new game as the scene gets it: the card shown, the call open under it, no lamp. */
+  const card = (fields: Partial<GameState> = {}): GameState => ({
+    ...state({ x: 8, y: 8 }),
+    lamp: { on: false, strength: 1, owned: false, used: false },
+    dialogue: { speaker: 'story', index: 0, page: 0 },
+    presented: null,
+    ...fields,
+  });
+  /** The calls that draw `text` from (x, y): one sprite per character that is no space. */
+  const line = (text: string, x: number, y: number): string[] =>
+    [...text].flatMap((character, i) =>
+      character === ' '
+        ? []
+        : [`drawSprite ${glyphIndex(character)} at ${x + i * GLYPH_WIDTH},${y}`],
+    );
+  const drawn = (scene: GameState, settings: SceneSettings = GERMAN) => {
+    const renderer = recordingRenderer();
+    // The whole scene, the help label included: the card has none.
+    drawSceneWith(renderer, scene, CONTENT, settings);
+    return renderer;
+  };
+
+  it('puts the presenter at y = 74 and the title at y = 94, each centred on the 320 px', () => {
+    expect([CARD_PRESENTS_Y, CARD_TITLE_Y]).toStrictEqual([74, 94]);
+    expect([16, 13, 9].map(centredX)).toStrictEqual([112, 121, 133]);
+  });
+
+  it('draws the clear and the two lines and nothing else, in German', () => {
+    const renderer = drawn(card());
+    expect(renderer.calls).toStrictEqual([
+      'clear #181425',
+      ...line('LMIS präsentiert', 112, 74),
+      ...line('Shadow AI', 133, 94),
+    ]);
+    // `L` is glyph 44 and `S` glyph 51: each line starts where the spec puts it.
+    expect(renderer.calls[1]).toBe('drawSprite 44 at 112,74');
+    expect(renderer.calls[16]).toBe('drawSprite 51 at 133,94');
+    expect(renderer.sheets.every((sheet) => sheet === CONTENT.fontSheet)).toBe(true);
+    expect(renderer.tilesets).toStrictEqual([]);
+  });
+
+  it('draws the presenter from x = 121 in English, and the title where it was', () => {
+    const renderer = drawn(card(), ENGLISH);
+    expect(renderer.calls).toStrictEqual([
+      'clear #181425',
+      ...line('LMIS presents', 121, 74),
+      ...line('Shadow AI', 133, 94),
+    ]);
+    expect(renderer.calls[1]).toBe('drawSprite 44 at 121,74');
+    expect(renderer.calls[13]).toBe('drawSprite 51 at 133,94');
+  });
+
+  it('shows nothing of the world whatever the state holds: no heart, no label, no box, no bar', () => {
+    const plain = drawn(card()).calls;
+    // The language was switched in this step: its line is not on the card either.
+    expect(drawn(card(), { language: 'de', switchedAt: QUIET_TICK }).calls).toStrictEqual(plain);
+    expect(drawn(card({ help: true })).calls).toStrictEqual(plain);
+    expect(drawn(card({ journal: { tab: 'creatures' } })).calls).toStrictEqual(plain);
+    expect(drawn(card({ overview: { current: 1, max: 5 } })).calls).toStrictEqual(plain);
+    expect(plain.some((call) => call.startsWith('fillRect'))).toBe(false);
+  });
+
+  it('gives way to the world in the frame after it: the map, and the call in its box', () => {
+    const renderer = drawn(card({ presented: 1 }));
+    expect(renderer.calls[0]).toBe('clear #181425');
+    expect(renderer.tilesets.length).toBeGreaterThan(0);
+    const box = `fillRect ${DIALOGUE_BOX.x},${DIALOGUE_BOX.y} ${DIALOGUE_BOX.width}x${DIALOGUE_BOX.height} #181425`;
+    expect(renderer.calls).toContain(box);
+    // The first letter of the call, `M`, where a page starts.
+    expect(renderer.calls).toContain(`drawSprite 45 at ${DIALOGUE_TEXT.x},${DIALOGUE_TEXT.y}`);
+    expect(renderer.calls.some((call) => call.endsWith(' at 112,74'))).toBe(false);
   });
 });

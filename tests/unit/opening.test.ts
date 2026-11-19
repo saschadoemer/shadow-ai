@@ -42,8 +42,13 @@ const steps = (map: TileMap, start: GameState, input: GameInput, count: number):
   }
   return state;
 };
+/**
+ * The new game past its card (0036): the call open on its first page, as a game began when
+ * these tests were written. The card has its own tests.
+ */
+const opening = (map: TileMap): GameState => ({ ...newGame(map), presented: 0 });
 /** The new game with the call read to its end: five steps, three presses. */
-const called = (map: TileMap): GameState => run(map, newGame(map), TALK, NONE, TALK, NONE, TALK);
+const called = (map: TileMap): GameState => run(map, opening(map), TALK, NONE, TALK, NONE, TALK);
 /** The pages of the state's open dialogue, as `update` and the scene look them up. */
 const spoken = (map: TileMap, state: GameState) =>
   state.dialogue === null
@@ -54,11 +59,12 @@ const spoken = (map: TileMap, state: GameState) =>
       );
 
 describe('the two starts (0026)', () => {
-  it('starts a played game with the call open and without the lamp', () => {
+  it('starts a played game with the card, the call open under it, and without the lamp', () => {
     expect(newGame(MAP)).toStrictEqual({
       ...createInitialState(MAP),
       lamp: { on: false, strength: 1, owned: false, used: false },
       dialogue: { speaker: 'story', index: 0, page: 0 },
+      presented: null,
     });
   });
 
@@ -69,7 +75,7 @@ describe('the two starts (0026)', () => {
   });
 
   it('survives a JSON round trip: at the start, on page 2 of the call, after the first meeting (INV-1)', () => {
-    const start = newGame(MAP);
+    const start = opening(MAP);
     const second = run(MAP, start, TALK, NONE, TALK);
     const met = run(MAP, called(MAP), NONE, TALK, NONE, TALK, NONE, TALK);
     expect(second.dialogue).toStrictEqual({ speaker: 'story', index: 0, page: 2 });
@@ -82,7 +88,7 @@ describe('the two starts (0026)', () => {
 
 describe('the call (0026)', () => {
   it('shows its pages one by one and closes with the third press', () => {
-    const start = newGame(MAP);
+    const start = opening(MAP);
     expect(spoken(MAP, start)).toStrictEqual(CALL);
     const pages: (number | null)[] = [];
     let state = start;
@@ -94,13 +100,13 @@ describe('the call (0026)', () => {
   });
 
   it('stands still for 600 steps with every key but talk held: only the tick and the held keys change', () => {
-    const start = newGame(MAP);
+    const start = opening(MAP);
     const later = steps(MAP, start, OTHERS, 600);
     expect(later).toStrictEqual({ ...start, tick: 600, held: OTHERS });
   });
 
   it('turns nobody: the figure, the colleague and the player look where they looked', () => {
-    const start = newGame(MAP);
+    const start = opening(MAP);
     const closed = called(MAP);
     expect(closed.dialogue).toBeNull();
     expect(closed.figures).toStrictEqual(start.figures);
@@ -109,13 +115,13 @@ describe('the call (0026)', () => {
   });
 
   it('is not the dialogue of the figure or the colleague in reach', () => {
-    const second = run(MAP, newGame(MAP), TALK);
+    const second = run(MAP, opening(MAP), TALK);
     expect(second.dialogue).toStrictEqual({ speaker: 'story', index: 0, page: 1 });
     expect(spoken(MAP, second)).toStrictEqual(CALL);
   });
 
   it('changes nothing but tick, held and dialogue, also in the step that closes it (0031)', () => {
-    const start = newGame(MAP);
+    const start = opening(MAP);
     const closed = called(MAP);
     expect(closed).toStrictEqual({ ...start, tick: 5, held: TALK, dialogue: null });
   });
@@ -136,7 +142,7 @@ describe('no record of when the opening ended (0031)', () => {
     expect(woken.dark).toBe(45);
     for (const state of [
       createInitialState(MAP),
-      newGame(MAP),
+      opening(MAP),
       closed,
       steps(MAP, closed, RIGHT, 600),
       met,
@@ -290,14 +296,15 @@ describe('the first meeting (0026)', () => {
     expect(closed.lamp).toStrictEqual({ on: false, strength: 1, owned: false, used: false });
   });
 
-  it('says the two pages of 0017 once the lamp is owned, and closing them changes neither field', () => {
+  it('says her own three pages once the lamp is owned, and closing them changes neither field', () => {
     const met = run(MAP, start, NONE, TALK, NONE, TALK, NONE, TALK);
     const again = run(MAP, met, NONE, TALK);
     expect(again.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
-    const closed = run(MAP, again, NONE, TALK, NONE, TALK);
+    // The two pages of 0017 and the third of 0036.
+    const closed = run(MAP, again, NONE, TALK, NONE, TALK, NONE, TALK);
     expect(closed.dialogue).toBeNull();
     expect(closed.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
-    const past = run(MAP, createInitialState(MAP), TALK, NONE, TALK, NONE, TALK);
+    const past = run(MAP, createInitialState(MAP), TALK, NONE, TALK, NONE, TALK, NONE, TALK);
     expect(past.dialogue).toBeNull();
     expect(past.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: true });
   });
@@ -334,5 +341,46 @@ describe('the lamp used for the first time (0026)', () => {
     const during = update(pushed, SHINE, MAP);
     expect(during.lamp.on).toBe(false);
     expect(during.lamp.used).toBe(false);
+  });
+});
+
+describe('card, call and first meeting in a row (0036)', () => {
+  it('goes from the card through the call to the lamp, one press each', () => {
+    let state = newGame(MAP);
+    expect(state.presented).toBeNull();
+    // The press that ends the card.
+    state = update(state, TALK, MAP);
+    expect(state.presented).toBe(1);
+    expect(spoken(MAP, state)).toStrictEqual(CALL);
+    expect(state.dialogue).toStrictEqual({ speaker: 'story', index: 0, page: 0 });
+    // Three presses read the call.
+    state = run(MAP, state, NONE, TALK, NONE, TALK, NONE, TALK);
+    expect(state.dialogue).toBeNull();
+    expect(state.lamp.owned).toBe(false);
+    // Three more are the first meeting: the lamp is handed over.
+    state = run(MAP, state, NONE, TALK, NONE, TALK, NONE, TALK);
+    expect(state.dialogue).toBeNull();
+    expect(state.lamp.owned).toBe(true);
+    // The same game as one that began past the card, two steps later.
+    const met = run(MAP, called(MAP), NONE, TALK, NONE, TALK, NONE, TALK);
+    expect(state).toStrictEqual({ ...met, tick: met.tick + 2, presented: 1 });
+  });
+});
+
+describe('the officer after the meeting (0036)', () => {
+  it('says her three pages once the lamp is handed over, and a fourth press closes them', () => {
+    const met = run(MAP, called(MAP), NONE, TALK, NONE, TALK, NONE, TALK);
+    expect(met.lamp.owned).toBe(true);
+    const opened = run(MAP, met, NONE, TALK);
+    expect(opened.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
+    // The third is the page that names Harmonic; the first meeting did not have it.
+    expect(spoken(MAP, opened)).toStrictEqual([
+      textKey('talk.officer-rules-1'),
+      textKey('talk.officer-rules-2'),
+      textKey('talk.officer-rules-3'),
+    ]);
+    const third = run(MAP, opened, NONE, TALK, NONE, TALK);
+    expect(third.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 2 });
+    expect(run(MAP, third, NONE, TALK).dialogue).toBeNull();
   });
 });
