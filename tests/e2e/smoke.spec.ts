@@ -385,6 +385,16 @@ test('the floor starts with its fifteen traces, none seen and none found', async
     .toStrictEqual(Array.from({ length: 15 }, (_, trace) => ({ trace, light: 0, found: null })));
 });
 
+test('the floor starts with its three panes open, none lit', async ({ page }) => {
+  await start(page);
+  // The windows that are open on three screens of Support (0038); in the state they are panes.
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.panes), {
+      message: 'window.shadowAi.state.panes holds the three open panes of Support',
+    })
+    .toStrictEqual([0, 1, 2].map((pane) => ({ pane, lit: false })));
+});
+
 test('H opens the help, the game stands still under it, and H closes it again', async ({
   page,
 }) => {

@@ -13,6 +13,7 @@ import { HINT_FIGURE, HINTS } from '../../src/game/hints';
 import { REGION_NAME } from '../../src/game/journal';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
 import { NOTICE_SHADOW_TOO_DENSE, noticeOf } from '../../src/game/notice';
+import { paneInReach, panesOf } from '../../src/game/pane';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
 import { areasOf, inArea, shadowedAreas, veilOf } from '../../src/game/region';
 import { restInReach, restsOf, restUnderShadow } from '../../src/game/rest';
@@ -36,6 +37,7 @@ import {
   floorJson,
   HORIZONTAL_WALLS,
   MIRAGES,
+  PANES,
   POSTS,
   REGION_AREAS,
   RESTS,
@@ -506,9 +508,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 137 }, (_, i) => i + 1),
+      Array.from({ length: 140 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(138);
+    expect(json.nextobjectid).toBe(141);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -2281,16 +2283,13 @@ describe('the traces of Support on the floor (0037)', () => {
     );
   });
 
-  it('are the last five objects of the file, rectangles with the ids 133 to 137, after the intern of 0033', () => {
+  it('are five rectangles with the ids 133 to 137, after the intern of 0033 and before the panes of 0038', () => {
     const objects = floorJson().layers[3].objects;
-    expect(objects).toHaveLength(137);
-    expect(objects.slice(132).map((object) => [object.id, object.name])).toStrictEqual(
+    expect(objects.slice(132, 137).map((object) => [object.id, object.name])).toStrictEqual(
       [133, 134, 135, 136, 137].map((id) => [id, 'trace:support']),
     );
-    expect(objects.slice(132).some((object) => 'point' in object)).toBe(false);
-    expect(floorJson().nextobjectid).toBe(138);
-    expect(floor.rects).toHaveLength(41);
-    expect(floor.rects.slice(36).every((rect) => rect.name === 'trace:support')).toBe(true);
+    expect(objects.slice(132, 137).some((object) => 'point' in object)).toBe(false);
+    expect(floor.rects.slice(36, 41).every((rect) => rect.name === 'trace:support')).toBe(true);
   });
 
   it('leave the 132 objects of 0033 and before exactly as they were', () => {
@@ -2495,5 +2494,186 @@ describe('the case of Support on the floor (0037)', () => {
       expect(restUnderShadow(machine, floor.rects, [])).toBe(true);
       expect(restUnderShadow(machine, floor.rects, support.solved)).toBe(false);
     }
+  });
+});
+
+describe('the panes of Support on the floor (0038)', () => {
+  /** Cell, box, the cell of the drop point and its feet, in file order: the spec's table. */
+  const TABLE: readonly (readonly [number, number, Box, number, number, Point])[] = [
+    [72, 61, { x: 1152, y: 976, width: 16, height: 16 }, 74, 62, { x: 1192, y: 1000 }],
+    [93, 67, { x: 1488, y: 1072, width: 16, height: 16 }, 95, 68, { x: 1528, y: 1096 }],
+    [62, 73, { x: 992, y: 1168, width: 16, height: 16 }, 64, 74, { x: 1032, y: 1192 }],
+  ];
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const SHINE: GameInput = { ...NO_INPUT, lamp: true };
+  const panes = panesOf(floor);
+  const traces = tracesOf(floor.rects);
+  const start = createInitialState(floor);
+  /**
+   * The figure in the middle of the cell below the chair of the cubicle, looking up at its
+   * screen — and nobody walking the floor: with a colleague in reach a talk would come first.
+   */
+  const below = (state: GameState, column: number, row: number): GameState => ({
+    ...state,
+    movers: [],
+    player: { ...state.player, x: column * 16 + 8, y: (row + 2) * 16 + 8, facing: 'up' },
+  });
+  const steps = (from: GameState, input: GameInput, count: number): GameState => {
+    let state = from;
+    for (let i = 0; i < count; i += 1) {
+      state = update(state, input, floor);
+    }
+    return state;
+  };
+
+  it('are three, on the cells of the spec, each with its drop point', () => {
+    expect(PANES).toStrictEqual(TABLE.map(([x, y]) => ({ region: 'support', cell: { x, y } })));
+    expect(panes).toStrictEqual(
+      TABLE.map(([, , box, , , drop]) => ({ region: 'support', box, drop })),
+    );
+  });
+
+  it('are the last three objects of the file, rectangles with the ids 138 to 140, after the traces of 0037', () => {
+    const objects = floorJson().layers[3].objects;
+    expect(objects).toHaveLength(140);
+    expect(objects.slice(137).map((object) => [object.id, object.name])).toStrictEqual(
+      [138, 139, 140].map((id) => [id, 'pane:support']),
+    );
+    expect(objects.slice(137).some((object) => 'point' in object)).toBe(false);
+    expect(floorJson().nextobjectid).toBe(141);
+    expect(floor.rects).toHaveLength(44);
+    expect(floor.rects.slice(41).every((rect) => rect.name === 'pane:support')).toBe(true);
+  });
+
+  it('leave the 137 objects of 0037 and before exactly as they were', () => {
+    // SHA-256 over the first 137 objects, recorded from the generator before this feature.
+    const before = JSON.stringify(floorJson().layers[3].objects.slice(0, 137));
+    expect(createHash('sha256').update(before).digest('hex')).toBe(
+      'cdabacf45496c2e915a980f35322360f22cc08b085236bff53c478f0e7870cec',
+    );
+  });
+
+  it('lie in the area of Support, each on a desk with a screen whose chair stands on the cell below', () => {
+    const support = areasOf(floor.rects).filter((area) => area.region === 'support');
+    for (const [column, row, box] of TABLE) {
+      expect(
+        support.some((area) => inArea(area, { x: box.x, y: box.y })),
+        `(${column}, ${row})`,
+      ).toBe(true);
+      expect(floor.detail[cell(column, row)], `(${column}, ${row})`).toBe(DESK_MONITOR_PARTITION);
+      expect(floor.detail[cell(column, row + 1)], `(${column}, ${row + 1})`).toBe(CHAIR);
+    }
+  });
+
+  it('drop their lurkers on the middle of a cell without a solid box, reached on foot', () => {
+    const support = areasOf(floor.rects).filter((area) => area.region === 'support');
+    for (const [, , , column, row, drop] of TABLE) {
+      expect(drop).toStrictEqual({ x: column * 16 + 8, y: row * 16 + 8 });
+      expect(floor.solids[cell(column, row)], `(${column}, ${row})`).toStrictEqual([]);
+      expect(reached(drop), `(${column}, ${row})`).toBe(true);
+      // At home in the area: the lurker goes with the shadow of Support (0025).
+      expect(support.some((area) => inArea(area, drop))).toBe(true);
+    }
+  });
+
+  it('lie over the traces of 0037 on (72, 61) and (62, 73), and over none on (93, 67)', () => {
+    const under = TABLE.map(([, , box]) =>
+      traces.findIndex((trace) => trace.box.x === box.x && trace.box.y === box.y),
+    );
+    expect(under).toStrictEqual([11, -1, 13]);
+  });
+
+  it('start open in the state: three panes, none lit, six creatures, nothing captured', () => {
+    expect(start.panes).toStrictEqual([0, 1, 2].map((pane) => ({ pane, lit: false })));
+    expect(start.creatures).toHaveLength(6);
+    expect(start.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
+    expect(JSON.parse(JSON.stringify(start))).toStrictEqual(start);
+  });
+
+  it('are in reach from every place on the cell below the chair', () => {
+    for (const [index, [column, row]] of TABLE.entries()) {
+      let places = 0;
+      for (let x = column * 16; x <= column * 16 + 16; x += 2) {
+        for (let y = (row + 2) * 16 + 2; y < (row + 3) * 16; y += 2) {
+          if (!reached({ x, y })) {
+            continue;
+          }
+          places += 1;
+          expect(
+            paneInReach({ x, y }, start.panes, panes, floor)?.pane,
+            `(${column}, ${row}) from (${x}, ${y})`,
+          ).toBe(index);
+        }
+      }
+      expect(places, `(${column}, ${row})`).toBe(45);
+    }
+  });
+
+  it('keep their trace hidden while they are open, and give it up once they are closed', () => {
+    for (const [index, trace] of [
+      [0, 11],
+      [2, 13],
+    ] as const) {
+      const [column, row] = TABLE[index] ?? [0, 0];
+      // A second of light finds a trace; ten seconds do not find this one.
+      const lit = steps(below(start, column, row), SHINE, 600);
+      expect(lit.traces[trace]).toStrictEqual({ trace, light: 0, found: null });
+      expect(lit.panes[index]).toStrictEqual({ pane: index, lit: true });
+      // Let go, then a press of E: the pane closes, and its lurker drops beside the chair.
+      const closed = steps(update(lit, NO_INPUT, floor), TALK, 1);
+      expect(closed.panes.map((open) => open.pane)).not.toContain(index);
+      expect(closed.creatures.at(-1)).toStrictEqual({
+        species: 'lurker',
+        x: TABLE[index]?.[5].x,
+        y: TABLE[index]?.[5].y,
+        light: 0,
+        home: TABLE[index]?.[5],
+      });
+      // Without the lurker in the way, the trace is found in the 60th lit step.
+      const free: GameState = { ...update(closed, NO_INPUT, floor), creatures: [] };
+      const found = steps(free, SHINE, 60);
+      expect(found.traces[trace]?.found).toBe(found.tick);
+    }
+  });
+
+  it('keep the case of Support from being ready while the two over a trace are open', () => {
+    const ready = (state: GameState): boolean => isReady('support', progressOf(state, floor));
+    // Every trace of Support that no pane covers is found: three of five.
+    const three: GameState = {
+      ...start,
+      traces: start.traces.map((trace) =>
+        [10, 12, 14].includes(trace.trace) ? { ...trace, found: 1 } : trace,
+      ),
+    };
+    expect(ready(three)).toBe(false);
+    // Ten seconds of light under each of the two panes find nothing.
+    const first = TABLE[0] ?? [0, 0];
+    const third = TABLE[2] ?? [0, 0];
+    const tried = steps(
+      below(steps(below(three, first[0], first[1]), SHINE, 600), third[0], third[1]),
+      SHINE,
+      600,
+    );
+    expect(ready(tried)).toBe(false);
+    expect(tried.traces.filter((trace) => trace.found !== null)).toHaveLength(3);
+  });
+
+  it('go with the shadow when the case of Support is solved: no pane is left, and no lurker dropped', () => {
+    const routes = routesOf(floor.points);
+    const source = start.movers.find((mover) => routes[mover.route]?.name === 'person:support');
+    const ready: GameState = {
+      ...start,
+      tick: 1000,
+      traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+      player: { ...start.player, x: source?.x ?? 0, y: (source?.y ?? 0) + 24 },
+    };
+    const solved = [TALK, NO_INPUT, TALK, NO_INPUT, TALK, NO_INPUT].reduce(
+      (state, input) => update(state, input, floor),
+      ready,
+    );
+    expect(solved.solved).toStrictEqual([{ region: 'support', at: 1005 }]);
+    expect(solved.panes).toStrictEqual([]);
+    expect(solved.creatures.some((creature) => creature.species === 'lurker')).toBe(false);
+    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 });

@@ -277,6 +277,18 @@ export const FIRST_TRACES = 5;
 export const SECOND_TRACES = 10;
 
 /**
+ * The panes (0038): per pane its region and the cell of the screen it is open on. Three in
+ * Support, each on the desk with a screen of a cubicle; the first and the third lie over a
+ * trace of 0037. They are written at the end of the file, after the traces of 0037. The order
+ * is the order in the file.
+ */
+export const PANES: readonly { readonly region: string; readonly cell: Point }[] = [
+  { region: 'support', cell: { x: 72, y: 61 } },
+  { region: 'support', cell: { x: 93, y: 67 } },
+  { region: 'support', cell: { x: 62, y: 73 } },
+];
+
+/**
  * The areas of the regions (0023): which room of the layout belongs to which region of the
  * world data. The meeting rooms are one region with two rooms. The corridors, the lift, the
  * stairwell and the data protection officer's office are no regions.
@@ -1248,6 +1260,7 @@ export function floorJson(): MapJson {
   const laterFigures = FIGURES.slice(FIRST_FIGURES);
   const firstLastTrace = firstLaterFigure + laterFigures.length;
   const lastTraces = TRACES.slice(SECOND_TRACES);
+  const firstPane = firstLastTrace + lastTraces.length;
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1292,6 +1305,9 @@ export function floorJson(): MapJson {
           ...lastTraces.map((trace, i) =>
             rectObject(firstLastTrace + i, `trace:${trace.region}`, traceBox(trace.cell)),
           ),
+          ...PANES.map((pane, i) =>
+            rectObject(firstPane + i, `pane:${pane.region}`, traceBox(pane.cell)),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1301,7 +1317,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstLastTrace + lastTraces.length,
+    nextobjectid: firstPane + PANES.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',
