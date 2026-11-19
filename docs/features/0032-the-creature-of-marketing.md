@@ -216,7 +216,10 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 - Does a framed picture read as "something a machine made"?
 - Does the snippet now feel too simple beside it?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–14. Feel: that it only moves while nobody looks is
+clear without a word — pass; three in the room — pass; time to turn round at six tiles and
+three quarters of the figure's speed — pass; a framed picture reads as something a machine
+made — pass; the snippet beside it does not feel too simple — "Nein, ist in Ordnung."
 
 ## Open questions
 
