@@ -1,12 +1,12 @@
 # 0036 — LMIS and Harmonic
 
-**Status:** draft
+**Status:** approved 2026-11-19
 **Milestone:** M5
 **Drafted:** 2026-11-19
 
-Approved on 2026-11-19 as *LMIS presents*, with the card alone. The three lines that name
-Harmonic were added the same day, in place of the rejected station (0035). The status is
-draft again until the author approves the whole.
+First approved on 2026-11-19 as *LMIS presents*, with the card alone. The three lines that
+name Harmonic were added the same day, in place of the rejected station (0035), and the
+whole was approved again.
 
 ## Goal
 
@@ -236,12 +236,12 @@ takes about twenty minutes.
 
 ## Open questions
 
-Five, each with the answer the draft is written for:
+None. Five were settled on 2026-11-19 for the three lines, each as drafted:
 
 - **The words of the three lines.** As in the table. Each says something about what the
   product does: it shows the house which AI runs in it and where the data goes; it would
   have shown the outflow before the customer saw it; it can show a colleague beforehand
-  where a text goes. The author knows the product and confirms each.
+  where a text goes. The author knows the product and confirmed each.
 - **The places.** The data protection officer, the source of Sales after its case, the
   management in the close. Not the source of Marketing and not the intern.
 - **The rule.** `CLAUDE.md` §2 and `vision.md` §6 said that no figure recommends Harmonic.
@@ -249,8 +249,7 @@ Five, each with the answer the draft is written for:
   wish, and that nobody says it is good, tells the player to get it, says what it costs or
   where to get it.
 - **One feature, one long walk.** The line of the close is reached only with both cases
-  solved, so the walk takes about twenty minutes. The other way is to cut the three lines
-  off into a feature of their own. Drafted as one, as the author asked.
+  solved, so the walk takes about twenty minutes. It stays one feature.
 - **The order.** 0036, then 0037 and 0038. Without an object of 0035 in the map, the ids of
   0037 are 133 to 137 and those of 0038 are 138 to 140.
 

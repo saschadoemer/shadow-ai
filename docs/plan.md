@@ -147,8 +147,7 @@ species brings what the journal still lacks — a choice among its entries, and 
 Six features for a build that can be played from the call to a close by somebody who was
 only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034 the close ·
 0036 LMIS and Harmonic · 0037 the case of Support · 0038 the creature of Support. They are
-built in this order. 0032 to 0034 are implemented; 0036 is a draft; the other two are
-approved.
+built in this order. 0032 to 0034 are implemented; the other three are approved.
 The creature first, so that the second room has opposition; it is cut small — the choice
 among the journal's entries and its pages wait for a later case and the third species. The
 intern after it: the hint system `world.md` §3 has named since M1, one figure in the break
