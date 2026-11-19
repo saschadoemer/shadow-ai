@@ -197,4 +197,6 @@ export const de = {
     'klingen, als hätte ich eine Woche Zeit gehabt.',
     'Erst mal Kaffee.',
   ].join('\n'),
+  'card.presents': 'LMIS präsentiert',
+  'card.title': 'Shadow AI',
 } as const;

@@ -193,4 +193,6 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'sound as if I had had a week for it.',
     'Coffee first.',
   ].join('\n'),
+  'card.presents': 'LMIS presents',
+  'card.title': 'Shadow AI',
 };
