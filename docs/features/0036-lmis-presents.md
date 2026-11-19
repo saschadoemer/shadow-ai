@@ -13,7 +13,7 @@ this is, and that the one real product in it is there on purpose.
 
 ## Scope
 
-Built on 0035 as merged. No map changes, no new sprite.
+Built on 0039 as merged. No map changes, no new sprite.
 
 **In:**
 
@@ -27,7 +27,7 @@ Built on 0035 as merged. No map changes, no new sprite.
 (M8) — the card is its stand-in and goes when it comes · a logo of LMIS or of anything
 (`vision.md` §10: a name, never a logo) · a line about Harmonic on the card (see the open
 questions) · credits, an imprint, a privacy note or a licence text (M8, with the first
-public release) · LMIS anywhere in the world of the game (`vision.md` §10) · the name at
+public release) · LMIS anywhere in the world of the game but on its carpet (0039) · the name at
 the close of 0034 · sound.
 
 ## Behaviour
@@ -87,8 +87,8 @@ is shown. `newGame` starts with `null`. `createInitialState`, the game past its 
    but `held`.
 7. The wake keeps `presented`, and the card never comes back in a game.
 8. `de` and `en` hold the two keys of the spec; each is one line that fits the surface.
-9. No other text of the game holds the name LMIS, and no figure, region or company of the
-   world data does.
+9. No text of the game but this line and the carpet's (`carpet.lmis`, 0039) holds the name
+   LMIS, and no figure, region or company of the world data does.
 10. A game past its opening steps and is drawn exactly as before: the 600 recorded steps of
     0020 give the same digest, and the tests of 0026 pass with `presented` 0.
 
@@ -97,8 +97,8 @@ is shown. `newGame` starts with `null`. `createInitialState`, the game past its 
 - **Unit, state:** criterion 1; criteria 3 to 6 through `update` from `newGame`; the wake;
   the digest of criterion 10.
 - **Unit, scene:** criterion 2 in both languages, and the frame after the card.
-- **Unit, text:** the two keys; the centring for both languages; a test that no other key
-  of either table contains the name — criterion 9.
+- **Unit, text:** the two keys; the centring for both languages; a test that no key
+  of either table but the two contains the name — criterion 9.
 - **Unit, opening (0026):** its tests start past the card and pass unchanged; one new test
   plays card, call and first meeting in a row.
 - **Architecture, assets:** unchanged.

@@ -1,6 +1,6 @@
 # 0000 — Template
 
-**Status:** draft | approved YYYY-MM-DD | implemented YYYY-MM-DD
+**Status:** draft | approved YYYY-MM-DD | implemented YYYY-MM-DD | rejected YYYY-MM-DD
 **Milestone:** Mn
 **Drafted:** YYYY-MM-DD
 

@@ -35,8 +35,7 @@ Built on 0037 as merged. No tile changes; the floor gets three rectangles.
 **Out, explicitly:** a second medium creature, and devices that are unplugged (with their
 cases) · a creature that only the wider cone captures (`gameplay.md` §2) · pages on the
 cases tab and the policy tab — four cases and three blocks fit (with the fifth case and the
-fourth block) · a Harmonic station in Support (`world.md` §6: decided in a case spec of
-Act 2; not this one) · a window that opens again · a window in another department ·
+fourth block) · a window that opens again · a window in another department ·
 picking a creature at the source (`gameplay.md` §6, with a later case) · sound.
 
 ## Behaviour
@@ -48,7 +47,7 @@ Refines `world.md` §4, `gameplay.md` §3, §6 and §7, `architecture.md` §2 an
 
 A rectangle named `window:support` in the `objects` layer is a window: exactly one cell, on
 the cell of a desk with a screen. `floor.tmj` gets three, written after the objects of 0037
-with the ids 139 to 141; `nextobjectid` is 142. No object of an earlier feature changes its
+with the ids 140 to 142; `nextobjectid` is 143. No object of an earlier feature changes its
 id.
 
 | Window | Cell | Rectangle | Under it | Where the lurker drops |
@@ -86,7 +85,7 @@ comes first —, the input does not hold `lamp` as `update` counts it, the figur
 being pushed, and an open window is **in reach**: the centre of its cell is at most 40 px
 from the figure's feet, and no opaque box lies on the line from the centre of the figure's
 box, (x, y − 4), to that centre. A desk, a chair and a partition are low and do not block
-the line. A window comes before a station (0035) and a rest (0027).
+the line. A window comes before a rest (0027).
 
 In that step the window leaves `windows`, and a lurker joins `creatures` at the end of the
 list: `{ species: 'lurker', light: 0 }` with its feet and its home at the window's drop
@@ -174,7 +173,7 @@ before. The cases tab and the policy tab have no pages; `up` and `down` do nothi
 
 ## Acceptance criteria
 
-1. `floor.tmj` holds the three rectangles of the table with the ids 139 to 141 after the
+1. `floor.tmj` holds the three rectangles of the table with the ids 140 to 142 after the
    objects of 0037, which are unchanged; each lies on a desk with a screen in the area of
    Support, and each drop point is the middle of a cell without a solid box, reached on
    foot.
@@ -307,4 +306,4 @@ None. Ten were settled on 2026-11-19, each as drafted:
 - The keys of the pages: `down` and `up`, with `1 von 2` at the right of the first name.
 - The look: an eye on the floor, and the eye in a small window on a screen, until the art
   pass.
-- The order of a press of `E`: a talk, then a window, then a station, then a coffee.
+- The order of a press of `E`: a talk, then a window, then a coffee.

@@ -1,6 +1,6 @@
 # 0035 — The Harmonic station
 
-**Status:** approved 2026-11-19
+**Status:** rejected 2026-11-19
 **Milestone:** M5
 **Drafted:** 2026-11-19
 
@@ -219,7 +219,9 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 - Does the room feel emptier in a good way, or was the fight missed?
 - Is the plate readable, and does it look like part of the room?
 
-**Result:** not yet walked.
+**Result:** rejected 2026-11-19. Steps 1–8 passed; at step 9 the author stopped the walk and
+turned the feature down: a desk that empties a room is too strong a hand in the play. Nothing
+of it is on `main`. The two names lie on carpets instead (0039).
 
 ## Open questions
 
