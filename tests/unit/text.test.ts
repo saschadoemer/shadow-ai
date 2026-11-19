@@ -473,10 +473,6 @@ describe('the language table (INV-4, 0016)', () => {
       textOf(textKey(id), 'de').split('\n')[0] ?? '',
       textOf(textKey(id), 'en').split('\n')[0] ?? '',
     ];
-    expect(first('talk.intern-lamp')).toStrictEqual([
-      'Du willst in den Vertrieb? Geh erst nach',
-      'Off to Sales? Go next door first, to the data',
-    ]);
     expect(first('talk.intern-sales-start')).toStrictEqual([
       'Vertrieb? Am Ende des Flurs nach Osten.',
       'Sales? At the end of the corridor to the east.',
@@ -510,9 +506,10 @@ describe('the language table (INV-4, 0016)', () => {
       'kommst du jetzt in HR und Buchhaltung rein –',
       'was da los ist, erzählst du mir.',
     ]);
-    // Eight keys of 0033 and the three of Support (0037), each one page of three lines.
+    // Seven keys of 0033 — the page that sent for the lamp went with 0039 — and the three of
+    // Support (0037), each one page of three lines.
     const ids = Object.keys(TABLE.de).filter((id) => id.startsWith('talk.intern-'));
-    expect(ids).toHaveLength(11);
+    expect(ids).toHaveLength(10);
     for (const language of LANGUAGES) {
       for (const id of ids) {
         expect(TABLE[language][id as TextId].split('\n'), `${language} ${id}`).toHaveLength(3);
@@ -646,7 +643,19 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
-  it('holds the words of the call, the first meeting and the lamp in both languages (0026)', () => {
+  it('has no page that hands the lamp over and none that sends for it (0039)', () => {
+    for (const language of LANGUAGES) {
+      const ids = Object.keys(TABLE[language]);
+      expect(ids, language).not.toContain('talk.officer-meeting-2');
+      expect(ids, language).not.toContain('talk.intern-lamp');
+      // No page of either table tells the player to take or to fetch the lamp.
+      const words = Object.values(TABLE[language]).join('\n');
+      expect(words.includes('Nimm die Lampe'), language).toBe(false);
+      expect(words.includes('Take the lamp'), language).toBe(false);
+    }
+  });
+
+  it('holds the words of the call and the lamp in both languages (0026)', () => {
     const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
       textOf(textKey(id), language).split('\n');
     expect(lines('story.call-1', 'de')).toStrictEqual([
@@ -678,16 +687,6 @@ describe('the language table (INV-4, 0016)', () => {
       'Something lies over the doors in the corridor',
       'that was not there before. Next door, the',
       'data protection officer has her light on.',
-    ]);
-    expect(lines('talk.officer-meeting-2', 'de')).toStrictEqual([
-      'Nimm die Lampe: Sie hält fest, was sich darin',
-      'regt – nicht um es zu vertreiben, sondern um',
-      'es zu verstehen.',
-    ]);
-    expect(lines('talk.officer-meeting-2', 'en')).toStrictEqual([
-      'Take the lamp: it holds still whatever stirs',
-      'in it – not to drive it away, but to',
-      'understand it.',
     ]);
     expect(lines('notice.lamp', 'de')).toStrictEqual(['Die Lampe: Leertaste halten.']);
     expect(lines('notice.lamp', 'en')).toStrictEqual(['The lamp: hold Space.']);

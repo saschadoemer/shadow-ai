@@ -59,11 +59,6 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'would show the house which AI runs here',
     'and where the data goes.',
   ].join('\n'),
-  'talk.officer-meeting-2': [
-    'Take the lamp: it holds still whatever stirs',
-    'in it – not to drive it away, but to',
-    'understand it.',
-  ].join('\n'),
   'story.call-1': [
     'Monday morning. The phone – a customer:',
     '“Sentences from our confidential offer are in',
@@ -173,11 +168,6 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'Tools and extensions come from the approved',
     'list – and only from there. If one is missing,',
     'say so: then it gets onto the list.',
-  ].join('\n'),
-  'talk.intern-lamp': [
-    'Off to Sales? Go next door first, to the data',
-    'protection officer. She has something you',
-    'are going to need.',
   ].join('\n'),
   'talk.intern-sales-start': [
     'Sales? At the end of the corridor to the east.',

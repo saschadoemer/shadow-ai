@@ -63,11 +63,6 @@ export const de = {
     'würde dem Haus zeigen, welche KI hier läuft',
     'und wohin die Daten gehen.',
   ].join('\n'),
-  'talk.officer-meeting-2': [
-    'Nimm die Lampe: Sie hält fest, was sich darin',
-    'regt – nicht um es zu vertreiben, sondern um',
-    'es zu verstehen.',
-  ].join('\n'),
   'story.call-1': [
     'Montagmorgen. Das Telefon – ein Kunde:',
     '„Sätze aus unserem vertraulichen Angebot stehen',
@@ -178,11 +173,6 @@ export const de = {
     'Werkzeuge und Erweiterungen kommen von der',
     'freigegebenen Liste – und nur von dort. Fehlt',
     'eines, sag es: Dann kommt es auf die Liste.',
-  ].join('\n'),
-  'talk.intern-lamp': [
-    'Du willst in den Vertrieb? Geh erst nach',
-    'nebenan, zur Datenschutzbeauftragten. Sie hat',
-    'etwas, das du brauchen wirst.',
   ].join('\n'),
   'talk.intern-sales-start': [
     'Vertrieb? Am Ende des Flurs nach Osten.',
