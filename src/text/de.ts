@@ -8,6 +8,7 @@ export const de = {
   'notice.shadow-too-dense': 'Dieser Schatten ist zu dicht für die Lampe.',
   'notice.language': 'Sprache: Deutsch',
   'notice.trace-found': 'Spur gefunden. Sie steht im Journal.',
+  'notice.pane-open': 'Hier liest etwas mit. Das Licht hält es nicht.',
   'help.key-walk': 'Pfeiltasten, WASD',
   'help.do-walk': 'Gehen',
   'help.key-lamp': 'Leertaste',
@@ -47,6 +48,13 @@ export const de = {
     'keiner geprüft hat. Es bewegt sich nur, solange',
     'niemand hinsieht – und geht, sobald jemand',
     'draufschaut, bevor es das Haus verlässt.',
+  ].join('\n'),
+  'creature.lurker-name': 'Mitleser',
+  'creature.lurker-text': [
+    'Eine Erweiterung im Browser, die jemand',
+    'installiert hat und die seither alles mitliest.',
+    'Solange ihr Fenster offen ist, hält sie kein',
+    'Licht – sie geht, wenn nur Freigegebenes läuft.',
   ].join('\n'),
   'talk.officer-rules-1': [
     'Du siehst den Schatten also auch.',
@@ -211,8 +219,8 @@ export const de = {
   ].join('\n'),
   'talk.intern-support-traces': [
     'Im Support sind es wieder die Bildschirme.',
-    'Drei Reihen, und in jeder sitzt jemand, der',
-    'gerade etwas übersetzen lässt.',
+    'Auf manchen ist ein Fenster offen, das keiner',
+    'aufgemacht hat – mach es ruhig zu.',
   ].join('\n'),
   'talk.intern-support-source': [
     'Oranges Hemd, läuft zwischen den Tischen und',

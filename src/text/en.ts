@@ -5,6 +5,7 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
   'notice.shadow-too-dense': 'This shadow is too dense for the lamp.',
   'notice.language': 'Language: English',
   'notice.trace-found': 'Trace found. It is in the journal.',
+  'notice.pane-open': 'It reads along here. The light does not hold it.',
   'help.key-walk': 'Arrow keys, WASD',
   'help.do-walk': 'Walk',
   'help.key-lamp': 'Space',
@@ -44,6 +45,13 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'It only moves while nobody is looking – and it',
     'goes as soon as somebody looks at it before',
     'it leaves the house.',
+  ].join('\n'),
+  'creature.lurker-name': 'Lurker',
+  'creature.lurker-text': [
+    'A browser extension somebody installed, which',
+    'has read everything along ever since. While',
+    'its window is open no light holds it – it',
+    'goes when only approved tools are running.',
   ].join('\n'),
   'talk.officer-rules-1': [
     'So you can see the shadow too.',
@@ -205,9 +213,9 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'languages – ask yourself how.',
   ].join('\n'),
   'talk.intern-support-traces': [
-    'In Support it is the screens again. Three',
-    'rows, and in each somebody is having',
-    'something translated right now.',
+    'In Support it is the screens again. On some',
+    'a window is open that nobody opened – go',
+    'ahead and close it.',
   ].join('\n'),
   'talk.intern-support-source': [
     'Orange shirt, walks between the desks and the',
