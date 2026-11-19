@@ -89,13 +89,13 @@ change that weakens the test has violated the invariant.
 
 ## 3. The feature workflow
 
-The game is built feature by feature, in small steps: a feature is the smallest change the
-author can test by hand in a few minutes. Nothing is built that was not approved.
+The game is built feature by feature, in small steps: a feature is the smallest change that
+can be tested by hand in a few minutes. Nothing is built that was not approved.
 
 1. **Draft.** A feature gets a spec at `docs/features/NNNN-<name>.md`, from
    `docs/features/0000-template.md`, with `Status: draft`. It states the goal, the scope (in, and
    explicitly out), the exact behaviour, testable acceptance criteria, the test plan, an
-   **acceptance plan for the manual test** (`docs/spec/testing.md` §5) and the open questions.
+   **acceptance plan for the walk** (`docs/spec/testing.md` §5) and the open questions.
    Numbers are numbers, not adjectives. A spec without an acceptance plan is not approved.
 2. **Approval.** Only the author approves, in conversation. The agent then sets
    `Status: approved` with the date and commits that change. An agent never approves a spec.
@@ -105,16 +105,20 @@ author can test by hand in a few minutes. Nothing is built that was not approved
    are green (unit, architecture, assets, smoke), typecheck and Biome are clean, the build and
    the container run, and the affected files in `docs/spec/` are updated. Complete starts the
    walk, not the pull request.
-4. **Acceptance walk.** The agent starts the game as the spec's preconditions say and guides the
-   author through the acceptance plan one step at a time: it names a step, waits for the
-   author's answer — pass or fail, with a note if the author has one — records it, and only then
-   names the next step. The agent never answers a step itself and does not run the plan on its
-   own beforehand; the automated checks are the only pre-check. A failed step ends the walk:
-   the agent fixes the branch, or asks when the fix needs a decision the plan does not make,
-   reruns the checks, and the walk starts again at step 1. When every step has passed and the
-   feel questions are answered, the result goes into the spec's `Result` line with the date and
-   is committed on the branch. **The walk is the quality gate: no pull request is opened before
-   it has passed.** The protocol is `docs/spec/testing.md` §5.
+4. **Acceptance walk.** The agent plays the acceptance plan itself, on the author's machine: it
+   starts the game as the spec's preconditions say and takes the plan's steps in their order
+   in a browser, by simulated key presses and nothing else. The walk is a script under
+   `tests/walk/`. It reads the game's state and never writes it; what the plan needs, it
+   reaches by play. Every expected step is compared with the game's state and with a saved
+   picture of the screen, which the agent looks at. An expectation is never weakened to make a
+   step pass. A failed step ends the walk: the agent fixes the branch, or asks when the fix
+   needs a decision the plan does not make, reruns the checks, and the walk starts again at
+   step 1. The feel questions stay with the author: the agent puts them to the author, with
+   the pictures and the running game, and records the answers. When every step has passed and
+   the feel questions are answered, the result goes into the spec's `Result` line with the
+   date and is committed on the branch. **The walk is the quality gate: no pull request is
+   opened before it has passed.** The author may take any walk by hand instead. The protocol
+   is `docs/spec/testing.md` §5.
 5. **Pull request and merge.** Only after the walk: `main` is merged in (§4) and the checks are
    rerun — if the merge changed code, the walk is run again — then `Status: implemented` with
    the date is set in the spec and in the table of `docs/features/README.md`, committed on the
@@ -140,7 +144,7 @@ Harness changes approved in conversation may go directly to `main`.
 - **Stay in scope.** If a task seems to need something the spec does not cover, stop and ask.
 - **The model fits the step.** Thinking runs on the most capable model, doing on the cheaper
   one. Feature specs and implementation plans are written on the strongest model available —
-  today Claude Fable. Implementation — code, tests, guiding the acceptance walk, the pull
+  today Claude Fable. Implementation — code, tests, playing the acceptance walk, the pull
   request — runs on Claude Opus, which is enough for work a plan already lays out step by step
   and costs a fraction per token. The planning session hands over by starting the
   implementation session on Opus with the plan as its brief; subagents that write code run on

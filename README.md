@@ -83,6 +83,7 @@ npm ci
 npm run dev          # the dev server at http://localhost:5173
 npm run check        # typecheck, lint, build and the headless tests
 npm run test:e2e     # the smoke test against the dev server
+npm run walk -- NNNN # the acceptance walk of feature NNNN, played by simulated keys
 npm run gen-tiles    # regenerate the placeholder tiles under public/tiles/
 npm run gen-sprites  # regenerate the placeholder figure, the lamp and its wider cone, snippet, mirage, overview, movers', shadow-wall, font, officer and intern sheets under public/sprites/
 npm run gen-floor    # regenerate the floor map with its creatures and the wake point under public/maps/

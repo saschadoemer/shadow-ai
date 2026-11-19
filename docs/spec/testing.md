@@ -58,21 +58,23 @@ A guard without such a test is a comment.
 ## 4. Not tested, on purpose
 
 - **Pixel-exact screenshots.** Brittle across platforms and expensive to maintain. The smoke test
-  checks that the game runs and reacts; what it looks like is a human's job.
+  checks that the game runs and reacts. The pictures of a walk (§5) are looked at, not compared
+  pixel by pixel; whether the game looks right is a human's job.
 - **Animation timing by image comparison.** Frame indices are unit-tested as numbers; whether the
   walk looks right is judged by eye.
-- **Performance by benchmark in CI.** Frame budget is checked by a person on an ordinary laptop
-  during the walk. A number in CI would measure the runner, not the game.
+- **Performance by benchmark in CI.** Frame budget is checked by a person on an ordinary laptop,
+  with the feel questions of the walk. A number in CI would measure the runner, not the game.
 - **Tiled itself.** The loader is tested against committed fixtures, not against the editor.
 
-## 5. Human acceptance: the walk
+## 5. Acceptance: the walk
 
-The last test of every feature is the **acceptance walk**: the author runs the feature's
-acceptance plan — the manual test written into the feature spec and mandatory for approval
-(`CLAUDE.md` §3) — guided by the agent, one step at a time. The automated layers prove the rules
-hold; the walk proves they are *reachable* — that the screen shows what the spec says, and that
-the game feels the way the numbers intended. **The walk is the quality gate: no pull request is
-opened before it has passed.**
+The last test of every feature is the **acceptance walk**: the feature's acceptance plan —
+written into the feature spec and mandatory for approval (`CLAUDE.md` §3) — is played from its
+first step to its last. The agent plays it, in a browser on the author's machine, by simulated
+key presses; the author answers the feel questions and may take any walk by hand instead. The
+automated layers prove the rules hold; the walk proves they are *reachable* — that somebody who
+presses the keys gets to the screen the spec describes. **The walk is the quality gate: no pull
+request is opened before it has passed.**
 
 An acceptance plan has three parts:
 
@@ -85,45 +87,78 @@ An acceptance plan has three parts:
 - **Feel.** The few things only a player notices — a snag at a corner, a shimmer, a speed that is
   off — as questions with room for a number or a note.
 
+A plan is written for a person at the keyboard, in the words of the keys and the screen. That
+the agent plays it changes nothing about how it is written.
+
+### The walk script
+
+A walk is a Playwright script, `tests/walk/NNNN-<name>.walk.ts`, run with `npm run walk -- NNNN`
+against the dev server, in real time. It is not a fifth layer: it runs for its own feature, on
+the author's machine, and never in CI.
+
+- **Keys only.** The script holds and lets go of keys, as a player does. It reads the game's
+  state through the page's one global, `window.shadowAi`, to know where the figure stands and
+  what a step did. It never writes a state, and nothing in the game exists for its sake. What
+  the preconditions ask for — a solved case, an upgrade — is reached by play.
+- **The plan's steps, in its numbering and its words.** Every step of the plan is one step of the
+  script, and its title quotes the plan. A step is left out only where the plan itself allows it,
+  and the script says so in its report.
+- **Every expected step is compared and saved.** A text the plan quotes is compared with the
+  page the game has open, looked up in the language table; a number with the state; a place
+  with the map. Then the picture of the screen is saved as `walk-results/NNNN/step-NN.png`. The
+  pictures are not committed.
+- **The bot.** `tests/walk/bot.ts` holds what every walk needs: a way across the floor around
+  furniture and standing shadow walls, the lamp held on a wall, a creature or a trace, a talk
+  with a colleague, the journal, a whole case. It plans with the game's own pure functions from
+  `src/game/`, so no rule exists twice.
+- **Older scripts are history.** They stay, and they compile — typecheck and Biome cover
+  `tests/walk/` — but they are not run again and not kept passing. A later feature changes an
+  older script only as far as the typecheck demands.
+
 ### The walk
 
 The walk begins when the implementation is complete (`CLAUDE.md` §3 step 3): all four layers
-green, typecheck and Biome clean, build and container running, `docs/spec/` updated. The agent
-does not run the plan itself before the walk; the automated layers are the only pre-check, and
-the walk belongs to the author.
+green, typecheck and Biome clean, build and container running, `docs/spec/` updated.
 
-1. **Set-up.** The agent starts the game as the preconditions say — the dev server or the
-   container — and states them in one message: the URL, the browser, the window size, where in
-   the game to begin. The author opens the game in their own browser and says when they are
-   ready. Nothing else happens until then.
-2. **One step per message.** The agent names the next action step together with its expected
-   step, in the spec's numbering and words, and nothing more: no hint at what a failure would
-   look like, no summary of the steps to come. The step is the only question of that message,
-   and the agent waits for the answer.
-3. **The author answers.** `pass` or `fail`, with a note if there is one. The agent records the
-   answer as given. It never answers a step itself, never skips one, and never takes silence or
-   a general remark as a pass.
-4. **Fail ends the walk.** The agent records "step n failed" with the author's words and stops
-   the walk. It fixes the branch — or asks, when the fix needs a decision the spec or the plan
-   does not make — reruns the automated checks, and the walk starts again at step 1. A fixed
-   branch is a new build; nothing before the failed step counts as still proven. The failed walk
-   is recorded in the fix's commit message, not in the spec.
-5. **Feel last.** After the last step the agent asks the feel questions, one per message, and
-   records the answers with their numbers and notes. A feel note is not a failure: a number the
-   author would change becomes a new draft, not a change on this branch.
+1. **The script comes from the plan.** The script is written from the spec's acceptance plan,
+   not from what the game happens to do — where there is an implementation plan, it carries the
+   script. An expectation of the plan is never weakened to make a step pass. When a step turns
+   out to be wrong, the spec is corrected in the open and the author is asked first.
+2. **Play.** The agent starts the walk with `npm run walk -- NNNN`; with `-- NNNN --headed` the
+   author can watch. The steps run in the plan's order, and the first failed expectation ends
+   the run.
+3. **Look.** After a run without a failure the agent looks at every saved picture and holds it
+   against its expected step: what a state does not show — a colour, a line on the screen, a
+   figure in the picture. A picture that does not show what the step says is a failed step.
+4. **Fail ends the walk.** The agent records "step n failed" with what it saw. It fixes the
+   branch — or asks, when the fix needs a decision the spec or the plan does not make — reruns
+   the automated checks, and the walk starts again at step 1. A fixed branch is a new build;
+   nothing before the failed step counts as still proven. The failed walk is recorded in the
+   fix's commit message, not in the spec.
+5. **Feel last.** The feel questions are the author's. The agent leaves the game running, names
+   its URL and the folder of the pictures, and asks the feel questions, one per message. It
+   records the answers with their numbers and notes and never answers one itself. A feel note
+   is not a failure: a number the author would change becomes a new draft, not a change on this
+   branch.
 6. **The record.** When every step has passed and the feel questions are answered, the agent
-   writes the result into the spec's `Result` line — `passed YYYY-MM-DD, steps 1–n`, followed by
-   the feel notes — and commits it on the branch. The pull request description points to it.
-   Only then does `CLAUDE.md` §3 step 5 begin.
+   writes the result into the spec's `Result` line — `passed YYYY-MM-DD, steps 1–n, played by
+   the agent`, followed by the feel notes — and commits it on the branch. The pull request
+   description points to it. Only then does `CLAUDE.md` §3 step 5 begin.
 
 A walk takes a few minutes, not an afternoon. If it does not fit, the feature is too big and is
 cut. A merge of `main` after the walk that changes code counts as a fix: the walk is run again.
 
+**By hand.** The author may take a walk themselves, whole or from a step on. Then the agent
+starts the game and states the preconditions, names one action step with its expected step per
+message, in the spec's numbering and words, and waits for `pass` or `fail`. It never answers
+such a step itself, never skips one, and never takes silence or a general remark as a pass. The
+`Result` line then says `walked by the author`.
+
 **What only exists after the merge.** A feature can end in something that only exists on
 `main` — a job that runs on a merge, for example. That part is not a step of the walk. The
 spec lists it under "After the merge"; the author checks it with the agent right after
-merging, one step per message as in the walk, and the answers are recorded as a comment on
-the pull request. A failure there is a defect and is fixed by a follow-up change.
+merging, one step per message as in a walk by hand, and the answers are recorded as a comment
+on the pull request. A failure there is a defect and is fixed by a follow-up change.
 Everything that can be proved before the merge stays in the walk.
 
 ## 6. Test data

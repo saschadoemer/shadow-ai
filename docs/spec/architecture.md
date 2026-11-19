@@ -86,6 +86,7 @@ tests/
   unit/          Vitest, headless: engine math, game rules, map loading, assets
   arch/          the import and source rules behind INV-2 and INV-4
   e2e/           the one Playwright smoke test
+  walk/          the acceptance walks, one script per feature, and their bot (testing.md §5)
 ```
 
 What may import what: `main.ts` imports everything. `render/` imports `engine/`, the types and
