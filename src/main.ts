@@ -41,6 +41,7 @@ const PERSON_SHEET_URLS = [
   '/sprites/person-2.png',
   '/sprites/person-3.png',
   '/sprites/person-4.png',
+  '/sprites/person-5.png',
 ];
 const DOG_SHEET_URL = '/sprites/dog.png';
 const VACUUM_SHEET_URL = '/sprites/vacuum.png';
@@ -55,7 +56,7 @@ const FONT_SHEET_URL = '/sprites/font.png';
 /**
  * The map, its tileset and the tileset's image, each resolved against the file naming it, then
  * the player's sprite sheet, the lamp's, one sheet per creature species, the overview sheet and
- * the movers' seven sheets (0015), the shadow-wall sheet (0014), the font sheet (0016) and one
+ * the movers' eight sheets (0015, 0040), the shadow-wall sheet (0014), the font sheet (0016) and one
  * sheet per figure of the cast (0017).
  */
 async function loadContent(): Promise<SceneContent> {

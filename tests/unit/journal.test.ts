@@ -11,12 +11,16 @@ import {
   type TileMap,
 } from '../../src/engine/tiled';
 import {
+  blockPages,
+  blocksOn,
   ENTRIES_PER_PAGE,
   ENTRY_TEXT,
   entriesOf,
   entriesOn,
   entryPages,
   openJournal,
+  POLICY_PER_PAGE,
+  pagesOfTab,
   stepJournal,
   TAB_TEXT,
 } from '../../src/game/journal';
@@ -365,7 +369,8 @@ describe('a game in which the journal is never opened (0020)', () => {
     { on: state.lamp.on, strength: state.lamp.strength },
     // The creatures and the count as they were recorded: the snippets, before 0032.
     state.creatures.filter((creature) => creature.species === 'snippet'),
-    state.movers,
+    // The movers as they were recorded: the 22 before the colleague of HR of 0040.
+    state.movers.slice(0, 22),
     state.shadowWalls,
     // The figure that was recorded: the officer, before the intern of 0033.
     state.figures.slice(0, 1),
@@ -490,6 +495,123 @@ describe('the pages of the creatures tab (0038)', () => {
 
   it('survives a JSON round trip on the second page (INV-1)', () => {
     const second = run(OPEN, full, NONE, DOWN);
+    expect(JSON.parse(JSON.stringify(second))).toStrictEqual(second);
+  });
+});
+
+describe('the pages of the policy tab (0040)', () => {
+  const UP: GameInput = { ...NONE, up: true };
+  const DOWN: GameInput = { ...NONE, down: true };
+  const SALES = { region: 'sales', at: 900 };
+  const MARKETING = { region: 'marketing', at: 930 };
+  const SUPPORT = { region: 'support', at: 960 };
+  /** The journal open on the policy, with the given cases solved. */
+  const policy = (...solved: GameState['solved']): GameState =>
+    run(OPEN, { ...opened, solved }, NONE, RIGHT, NONE, RIGHT);
+
+  it('has pages of three blocks: one page while no more than three cases are solved', () => {
+    expect(POLICY_PER_PAGE).toBe(3);
+    expect(blockPages([])).toBe(1);
+    expect(blockPages([SALES])).toBe(1);
+    expect(blockPages([SUPPORT, SALES, MARKETING])).toBe(1);
+    // The blocks of a page, in the order the cases were solved.
+    expect(blocksOn([SUPPORT, SALES, MARKETING], 0)).toStrictEqual([
+      textKey('policy.support'),
+      textKey('policy.sales'),
+      textKey('policy.marketing'),
+    ]);
+    expect(blocksOn([SUPPORT, SALES, MARKETING], 1)).toStrictEqual([]);
+    expect(blocksOn([], 0)).toStrictEqual([]);
+  });
+
+  it('counts the pages of each tab: the creatures by their entries, the cases one, the policy by its blocks', () => {
+    const all: GameState = {
+      ...opened,
+      captured: { snippet: 1, mirage: 1, lurker: 1 },
+      solved: [SALES, MARKETING, SUPPORT],
+    };
+    expect(pagesOfTab('creatures', all)).toBe(2);
+    expect(pagesOfTab('cases', all)).toBe(1);
+    expect(pagesOfTab('policy', all)).toBe(1);
+    expect(pagesOfTab('policy', opened)).toBe(1);
+  });
+
+  it('stays on page 0 of the policy tab with one page, whatever is pressed', () => {
+    const three = policy(SALES, MARKETING, SUPPORT);
+    expect(three.journal).toStrictEqual({ tab: 'policy', page: 0 });
+    expect(run(OPEN, three, NONE, DOWN).journal).toStrictEqual({ tab: 'policy', page: 0 });
+    expect(run(OPEN, three, NONE, DOWN, NONE, DOWN).journal?.page).toBe(0);
+    expect(run(OPEN, three, NONE, UP).journal).toStrictEqual({ tab: 'policy', page: 0 });
+  });
+});
+
+describe('the policy tab with four solved cases (0040)', () => {
+  const UP: GameInput = { ...NONE, up: true };
+  const DOWN: GameInput = { ...NONE, down: true };
+  const FOUR = [
+    { region: 'sales', at: 900 },
+    { region: 'marketing', at: 930 },
+    { region: 'support', at: 960 },
+    { region: 'hr', at: 990 },
+  ];
+  /** The journal open on the policy, with the four cases solved. */
+  const policy = run(OPEN, { ...opened, solved: FOUR }, NONE, RIGHT, NONE, RIGHT);
+
+  it('has two pages: the three blocks solved first, then the fourth', () => {
+    expect(blockPages(FOUR)).toBe(2);
+    expect(pagesOfTab('policy', policy)).toBe(2);
+    expect(blocksOn(FOUR, 0)).toStrictEqual([
+      textKey('policy.sales'),
+      textKey('policy.marketing'),
+      textKey('policy.support'),
+    ]);
+    expect(blocksOn(FOUR, 1)).toStrictEqual([textKey('policy.hr')]);
+    // In the order they were solved, whatever the order of the cases.
+    expect(blocksOn([...FOUR].reverse(), 1)).toStrictEqual([textKey('policy.sales')]);
+    // The cases tab keeps one page: four entries fit.
+    expect(pagesOfTab('cases', policy)).toBe(1);
+  });
+
+  it('turns to page 1 with a press of down and back with a press of up', () => {
+    expect(policy.journal).toStrictEqual({ tab: 'policy', page: 0 });
+    const second = run(OPEN, policy, NONE, DOWN);
+    expect(second.journal).toStrictEqual({ tab: 'policy', page: 1 });
+    expect(run(OPEN, second, NONE, UP).journal).toStrictEqual({ tab: 'policy', page: 0 });
+    // Nothing else changes: the tick, the input, the page.
+    expect(second).toStrictEqual({
+      ...policy,
+      tick: policy.tick + 2,
+      held: DOWN,
+      journal: { tab: 'policy', page: 1 },
+    });
+  });
+
+  it('turns one page for a key held for 600 steps, and none past either end', () => {
+    let state = update(policy, NONE, OPEN);
+    for (let step = 0; step < 600; step += 1) {
+      state = update(state, DOWN, OPEN);
+    }
+    expect(state.journal?.page).toBe(1);
+    expect(run(OPEN, state, NONE, DOWN).journal?.page).toBe(1);
+    expect(run(OPEN, policy, NONE, UP).journal?.page).toBe(0);
+  });
+
+  it('is page 0 after a turn of the tab and after the journal opens again', () => {
+    const second = run(OPEN, policy, NONE, DOWN);
+    expect(run(OPEN, second, NONE, LEFT).journal).toStrictEqual({ tab: 'cases', page: 0 });
+    // Right on the last tab turns to no other tab, and keeps the page.
+    expect(run(OPEN, second, NONE, RIGHT).journal).toStrictEqual({ tab: 'policy', page: 1 });
+    const again = run(OPEN, second, NONE, JOURNAL, NONE, JOURNAL);
+    expect(again.journal).toStrictEqual({ tab: 'creatures', page: 0 });
+  });
+
+  it('does nothing with up and down on the cases tab, with four cases solved', () => {
+    const cases = run(OPEN, policy, NONE, LEFT);
+    expect(run(OPEN, cases, NONE, DOWN).journal).toStrictEqual({ tab: 'cases', page: 0 });
+  });
+
+  it('survives a JSON round trip on the second page (INV-1)', () => {
+    const second = run(OPEN, policy, NONE, DOWN);
     expect(JSON.parse(JSON.stringify(second))).toStrictEqual(second);
   });
 });

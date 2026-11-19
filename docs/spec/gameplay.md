@@ -169,6 +169,11 @@ Accounting give way after one second of light, and the wall of Development still
 Solving Sales earns nothing. The rooms of HR and Accounting can be entered from then on; their
 cases come with their own features.
 
+**As built** (feature 0040): solving HR earns the colour filter and a strength of 3: the shadow
+wall of Development gives way after one second of light. For two seconds after the line of the
+solved case the notice says so: `Die Lampe schafft jetzt auch dichten Schatten.` What the
+filter shows — hidden traces and hidden paths — is not built yet, and the cone keeps its look.
+
 Two keys where the story demands them: the keycard to the server room, handed over by the
 convinced managing director, and one further door chosen in the case specs.
 
@@ -234,6 +239,13 @@ room: overview grows by one, to eight with all three cases solved. The three cas
 depend on each other and may be solved in any order. The case earns no upgrade. The close
 (feature 0034) follows the last case of the game, so it now waits for Support too.
 
+**As built** (feature 0040): the case of HR, by the same rules. Its source is the colleague in
+the yellow shirt who walks between a desk and the table. Its three traces lie on the room's
+three screens. With all three found the colleague answers in two pages, and the press that
+closes the answer solves the case and clears the room: overview grows by one, to nine with all
+four cases solved. The case is behind a wall of density 2, so it waits for the wider cone of
+Marketing. The close (feature 0034) now waits for HR too.
+
 **As built** (feature 0038): two of the five traces of Support lie under a window that is open
 on their screen. An open window hides its trace: the light finds nothing there until the
 window is closed. So the case of Support cannot be made ready with the lamp alone. The intern
@@ -296,6 +308,13 @@ first starts at (16, 36), and each further one 12 px below the last line of the 
 it — after a block of four lines 60 px lower, as before, and after a block of three lines 48
 px lower. The three blocks of today, of four, three and three lines, fit the screen in every
 order: the last line ends at y = 178. Pages on this tab come with the fourth block.
+
+**As built** (feature 0040): with four cases the cases tab shows four entries, 36 px apart, in
+the order Sales, Marketing, Support, HR; the fourth ends at y = 178. The policy tab has pages
+of three blocks, in the order the cases were solved, turned with the down and up arrows like
+the pages of the creatures tab. With more than one page the tab says which one is open —
+`1 von 2` — with its right end at x = 304 on the line y = 26, above the first block. Any three
+blocks have ten lines or fewer, so every page fits the screen.
 
 **As built** (feature 0032): with a second species the creatures tab shows two entries, the
 second 72 px below the first, in the order of the species — the snippet, then the mirage —

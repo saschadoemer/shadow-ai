@@ -695,7 +695,8 @@ describe('the movers’ sheets (0015)', () => {
     }
   });
 
-  it.each([0, 1, 2, 3])(
+  // The fifth, of the colleague of HR, came with 0040.
+  it.each([0, 1, 2, 3, 4])(
     'person %i equals its generator and is the figure in another shirt',
     (look) => {
       const png = read(`person-${look + 1}.png`);
@@ -714,8 +715,13 @@ describe('the movers’ sheets (0015)', () => {
     },
   );
 
-  it('the shirts are green, red, orange and pink, none the figure’s', () => {
-    expect(PERSON_SHIRTS).toStrictEqual(['#3e8948', '#e43b44', '#f77622', '#b55088']);
+  it('the shirts are green, red, orange, pink and yellow, each the colour of no other figure (0040)', () => {
+    expect(PERSON_SHIRTS).toStrictEqual(['#3e8948', '#e43b44', '#f77622', '#b55088', '#feae34']);
+    // No two persons share a shirt, and none wears the figure's, the officer's or the intern's.
+    expect(new Set(PERSON_SHIRTS).size).toBe(5);
+    for (const shirt of PERSON_SHIRTS) {
+      expect([INKS.T, OFFICER_SHIRT, INTERN_SHIRT], shirt).not.toContain(shirt);
+    }
   });
 
   it('the down-facing standing frame has shirt at (7, 13): the smoke test reads it', () => {

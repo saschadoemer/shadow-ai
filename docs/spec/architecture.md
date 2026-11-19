@@ -51,7 +51,7 @@ tools/
   gen-tiles.ts          writes them to public/tiles/; `npm run gen-tiles`
   placeholder-player.ts the placeholder figure as pure data: the pixels of its sprite sheet
   gen-sprites.ts        writes the figure, the lamp, the snippet, the overview sheet, the
-                        movers' seven sheets, the shadow-wall sheet, the font sheet, the
+                        movers' eight sheets, the shadow-wall sheet, the font sheet, the
                         officer's sheet, the trace sheet, the veil sheet and the wider
                         cone's sheet to public/sprites/; `npm run gen-sprites`
   placeholder-lamp.ts   the placeholder lamp sheets as pure data: the cone of light, one 48x48
@@ -86,6 +86,7 @@ tests/
   unit/          Vitest, headless: engine math, game rules, map loading, assets
   arch/          the import and source rules behind INV-2 and INV-4
   e2e/           the one Playwright smoke test
+  walk/          the acceptance walks, one script per feature, and their bot (testing.md §5)
 ```
 
 What may import what: `main.ts` imports everything. `render/` imports `engine/`, the types and
@@ -181,7 +182,7 @@ start, and the wake keeps it. The step that solves a case also earns the upgrade
 `upgrades` does not hold it, its id is appended and `lamp.strength` becomes
 `strengthAfter(upgrades.length)`, the base strength plus the number of upgrades. No other step
 changes either. Solving Sales earns nothing; solving Marketing earns `wide-cone` and a strength
-of 2. The cone's **spread** is its slope to each side and is derived, not stored
+of 2; solving HR earns `filter` and a strength of 3 (feature 0040). The cone's **spread** is its slope to each side and is derived, not stored
 (`spreadOf(upgrades)` in `game/lamp`): `SPREAD`, 1/2, without `wide-cone` and `WIDE_SPREAD`,
 3/4, with it. `update` derives it once per ordinary step and hands it to the step of the
 creatures, the walls and the traces; `inCone(point, cone, spread)` and
@@ -355,7 +356,8 @@ one (since feature 0039 it no longer asks for the lamp, and `HINT_LAMP` is gone)
 case of `CASES` that is not solved decides — `start` while no trace of its
 region is found, `traces` while some are and not all, `source` once it is ready (`isReady`);
 with every case solved `HINT_DONE`. Since feature 0037 `HINTS` holds the three pages of Support
-too, and the cases are asked in the order Sales, Marketing, Support.
+too, and the cases are asked in the order Sales, Marketing, Support. Since feature 0040 it
+holds those of HR, asked last.
 `withHint(figures, hint)` gives `HINT_FIGURE` that one page
 instead of its own; `update` and the scene both do it, so the box shows the
 page the dialogue has. The hint is derived on every call and is not in the state; a talk with
@@ -371,7 +373,10 @@ it and `held` does not (`game/player`, `pressed`; `talkPressed` in `game/talk` r
 `policy` — and the page of the creatures tab from 0 (feature 0020, `game/journal`; the page
 since feature 0038: `ENTRIES_PER_PAGE` is 2, `entryPages` and `entriesOn` derive the pages from
 `captured`, and a press of `down` or `up` alone turns one page, never past an end; a turn to
-another tab and the opening of the journal give page 0). What a tab shows is not in the state: the **entries**
+another tab and the opening of the journal give page 0). Since feature 0040 the policy tab has
+pages too: `POLICY_PER_PAGE` is 3, `blockPages` and `blocksOn` derive them from `solved`, and
+`pagesOfTab(tab, state)` is the number of pages `stepJournal` holds the page to on every tab —
+one on the cases tab. What a tab shows is not in the state: the **entries**
 of the creatures tab are the species of which at least one was captured, in `SPECIES` order,
 derived from `captured` in every frame by `entriesOf`. The entries of the cases tab are the
 regions of which at least one trace is found, in the order of the world data, each with the
@@ -737,7 +742,11 @@ and each further one the origin 12 px (`POLICY_GAP`) below the last line of the 
 it, so a block of n lines is followed by the next one 12n + 12 px lower; the lines counted are
 those of the language the tab is drawn in. Without a solved case the tab shows its line for
 nothing. The three blocks of today — four, three and three lines in both languages — fit in
-every order, the last line ending at y = 178. `draw-journal` imports only types
+every order, the last line ending at y = 178. Since feature 0040 the tab draws the blocks of
+its open page, `blocksOn(solved, page)`, and with more than one page the mark of the creatures
+tab on the line y = 26 (`POLICY_MARK_Y`): `pageMarkOrigin(page, pages, language, y)` takes the
+line and keeps the right end at x = 304. Any three blocks of the table have ten lines or fewer
+in both languages, so a page ends at y = 178 at the latest. `draw-journal` imports only types
 from `draw-scene`, and `draw-scene` imports `drawJournal`.
 
 The help (feature 0021, `render/draw-help`). While `help` is `true`, `drawScene` draws what it
@@ -959,6 +968,13 @@ in the light. `clearRegion` removes the open panes of a solved region. No coordi
 is in `src/` (INV-7); `tools/floor-layout.ts` holds the floor's three, `PANES`, written at the
 end of the file with the ids 138 to 140, and `nextobjectid` is 141.
 
+Since feature 0040 the file ends with the objects of the case of HR. The routes after the 22
+of feature 0015 (`FIRST_ROUTES`) are written after the panes, so that no object of an earlier
+feature changes its id and no mover its place in the state: the four points of `person:hr`
+have the ids 141 to 144, and the colleague of HR is the 23rd mover. The traces from the
+sixteenth on (`THIRD_TRACES`, 15) follow them: the three of HR are rectangles with the ids 145
+to 147, and `nextobjectid` is 148.
+
 Flipped and rotated tiles, more than one tileset per map, embedded tilesets, encoded or
 compressed data and infinite maps stay rejected until a feature needs one and lifts its rule. A
 tileset tile with an `animation` is rejected too: the game has no animated tiles, and a still
@@ -1125,11 +1141,11 @@ heart and `#3a4466` for the empty one. `npm run gen-sprites` writes it beside th
 deterministic and tested against the generator pixel by pixel. The art pass replaces it under the
 same name and frame order.
 
-The movers' seven sheets (feature 0015), all in Endesga 32 and none using `#68386c`, written by
+The movers' eight sheets (feature 0015; the eighth since feature 0040), all in Endesga 32 and none using `#68386c`, written by
 `npm run gen-sprites` beside the others, committed, deterministic and tested against their
-generators. `tools/placeholder-person.ts`: `person-1.png` to `person-4.png`, each the size and
+generators. `tools/placeholder-person.ts`: `person-1.png` to `person-5.png`, each the size and
 frame order of `player.png` — the figure's twenty frames with the shirt in `#3e8948`, `#e43b44`,
-`#f77622` or `#b55088` and the lanyard's pixels in the shirt's colour; a person of `look` n uses
+`#f77622`, `#b55088` or `#feae34` and the lanyard's pixels in the shirt's colour; a person of `look` n uses
 `person-(n + 1)`. The data protection officer's sheet (feature 0017), `officer.png`, comes
 from the same generator: the size and frame order of `player.png`, with the shirt and the
 lanyard's pixels in `#c0cbdc`, the colour of no other shirt. The intern's sheet (feature 0033),
@@ -1284,7 +1300,8 @@ it shows, if any. While the lamp is on and a standing shadow wall has `lit` true
 a wall in the light that holds (0014) — it is `notice.shadow-too-dense`; otherwise, for two
 seconds from the step that solved a case, `notice.case-solved` (0024); otherwise, for the two
 seconds after those (`UPGRADE_NOTICE_STEPS`, 120), the line of the upgrade the case earned, if
-the player has it — `notice.upgrade-wide-cone` (0029, `NOTICE_UPGRADE`); otherwise, for two
+the player has it — `notice.upgrade-wide-cone` (0029, `NOTICE_UPGRADE`) or
+`notice.upgrade-filter` (0040); otherwise, for two
 seconds from the last find of a trace, `notice.trace-found` (0022); otherwise, for two seconds
 (`REST_NOTICE_STEPS`, 120) from a press at a rest, the line of its result — `notice.rest`,
 `notice.rest-full` or `notice.rest-shadow` (0027, `NOTICE_REST`); otherwise, while the lamp

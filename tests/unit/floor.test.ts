@@ -23,6 +23,7 @@ import { CLOSE_SCENE } from '../../src/game/story';
 import { speakerInReach, speakersOf, TALK_DISTANCE } from '../../src/game/talk';
 import { traceInLight, tracesOf } from '../../src/game/trace';
 import { createInitialState, update } from '../../src/game/update';
+import { textKey } from '../../src/text/text';
 import {
   areaBox,
   type CellRect,
@@ -30,6 +31,7 @@ import {
   CORRIDORS,
   FIGURES,
   FIRST_FIGURES,
+  FIRST_ROUTES,
   FIRST_TRACES,
   FLOOR_HEIGHT,
   FLOOR_WIDTH,
@@ -48,6 +50,7 @@ import {
   SNIPPETS,
   SPAWN,
   shadowWallBox,
+  THIRD_TRACES,
   TRACES,
   traceBox,
   VERTICAL_WALLS,
@@ -428,8 +431,8 @@ describe('the routes of the floor (0015)', () => {
   const cellsOf = (points: readonly { x: number; y: number; pause: number }[]) =>
     points.map((p) => [(p.x - 8) / 16, (p.y - 8) / 16, p.pause]);
 
-  it('holds 86 route points in 22 routes: 4 persons, 8 dogs, 8 vacuums, 2 drones, in table order', () => {
-    expect(floor.points.filter((point) => isRoutePoint(point.name))).toHaveLength(86);
+  it('holds 90 route points in 23 routes: 5 persons, 8 dogs, 8 vacuums, 2 drones, in table order', () => {
+    expect(floor.points.filter((point) => isRoutePoint(point.name))).toHaveLength(90);
     expect(routes.map((route) => route.name)).toStrictEqual([
       'person:reception',
       'person:marketing',
@@ -453,6 +456,8 @@ describe('the routes of the floor (0015)', () => {
       'vacuum:support',
       'drone:development',
       'drone:marketing',
+      // The colleague of HR (0040), written at the end of the file.
+      'person:hr',
     ]);
   });
 
@@ -508,9 +513,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 140 }, (_, i) => i + 1),
+      Array.from({ length: 147 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(141);
+    expect(json.nextobjectid).toBe(148);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -956,7 +961,8 @@ describe('the shadow walls of the floor (0014)', () => {
       TABLE.map(([region], i) => [92 + i, `shadow:${region}`]),
     );
     expect(objects.slice(91, 99).some((object) => 'point' in object)).toBe(false);
-    expect(floor.points).toHaveLength(95);
+    // The 95 points of 0033 and before, and since 0040 the four of the route of HR.
+    expect(floor.points).toHaveLength(99);
   });
 
   it('builds the boxes from the doorway cells of the layout', () => {
@@ -1169,7 +1175,7 @@ describe('the colleagues of the floor and their lines (0018)', () => {
     }
   });
 
-  it('has six speakers: the two standing figures, then the four colleagues in the order of the movers', () => {
+  it('has seven speakers: the two standing figures, then the five colleagues in the order of the movers', () => {
     const speakers = speakersOf(figuresOf(floor.points), start.movers, routes);
     expect(speakers.map((speaker) => [speaker.speaker, speaker.index])).toStrictEqual([
       ['figure', 0],
@@ -1179,6 +1185,8 @@ describe('the colleagues of the floor and their lines (0018)', () => {
       ['mover', 1],
       ['mover', 2],
       ['mover', 3],
+      // The colleague of HR is the last mover (0040).
+      ['mover', 22],
     ]);
   });
 
@@ -1241,7 +1249,8 @@ describe('the traces of the floor (0022)', () => {
     );
     expect(objects.some((object) => 'point' in object)).toBe(false);
     expect(floor.rects.slice(8, 13).every((rect) => rect.name === 'trace:sales')).toBe(true);
-    expect(floor.points).toHaveLength(95);
+    // The 95 points of 0033 and before, and since 0040 the four of the route of HR.
+    expect(floor.points).toHaveLength(99);
   });
 
   it('lie in Sales, each on a desk with a screen whose chair stands on the cell below', () => {
@@ -1312,8 +1321,9 @@ describe('the traces of the floor (0022)', () => {
     for (const { region } of traces) {
       expect(REGION_NAME[region], region).toBeDefined();
     }
-    // Five of Sales, since 0028 five of Marketing, and since 0037 five of Support.
-    expect(createInitialState(floor).traces).toHaveLength(15);
+    // Five of Sales, since 0028 five of Marketing, since 0037 five of Support, and since 0040
+    // three of HR.
+    expect(createInitialState(floor).traces).toHaveLength(18);
   });
 });
 
@@ -1384,9 +1394,10 @@ describe('the areas of the regions on the floor (0023)', () => {
 
   it('leave the walls and the traces as they were', () => {
     expect(wallsOf(floor.rects)).toHaveLength(8);
-    // The five of 0022; the five of 0028 and the five of 0037 came later.
-    expect(tracesOf(floor.rects)).toHaveLength(15);
-    expect(floor.points).toHaveLength(95);
+    // The five of 0022; the five of 0028, the five of 0037 and the three of 0040 came later.
+    expect(tracesOf(floor.rects)).toHaveLength(18);
+    // The 95 points of 0033 and before, and since 0040 the four of the route of HR.
+    expect(floor.points).toHaveLength(99);
   });
 
   it('give every room of a region its area, with exactly the cells of the room', () => {
@@ -1575,10 +1586,11 @@ describe('the rests of the floor (0027)', () => {
 
   it('leave the objects of 0023 and before as they were', () => {
     expect(wallsOf(floor.rects)).toHaveLength(8);
-    // The five of 0022; the five of 0028 and the five of 0037 came later.
-    expect(tracesOf(floor.rects)).toHaveLength(15);
+    // The five of 0022; the five of 0028, the five of 0037 and the three of 0040 came later.
+    expect(tracesOf(floor.rects)).toHaveLength(18);
     expect(areas).toHaveLength(10);
-    expect(floor.points).toHaveLength(95);
+    // The 95 points of 0033 and before, and since 0040 the four of the route of HR.
+    expect(floor.points).toHaveLength(99);
   });
 
   it('lie each on a counter with a coffee machine, and the floor has no such tile without one', () => {
@@ -2091,14 +2103,15 @@ describe('the intern of the floor (0033)', () => {
     expect(HINT_FIGURE).toBe('intern');
   });
 
-  it('is the point figure:intern with the id 132, the last point of the file', () => {
-    // The traces of 0037 follow him; they are rectangles.
+  it('is the point figure:intern with the id 132, the last point before the route of HR', () => {
+    // The traces of 0037 and the panes of 0038 follow him; they are rectangles. The route of
+    // HR (0040) comes after them.
     const objects = floorJson().layers[3].objects;
     const his = objects[131];
     expect([his?.id, his?.name, his?.x, his?.y]).toStrictEqual([132, 'figure:intern', 616, 488]);
     expect(his !== undefined && 'point' in his).toBe(true);
-    expect(objects.slice(132).some((object) => 'point' in object)).toBe(false);
-    expect(floor.points.at(-1)).toStrictEqual({ name: 'figure:intern', ...INTERN });
+    expect(objects.slice(132, 140).some((object) => 'point' in object)).toBe(false);
+    expect(floor.points[94]).toStrictEqual({ name: 'figure:intern', ...INTERN });
   });
 
   it('leaves the 131 objects of 0032 and before exactly as they were', () => {
@@ -2231,7 +2244,7 @@ describe('the close on the floor (0034)', () => {
     traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
   };
 
-  it('opens 300 steps after the last of the three cases of the floor, and not after the second', () => {
+  it('opens 300 steps after the last of the four cases of the floor, and not after the third', () => {
     let state = answer(beside(ready, 'person:sales'));
     expect(state.solved.map((entry) => entry.region)).toStrictEqual(['sales']);
     state = answer(beside(state, 'person:marketing'));
@@ -2242,8 +2255,19 @@ describe('the close on the floor (0034)', () => {
     }
     expect(state.dialogue).toBeNull();
     state = answer(beside(state, 'person:support'));
-    const last = state.solved[2];
-    expect(last?.region).toBe('support');
+    expect(state.solved.map((entry) => entry.region)).toStrictEqual([
+      'sales',
+      'marketing',
+      'support',
+    ]);
+    // HR is not solved (0040): nothing opens either.
+    for (let step = 0; step < 400; step += 1) {
+      state = update(state, NO_INPUT, floor);
+    }
+    expect(state.dialogue).toBeNull();
+    state = answer(beside(state, 'person:hr'));
+    const last = state.solved[3];
+    expect(last?.region).toBe('hr');
     while (state.tick < (last?.at ?? 0) + 300) {
       state = update(state, NO_INPUT, floor);
       expect(state.dialogue).toBeNull();
@@ -2276,9 +2300,11 @@ describe('the traces of Support on the floor (0037)', () => {
 
   it('are five, on the cells of the spec, after the five of Marketing', () => {
     expect(SECOND_TRACES).toBe(10);
-    expect(traces).toHaveLength(15);
-    expect(traces.slice(10)).toStrictEqual(TABLE.map(([, , box]) => ({ region: 'support', box })));
-    expect(TRACES.slice(10)).toStrictEqual(
+    // The three of HR follow them (0040).
+    expect(traces.slice(10, 15)).toStrictEqual(
+      TABLE.map(([, , box]) => ({ region: 'support', box })),
+    );
+    expect(TRACES.slice(10, 15)).toStrictEqual(
       TABLE.map(([x, y]) => ({ region: 'support', cell: { x, y } })),
     );
   });
@@ -2365,11 +2391,12 @@ describe('the traces of Support on the floor (0037)', () => {
     }
   });
 
-  it('start unseen in the state: fifteen traces, none found, Support 10 to 14', () => {
-    expect(start.traces).toStrictEqual(
+  it('start unseen in the state, none found, Support 10 to 14', () => {
+    // The three of HR follow them (0040).
+    expect(start.traces.slice(0, 15)).toStrictEqual(
       Array.from({ length: 15 }, (_, trace) => ({ trace, light: 0, found: null })),
     );
-    expect(start.traces.slice(10).map((state) => traces[state.trace]?.region)).toStrictEqual(
+    expect(start.traces.slice(10, 15).map((state) => traces[state.trace]?.region)).toStrictEqual(
       Array.from({ length: 5 }, () => 'support'),
     );
     expect(REGION_NAME.support).toBeDefined();
@@ -2421,10 +2448,11 @@ describe('the case of Support on the floor (0037)', () => {
     state.shadowWalls.map((standing) => walls[standing.wall]?.region);
   const support = answer(beside(ready, 'person:support'));
 
-  it('is the case of every region that has traces on the floor: Sales, Marketing, Support', () => {
+  it('is the case of every region that has traces on the floor: Sales, Marketing, Support, HR', () => {
+    // HR has had its traces and its case since 0040.
     const regions = [...new Set(tracesOf(floor.rects).map((trace) => trace.region))];
     expect(regions).toStrictEqual(CASES.map((entry) => entry.region));
-    expect(regions).toStrictEqual(['sales', 'marketing', 'support']);
+    expect(regions).toStrictEqual(['sales', 'marketing', 'support', 'hr']);
   });
 
   it('has a source that stands free at the start, with room 24 px below it', () => {
@@ -2533,16 +2561,15 @@ describe('the panes of Support on the floor (0038)', () => {
     );
   });
 
-  it('are the last three objects of the file, rectangles with the ids 138 to 140, after the traces of 0037', () => {
+  it('are three rectangles with the ids 138 to 140, after the traces of 0037', () => {
+    // The route of HR follows them (0040).
     const objects = floorJson().layers[3].objects;
-    expect(objects).toHaveLength(140);
-    expect(objects.slice(137).map((object) => [object.id, object.name])).toStrictEqual(
+    expect(objects.slice(137, 140).map((object) => [object.id, object.name])).toStrictEqual(
       [138, 139, 140].map((id) => [id, 'pane:support']),
     );
-    expect(objects.slice(137).some((object) => 'point' in object)).toBe(false);
-    expect(floorJson().nextobjectid).toBe(141);
-    expect(floor.rects).toHaveLength(44);
-    expect(floor.rects.slice(41).every((rect) => rect.name === 'pane:support')).toBe(true);
+    expect(objects.slice(137, 140).some((object) => 'point' in object)).toBe(false);
+    // The traces of HR are the rectangles after them (0040).
+    expect(floor.rects.slice(41, 44).every((rect) => rect.name === 'pane:support')).toBe(true);
   });
 
   it('leave the 137 objects of 0037 and before exactly as they were', () => {
@@ -2675,5 +2702,365 @@ describe('the panes of Support on the floor (0038)', () => {
     expect(solved.panes).toStrictEqual([]);
     expect(solved.creatures.some((creature) => creature.species === 'lurker')).toBe(false);
     expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
+  });
+});
+
+describe('the colleague of HR on the floor (0040)', () => {
+  /** Column, row and pause of the four points: the spec's table. */
+  const TABLE: readonly (readonly [number, number, number])[] = [
+    [6, 5, 300],
+    [11, 5, 0],
+    [11, 13, 180],
+    [11, 5, 0],
+  ];
+  const routes = routesOf(floor.points);
+  const start = createInitialState(floor);
+  const hr = areasOf(floor.rects).filter((area) => area.region === 'hr');
+
+  it('walks the route of the spec, the 23rd route, after the 22 of 0015', () => {
+    expect(FIRST_ROUTES).toBe(22);
+    expect(ROUTES).toHaveLength(23);
+    expect(ROUTES[22]).toStrictEqual({ name: 'person:hr', cells: TABLE.map((row) => [...row]) });
+    expect(routes).toHaveLength(23);
+    expect(routes[22]?.name).toBe('person:hr');
+    expect(routes[22]?.kind).toBe('person');
+    expect(routes[22]?.points.map((p) => [(p.x - 8) / 16, (p.y - 8) / 16, p.pause])).toStrictEqual(
+      TABLE.map((row) => [...row]),
+    );
+  });
+
+  it('is four points with the ids 141 to 144, after the panes of 0038', () => {
+    // The traces of HR follow them.
+    const objects = floorJson().layers[3].objects;
+    expect(objects.slice(140, 144).map((object) => [object.id, object.name])).toStrictEqual(
+      [141, 142, 143, 144].map((id, i) => [id, `person:hr:${i + 1}`]),
+    );
+    expect(objects.slice(140, 144).every((object) => 'point' in object)).toBe(true);
+    expect(floor.points.slice(95)).toStrictEqual(
+      TABLE.map(([column, row, pause], i) => ({
+        name: `person:hr:${i + 1}`,
+        x: column * 16 + 8,
+        y: row * 16 + 8,
+        // A point without a pause has none in the file.
+        ...(pause > 0 ? { pause } : {}),
+      })),
+    );
+  });
+
+  it('leaves the 140 objects of 0038 and before exactly as they were', () => {
+    // SHA-256 over the first 140 objects, recorded from the generator before this feature.
+    const before = JSON.stringify(floorJson().layers[3].objects.slice(0, 140));
+    expect(createHash('sha256').update(before).digest('hex')).toBe(
+      '807dbffe6a766b2d715b7d8c23d252597648025d3d0571e521762471f7d0f14f',
+    );
+  });
+
+  it('runs in HR, and no cell of the route has a solid box', () => {
+    expect(hr).toHaveLength(1);
+    // The cells of its two legs: along row 5, then down column 11.
+    const cells: [number, number][] = [
+      ...[6, 7, 8, 9, 10, 11].map((column): [number, number] => [column, 5]),
+      ...[6, 7, 8, 9, 10, 11, 12, 13].map((row): [number, number] => [11, row]),
+    ];
+    for (const [column, row] of cells) {
+      expect(
+        hr.some((area) => inArea(area, { x: column * 16 + 8, y: row * 16 + 8 })),
+        `(${column}, ${row})`,
+      ).toBe(true);
+      expect(floor.solids[cell(column, row)] ?? [], `(${column}, ${row})`).toStrictEqual([]);
+    }
+  });
+
+  it('puts a 23rd mover in the state, a person of look 4 on its route, and leaves the 22 of before', () => {
+    expect(start.movers).toHaveLength(23);
+    // SHA-256 over the 22 movers of the initial state, recorded before this feature.
+    expect(
+      createHash('sha256')
+        .update(JSON.stringify(start.movers.slice(0, 22)))
+        .digest('hex'),
+    ).toBe('e873fe66d011c4844393900eeae938cc582e95c43c4d393faec8cbde3234344c');
+    expect(start.movers[22]).toMatchObject({ kind: 'person', look: 4, route: 22, x: 104, y: 88 });
+    // A person of look n is drawn from person-(n + 1).png: the fifth sheet.
+    expect(
+      start.movers.filter((mover) => mover.kind === 'person').map((m) => m.look),
+    ).toStrictEqual([0, 1, 2, 3, 4]);
+  });
+
+  it('says its everyday line, and stands free at the start with room 24 px below it', () => {
+    const speakers = speakersOf(figuresOf(floor.points), start.movers, routes);
+    expect(speakers.at(-1)).toStrictEqual({
+      speaker: 'mover',
+      index: 22,
+      x: 104,
+      y: 88,
+      pages: [textKey('talk.hr-everyday')],
+    });
+    expect(reached({ x: 104, y: 112 })).toBe(true);
+  });
+});
+
+describe('the traces of HR on the floor (0040)', () => {
+  /** Cell and box, in file order: the spec's table. */
+  const TABLE: readonly (readonly [number, number, Box])[] = [
+    [3, 3, { x: 48, y: 48, width: 16, height: 16 }],
+    [14, 3, { x: 224, y: 48, width: 16, height: 16 }],
+    [3, 10, { x: 48, y: 160, width: 16, height: 16 }],
+  ];
+  const traces = tracesOf(floor.rects);
+  const start = createInitialState(floor);
+  const hr = areasOf(floor.rects).filter((area) => area.region === 'hr');
+  /** The state with the traces of the given indices found. */
+  const found = (...indices: readonly number[]): GameState => ({
+    ...start,
+    traces: start.traces.map((trace, i) => (indices.includes(i) ? { ...trace, found: 1 } : trace)),
+  });
+  const SALES = [0, 1, 2, 3, 4];
+  const MARKETING = [5, 6, 7, 8, 9];
+  const SUPPORT = [10, 11, 12, 13, 14];
+  const HR = [15, 16, 17];
+
+  it('are three, on the cells of the spec, after the five of Support', () => {
+    expect(THIRD_TRACES).toBe(15);
+    expect(traces).toHaveLength(18);
+    expect(traces.slice(15)).toStrictEqual(TABLE.map(([, , box]) => ({ region: 'hr', box })));
+    expect(TRACES.slice(15)).toStrictEqual(
+      TABLE.map(([x, y]) => ({ region: 'hr', cell: { x, y } })),
+    );
+  });
+
+  it('are the last three objects of the file, rectangles with the ids 145 to 147, after the route of HR', () => {
+    const objects = floorJson().layers[3].objects;
+    expect(objects).toHaveLength(147);
+    expect(objects.slice(144).map((object) => [object.id, object.name])).toStrictEqual(
+      [145, 146, 147].map((id) => [id, 'trace:hr']),
+    );
+    expect(objects.slice(144).some((object) => 'point' in object)).toBe(false);
+    expect(floorJson().nextobjectid).toBe(148);
+    expect(floor.rects).toHaveLength(47);
+    expect(floor.rects.slice(44).every((rect) => rect.name === 'trace:hr')).toBe(true);
+  });
+
+  it('leave the 144 objects of the route of HR and before exactly as they were', () => {
+    // SHA-256 over the first 144 objects, recorded from the generator before the traces of HR.
+    const before = JSON.stringify(floorJson().layers[3].objects.slice(0, 144));
+    expect(createHash('sha256').update(before).digest('hex')).toBe(
+      '18d5e181a98a44fb4e4fed930c0566fc0348d1a0f033c7d448bd503ef4d678de',
+    );
+  });
+
+  it('lie in the area of HR, each on a desk with a screen whose chair stands on the cell below', () => {
+    expect(hr).toHaveLength(1);
+    for (const [column, row, box] of TABLE) {
+      expect(
+        hr.some((area) => inArea(area, { x: box.x, y: box.y })),
+        `(${column}, ${row})`,
+      ).toBe(true);
+      expect(floor.detail[cell(column, row)], `(${column}, ${row})`).toBe(DESK_MONITOR);
+      expect(floor.detail[cell(column, row + 1)], `(${column}, ${row + 1})`).toBe(CHAIR);
+      expect(floor.detail[cell(column, row + 2)], `(${column}, ${row + 2})`).toBe(EMPTY);
+    }
+  });
+
+  it('are in the light of a player who looks up from any place on the cell below the chair', () => {
+    for (const [column, row] of TABLE) {
+      const trace = traces.find(
+        (candidate) => candidate.box.x === column * 16 && candidate.box.y === row * 16,
+      );
+      let places = 0;
+      for (let x = column * 16; x <= column * 16 + 16; x += 2) {
+        for (let y = (row + 2) * 16 + 2; y <= (row + 3) * 16; y += 2) {
+          if (!reached({ x, y })) {
+            continue;
+          }
+          places += 1;
+          const player = {
+            x,
+            y,
+            facing: 'up',
+            frame: 0,
+            frameTimer: 0,
+            grace: 0,
+            recoil: NO_RECOIL,
+          } as const;
+          expect(
+            trace !== undefined && traceInLight(trace, player, true, floor),
+            `(${column}, ${row}) from (${x}, ${y})`,
+          ).toBe(true);
+        }
+      }
+      expect(places, `(${column}, ${row})`).toBe(54);
+    }
+  });
+
+  it('are on the three screens of HR: the room has no other', () => {
+    const screens: [number, number][] = [];
+    for (let row = 1; row <= 19; row += 1) {
+      for (let column = 1; column <= 21; column += 1) {
+        const tile = floor.detail[cell(column, row)];
+        if (tile === DESK_MONITOR || tile === DESK_MONITOR_PARTITION) {
+          screens.push([column, row]);
+        }
+      }
+    }
+    expect(screens).toStrictEqual(TABLE.map(([column, row]) => [column, row]));
+  });
+
+  it('start unseen in the state: eighteen traces, none found, HR 15 to 17', () => {
+    expect(start.traces).toStrictEqual(
+      Array.from({ length: 18 }, (_, trace) => ({ trace, light: 0, found: null })),
+    );
+    expect(start.traces.slice(15).map((state) => traces[state.trace]?.region)).toStrictEqual([
+      'hr',
+      'hr',
+      'hr',
+    ]);
+    expect(REGION_NAME.hr).toBe(textKey('region.hr'));
+  });
+
+  it('make HR ready exactly when its own three are found, whatever is found in the others', () => {
+    const ready = (state: GameState): boolean[] =>
+      ['sales', 'marketing', 'support', 'hr'].map((region) =>
+        isReady(region, progressOf(state, floor)),
+      );
+    expect(ready(start)).toStrictEqual([false, false, false, false]);
+    // Three.
+    expect(ready(found(...HR))).toStrictEqual([false, false, false, true]);
+    expect(ready(found(15, 16, 0))).toStrictEqual([false, false, false, false]);
+    // Eight: HR and one other, or the other's five and two of HR.
+    expect(ready(found(...HR, ...MARKETING))).toStrictEqual([false, true, false, true]);
+    expect(ready(found(...SUPPORT, 15, 17, 4))).toStrictEqual([false, false, true, false]);
+    // Fifteen: the other three, or two of them and HR without one of their traces.
+    expect(ready(found(...SALES, ...MARKETING, ...SUPPORT))).toStrictEqual([
+      true,
+      true,
+      true,
+      false,
+    ]);
+    expect(ready(found(...SALES, ...SUPPORT, ...HR, 5, 6))).toStrictEqual([
+      true,
+      false,
+      true,
+      true,
+    ]);
+    // Eighteen.
+    expect(ready(found(...SALES, ...MARKETING, ...SUPPORT, ...HR))).toStrictEqual([
+      true,
+      true,
+      true,
+      true,
+    ]);
+  });
+});
+
+describe('the case of HR on the floor (0040)', () => {
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const SHINE: GameInput = { ...NO_INPUT, lamp: true };
+  const areas = areasOf(floor.rects);
+  const walls = wallsOf(floor.rects);
+  const routes = routesOf(floor.points);
+  const start = createInitialState(floor);
+  /** The figure 24 px below the colleague of the given route, where it stands in the state. */
+  const beside = (state: GameState, route: string): GameState => {
+    const source = state.movers.find((mover) => routes[mover.route]?.name === route);
+    return {
+      ...state,
+      player: { ...state.player, x: source?.x ?? 0, y: (source?.y ?? 0) + 24 },
+    };
+  };
+  /** Every trace of the floor found long ago. */
+  const ready: GameState = {
+    ...start,
+    tick: 1000,
+    traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+  };
+  const answer = (from: GameState): GameState =>
+    [TALK, NO_INPUT, TALK, NO_INPUT, TALK, NO_INPUT].reduce(
+      (state, input) => update(state, input, floor),
+      from,
+    );
+  const regionsOf = (state: GameState): (string | undefined)[] =>
+    state.shadowWalls.map((standing) => walls[standing.wall]?.region);
+  /** The state with the figure 20 px below the wall of a region in the top corridor, looking up. */
+  const below = (state: GameState, region: string): GameState => {
+    const box = walls.find((wall) => wall.region === region)?.box ?? { x: 0, y: 0, width: 0 };
+    return {
+      ...state,
+      player: { ...state.player, x: box.x + box.width / 2, y: box.y + 24, facing: 'up' },
+    };
+  };
+  const shine = (from: GameState, count: number): GameState => {
+    let state = from;
+    for (let step = 0; step < count; step += 1) {
+      state = update(state, SHINE, floor);
+    }
+    return state;
+  };
+  const hr = answer(beside(ready, 'person:hr'));
+  /** Marketing first, for the wider cone; then HR. */
+  const marketing = answer(beside(ready, 'person:marketing'));
+  const both = answer(beside(marketing, 'person:hr'));
+
+  it('is solved from beside its source, before the others: six of six, and the filter', () => {
+    expect(hr.solved).toStrictEqual([{ region: 'hr', at: 1005 }]);
+    expect(hr.overview).toStrictEqual({ current: 6, max: 6 });
+    expect(hr.upgrades).toStrictEqual(['filter']);
+  });
+
+  it('gives the filter after the wider cone: both upgrades and a lamp of strength 3', () => {
+    expect(marketing.upgrades).toStrictEqual(['wide-cone']);
+    expect(both.solved.map((entry) => entry.region)).toStrictEqual(['marketing', 'hr']);
+    expect(both.upgrades).toStrictEqual(['wide-cone', 'filter']);
+    expect(both.lamp.strength).toBe(3);
+  });
+
+  it('takes the shadow from the cells of HR and leaves it on the other regions', () => {
+    const cleared = shadowedAreas(areas, hr.solved);
+    expect(veilOf(areas, 5, 5)).toBe(2);
+    expect(veilOf(cleared, 5, 5)).toBe(0);
+    expect(veilOf(cleared, 20, 18)).toBe(0);
+    // Sales, Marketing, Support and Development.
+    expect([
+      veilOf(cleared, 90, 30),
+      veilOf(cleared, 10, 70),
+      veilOf(cleared, 100, 70),
+      veilOf(cleared, 60, 10),
+    ]).toStrictEqual([1, 1, 1, 3]);
+  });
+
+  it('removes the shadow wall of HR and no other', () => {
+    expect(regionsOf(ready).filter((region) => region === 'hr')).toHaveLength(1);
+    expect(regionsOf(hr)).not.toContain('hr');
+    expect(regionsOf(hr)).toContain('accounting');
+    expect(regionsOf(hr)).toContain('development');
+    expect(hr.shadowWalls).toHaveLength(ready.shadowWalls.length - 1);
+  });
+
+  it('lets the wall of Development give way with the filter, in the 60th lit step', () => {
+    // Without the filter it holds (0029).
+    expect(regionsOf(shine(below(marketing, 'development'), 180))).toContain('development');
+    const almost = shine(below(both, 'development'), 59);
+    expect(regionsOf(almost)).toContain('development');
+    expect(regionsOf(update(almost, SHINE, floor))).not.toContain('development');
+  });
+
+  it('is followed by the other three: nine of nine, and four rooms clear', () => {
+    const all = ['person:sales', 'person:support'].reduce(
+      (state, route) => answer(beside(state, route)),
+      both,
+    );
+    expect(all.solved.map((entry) => entry.region)).toStrictEqual([
+      'marketing',
+      'hr',
+      'sales',
+      'support',
+    ]);
+    expect(all.overview).toStrictEqual({ current: 9, max: 9 });
+    const cleared = shadowedAreas(areas, all.solved);
+    expect([
+      veilOf(cleared, 5, 5),
+      veilOf(cleared, 90, 30),
+      veilOf(cleared, 10, 70),
+      veilOf(cleared, 100, 70),
+    ]).toStrictEqual([0, 0, 0, 0]);
   });
 });

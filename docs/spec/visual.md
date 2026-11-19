@@ -51,7 +51,7 @@ top, a figure below the body in front of it. A tall thing never stands in the fi
 wall, so its top always lies in the same room as its body.
 
 **The movers** (feature 0015). A colleague is 16x24 like the figure, drawn from the figure's
-frames in another shirt. An office dog, a robot vacuum and a drone are 16x16, one tile. The
+frames in another shirt — green, red, orange, pink and, since feature 0040, yellow. An office dog, a robot vacuum and a drone are 16x16, one tile. The
 vacuum is a plain disc and the drone a body with four rotors, so neither shows a real product.
 The drone has no drop shadow: a dark patch on the floor would read as the shadow of the game.
 

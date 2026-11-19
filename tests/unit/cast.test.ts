@@ -107,18 +107,22 @@ describe('a figure point among the other points (0017)', () => {
 });
 
 describe('the colleagues and their lines (0018)', () => {
-  it('gives each of the four routes of the floor one saying of one page', () => {
+  it('gives each of the five routes of the floor one saying of one page', () => {
     expect(COLLEAGUES).toStrictEqual([
       { route: 'person:reception', pages: [textKey('talk.reception-everyday')] },
       { route: 'person:marketing', pages: [textKey('talk.marketing-everyday')] },
       { route: 'person:support', pages: [textKey('talk.support-everyday')] },
       { route: 'person:sales', pages: [textKey('talk.sales-everyday')] },
+      // The colleague of HR (0040).
+      { route: 'person:hr', pages: [textKey('talk.hr-everyday')] },
     ]);
   });
 
   it('finds the pages of a route, and none for a route without lines', () => {
     expect(pagesOfRoute('person:sales')).toStrictEqual([textKey('talk.sales-everyday')]);
-    expect(pagesOfRoute('person:hr')).toStrictEqual([]);
+    expect(pagesOfRoute('person:hr')).toStrictEqual([textKey('talk.hr-everyday')]);
+    // Nobody walks in Accounting yet.
+    expect(pagesOfRoute('person:accounting')).toStrictEqual([]);
     expect(pagesOfRoute('dog:reception')).toStrictEqual([]);
   });
 

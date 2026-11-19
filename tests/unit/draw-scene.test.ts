@@ -117,7 +117,8 @@ const CONTENT: SceneContent = {
   shadowWallSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   traceSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   moverSheets: {
-    person: [0, 1, 2, 3].map(() => ({
+    // Five persons since the colleague of HR (0040).
+    person: [0, 1, 2, 3, 4].map(() => ({
       image: {} as ImageBitmap,
       frameWidth: 16,
       frameHeight: 24,
@@ -2011,8 +2012,11 @@ describe('the intern in the scene (0033)', () => {
       { region: 'marketing', at: 19 },
     ];
     expect(firstGlyph({ ...found, solved: both })).toBe('drawSprite 36 at 12,138');
-    // All three solved: `Mehr weiß ich …`, `M`.
-    const all = [...both, { region: 'support', at: 29 }];
+    // The first three solved: HR is next (0040), `Dann HR …`, `D`.
+    const three = [...both, { region: 'support', at: 29 }];
+    expect(firstGlyph({ ...found, solved: three })).toBe('drawSprite 36 at 12,138');
+    // All four solved: `Mehr weiß ich …`, `M`.
+    const all = [...three, { region: 'hr', at: 39 }];
     expect(firstGlyph({ ...found, solved: all })).toBe('drawSprite 45 at 12,138');
   });
 

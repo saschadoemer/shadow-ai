@@ -32,6 +32,7 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
   'region.sales': 'Sales',
   'region.marketing': 'Marketing',
   'region.support': 'Support',
+  'region.hr': 'HR',
   'creature.snippet-name': 'Snippet',
   'creature.snippet-text': [
     'A piece of text somebody pasted into a public',
@@ -136,6 +137,7 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
   ].join('\n'),
   'notice.case-solved': 'The case is solved. See the journal.',
   'notice.upgrade-wide-cone': 'The lamp now shines wider and stronger.',
+  'notice.upgrade-filter': 'The lamp now gets through dense shadow too.',
   'talk.marketing-source-1': [
     'An image generator makes the visuals – in ten',
     'minutes instead of two days, and we saved',
@@ -176,6 +178,27 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'Tools and extensions come from the approved',
     'list – and only from there. If one is missing,',
     'say so: then it gets onto the list.',
+  ].join('\n'),
+  'talk.hr-source-1': [
+    'A tool sorts the applications for me. On top',
+    'are the ones it thinks fit – the others I',
+    'do not even see any more.',
+  ].join('\n'),
+  'talk.hr-source-2': [
+    'What it sorts by, I do not know. And all the',
+    'CVs now lie with a provider nobody here',
+    'has heard of.',
+  ].join('\n'),
+  'talk.hr-after': [
+    'Thanks. From now on I read them myself –',
+    'and when something sorts for me, I want to',
+    'know what by.',
+  ].join('\n'),
+  'case.hr-outcome': 'Solved: a tool pre-sorted the applications.',
+  'policy.hr': [
+    'A person decides about people. What a machine',
+    'has pre-sorted, somebody looks at – and can',
+    'say what it was sorted by.',
   ].join('\n'),
   'talk.intern-sales-start': [
     'Sales? At the end of the corridor to the east.',
@@ -222,15 +245,35 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'printer. Forty tickets before the first',
     'coffee – ask about the languages.',
   ].join('\n'),
+  'talk.intern-hr-start': [
+    'HR next, far left on the north corridor.',
+    'Lately they invite people surprisingly fast',
+    '– with two hundred applications.',
+  ].join('\n'),
+  'talk.intern-hr-traces': [
+    'HR has only three desks. Look at every',
+    'screen – they have no other devices',
+    'in there.',
+  ].join('\n'),
+  'talk.intern-hr-source': [
+    'Yellow shirt, walks back and forth between',
+    'the desks. Ask who actually reads the',
+    'applications.',
+  ].join('\n'),
   'talk.intern-done': [
-    'That is all I know for now. Off the north',
-    'corridor you can get into HR and Accounting',
-    'now – what goes on there, you tell me.',
+    'That is all I know for now. Nobody has been',
+    'to Accounting on the north corridor yet –',
+    'you tell me what is going on there.',
   ].join('\n'),
   'talk.sales-everyday': [
     'Three offers by tonight, and each one should',
     'sound as if I had had a week for it.',
     'Coffee first.',
+  ].join('\n'),
+  'talk.hr-everyday': [
+    'Two hundred applications for one job, and',
+    'I am to invite ten of them by Friday.',
+    'Who is supposed to read them all?',
   ].join('\n'),
   'card.presents': 'LMIS presents',
   'card.title': 'Shadow AI',

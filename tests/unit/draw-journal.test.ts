@@ -17,6 +17,7 @@ import {
   PAGE_MARK_RIGHT,
   POLICY_BLOCK,
   POLICY_GAP,
+  POLICY_MARK_Y,
   pageMarkOrigin,
   policyOrigins,
   TAB_CLOSED,
@@ -944,6 +945,267 @@ describe('the pages of the creatures tab in the journal (0038)', () => {
       const renderer = recordingRenderer();
       drawJournal(renderer, { ...reading(tab), captured: ALL }, { tab, page: 0 }, CONTENT, GERMAN);
       expect(mark(renderer.calls)).toStrictEqual([]);
+    }
+  });
+});
+
+describe('the cases tab with four regions (0040)', () => {
+  /** Five traces each of Sales, Marketing and Support and three of HR, in the order of the floor. */
+  const REGION_OF = [
+    ...Array.from({ length: 5 }, () => 'sales'),
+    ...Array.from({ length: 5 }, () => 'marketing'),
+    ...Array.from({ length: 5 }, () => 'support'),
+    ...Array.from({ length: 3 }, () => 'hr'),
+  ];
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: REGION_OF.map((region, n) => ({
+        name: `trace:${region}`,
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  const cases = (found: readonly number[], settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    const traces: TraceState[] = REGION_OF.map((_, trace) => ({
+      trace,
+      light: 0,
+      found: found.includes(trace) ? 60 : null,
+    }));
+    drawJournal(
+      renderer,
+      { ...reading('cases'), traces },
+      { tab: 'cases', page: 0 },
+      content,
+      settings,
+    );
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+
+  it('shows HR alone, in the first place, while no trace of the other three is found', () => {
+    const entry = cases([15]);
+    // `Personal` 8 and `Spuren: 1 von 3` 12 glyphs; `P` is glyph 48, `S` 51.
+    expect(entry).toHaveLength(8 + 12);
+    expect(entry[0]).toBe('drawSprite 48 at 16,36');
+    expect(entry[8]).toBe('drawSprite 51 at 16,48');
+    // The counts: `1` and `3`, glyphs 17 and 19.
+    expect(entry).toContain('drawSprite 17 at 64,48');
+    expect(entry.at(-1)).toBe('drawSprite 19 at 100,48');
+  });
+
+  it('shows Sales, Marketing, Support and HR 36 px apart, with a trace of each found', () => {
+    const entries = cases([0, 5, 10, 15]);
+    // `Vertrieb` 8, `Marketing` 9, `Support` 7 and `Personal` 8 glyphs, each with its count of 12.
+    expect(entries).toHaveLength(8 + 12 + 9 + 12 + 7 + 12 + 8 + 12);
+    expect(entries[0]).toBe('drawSprite 54 at 16,36');
+    expect(entries[20]).toBe('drawSprite 45 at 16,72');
+    expect(entries[41]).toBe('drawSprite 51 at 16,108');
+    expect(entries[60]).toBe('drawSprite 48 at 16,144');
+    expect(entries[68]).toBe('drawSprite 51 at 16,156');
+  });
+
+  it('reads `HR` and `Traces: 3 of 3` in English', () => {
+    const entry = cases([15, 16, 17], ENGLISH);
+    // `H` is glyph 40, `T` 52.
+    expect(entry).toHaveLength(2 + 11);
+    expect(entry[0]).toBe('drawSprite 40 at 16,36');
+    expect(entry[2]).toBe('drawSprite 52 at 16,48');
+  });
+});
+
+describe('the pages of the policy tab in the journal (0040)', () => {
+  const SALES = { region: 'sales', at: 900 };
+  const MARKETING = { region: 'marketing', at: 930 };
+  const SUPPORT = { region: 'support', at: 960 };
+  const shown = (solved: GameState['solved'], settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    drawJournal(
+      renderer,
+      { ...reading('policy'), solved },
+      { tab: 'policy', page: 0 },
+      CONTENT,
+      settings,
+    );
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+
+  it('places the mark on the line y = 26, with its right end at x = 304', () => {
+    // Between the rule under the tabs, which ends at y = 24, and the first block at y = 36.
+    expect(POLICY_MARK_Y).toBe(26);
+    expect(PAGE_MARK_RIGHT).toBe(304);
+    // `1 von 2`: seven cells; `1 of 2`: six.
+    expect(pageMarkOrigin(0, 2, 'de', POLICY_MARK_Y)).toStrictEqual({ x: 262, y: 26 });
+    expect(pageMarkOrigin(1, 2, 'de', POLICY_MARK_Y)).toStrictEqual({ x: 262, y: 26 });
+    expect(pageMarkOrigin(0, 2, 'en', POLICY_MARK_Y)).toStrictEqual({ x: 268, y: 26 });
+    // The creatures tab keeps its line: the first name's (0038).
+    expect(pageMarkOrigin(0, 2, 'de')).toStrictEqual({ x: 262, y: 35 });
+  });
+
+  it('draws no mark and nothing above y = 36 with up to three solved cases, in both languages', () => {
+    for (const settings of [GERMAN, ENGLISH]) {
+      for (const solved of [[SALES], [SUPPORT, MARKETING], [MARKETING, SUPPORT, SALES]]) {
+        const calls = shown(solved, settings);
+        expect(calls[0]).toMatch(/ at 16,36$/);
+        expect(
+          calls.filter((call) => Number(call.slice(call.lastIndexOf(',') + 1)) < 36),
+        ).toStrictEqual([]);
+      }
+    }
+  });
+});
+
+describe('four solved cases in the journal (0040)', () => {
+  /** Five traces each of Sales, Marketing and Support and three of HR, in the order of the floor. */
+  const REGION_OF = [
+    ...Array.from({ length: 5 }, () => 'sales'),
+    ...Array.from({ length: 5 }, () => 'marketing'),
+    ...Array.from({ length: 5 }, () => 'support'),
+    ...Array.from({ length: 3 }, () => 'hr'),
+  ];
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: REGION_OF.map((region, n) => ({
+        name: `trace:${region}`,
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  const shown = (
+    tab: JournalTab,
+    solved: GameState['solved'],
+    page = 0,
+    settings = GERMAN,
+  ): string[] => {
+    const renderer = recordingRenderer();
+    const state: GameState = {
+      ...reading(tab),
+      traces: REGION_OF.map((_, trace) => ({ trace, light: 0, found: 60 })),
+      solved,
+    };
+    drawJournal(renderer, state, { tab, page }, content, settings);
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+  /** The calls that draw on the line with its top at y. */
+  const at = (calls: readonly string[], y: number): string[] =>
+    calls.filter((call) => call.endsWith(`,${y}`));
+  /** The lowest top of a line that is drawn. */
+  const lowest = (calls: readonly string[]): number =>
+    Math.max(...calls.map((call) => Number(call.slice(call.lastIndexOf(',') + 1))));
+  const SALES = { region: 'sales', at: 900 };
+  const MARKETING = { region: 'marketing', at: 930 };
+  const SUPPORT = { region: 'support', at: 960 };
+  const HR = { region: 'hr', at: 990 };
+  const FOUR = [SALES, MARKETING, SUPPORT, HR];
+
+  it('draws four entries on the cases tab, 36 px apart, each with its outcome, and none below y = 168', () => {
+    const entries = shown('cases', [HR, SUPPORT, SALES, MARKETING]);
+    // The order is that of the cases: `V`, `M`, `S`, `P`.
+    expect([36, 72, 108, 144].map((y) => at(entries, y)[0])).toStrictEqual([
+      'drawSprite 54 at 16,36',
+      'drawSprite 45 at 16,72',
+      'drawSprite 51 at 16,108',
+      'drawSprite 48 at 16,144',
+    ]);
+    // `Personal`, then `Spuren: 3 von 3`.
+    expect(at(entries, 144)).toHaveLength(8);
+    expect(at(entries, 156)).toHaveLength(12);
+    // `Gelöst: …` on the third line of each entry.
+    expect([60, 96, 132, 168].map((y) => at(entries, y)[0])).toStrictEqual([
+      'drawSprite 39 at 16,60',
+      'drawSprite 39 at 16,96',
+      'drawSprite 39 at 16,132',
+      'drawSprite 39 at 16,168',
+    ]);
+    // `Gelöst: Ein Werkzeug sortierte Bewerbungen vor.`: 42 glyphs; its line ends at y = 178.
+    expect(at(entries, 168)).toHaveLength(42);
+    expect(lowest(entries)).toBe(168);
+  });
+
+  it('draws no mark on the cases tab', () => {
+    const entries = shown('cases', FOUR);
+    // Nothing above the first entry: the line of the mark stays empty.
+    expect(at(entries, 26)).toStrictEqual([]);
+    expect(
+      entries.filter((call) => Number(call.slice(call.lastIndexOf(',') + 1)) < 36),
+    ).toStrictEqual([]);
+  });
+
+  it('draws the three blocks solved first on page 0, from (16, 36), and the mark `1 von 2`', () => {
+    const first = shown('policy', FOUR);
+    // As the three alone draw them, and the mark above them.
+    const three = shown('policy', [SALES, MARKETING, SUPPORT]);
+    expect(first.slice(0, three.length)).toStrictEqual(three);
+    expect(at(three, 26)).toStrictEqual([]);
+    expect(at(first, 36)[0]).toBe('drawSprite 42 at 16,36');
+    expect(lowest(first)).toBe(168);
+    // `1`, `v`, `o`, `n`, `2`: glyphs 17, 86, 79, 78 and 18, one empty cell between two parts.
+    expect(first.slice(three.length)).toStrictEqual([
+      'drawSprite 17 at 262,26',
+      'drawSprite 86 at 274,26',
+      'drawSprite 79 at 280,26',
+      'drawSprite 78 at 286,26',
+      'drawSprite 18 at 298,26',
+    ]);
+  });
+
+  it('draws the fourth block alone on page 1, from (16, 36), and the mark `2 von 2`', () => {
+    const second = shown('policy', [HR, SUPPORT, MARKETING, SALES], 1);
+    // Sales was solved last: its block, `J…`, four lines from y = 36.
+    expect(second[0]).toBe('drawSprite 42 at 16,36');
+    expect([
+      ...new Set(second.map((call) => Number(call.slice(call.lastIndexOf(',') + 1)))),
+    ]).toStrictEqual([36, 48, 60, 72, 26]);
+    expect(at(second, 26)).toStrictEqual([
+      'drawSprite 18 at 262,26',
+      'drawSprite 86 at 274,26',
+      'drawSprite 79 at 280,26',
+      'drawSprite 78 at 286,26',
+      'drawSprite 18 at 298,26',
+    ]);
+    // HR solved last: its block, three lines.
+    const hr = shown('policy', FOUR, 1);
+    expect(at(hr, 36).length).toBeGreaterThan(0);
+    expect(at(hr, 60).length).toBeGreaterThan(0);
+    expect(at(hr, 72)).toStrictEqual([]);
+  });
+
+  it('reads `1 of 2` in English, and the block of HR on page 1', () => {
+    // `1`, `o`, `f`, `2`: glyphs 17, 79, 70 and 18.
+    expect(at(shown('policy', FOUR, 0, ENGLISH), 26)).toStrictEqual([
+      'drawSprite 17 at 268,26',
+      'drawSprite 79 at 280,26',
+      'drawSprite 70 at 286,26',
+      'drawSprite 18 at 298,26',
+    ]);
+    // `A person decides about people. …`: `A` is glyph 33.
+    const second = shown('policy', FOUR, 1, ENGLISH);
+    expect(second[0]).toBe('drawSprite 33 at 16,36');
+    expect(at(second, 26)[0]).toBe('drawSprite 18 at 268,26');
+  });
+
+  it('keeps every page of every order of the four inside the surface, in both languages', () => {
+    const orders = (rest: readonly (typeof SALES)[]): (typeof SALES)[][] =>
+      rest.length === 0
+        ? [[]]
+        : rest.flatMap((first) =>
+            orders(rest.filter((other) => other !== first)).map((tail) => [first, ...tail]),
+          );
+    for (const settings of [GERMAN, ENGLISH]) {
+      for (const order of orders(FOUR)) {
+        for (const page of [0, 1]) {
+          expect(lowest(shown('policy', order, page, settings))).toBeLessThanOrEqual(168);
+        }
+      }
     }
   });
 });

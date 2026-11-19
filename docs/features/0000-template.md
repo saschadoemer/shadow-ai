@@ -32,13 +32,14 @@ is reported as "criterion 4", not as an interpretation.
 Which unit tests, which architecture or asset tests, what the smoke test asserts. Which fixtures
 are added under `tests/fixtures/`.
 
-## Acceptance plan (manual test)
+## Acceptance plan (the walk)
 
-The walk the author takes, guided by the agent one step at a time, after the implementation is
-complete and before the pull request is opened. Written so that a failure is reported as
-"step 7", not as an impression. The rules are in `docs/spec/testing.md` §5. The `Result` line is
-filled in by the agent from the author's answers: `passed YYYY-MM-DD, steps 1–n`, then the feel
-notes.
+The walk the agent plays in a browser, by simulated key presses, after the implementation is
+complete and before the pull request is opened. Written for a person at the keyboard, so that
+the author can take it by hand as well, and so that a failure is reported as "step 7", not as
+an impression. The rules are in `docs/spec/testing.md` §5. The `Result` line is filled in by
+the agent: `passed YYYY-MM-DD, steps 1–n, played by the agent`, then the feel notes from the
+author's answers.
 
 **Preconditions:** how to start (`npm run dev` or the container), which browser, which window
 size, where in the game to begin.

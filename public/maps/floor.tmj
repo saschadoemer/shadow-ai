@@ -2225,6 +2225,101 @@
           "width": 16,
           "x": 992,
           "y": 1168
+        },
+        {
+          "height": 0,
+          "id": 141,
+          "name": "person:hr:1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 104,
+          "y": 88,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 300
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 142,
+          "name": "person:hr:2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 184,
+          "y": 88
+        },
+        {
+          "height": 0,
+          "id": 143,
+          "name": "person:hr:3",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 184,
+          "y": 216,
+          "properties": [
+            {
+              "name": "pause",
+              "type": "int",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "height": 0,
+          "id": 144,
+          "name": "person:hr:4",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 184,
+          "y": 88
+        },
+        {
+          "height": 16,
+          "id": 145,
+          "name": "trace:hr",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 48,
+          "y": 48
+        },
+        {
+          "height": 16,
+          "id": 146,
+          "name": "trace:hr",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 224,
+          "y": 48
+        },
+        {
+          "height": 16,
+          "id": 147,
+          "name": "trace:hr",
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 16,
+          "x": 48,
+          "y": 160
         }
       ],
       "opacity": 1,
@@ -2235,7 +2330,7 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 141,
+  "nextobjectid": 148,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",

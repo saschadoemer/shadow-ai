@@ -10,8 +10,14 @@ import { rgb } from './placeholder-tiles.ts';
  * pixels take the shirt's colour. Pure.
  */
 
-/** One shirt per person, in route order: reception, marketing, support, sales. */
-export const PERSON_SHIRTS: readonly PaletteColour[] = ['#3e8948', '#e43b44', '#f77622', '#b55088'];
+/** One shirt per person, in route order: reception, marketing, support, sales, and HR (0040). */
+export const PERSON_SHIRTS: readonly PaletteColour[] = [
+  '#3e8948',
+  '#e43b44',
+  '#f77622',
+  '#b55088',
+  '#feae34',
+];
 
 /** The data protection officer's shirt (0017): light grey, the colour of no other shirt. */
 export const OFFICER_SHIRT: PaletteColour = '#c0cbdc';

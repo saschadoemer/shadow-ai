@@ -333,20 +333,21 @@ const withMover = (map: TileMap, fields: Partial<MoverState>): GameState => {
 const MOVER_TALK = { speaker: 'mover', index: 0, page: 0 } as const;
 
 describe('the speakers of a step (0018)', () => {
+  // The person without lines walks in Accounting: since 0040 the route of HR has lines.
   const routes = routesOf([
     ...WALKER,
     { name: 'dog:reception:1', x: 40, y: 152 },
     { name: 'dog:reception:2', x: 104, y: 152 },
-    { name: 'person:hr:1', x: 200, y: 152 },
-    { name: 'person:hr:2', x: 264, y: 152 },
+    { name: 'person:accounting:1', x: 200, y: 152 },
+    { name: 'person:accounting:2', x: 264, y: 152 },
   ]);
   const movers = createInitialState(
     mapAt(300, 20, [
       ...WALKER,
       { name: 'dog:reception:1', x: 40, y: 152 },
       { name: 'dog:reception:2', x: 104, y: 152 },
-      { name: 'person:hr:1', x: 200, y: 152 },
-      { name: 'person:hr:2', x: 264, y: 152 },
+      { name: 'person:accounting:1', x: 200, y: 152 },
+      { name: 'person:accounting:2', x: 264, y: 152 },
     ]),
   ).movers;
 
@@ -366,7 +367,7 @@ describe('the speakers of a step (0018)', () => {
   });
 
   it('read the lines from the table they are given: the game passes its own', () => {
-    const table: readonly Colleague[] = [{ route: 'person:hr', pages: [SAYING] }];
+    const table: readonly Colleague[] = [{ route: 'person:accounting', pages: [SAYING] }];
     expect(speakersOf([], movers, routes, table)).toStrictEqual([
       { speaker: 'mover', index: 2, x: 200, y: 152, pages: [SAYING] },
     ]);
@@ -479,9 +480,10 @@ describe('talking to a colleague (0018)', () => {
   });
 
   it('opens nothing next to a person without lines or next to a dog', () => {
+    // Nobody walks in Accounting yet: its route has no lines.
     const silent = mapAt(74, 48, [
-      { name: 'person:hr:1', x: 64, y: 48, pause: 600 },
-      { name: 'person:hr:2', x: 128, y: 48 },
+      { name: 'person:accounting:1', x: 64, y: 48, pause: 600 },
+      { name: 'person:accounting:2', x: 128, y: 48 },
     ]);
     const next = update(createInitialState(silent), TALK, silent);
     expect(next.dialogue).toBeNull();

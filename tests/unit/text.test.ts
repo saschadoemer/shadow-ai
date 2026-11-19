@@ -1,4 +1,5 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
+import { POLICY_PER_PAGE } from '../../src/game/journal';
 import {
   DEFAULT_LANGUAGE,
   LANGUAGES,
@@ -422,6 +423,107 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the words of the case of HR in both languages (0040)', () => {
+    const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
+      textOf(textKey(id), language).split('\n');
+    expect([lines('region.hr', 'de'), lines('region.hr', 'en')]).toStrictEqual([
+      ['Personal'],
+      ['HR'],
+    ]);
+    expect(lines('talk.hr-everyday', 'de')).toStrictEqual([
+      'Zweihundert Bewerbungen auf eine Stelle,',
+      'und bis Freitag soll ich zehn einladen.',
+      'Wer liest die bitte alle?',
+    ]);
+    expect(lines('talk.hr-everyday', 'en')).toStrictEqual([
+      'Two hundred applications for one job, and',
+      'I am to invite ten of them by Friday.',
+      'Who is supposed to read them all?',
+    ]);
+    expect(lines('talk.hr-source-1', 'de')).toStrictEqual([
+      'Ein Werkzeug sortiert die Bewerbungen vor.',
+      'Oben stehen die, die es für passend hält –',
+      'die anderen sehe ich gar nicht mehr.',
+    ]);
+    expect(lines('talk.hr-source-1', 'en')).toStrictEqual([
+      'A tool sorts the applications for me. On top',
+      'are the ones it thinks fit – the others I',
+      'do not even see any more.',
+    ]);
+    expect(lines('talk.hr-source-2', 'de')).toStrictEqual([
+      'Wonach es sortiert, weiß ich nicht. Und die',
+      'Lebensläufe liegen jetzt alle bei einem',
+      'Anbieter, den hier keiner kennt.',
+    ]);
+    expect(lines('talk.hr-source-2', 'en')).toStrictEqual([
+      'What it sorts by, I do not know. And all the',
+      'CVs now lie with a provider nobody here',
+      'has heard of.',
+    ]);
+    expect(lines('talk.hr-after', 'de')).toStrictEqual([
+      'Danke. Ab jetzt lese ich wieder selbst –',
+      'und wenn mir etwas vorsortiert, will ich',
+      'wissen, wonach.',
+    ]);
+    expect(lines('talk.hr-after', 'en')).toStrictEqual([
+      'Thanks. From now on I read them myself –',
+      'and when something sorts for me, I want to',
+      'know what by.',
+    ]);
+    expect(lines('case.hr-outcome', 'de')).toStrictEqual([
+      'Gelöst: Ein Werkzeug sortierte Bewerbungen vor.',
+    ]);
+    expect(lines('case.hr-outcome', 'en')).toStrictEqual([
+      'Solved: a tool pre-sorted the applications.',
+    ]);
+    expect(lines('policy.hr', 'de')).toStrictEqual([
+      'Über Menschen entscheidet ein Mensch. Was eine',
+      'Maschine vorsortiert, sieht jemand an – und',
+      'kann sagen, wonach sortiert wurde.',
+    ]);
+    expect(lines('policy.hr', 'en')).toStrictEqual([
+      'A person decides about people. What a machine',
+      'has pre-sorted, somebody looks at – and can',
+      'say what it was sorted by.',
+    ]);
+    expect(lines('talk.intern-hr-start', 'de')).toStrictEqual([
+      'Dann HR, am Nordflur ganz links. Die laden',
+      'neuerdings erstaunlich schnell zum Gespräch',
+      'ein – bei zweihundert Bewerbungen.',
+    ]);
+    expect(lines('talk.intern-hr-start', 'en')).toStrictEqual([
+      'HR next, far left on the north corridor.',
+      'Lately they invite people surprisingly fast',
+      '– with two hundred applications.',
+    ]);
+    expect(lines('talk.intern-hr-traces', 'de')).toStrictEqual([
+      'In HR stehen nur drei Schreibtische. Schau',
+      'auf jeden Bildschirm – mehr Geräte haben',
+      'die da nicht.',
+    ]);
+    expect(lines('talk.intern-hr-traces', 'en')).toStrictEqual([
+      'HR has only three desks. Look at every',
+      'screen – they have no other devices',
+      'in there.',
+    ]);
+    expect(lines('talk.intern-hr-source', 'de')).toStrictEqual([
+      'Gelbes Hemd, läuft zwischen den Tischen hin',
+      'und her. Frag mal, wer die Bewerbungen',
+      'eigentlich liest.',
+    ]);
+    expect(lines('talk.intern-hr-source', 'en')).toStrictEqual([
+      'Yellow shirt, walks back and forth between',
+      'the desks. Ask who actually reads the',
+      'applications.',
+    ]);
+    expect(lines('notice.upgrade-filter', 'de')).toStrictEqual([
+      'Die Lampe schafft jetzt auch dichten Schatten.',
+    ]);
+    expect(lines('notice.upgrade-filter', 'en')).toStrictEqual([
+      'The lamp now gets through dense shadow too.',
+    ]);
+  });
+
   it('holds the two lines of the card in both languages (0036)', () => {
     const both = (id: Parameters<typeof textKey>[0]): string[] => [
       textOf(textKey(id), 'de'),
@@ -525,19 +627,25 @@ describe('the language table (INV-4, 0016)', () => {
       'Rotes Hemd, pendelt zwischen den Tischinseln',
       'Red shirt, goes back and forth between the',
     ]);
+    // The last page no longer names HR, whose case came with 0040.
     expect(first('talk.intern-done')).toStrictEqual([
-      'Mehr weiß ich gerade auch nicht. Am Nordflur',
-      'That is all I know for now. Off the north',
+      'Mehr weiß ich gerade auch nicht. In der',
+      'That is all I know for now. Nobody has been',
     ]);
     expect(textOf(textKey('talk.intern-done'), 'de').split('\n')).toStrictEqual([
-      'Mehr weiß ich gerade auch nicht. Am Nordflur',
-      'kommst du jetzt in HR und Buchhaltung rein –',
+      'Mehr weiß ich gerade auch nicht. In der',
+      'Buchhaltung am Nordflur war noch keiner –',
       'was da los ist, erzählst du mir.',
     ]);
-    // Seven keys of 0033 — the page that sent for the lamp went with 0039 — and the three of
-    // Support (0037), each one page of three lines.
+    expect(textOf(textKey('talk.intern-done'), 'en').split('\n')).toStrictEqual([
+      'That is all I know for now. Nobody has been',
+      'to Accounting on the north corridor yet –',
+      'you tell me what is going on there.',
+    ]);
+    // Seven keys of 0033 — the page that sent for the lamp went with 0039 — the three of
+    // Support (0037) and the three of HR (0040), each one page of three lines.
     const ids = Object.keys(TABLE.de).filter((id) => id.startsWith('talk.intern-'));
-    expect(ids).toHaveLength(10);
+    expect(ids).toHaveLength(13);
     for (const language of LANGUAGES) {
       for (const id of ids) {
         expect(TABLE[language][id as TextId].split('\n'), `${language} ${id}`).toHaveLength(3);
@@ -601,6 +709,26 @@ describe('the language table (INV-4, 0016)', () => {
         for (const line of lines) {
           expect(line.length, `${language} ${key}: "${line}"`).toBeLessThanOrEqual(width);
           expect(line.trim(), `${language} ${key}`).not.toBe('');
+        }
+      }
+    }
+  });
+
+  it('keeps any three blocks of the policy at ten lines together, in both languages (0040)', () => {
+    // A page of the policy tab holds three blocks: ten lines and two gaps end at y = 178.
+    expect(POLICY_PER_PAGE).toBe(3);
+    for (const language of LANGUAGES) {
+      const lines = Object.entries(TABLE[language])
+        .filter(([id]) => id.startsWith('policy.'))
+        .map(([id, text]) => [id, text.split('\n').length] as const);
+      expect(lines.length, language).toBeGreaterThanOrEqual(POLICY_PER_PAGE);
+      for (const [i, [a, one]] of lines.entries()) {
+        for (const [j, [b, two]] of lines.entries()) {
+          for (const [k, [c, three]] of lines.entries()) {
+            if (i < j && j < k) {
+              expect(one + two + three, `${language} ${a} ${b} ${c}`).toBeLessThanOrEqual(10);
+            }
+          }
         }
       }
     }

@@ -6,6 +6,7 @@ coverage/
 # Test runners
 playwright-report/
 test-results/
+walk-results/
 
 # Local agent configuration and worktrees
 CLAUDE.local.md

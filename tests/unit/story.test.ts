@@ -73,10 +73,12 @@ describe('the scenes of the story (0026)', () => {
 describe('the close (0034)', () => {
   const CLOSE = [textKey('story.close-1'), textKey('story.close-2'), textKey('story.close-3')];
   const SALES = { region: 'sales', at: 400 };
-  const MARKETING = { region: 'marketing', at: 550 };
-  /** The third case of the game since 0037, and here the one solved last. */
-  const SUPPORT = { region: 'support', at: 700 };
-  const ALL = [SALES, MARKETING, SUPPORT];
+  const MARKETING = { region: 'marketing', at: 500 };
+  /** The third case of the game since 0037. */
+  const SUPPORT = { region: 'support', at: 600 };
+  /** The fourth case since 0040, and here the one solved last. */
+  const HR = { region: 'hr', at: 700 };
+  const ALL = [SALES, MARKETING, SUPPORT, HR];
 
   it('is the second scene, with its three pages', () => {
     expect(SCENES).toStrictEqual([
@@ -100,6 +102,9 @@ describe('the close (0034)', () => {
     // With Sales and Marketing solved and Support not, it is not due (0037).
     expect(closeDue(100000, [SALES, MARKETING], null)).toBe(false);
     expect(closeDue(100000, [SUPPORT, SALES], null)).toBe(false);
+    // With the first three solved and HR not, it is not due (0040).
+    expect(closeDue(100000, [SALES, MARKETING, SUPPORT], null)).toBe(false);
+    expect(closeDue(100000, [HR, SUPPORT, SALES], null)).toBe(false);
   });
 
   it('is due 300 steps after the step that solved the last case, and not one before', () => {
@@ -111,13 +116,14 @@ describe('the close (0034)', () => {
 
   it('counts from the latest case, in any order', () => {
     const turned = [
-      { region: 'support', at: 400 },
-      { region: 'sales', at: 550 },
+      { region: 'hr', at: 400 },
+      { region: 'support', at: 500 },
+      { region: 'sales', at: 600 },
       { region: 'marketing', at: 700 },
     ];
     expect(closeDue(999, turned, null)).toBe(false);
     expect(closeDue(1000, turned, null)).toBe(true);
-    expect(closeDue(1000, [SUPPORT, MARKETING, SALES], null)).toBe(true);
+    expect(closeDue(1000, [HR, SUPPORT, MARKETING, SALES], null)).toBe(true);
   });
 
   it('is not due once it was closed', () => {

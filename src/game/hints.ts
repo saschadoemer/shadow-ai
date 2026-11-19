@@ -40,6 +40,11 @@ export const HINTS: Readonly<Partial<Record<string, CaseHints>>> = {
     traces: textKey('talk.intern-support-traces'),
     source: textKey('talk.intern-support-source'),
   },
+  hr: {
+    start: textKey('talk.intern-hr-start'),
+    traces: textKey('talk.intern-hr-traces'),
+    source: textKey('talk.intern-hr-source'),
+  },
 };
 
 /** The page when every case is solved. */

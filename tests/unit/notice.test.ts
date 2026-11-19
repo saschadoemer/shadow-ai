@@ -364,3 +364,68 @@ describe('the notice of an upgrade (0029)', () => {
     expect(shown.slice(240)).toStrictEqual([null, null]);
   });
 });
+
+describe('the notice of the filter (0040)', () => {
+  const FILTER = textKey('notice.upgrade-filter');
+  /** HR was solved at step 1000 with the wider cone and earned the filter; `since` steps have passed. */
+  const earned = (since: number): GameState => ({
+    ...BASE,
+    tick: 1000 + since,
+    solved: [
+      { region: 'marketing', at: 400 },
+      { region: 'hr', at: 1000 },
+    ],
+    upgrades: ['wide-cone', 'filter'],
+    lamp: { ...BASE.lamp, strength: 3 },
+  });
+
+  it('is the line of the filter, for two seconds', () => {
+    expect(NOTICE_UPGRADE.filter).toBe(FILTER);
+  });
+
+  it('follows the notice of the solved case: the case for 120 steps, the filter for the next 120', () => {
+    expect(noticeOf(earned(0))).toBe(NOTICE_CASE_SOLVED);
+    expect(noticeOf(earned(119))).toBe(NOTICE_CASE_SOLVED);
+    expect(noticeOf(earned(120))).toBe(FILTER);
+    expect(noticeOf(earned(239))).toBe(FILTER);
+    expect(noticeOf(earned(240))).toBeNull();
+    expect(noticeOf(earned(6000))).toBeNull();
+  });
+
+  it('is what a game shows that solves HR with the wider cone: the case, then the filter, then nothing', () => {
+    const map = grassMap(
+      20,
+      12,
+      { x: 104, y: 144 },
+      [
+        { name: 'person:hr:1', x: 64, y: 144, pause: 600 },
+        { name: 'person:hr:2', x: 128, y: 144 },
+      ],
+      [{ name: 'trace:hr', x: 240, y: 128, width: 16, height: 16 }],
+    );
+    const TALK: GameInput = { ...NONE, talk: true };
+    const start = createInitialState(map);
+    let state: GameState = {
+      ...start,
+      tick: 1000,
+      traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+      solved: [{ region: 'marketing', at: 400 }],
+      upgrades: ['wide-cone'],
+      lamp: { ...start.lamp, strength: 2 },
+    };
+    for (const input of [TALK, NONE, TALK, NONE, TALK]) {
+      state = update(state, input, map);
+    }
+    expect(state.solved.at(-1)).toStrictEqual({ region: 'hr', at: 1005 });
+    expect(state.upgrades).toStrictEqual(['wide-cone', 'filter']);
+    expect(state.lamp.strength).toBe(3);
+    const shown: (string | null)[] = [];
+    for (let step = 0; step < 242; step += 1) {
+      shown.push(noticeOf(state));
+      state = update(state, NONE, map);
+    }
+    expect(shown.slice(0, 120).every((key) => key === NOTICE_CASE_SOLVED)).toBe(true);
+    expect(shown.slice(120, 240).every((key) => key === FILTER)).toBe(true);
+    expect(shown.slice(240)).toStrictEqual([null, null]);
+  });
+});

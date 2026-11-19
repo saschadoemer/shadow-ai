@@ -35,6 +35,7 @@ export const de = {
   'region.sales': 'Vertrieb',
   'region.marketing': 'Marketing',
   'region.support': 'Support',
+  'region.hr': 'Personal',
   'creature.snippet-name': 'Schnipsel',
   'creature.snippet-text': [
     'Ein Stück Text, das jemand in einen',
@@ -140,6 +141,7 @@ export const de = {
   ].join('\n'),
   'notice.case-solved': 'Der Fall ist gelöst. Sieh ins Journal.',
   'notice.upgrade-wide-cone': 'Die Lampe leuchtet jetzt breiter und stärker.',
+  'notice.upgrade-filter': 'Die Lampe schafft jetzt auch dichten Schatten.',
   'talk.marketing-source-1': [
     'Die Motive macht ein Bildgenerator – in zehn',
     'Minuten statt in zwei Tagen, und die Agentur',
@@ -181,6 +183,27 @@ export const de = {
     'Werkzeuge und Erweiterungen kommen von der',
     'freigegebenen Liste – und nur von dort. Fehlt',
     'eines, sag es: Dann kommt es auf die Liste.',
+  ].join('\n'),
+  'talk.hr-source-1': [
+    'Ein Werkzeug sortiert die Bewerbungen vor.',
+    'Oben stehen die, die es für passend hält –',
+    'die anderen sehe ich gar nicht mehr.',
+  ].join('\n'),
+  'talk.hr-source-2': [
+    'Wonach es sortiert, weiß ich nicht. Und die',
+    'Lebensläufe liegen jetzt alle bei einem',
+    'Anbieter, den hier keiner kennt.',
+  ].join('\n'),
+  'talk.hr-after': [
+    'Danke. Ab jetzt lese ich wieder selbst –',
+    'und wenn mir etwas vorsortiert, will ich',
+    'wissen, wonach.',
+  ].join('\n'),
+  'case.hr-outcome': 'Gelöst: Ein Werkzeug sortierte Bewerbungen vor.',
+  'policy.hr': [
+    'Über Menschen entscheidet ein Mensch. Was eine',
+    'Maschine vorsortiert, sieht jemand an – und',
+    'kann sagen, wonach sortiert wurde.',
   ].join('\n'),
   'talk.intern-sales-start': [
     'Vertrieb? Am Ende des Flurs nach Osten.',
@@ -227,15 +250,35 @@ export const de = {
     'dem Drucker hin und her. Vierzig Tickets vor',
     'dem ersten Kaffee – frag nach den Sprachen.',
   ].join('\n'),
+  'talk.intern-hr-start': [
+    'Dann HR, am Nordflur ganz links. Die laden',
+    'neuerdings erstaunlich schnell zum Gespräch',
+    'ein – bei zweihundert Bewerbungen.',
+  ].join('\n'),
+  'talk.intern-hr-traces': [
+    'In HR stehen nur drei Schreibtische. Schau',
+    'auf jeden Bildschirm – mehr Geräte haben',
+    'die da nicht.',
+  ].join('\n'),
+  'talk.intern-hr-source': [
+    'Gelbes Hemd, läuft zwischen den Tischen hin',
+    'und her. Frag mal, wer die Bewerbungen',
+    'eigentlich liest.',
+  ].join('\n'),
   'talk.intern-done': [
-    'Mehr weiß ich gerade auch nicht. Am Nordflur',
-    'kommst du jetzt in HR und Buchhaltung rein –',
+    'Mehr weiß ich gerade auch nicht. In der',
+    'Buchhaltung am Nordflur war noch keiner –',
     'was da los ist, erzählst du mir.',
   ].join('\n'),
   'talk.sales-everyday': [
     'Drei Angebote bis heute Abend, und jedes soll',
     'klingen, als hätte ich eine Woche Zeit gehabt.',
     'Erst mal Kaffee.',
+  ].join('\n'),
+  'talk.hr-everyday': [
+    'Zweihundert Bewerbungen auf eine Stelle,',
+    'und bis Freitag soll ich zehn einladen.',
+    'Wer liest die bitte alle?',
   ].join('\n'),
   'card.presents': 'LMIS präsentiert',
   'card.title': 'Shadow AI',
