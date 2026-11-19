@@ -39,6 +39,7 @@ import {
   NOTICE_BAR,
   NOTICE_CAPACITY,
   noticeOrigin,
+  PANE_FRAME,
   playerFrame,
   playerVisible,
   type SceneContent,
@@ -2128,5 +2129,105 @@ describe('the card in the scene (0036)', () => {
     // The first letter of the call, `M`, where a page starts.
     expect(renderer.calls).toContain(`drawSprite 45 at ${DIALOGUE_TEXT.x},${DIALOGUE_TEXT.y}`);
     expect(renderer.calls.some((call) => call.endsWith(' at 112,74'))).toBe(false);
+  });
+});
+
+describe('the panes in the scene (0038)', () => {
+  const rect = (name: string, x: number, y: number) => ({ name, x, y, width: 16, height: 16 });
+  /** 20x12 cells of open floor: a trace on cell (5, 8), a pane on cell (6, 8) and one on (15, 3). */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: grassMap(
+      20,
+      12,
+      { x: 104, y: 100 },
+      [],
+      [
+        rect('trace:support', 80, 128),
+        rect('pane:support', 96, 128),
+        rect('pane:support', 240, 48),
+      ],
+    ),
+  };
+  const lurkerSheet = content.creatureSheets.lurker;
+  const scene = (fields: Partial<GameState> = {}): GameState => ({
+    ...state({ x: 104, y: 100, facing: 'down' }),
+    tick: QUIET_TICK,
+    traces: [{ trace: 0, light: 0, found: null }],
+    panes: [
+      { pane: 0, lit: false },
+      { pane: 1, lit: false },
+    ],
+    ...fields,
+  });
+  /** The calls that draw from a sheet, in the order they were drawn. */
+  const spritesOn = (drawn: GameState, sheet: SpriteSheet): string[] => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, drawn, content);
+    return renderer.calls
+      .filter((call) => call.startsWith('drawSprite'))
+      .filter((_call, i) => renderer.sheets[i] === sheet);
+  };
+
+  it('draws every open pane with frame 3 of the lurker sheet on its cell', () => {
+    expect(PANE_FRAME).toBe(3);
+    expect(spritesOn(scene(), lurkerSheet)).toStrictEqual([
+      'drawSprite 3 at 96,128',
+      'drawSprite 3 at 240,48',
+    ]);
+  });
+
+  it('draws it in the light as out of it: the eye stays', () => {
+    const lit = scene({
+      lamp: { on: true, strength: 1, used: true },
+      panes: [
+        { pane: 0, lit: true },
+        { pane: 1, lit: false },
+      ],
+    });
+    expect(spritesOn(lit, lurkerSheet)).toStrictEqual(spritesOn(scene(), lurkerSheet));
+  });
+
+  it('draws a closed pane not at all', () => {
+    expect(spritesOn(scene({ panes: [{ pane: 1, lit: false }] }), lurkerSheet)).toStrictEqual([
+      'drawSprite 3 at 240,48',
+    ]);
+    expect(spritesOn(scene({ panes: [] }), lurkerSheet)).toStrictEqual([]);
+  });
+
+  it('moves with the camera', () => {
+    const moved = { ...scene(), camera: { x: 10, y: 20 } };
+    expect(spritesOn(moved, lurkerSheet)[0]).toBe('drawSprite 3 at 86,108');
+  });
+
+  it('draws the panes after the traces and before the player', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene({ traces: [{ trace: 0, light: 30, found: null }] }), content);
+    const order = [content.traceSheet, lurkerSheet, content.playerSheet].map((sheet) =>
+      renderer.sheets.indexOf(sheet),
+    );
+    expect(order.every((index) => index >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toStrictEqual(order);
+    expect(renderer.sheets.lastIndexOf(lurkerSheet)).toBeLessThan(
+      renderer.sheets.indexOf(content.playerSheet),
+    );
+  });
+
+  it('draws a lurker on the floor as every creature: frames 0 and 1 in turn, frame 2 in the light', () => {
+    const lurker = (light: number): CreatureState => ({
+      species: 'lurker',
+      x: 150,
+      y: 100,
+      light,
+      home: { x: 136, y: 152 },
+    });
+    const free = scene({ panes: [], creatures: [lurker(0)] });
+    expect(spritesOn(free, lurkerSheet)).toStrictEqual(['drawSprite 0 at 142,84']);
+    expect(spritesOn({ ...free, tick: QUIET_TICK + 15 }, lurkerSheet)).toStrictEqual([
+      'drawSprite 1 at 142,84',
+    ]);
+    expect(spritesOn(scene({ panes: [], creatures: [lurker(12)] }), lurkerSheet)).toStrictEqual([
+      'drawSprite 2 at 142,84',
+    ]);
   });
 });
