@@ -260,6 +260,9 @@ export const TRACES: readonly { readonly region: string; readonly cell: Point }[
   { region: 'support', cell: { x: 88, y: 67 } },
   { region: 'support', cell: { x: 62, y: 73 } },
   { region: 'support', cell: { x: 98, y: 73 } },
+  { region: 'hr', cell: { x: 3, y: 3 } },
+  { region: 'hr', cell: { x: 14, y: 3 } },
+  { region: 'hr', cell: { x: 3, y: 10 } },
 ];
 
 /**
@@ -275,6 +278,13 @@ export const FIRST_TRACES = 5;
  * that no object of an earlier feature changes its id (0037).
  */
 export const SECOND_TRACES = 10;
+
+/**
+ * How many traces stand before the panes in the file: those of 0022, 0028 and 0037. Every
+ * later trace is written at the end of the file, after the routes of 0040, so that no object
+ * of an earlier feature changes its id (0040).
+ */
+export const THIRD_TRACES = 15;
 
 /**
  * The panes (0038): per pane its region and the cell of the screen it is open on. Three in
@@ -1276,10 +1286,12 @@ export function floorJson(): MapJson {
   const firstLaterFigure = firstMirage + MIRAGES.length;
   const laterFigures = FIGURES.slice(FIRST_FIGURES);
   const firstLastTrace = firstLaterFigure + laterFigures.length;
-  const lastTraces = TRACES.slice(SECOND_TRACES);
+  const lastTraces = TRACES.slice(SECOND_TRACES, THIRD_TRACES);
   const firstPane = firstLastTrace + lastTraces.length;
   const firstLaterRoute = firstPane + PANES.length;
   const laterRoutes = routePoints(ROUTES.slice(FIRST_ROUTES));
+  const firstNewTrace = firstLaterRoute + laterRoutes.length;
+  const newTraces = TRACES.slice(THIRD_TRACES);
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1330,6 +1342,9 @@ export function floorJson(): MapJson {
           ...laterRoutes.map((point, i) =>
             pointObject(firstLaterRoute + i, point.name, point.at, point.pause),
           ),
+          ...newTraces.map((trace, i) =>
+            rectObject(firstNewTrace + i, `trace:${trace.region}`, traceBox(trace.cell)),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1339,7 +1354,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstLaterRoute + laterRoutes.length,
+    nextobjectid: firstNewTrace + newTraces.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

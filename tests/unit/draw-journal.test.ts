@@ -947,3 +947,72 @@ describe('the pages of the creatures tab in the journal (0038)', () => {
     }
   });
 });
+
+describe('the cases tab with four regions (0040)', () => {
+  /** Five traces each of Sales, Marketing and Support and three of HR, in the order of the floor. */
+  const REGION_OF = [
+    ...Array.from({ length: 5 }, () => 'sales'),
+    ...Array.from({ length: 5 }, () => 'marketing'),
+    ...Array.from({ length: 5 }, () => 'support'),
+    ...Array.from({ length: 3 }, () => 'hr'),
+  ];
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: REGION_OF.map((region, n) => ({
+        name: `trace:${region}`,
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  const cases = (found: readonly number[], settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    const traces: TraceState[] = REGION_OF.map((_, trace) => ({
+      trace,
+      light: 0,
+      found: found.includes(trace) ? 60 : null,
+    }));
+    drawJournal(
+      renderer,
+      { ...reading('cases'), traces },
+      { tab: 'cases', page: 0 },
+      content,
+      settings,
+    );
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+
+  it('shows HR alone, in the first place, while no trace of the other three is found', () => {
+    const entry = cases([15]);
+    // `Personal` 8 and `Spuren: 1 von 3` 12 glyphs; `P` is glyph 48, `S` 51.
+    expect(entry).toHaveLength(8 + 12);
+    expect(entry[0]).toBe('drawSprite 48 at 16,36');
+    expect(entry[8]).toBe('drawSprite 51 at 16,48');
+    // The counts: `1` and `3`, glyphs 17 and 19.
+    expect(entry).toContain('drawSprite 17 at 64,48');
+    expect(entry.at(-1)).toBe('drawSprite 19 at 100,48');
+  });
+
+  it('shows Sales, Marketing, Support and HR 36 px apart, with a trace of each found', () => {
+    const entries = cases([0, 5, 10, 15]);
+    // `Vertrieb` 8, `Marketing` 9, `Support` 7 and `Personal` 8 glyphs, each with its count of 12.
+    expect(entries).toHaveLength(8 + 12 + 9 + 12 + 7 + 12 + 8 + 12);
+    expect(entries[0]).toBe('drawSprite 54 at 16,36');
+    expect(entries[20]).toBe('drawSprite 45 at 16,72');
+    expect(entries[41]).toBe('drawSprite 51 at 16,108');
+    expect(entries[60]).toBe('drawSprite 48 at 16,144');
+    expect(entries[68]).toBe('drawSprite 51 at 16,156');
+  });
+
+  it('reads `HR` and `Traces: 3 of 3` in English', () => {
+    const entry = cases([15, 16, 17], ENGLISH);
+    // `H` is glyph 40, `T` 52.
+    expect(entry).toHaveLength(2 + 11);
+    expect(entry[0]).toBe('drawSprite 40 at 16,36');
+    expect(entry[2]).toBe('drawSprite 52 at 16,48');
+  });
+});
