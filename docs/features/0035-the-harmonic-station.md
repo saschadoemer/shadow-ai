@@ -1,6 +1,6 @@
 # 0035 — The Harmonic station
 
-**Status:** draft
+**Status:** approved 2026-11-19
 **Milestone:** M5
 **Drafted:** 2026-11-19
 

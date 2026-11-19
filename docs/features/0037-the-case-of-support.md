@@ -1,6 +1,6 @@
 # 0037 — The case of Support
 
-**Status:** draft
+**Status:** approved 2026-11-19
 **Milestone:** M6
 **Drafted:** 2026-11-19
 
