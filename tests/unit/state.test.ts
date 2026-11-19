@@ -14,6 +14,7 @@ import {
   type PlayerState,
   SPECIES,
 } from '../../src/game/state';
+import { CLOSE_SCENE } from '../../src/game/story';
 import { createInitialState, newGame, update } from '../../src/game/update';
 import { grassMap } from './grass-map';
 
@@ -87,6 +88,7 @@ describe('GameState (INV-1)', () => {
     expect(createInitialState(MAP)).toStrictEqual({
       tick: 0,
       rested: null,
+      finished: null,
       upgrades: [],
       player: {
         x: 136,
@@ -157,6 +159,7 @@ describe('update', () => {
       {
         tick: 41,
         rested: null,
+        finished: null,
         upgrades: [],
         player,
         camera: { x: 0, y: 12 },
@@ -187,6 +190,7 @@ describe('update', () => {
     const state: GameState = {
       tick: 7,
       rested: null,
+      finished: null,
       upgrades: [],
       player,
       camera: { x: 0, y: 12 },
@@ -209,6 +213,7 @@ describe('update', () => {
     expect(state).toStrictEqual({
       tick: 7,
       rested: null,
+      finished: null,
       upgrades: [],
       player,
       camera: { x: 0, y: 12 },
@@ -1220,5 +1225,220 @@ describe('the second species in the state (0032)', () => {
   it('survives a JSON round trip at the start (INV-1)', () => {
     const start = createInitialState(BEHIND);
     expect(JSON.parse(JSON.stringify(start))).toStrictEqual(start);
+  });
+});
+
+describe('the close in the state (0034)', () => {
+  const TALK: GameInput = { ...NONE, talk: true };
+  /** Both sources, each waiting ten seconds on its first point, and one trace of each case. */
+  const BOTH = grassMap(
+    20,
+    12,
+    { x: 104, y: 48 },
+    [
+      { name: 'person:sales:1', x: 64, y: 48, pause: 600 },
+      { name: 'person:sales:2', x: 128, y: 48 },
+      { name: 'person:marketing:1', x: 64, y: 144, pause: 600 },
+      { name: 'person:marketing:2', x: 128, y: 144 },
+    ],
+    [
+      { name: 'trace:sales', x: 240, y: 32, width: 16, height: 16 },
+      { name: 'trace:marketing', x: 240, y: 128, width: 16, height: 16 },
+    ],
+  );
+  const start = createInitialState(BOTH);
+  /** Both cases solved, the later one at step 700; the game stands at the given tick. */
+  const solvedAt = (tick: number, fields: Partial<GameState> = {}): GameState => ({
+    ...start,
+    tick,
+    // Far from both sources: a press of talk reaches nobody.
+    player: { ...start.player, x: 280, y: 96 },
+    traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+    solved: [
+      { region: 'sales', at: 400 },
+      { region: 'marketing', at: 700 },
+    ],
+    overview: { current: 7, max: 7 },
+    ...fields,
+  });
+  const run = (from: GameState, ...inputs: readonly GameInput[]): GameState =>
+    inputs.reduce((state, input) => update(state, input, BOTH), from);
+  const OPEN = { speaker: 'story', index: CLOSE_SCENE, page: 0 } as const;
+
+  it('starts with the close not closed, in a played game too', () => {
+    expect(start.finished).toBeNull();
+    expect(newGame(BOTH).finished).toBeNull();
+    expect(createInitialState(FLOOR_MAP).finished).toBeNull();
+  });
+
+  it('opens by itself in the step with tick 1000 before it: 300 steps after the last case', () => {
+    const before = run(solvedAt(998), RIGHT);
+    expect(before.tick).toBe(999);
+    expect(before.dialogue).toBeNull();
+    expect(before.player.x).toBeGreaterThan(280);
+    const last = update(before, RIGHT, BOTH);
+    expect(last.tick).toBe(1000);
+    expect(last.dialogue).toBeNull();
+    const opened = update(last, RIGHT, BOTH);
+    expect(opened.dialogue).toStrictEqual(OPEN);
+    expect(opened).toStrictEqual({
+      ...last,
+      tick: 1001,
+      held: RIGHT,
+      player: { ...last.player, frame: 0, frameTimer: 0 },
+      dialogue: OPEN,
+    });
+  });
+
+  it('opens with the lamp off, and the figure does not move in that step', () => {
+    const shining = run(solvedAt(999), SHINE);
+    expect(shining.lamp.on).toBe(true);
+    const opened = update(shining, SHINE, BOTH);
+    expect(opened.dialogue).toStrictEqual(OPEN);
+    expect(opened.lamp).toStrictEqual({ ...shining.lamp, on: false });
+    expect([opened.player.x, opened.player.y]).toStrictEqual([shining.player.x, shining.player.y]);
+  });
+
+  it('does not open with one case solved, however long the game runs', () => {
+    let state = solvedAt(1000, { solved: [{ region: 'sales', at: 400 }] });
+    for (let step = 0; step < 6000; step += 1) {
+      state = update(state, NONE, BOTH);
+    }
+    expect(state.dialogue).toBeNull();
+    expect(state.finished).toBeNull();
+  });
+
+  it('turns its pages with a press each, and the third press closes it and sets `finished`', () => {
+    const opened = update(solvedAt(1000), NONE, BOTH);
+    const second = run(opened, TALK);
+    expect(second.dialogue).toStrictEqual({ ...OPEN, page: 1 });
+    // A held key turns one page.
+    expect(run(second, TALK, TALK).dialogue).toStrictEqual({ ...OPEN, page: 1 });
+    const third = run(second, NONE, TALK);
+    expect(third.dialogue).toStrictEqual({ ...OPEN, page: 2 });
+    expect(third.finished).toBeNull();
+    const closed = run(third, NONE, TALK);
+    expect(closed.dialogue).toBeNull();
+    expect(closed.tick).toBe(1006);
+    expect(closed.finished).toBe(1006);
+    expect(closed).toStrictEqual({
+      ...third,
+      tick: 1006,
+      held: TALK,
+      dialogue: null,
+      finished: 1006,
+    });
+  });
+
+  it('steps nothing else while it is open, and `J` does nothing, as under the call', () => {
+    const opened = update(solvedAt(1000), NONE, BOTH);
+    const waited = run(opened, RIGHT, { ...NONE, journal: true }, SHINE);
+    expect(waited).toStrictEqual({ ...opened, tick: opened.tick + 3, held: SHINE });
+  });
+
+  it('never opens again: 6000 steps later no dialogue has opened by itself', () => {
+    let state = run(update(solvedAt(1000), NONE, BOTH), TALK, NONE, TALK, NONE, TALK);
+    expect(state.finished).toBe(1006);
+    for (let step = 0; step < 6000; step += 1) {
+      state = update(state, NONE, BOTH);
+      expect(state.dialogue).toBeNull();
+    }
+    expect(state.finished).toBe(1006);
+  });
+
+  it('comes before the journal and before a talk in the step it opens', () => {
+    expect(update(solvedAt(1000), { ...NONE, journal: true }, BOTH)).toMatchObject({
+      dialogue: OPEN,
+      journal: null,
+    });
+    // Beside the colleague of Sales, with a press of talk.
+    const beside = solvedAt(1000, { player: { ...start.player, x: 104, y: 48 } });
+    expect(update(beside, TALK, BOTH).dialogue).toStrictEqual(OPEN);
+    // One step earlier the same press opens the talk.
+    const early = solvedAt(999, { player: { ...start.player, x: 104, y: 48 } });
+    expect(update(early, TALK, BOTH).dialogue).toStrictEqual({
+      speaker: 'mover',
+      index: 0,
+      page: 0,
+    });
+  });
+
+  it('waits while the dark, the help, the journal, a talk or a push has the step, and opens after it', () => {
+    // The journal: open over the due step, closed with a press, and the close opens next.
+    const reading = solvedAt(1000, { journal: { tab: 'creatures' } });
+    const stillReading = update(reading, NONE, BOTH);
+    expect(stillReading.dialogue).toBeNull();
+    const shut = update(stillReading, { ...NONE, journal: true }, BOTH);
+    expect(shut.journal).toBeNull();
+    expect(update(shut, NONE, BOTH).dialogue).toStrictEqual(OPEN);
+    // The help.
+    const helped = update(solvedAt(1000, { help: true }), NONE, BOTH);
+    expect(helped.dialogue).toBeNull();
+    expect(helped.help).toBe(true);
+    // The dark: nothing opens until it is over.
+    let dark = solvedAt(1000, { dark: 80 });
+    for (let step = 0; step < 9; step += 1) {
+      dark = update(dark, NONE, BOTH);
+      expect(dark.dialogue).toBeNull();
+    }
+    dark = update(dark, NONE, BOTH);
+    expect(dark.dark).toBe(0);
+    expect(update(dark, NONE, BOTH).dialogue).toStrictEqual(OPEN);
+    // A talk that is open: its own pages first.
+    const talking = solvedAt(1000, { dialogue: { speaker: 'mover', index: 0, page: 0 } });
+    const after = update(talking, TALK, BOTH);
+    expect(after.dialogue).toBeNull();
+    expect(update(after, NONE, BOTH).dialogue).toStrictEqual(OPEN);
+    // A push: the figure is carried on, and the close opens when it stands.
+    const pushed = solvedAt(1000, {
+      player: { ...solvedAt(1000).player, recoil: { dx: 3, dy: 0, steps: 2 } },
+    });
+    const first = update(pushed, NONE, BOTH);
+    expect(first.dialogue).toBeNull();
+    expect(first.player.recoil.steps).toBe(1);
+    const second = update(first, NONE, BOTH);
+    expect(second.dialogue).toBeNull();
+    expect(update(second, NONE, BOTH).dialogue).toStrictEqual(OPEN);
+  });
+
+  it('keeps `finished` through the wake, closed or not', () => {
+    const closed = solvedAt(2000, { finished: 1006, dark: 44 });
+    const woken = update(closed, NONE, BOTH);
+    expect(woken.dark).toBe(45);
+    expect(woken.finished).toBe(1006);
+    const fresh = update(solvedAt(900, { dark: 44 }), NONE, BOTH);
+    expect(fresh.finished).toBeNull();
+  });
+
+  it('follows the solving step of a game: the last answer, 300 steps, the close', () => {
+    // Marketing ready, Sales solved long ago; the figure beside the colleague of Marketing.
+    let state: GameState = {
+      ...start,
+      tick: 1000,
+      player: { ...start.player, x: 104, y: 144 },
+      traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+      solved: [{ region: 'sales', at: 400 }],
+    };
+    state = run(state, TALK, NONE, TALK, NONE, TALK);
+    expect(state.solved[1]).toStrictEqual({ region: 'marketing', at: 1005 });
+    const opensAt: number[] = [];
+    for (let step = 0; step < 310; step += 1) {
+      const next = update(state, NONE, BOTH);
+      if (state.dialogue === null && next.dialogue !== null) {
+        opensAt.push(state.tick);
+      }
+      state = next;
+    }
+    expect(opensAt).toStrictEqual([1305]);
+    expect(state.dialogue).toStrictEqual(OPEN);
+  });
+
+  it('survives a JSON round trip at the start, with the close open and after it (INV-1)', () => {
+    const opened = update(solvedAt(1000), NONE, BOTH);
+    const closed = run(opened, TALK, NONE, TALK, NONE, TALK);
+    for (const state of [start, opened, closed]) {
+      expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
+    }
+    expect(closed.finished).toBe(1006);
   });
 });

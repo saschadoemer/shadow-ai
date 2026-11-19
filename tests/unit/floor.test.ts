@@ -18,6 +18,7 @@ import { areasOf, inArea, shadowedAreas, veilOf } from '../../src/game/region';
 import { restInReach, restsOf, restUnderShadow } from '../../src/game/rest';
 import { standingWalls, wallsOf, withWalls } from '../../src/game/shadow';
 import { type GameState, NO_RECOIL } from '../../src/game/state';
+import { CLOSE_SCENE } from '../../src/game/story';
 import { speakerInReach, speakersOf, TALK_DISTANCE } from '../../src/game/talk';
 import { traceInLight, tracesOf } from '../../src/game/trace';
 import { createInitialState, update } from '../../src/game/update';
@@ -2194,5 +2195,49 @@ describe('the intern of the floor (0033)', () => {
     for (const region of regions) {
       expect(HINTS[region], region).toBeDefined();
     }
+  });
+});
+
+describe('the close on the floor (0034)', () => {
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const routes = routesOf(floor.points);
+  const start = createInitialState(floor);
+  /** The state with the figure 24 px below the colleague of the given route, where it is now. */
+  const beside = (state: GameState, route: string): GameState => {
+    const source = state.movers.find((mover) => routes[mover.route]?.name === route);
+    return {
+      ...state,
+      player: { ...state.player, x: source?.x ?? 0, y: (source?.y ?? 0) + 24 },
+    };
+  };
+  const answer = (from: GameState): GameState =>
+    [TALK, NO_INPUT, TALK, NO_INPUT, TALK, NO_INPUT].reduce(
+      (state, input) => update(state, input, floor),
+      from,
+    );
+  /** Every trace found long ago. */
+  const ready: GameState = {
+    ...start,
+    tick: 1000,
+    traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+  };
+
+  it('opens 300 steps after the second of the two cases of the floor, and not after the first', () => {
+    let state = answer(beside(ready, 'person:sales'));
+    expect(state.solved.map((entry) => entry.region)).toStrictEqual(['sales']);
+    for (let step = 0; step < 400; step += 1) {
+      state = update(state, NO_INPUT, floor);
+    }
+    expect(state.dialogue).toBeNull();
+    state = answer(beside(state, 'person:marketing'));
+    const last = state.solved[1];
+    expect(last?.region).toBe('marketing');
+    while (state.tick < (last?.at ?? 0) + 300) {
+      state = update(state, NO_INPUT, floor);
+      expect(state.dialogue).toBeNull();
+    }
+    state = update(state, NO_INPUT, floor);
+    expect(state.dialogue).toStrictEqual({ speaker: 'story', index: CLOSE_SCENE, page: 0 });
+    expect(state.finished).toBeNull();
   });
 });

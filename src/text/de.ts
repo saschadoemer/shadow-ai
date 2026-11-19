@@ -77,6 +77,21 @@ export const de = {
     'vorher nicht da war. Nebenan, bei der',
     'Datenschutzbeauftragten, brennt Licht.',
   ].join('\n'),
+  'story.close-1': [
+    'Abend. Auf der Etage ist es ruhiger geworden.',
+    'Wo du warst, sind die Farben zurück – und',
+    'niemand hat Ärger bekommen.',
+  ].join('\n'),
+  'story.close-2': [
+    'Die Geschäftsführung ruft an: „Gut. Aber das',
+    'war erst der Anfang, oder?“ Über den anderen',
+    'Türen liegt der Schatten noch.',
+  ].join('\n'),
+  'story.close-3': [
+    'So weit reicht das Spiel bis heute.',
+    'Die übrigen Abteilungen folgen. Du kannst',
+    'dich weiter auf der Etage umsehen.',
+  ].join('\n'),
   'notice.lamp': 'Die Lampe: Leertaste halten.',
   'notice.rest': 'Kaffee. Der Überblick ist wieder da.',
   'notice.rest-full': 'Kaffee. Den Überblick hast du schon.',

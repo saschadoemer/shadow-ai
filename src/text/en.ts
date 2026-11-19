@@ -73,6 +73,21 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'that was not there before. Next door, the',
     'data protection officer has her light on.',
   ].join('\n'),
+  'story.close-1': [
+    'Evening. The floor has grown quieter.',
+    'Where you have been, the colours are back –',
+    'and nobody got into trouble.',
+  ].join('\n'),
+  'story.close-2': [
+    'The managing director calls: “Good. But that',
+    'was only the beginning, was it not?” The',
+    'shadow still lies over the other doors.',
+  ].join('\n'),
+  'story.close-3': [
+    'This is how far the game goes today.',
+    'The other departments will follow. You can',
+    'go on looking round the floor.',
+  ].join('\n'),
   'notice.lamp': 'The lamp: hold Space.',
   'notice.rest': 'Coffee. Your overview is back.',
   'notice.rest-full': 'Coffee. You have your overview already.',

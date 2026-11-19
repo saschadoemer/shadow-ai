@@ -1,6 +1,6 @@
 # 0034 — The close
 
-**Status:** approved 2026-11-19
+**Status:** implemented 2026-11-19
 **Milestone:** M6
 **Drafted:** 2026-11-19
 
@@ -165,7 +165,9 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 - The third page speaks about the game itself. Honest, or a break in the story?
 - Is it clear afterwards that walking on is possible and nothing more is to be found?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–16. Feel: it feels like a close, not an interruption —
+pass; five seconds after the case — pass; the third page speaking about the game itself —
+pass; that walking on is possible and nothing more is to be found is clear — pass.
 
 ## Open questions
 

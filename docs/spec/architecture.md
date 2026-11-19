@@ -102,7 +102,8 @@ render (feature 0019). It is read-only by convention; nothing in the game reads 
 
 One `GameState` object holds everything that changes while playing. Today that is `tick`, the
 logic steps since the start, the player, the camera, the lamp, the upgrades, the creatures, the movers, the
-standing shadow walls, the traces, the solved cases, the standing figures, the open dialogue,
+standing shadow walls, the traces, the solved cases, the step that closed the close, the
+standing figures, the open dialogue,
 the open journal,
 whether the help is open, the input of the last step, the captured count, overview and the step
 of the dark; later the current map id
@@ -312,6 +313,18 @@ pages of a dialogue are `pagesOf(dialogue, speakers)` in `game/talk`: the scene'
 `'story'`, else those of the speaker among the speakers of the step. A scene's dialogue is
 stepped like any other. The game opens a scene, never a press; in this feature only `newGame`
 does.
+
+The **close** (feature 0034) is the second scene, `CLOSE_SCENE`, 1. `closeDue(tick, solved,
+finished)` in `game/story` says whether it is due: `finished` is `null`, every case of `CASES`
+is in `solved`, and `tick` minus the largest `at` among them is at least `CLOSE_DELAY_STEPS`,
+300. In `update` a step in which it is due and the player is not being pushed opens it
+(`openScene`) — after the dark, the help, the journal and an open dialogue have had the step,
+and before a press of `journal` or of `talk` is looked at: `dialogue` becomes
+`{ speaker: 'story', index: 1, page: 0 }`, the player's `frame` and `frameTimer` are 0, the
+lamp is off, `tick` grows by 1 and the input is remembered; nothing else is stepped. `finished`
+is the `tick` of the step that closes the scene, or `null`: `null` at the start and in a new
+game, and the wake keeps it. Whether the close is due is derived in every step and is not in
+the state.
 
 The **first meeting** (feature 0026) is data of `game/cast`: `FIRST_MEETING` names the figure
 that hands the lamp over, `officer`, and its pages, `talk.officer-rules-1` and
@@ -1255,7 +1268,9 @@ and the rule test covers both new kinds in both languages. The case of Marketing
 
 The story (feature 0026) adds the kind `story`: `story.<scene>-<n>` is a page of a scene, under
 the rule of a page of talk — at most three lines of at most 47 characters, none empty — and the
-test of that rule covers both kinds. `game/story` names the pages by key in `SCENES`.
+test of that rule covers both kinds. `game/story` names the pages by key in `SCENES`. The close
+(feature 0034) adds three pages of the kind, `story.close-1` to `story.close-3`; none of them
+holds a number.
 `talk.officer-meeting-2` is the page of the first meeting that hands the lamp over, named in
 `FIRST_MEETING`; `notice.lamp` is a notice.
 

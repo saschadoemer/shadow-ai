@@ -280,6 +280,47 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the three pages of the close in both languages (0034)', () => {
+    const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
+      textOf(textKey(id), language).split('\n');
+    expect(lines('story.close-1', 'de')).toStrictEqual([
+      'Abend. Auf der Etage ist es ruhiger geworden.',
+      'Wo du warst, sind die Farben zurück – und',
+      'niemand hat Ärger bekommen.',
+    ]);
+    expect(lines('story.close-1', 'en')).toStrictEqual([
+      'Evening. The floor has grown quieter.',
+      'Where you have been, the colours are back –',
+      'and nobody got into trouble.',
+    ]);
+    expect(lines('story.close-2', 'de')).toStrictEqual([
+      'Die Geschäftsführung ruft an: „Gut. Aber das',
+      'war erst der Anfang, oder?“ Über den anderen',
+      'Türen liegt der Schatten noch.',
+    ]);
+    expect(lines('story.close-2', 'en')).toStrictEqual([
+      'The managing director calls: “Good. But that',
+      'was only the beginning, was it not?” The',
+      'shadow still lies over the other doors.',
+    ]);
+    expect(lines('story.close-3', 'de')).toStrictEqual([
+      'So weit reicht das Spiel bis heute.',
+      'Die übrigen Abteilungen folgen. Du kannst',
+      'dich weiter auf der Etage umsehen.',
+    ]);
+    expect(lines('story.close-3', 'en')).toStrictEqual([
+      'This is how far the game goes today.',
+      'The other departments will follow. You can',
+      'go on looking round the floor.',
+    ]);
+    // No page names a number: the text holds when a case is added.
+    for (const language of LANGUAGES) {
+      for (const id of ['story.close-1', 'story.close-2', 'story.close-3'] as const) {
+        expect(/[0-9]/.test(TABLE[language][id]), `${language} ${id}`).toBe(false);
+      }
+    }
+  });
+
   it('holds the eight pages of the intern in both languages (0033)', () => {
     const first = (id: Parameters<typeof textKey>[0]): string[] => [
       textOf(textKey(id), 'de').split('\n')[0] ?? '',

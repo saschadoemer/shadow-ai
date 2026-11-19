@@ -63,6 +63,13 @@ managing director stops the player at the reception, where the game begins: the 
 room of the player's own, so nobody can stand in its door. The third page points next door, to
 the data protection officer, who hands the lamp over in the first talk.
 
+*As built* (feature 0034): while the game is unfinished, the story speaks once more after the
+last case there is — three pages, five seconds after it is solved. The evening, and nobody got
+into trouble; a second call of the managing director, one sentence again; and one page in which
+the game says how far it goes today and that the other departments follow. That third page is
+the one text that is not the story's. Then the game goes on. The scene follows whatever the
+last case is, and the epilogue of Act 3 replaces it.
+
 **The shadow.** A residue, not a being. Wherever data leaves the house without anybody watching,
 something stays behind and grows with the flow. It darkens rooms, lies over screens, blocks
 corridors like a wall of flicker. Where the use gets dense, it condenses into creatures — one
