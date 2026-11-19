@@ -19,9 +19,9 @@ Built on 0039 as merged. No tile changes; the floor gets three rectangles.
 
 **In:**
 
-- A sixth kind of rectangle, `window:<region>`, and three windows in Support in
+- A sixth kind of rectangle, `pane:<region>`, and three windows in Support in
   `tools/floor-layout.ts` and `floor.tmj`.
-- `GameState.windows`: the windows that are open.
+- `GameState.panes`: the windows that are open.
 - The press that closes a window, and the lurker that drops from it.
 - A third species, `lurker`, in `SPECIES`; on the floor it goes by the snippet's rule.
 - An open window hides the trace on its cell and holds against the light, with a notice.
@@ -43,28 +43,37 @@ picking a creature at the source (`gameplay.md` §6, with a later case) · sound
 Refines `world.md` §4, `gameplay.md` §3, §6 and §7, `architecture.md` §2 and §5 and
 `visual.md` §4. What is not said here is as for the snippet (0008, 0009).
 
+### The name in code
+
+The thing is a window on a screen, and the text of the game and the prose of this spec call
+it that. In the map, in the state and in `src/game/` it is a **pane**: the test of INV-2
+keeps the browser name `window` out of the source text of `src/game/`, comments and text ids
+included, and that test is not weakened. So the rectangle is `pane:<region>`, the module
+`game/pane`, the field `GameState.panes` and the notice's key `notice.pane-open`. Corrected
+on 2026-11-19, before any code; nothing of the behaviour changed.
+
 ### The windows
 
-A rectangle named `window:support` in the `objects` layer is a window: exactly one cell, on
+A rectangle named `pane:support` in the `objects` layer is a window: exactly one cell, on
 the cell of a desk with a screen. `floor.tmj` gets three, written after the objects of 0037
 with the ids 138 to 140; `nextobjectid` is 141. No object of an earlier feature changes its
 id.
 
 | Window | Cell | Rectangle | Under it | Where the lurker drops |
 |---|---|---|---|---|
-| `window:support` | (72, 61) | (1152, 976, 16, 16) | a trace (0037) | (74, 62), feet (1192, 1000) |
-| `window:support` | (93, 67) | (1488, 1072, 16, 16) | nothing | (95, 68), feet (1528, 1096) |
-| `window:support` | (62, 73) | (992, 1168, 16, 16) | a trace (0037) | (64, 74), feet (1032, 1192) |
+| `pane:support` | (72, 61) | (1152, 976, 16, 16) | a trace (0037) | (74, 62), feet (1192, 1000) |
+| `pane:support` | (93, 67) | (1488, 1072, 16, 16) | nothing | (95, 68), feet (1528, 1096) |
+| `pane:support` | (62, 73) | (992, 1168, 16, 16) | a trace (0037) | (64, 74), feet (1032, 1192) |
 
 The drop point of a window is the middle of the cell two to the right of it and one below:
 inside the cubicle, beside the chair, about 36 px from a player who stands below the chair.
 
-`game/window` reads the windows of a map from its rectangles, as the rests are read (0027).
+`game/pane` reads the windows of a map from its rectangles, as the rests are read (0027).
 It refuses, each with its message: a box that is not one cell; a region the world data does
 not know; and a window whose drop point lies outside the map or in a solid box.
 
-`GameState.windows` is the list of the open windows, `{ window, lit }`, in the map's order:
-`window` is the index among the windows of the map, `lit` says whether the lamp's light was
+`GameState.panes` is the list of the open windows, `{ pane, lit }`, in the map's order:
+`pane` is the index among the windows of the map, `lit` says whether the lamp's light was
 on it in the last step. At the start every window of the map is open. A closed window has
 left the list for good.
 
@@ -75,7 +84,7 @@ left the list for good.
   are found as before.
 - **It holds against the light.** A window is in the light by the test of a trace (0022).
   While it is, `lit` is true, nothing else happens to it, and the notice says
-  `notice.window-open`. A lurker in its window is no entry of `creatures`: it cannot be
+  `notice.pane-open`. A lurker in its window is no entry of `creatures`: it cannot be
   frozen, cannot be captured and does not hit.
 
 ### Closing a window
@@ -87,7 +96,7 @@ from the figure's feet, and no opaque box lies on the line from the centre of th
 box, (x, y − 4), to that centre. A desk, a chair and a partition are low and do not block
 the line. A window comes before a rest (0027).
 
-In that step the window leaves `windows`, and a lurker joins `creatures` at the end of the
+In that step the window leaves `panes`, and a lurker joins `creatures` at the end of the
 list: `{ species: 'lurker', light: 0 }` with its feet and its home at the window's drop
 point. The step goes on from there as an ordinary step; the new creature is stepped from
 the next step on.
@@ -104,13 +113,13 @@ point; the wake brings it back there.
 ### When the case of Support is solved
 
 What is left of the region's shadow goes with it (0025). Every window of the region that is
-still open leaves `windows`; no lurker drops from it, and none is counted. Every lurker
+still open leaves `panes`; no lurker drops from it, and none is counted. Every lurker
 whose home lies in the area of Support leaves `creatures`, captured or not.
 
 ### The state
 
 `SPECIES` becomes `['snippet', 'mirage', 'lurker']`, so `captured` has a third count,
-`lurker`, 0 at the start. `CreatureState` does not change. The wake keeps `windows` and sets
+`lurker`, 0 at the start. `CreatureState` does not change. The wake keeps `panes` and sets
 `lit` to false in each.
 
 ### Drawing
@@ -137,7 +146,7 @@ turn, 15 steps each, and frame 2 while it is frozen.
 
 | Key | `de` | `en` |
 |---|---|---|
-| `notice.window-open` | `Hier liest etwas mit. Das Licht hält es nicht.` | `It reads along here. The light does not hold it.` |
+| `notice.pane-open` | `Hier liest etwas mit. Das Licht hält es nicht.` | `It reads along here. The light does not hold it.` |
 
 It is shown while the lamp is on and an open window has `lit` true — as long as the light
 is on it, like the line of a shadow wall that holds (0016). It says what is and tells the
@@ -177,7 +186,7 @@ before. The cases tab and the policy tab have no pages; `up` and `down` do nothi
    objects of 0037, which are unchanged; each lies on a desk with a screen in the area of
    Support, and each drop point is the middle of a cell without a solid box, reached on
    foot.
-2. `game/window` reads them as windows with their drop points and refuses the three faulty
+2. `game/pane` reads them as windows with their drop points and refuses the three faulty
    maps of the spec, each with its message.
 3. `SPECIES` is `['snippet', 'mirage', 'lurker']`. The initial state of the floor has three
    open windows, none lit, six creatures and `captured` `{ snippet: 0, mirage: 0, lurker:
@@ -186,9 +195,9 @@ before. The cases tab and the policy tab have no pages; `up` and `down` do nothi
 4. With its window open, the trace on cell (72, 61) is not found in 600 lit steps and is
    never drawn; the trace on (52, 61), which has no window, is found in the 60th.
 5. While the light is on an open window its `lit` is true and the notice is
-   `notice.window-open`; with the lamp off or turned away it is false and the notice is
+   `notice.pane-open`; with the lamp off or turned away it is false and the notice is
    gone. The window stays open, and nothing is captured.
-6. A press of `talk` in reach of an open window removes it from `windows` and adds one
+6. A press of `talk` in reach of an open window removes it from `panes` and adds one
    lurker at its drop point, with that point as its home; `captured` does not change.
 7. The press is not taken out of reach, behind an opaque box, with `lamp` held or during a
    push; with a speaker in reach the talk opens instead; at a closed window it does
@@ -223,7 +232,7 @@ before. The cases tab and the policy tab have no pages; `up` and `down` do nothi
 
 ## Test plan
 
-- **Unit, `game/window`:** reading and the three refusals; in reach; criteria 5 to 8, 10
+- **Unit, `game/pane`:** reading and the three refusals; in reach; criteria 5 to 8, 10
   and 12 through `update` on maps built in the test.
 - **Unit, `game/trace`:** criterion 4; a trace beside an open window is not hidden.
 - **Unit, `game/creature`:** criterion 9 — a lurker and a snippet side by side, step for
@@ -240,7 +249,7 @@ before. The cases tab and the policy tab have no pages; `up` and `down` do nothi
 - **Unit, state:** criterion 3; the digest of criterion 19.
 - **Unit, text:** the keys in both languages; the changed page of the intern.
 - **Architecture:** unchanged.
-- **Smoke:** after loading, `window.shadowAi.state.windows` holds three open windows.
+- **Smoke:** after loading, `window.shadowAi.state.panes` holds three open windows.
 - **Fixtures:** none; the maps are built in the tests.
 
 ## Acceptance plan (manual test)
