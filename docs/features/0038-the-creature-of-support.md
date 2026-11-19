@@ -47,7 +47,7 @@ Refines `world.md` §4, `gameplay.md` §3, §6 and §7, `architecture.md` §2 an
 
 A rectangle named `window:support` in the `objects` layer is a window: exactly one cell, on
 the cell of a desk with a screen. `floor.tmj` gets three, written after the objects of 0037
-with the ids 140 to 142; `nextobjectid` is 143. No object of an earlier feature changes its
+with the ids 138 to 140; `nextobjectid` is 141. No object of an earlier feature changes its
 id.
 
 | Window | Cell | Rectangle | Under it | Where the lurker drops |
@@ -173,7 +173,7 @@ before. The cases tab and the policy tab have no pages; `up` and `down` do nothi
 
 ## Acceptance criteria
 
-1. `floor.tmj` holds the three rectangles of the table with the ids 140 to 142 after the
+1. `floor.tmj` holds the three rectangles of the table with the ids 138 to 140 after the
    objects of 0037, which are unchanged; each lies on a desk with a screen in the area of
    Support, and each drop point is the middle of a cell without a solid box, reached on
    foot.

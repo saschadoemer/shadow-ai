@@ -31,7 +31,7 @@ Two purposes, in this order:
    0031). It says which key does what, and nothing about why. The line that names the lamp's key when the lamp is handed
    over (feature 0026) is of the same kind.
 
-The game is presented by LMIS, and one real product is named in it: Harmonic (§10). Both
+The game is presented by LMIS, and one real product is named in its world: Harmonic (§10). Both
 serve the second purpose and are bound by the order above. Where they pull against the game
 people play at home, the game wins.
 
@@ -188,36 +188,33 @@ which presents the game, and **Harmonic**, a safe AI workplace a company can app
 people. Harmonic is made by a partner of LMIS, and LMIS sells it. Its maker has agreed to the
 name appearing in the game.
 
-**Both are a name on the floor, and nothing more.** Each name is written on one carpet in a
-corridor of the office, the way a sponsor's name lies on the floor of a hall. A carpet is
-decoration: it does nothing, nobody speaks of it, and no rule of the game knows it. Where the
-carpets lie is `world.md` §6.
-
-**LMIS is the frame, not the company.** The name also stands where the game is presented: on the
-title screen, as in `LMIS präsentiert`. The teaser is shown before the title screen exists (M8),
-so it gets a card of its own for the line (feature 0036). Any further place — an end card,
+**LMIS is the frame, not the world.** The name stands where the game is presented: on the title
+screen, as in `LMIS präsentiert`. The teaser is shown before the title screen exists (M8), so it
+gets a card of its own for the line (feature 0036). Any further place — an end card,
 credits — is decided in the feature that builds it. LMIS is never the company in the game.
-That company stays fictional (`world.md` §5): it is the house the data leaks from, and no
-real company is put in that place. The carpet does not make it LMIS: the presenter's line
-says whose name it is.
+That company stays fictional (`world.md` §5): it is the house the data leaks from, and no real
+company is put in that place.
 
-**Harmonic does not act.** The lamp, the traces and the talk with the source carry every case
-(`gameplay.md` §6), and no product takes any part of that over. The game people play at home
-comes first (§2): a product that plays for the player pulls against it.
+**Harmonic is the approved way, said once.** The message says the shadow gives way where it
+becomes unnecessary (§3). When the case of Sales is solved, the colleague who was its source
+says what the offers are written in from now on, and names Harmonic. That is why a real product
+may be named in this world at all. It does not sit beside the message; it is an instance of it.
+The line belongs to the case (`gameplay.md` §6).
 
 The rules both are held to:
 
-- **Every player sees each name once.** The carpet of LMIS lies where every game begins, and
-  the carpet of Harmonic where the way of Act 1 leads, so the visitor at the booth and the
-  player at home both pass them.
-- **They are rare.** Two carpets in the whole game (`docs/plan.md` §3), each placed by hand.
-- **They change nothing.** A carpet is floor. It is not solid, takes no press, and is in no
-  line, no notice and no entry of the journal.
-- **Shown, not praised.** No figure speaks of either name. Nobody recommends Harmonic, says what
-  it costs or where to get it (§6).
+- **Harmonic is a word in a talk, and nothing more.** No rule of the play knows the name: there
+  is no thing to use, no entry in the journal and no effect. The lamp, the traces and the talk
+  with the source carry every case, and no product takes any part of that over.
+- **It is rare.** One line in the whole game names it (`docs/plan.md` §3). A further line is a
+  number in the budget first.
+- **Said, not praised.** The colleague says what they work with, as a fact. No figure
+  recommends Harmonic, says what it costs or where to get it (§6).
+- **LMIS is in no talk.** No figure names LMIS; the name stands only where the game is
+  presented.
 - **A name, not a logo.** Both names are written in the game's own font. No logo of either is
   drawn, so INV-6 needs no exception.
 - **The vendor is somebody else** (§4). He does not sell Harmonic.
-- **The advertising is recognizable.** The presenter's line tells a player that the two names
-  are there on purpose. Whether that is enough has to be checked by a competent person
+- **The advertising is recognizable.** The presenter's line tells a player that the product in
+  the game is there on purpose. Whether that is enough has to be checked by a competent person
   before the first public release, together with the licences (§9).

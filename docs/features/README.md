@@ -62,4 +62,4 @@ in two.
 | [0036](0036-lmis-presents.md) | LMIS presents | M5 | approved 2026-11-19 |
 | [0037](0037-the-case-of-support.md) | The case of Support | M6 | approved 2026-11-19 |
 | [0038](0038-the-creature-of-support.md) | The creature of Support | M6 | approved 2026-11-19 |
-| [0039](0039-the-carpets.md) | The carpets | M5 | draft |
+| [0039](0039-harmonic-by-name.md) | Harmonic by name | M5 | draft |

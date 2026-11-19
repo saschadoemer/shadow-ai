@@ -280,24 +280,8 @@ author's decision on that basis, and no trademark register was searched (§5).
 ## 5. Names
 
 Every product, company and tool in the game is fictional, with two exceptions: LMIS, which
-presents the game, and Harmonic. Each is a name on one carpet (§6, `vision.md` §10). Before any other
+presents the game, and Harmonic, which a colleague names once (`vision.md` §10). Before any other
 name is fixed in the world data it is checked against real trademarks and products; a name that
 exists, or is a thin disguise of one that exists, is not used. Domains and mail addresses in the
 game use reserved example domains. The company in the game has no name that resembles a real
-one, and it is never LMIS: LMIS presents the game, and its carpet is a presenter's sign, not
-the name of the house.
-
-## 6. The carpets
-
-Two carpets carry a name (`vision.md` §10). Each lies in a corridor, on cells of corridor floor
-with no wall strip and no furniture, and in no area of a region: the corridors are not under
-shadow (`visual.md` §4), so a carpet always shows its colours. A carpet is floor; nothing in
-the play knows it.
-
-- **LMIS.** In the west corridor, in front of the opening of the reception: the first steps of
-  every game lead over it.
-- **Harmonic.** In the east corridor, below the doorway of Sales: in view of everybody who
-  walks into the first case.
-
-The cells are fixed in the feature that builds them. A further carpet is a number in the
-budget first (`docs/plan.md` §3).
+one, and it is never LMIS: LMIS presents the game and is not part of its world.

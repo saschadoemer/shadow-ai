@@ -183,7 +183,7 @@ these.
 | File | Covers |
 |---|---|
 | `docs/spec/vision.md` | purpose, message, the story in three acts, the vendor, design pillars, tone sheet, language, non-goals, title and licence, LMIS as presenter and Harmonic |
-| `docs/spec/world.md` | the floor and its regions, shadow densities, the cases, order and gating, the cast, creature rules, the naming rule, where the carpets with a name lie |
+| `docs/spec/world.md` | the floor and its regions, shadow densities, the cases, order and gating, the cast, creature rules, the naming rule |
 | `docs/spec/gameplay.md` | the lamp, the three layers, overview, progression, resolving a case, the journal |
 | `docs/spec/visual.md` | 320x180, integer scaling, tiles and figures, Endesga 32 and the signature colour, the asset pipeline, frame rate |
 | `docs/spec/architecture.md` | directory structure, the state model, the loop, input, the renderer interface, maps and the Tiled pipeline, text plumbing, tooling, dependency policy |
