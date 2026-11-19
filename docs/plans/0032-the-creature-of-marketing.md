@@ -133,7 +133,7 @@ with the prototype.
 - Produces: the text ids `creature.mirage-name` and `creature.mirage-text`, in both
   languages.
 
-- [ ] **Step 1: Write the failing test:**
+- [x] **Step 1: Write the failing test:**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -164,11 +164,11 @@ with the prototype.
        'Die Lampe leuchtet jetzt breiter und stärker.',
 ```
 
-- [ ] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 26
+- [x] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 26
   tests. `npx tsc --noEmit` reports four errors, all in this test: the two ids are not ids
   of the table yet.
 
-- [ ] **Step 3: The words,** in both tables:
+- [x] **Step 3: The words,** in both tables:
 
 ```diff
 --- a/src/text/de.ts
@@ -208,11 +208,11 @@ with the prototype.
      'It stays behind wherever data leaves the house',
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green; the test that holds a
+- [x] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green; the test that holds a
   species' name to 24 characters and its text to two to four lines of 47 covers the two.
   Then `npm run check`: 1445 unit tests.
 
-- [ ] **Step 5: Commit** — `Add the words of the mirage`.
+- [x] **Step 5: Commit** — `Add the words of the mirage`.
 
 ---
 
@@ -231,7 +231,7 @@ with the prototype.
   - `encodeMiragePng()` in `tools/gen-sprites.ts`
   - `public/sprites/mirage.png`, 48x16, a shadow asset
 
-- [ ] **Step 1: Write the failing tests.** `tests/unit/gen-sprites.test.ts`:
+- [x] **Step 1: Write the failing tests.** `tests/unit/gen-sprites.test.ts`:
 
 ```diff
 --- a/tests/unit/gen-sprites.test.ts
@@ -405,13 +405,13 @@ with the prototype.
    it('checks the shadow-wall sheet under public/sprites/ with every other PNG (0014)', () => {
 ```
 
-- [ ] **Step 2: Run them** —
+- [x] **Step 2: Run them** —
   `npx vitest run tests/unit/gen-sprites.test.ts tests/unit/assets.test.ts`. Expected: FAIL:
   `gen-sprites.test.ts` does not load — it imports a file that does not exist, so the file
   fails as a whole and none of its tests runs — and 1 of 26 fails in `assets.test.ts`.
   `npx tsc --noEmit` reports two errors.
 
-- [ ] **Step 3: The generator.** Create `tools/placeholder-mirage.ts`:
+- [x] **Step 3: The generator.** Create `tools/placeholder-mirage.ts`:
 
 ```ts
 import { type PaletteColour, SHADOW_COLOUR } from '../src/render/palette.ts';
@@ -474,7 +474,7 @@ export function renderMirage(): Uint8Array {
 }
 ```
 
-- [ ] **Step 4: `gen-sprites.ts`** writes the sheet:
+- [x] **Step 4: `gen-sprites.ts`** writes the sheet:
 
 ```diff
 --- a/tools/gen-sprites.ts
@@ -521,16 +521,16 @@ export function renderMirage(): Uint8Array {
      writeFileSync(`public/sprites/person-${look + 1}.png`, encodePersonPng(look));
 ```
 
-- [ ] **Step 5: Generate** — `npm run gen-sprites`. Then `git status --short public` shows one
+- [x] **Step 5: Generate** — `npm run gen-sprites`. Then `git status --short public` shows one
   line, `?? public/sprites/mirage.png`: no other sheet changed.
   `shasum -a 256 public/sprites/mirage.png` gives
   `ab2ca9e81840a68fa216cf10d3358ca13a511246119bece2490c83e075684421`.
   If another sheet changed, stop.
 
-- [ ] **Step 6: Run** the two test files of Step 2 — green — then `npm run check`: 1453 unit
+- [x] **Step 6: Run** the two test files of Step 2 — green — then `npm run check`: 1453 unit
   tests. The asset test holds the sheet to the palette and allows it the signature colour.
 
-- [ ] **Step 7: Commit** — `Draw the sheet of the mirage`, with the PNG.
+- [x] **Step 7: Commit** — `Draw the sheet of the mirage`, with the PNG.
 
 ---
 
@@ -553,7 +553,7 @@ export function renderMirage(): Uint8Array {
   - `isWatched(creature: CreatureState, player: PlayerState, map: TileMap): boolean`
   - `ENTRY_TEXT.mirage`; `SceneContent.creatureSheets.mirage`, loaded by `main.ts`
 
-- [ ] **Step 1: Write the failing tests.** First the record of captures: every literal
+- [x] **Step 1: Write the failing tests.** First the record of captures: every literal
   `{ snippet: n }` in the unit tests becomes `{ snippet: n, mirage: 0 }` — 34 of them in
   nine files, plus the one of `draw-journal.test.ts` that holds a variable. The diffs below
   show each. `tests/unit/creature.test.ts` — and one block at its end:
@@ -1314,7 +1314,7 @@ export function renderMirage(): Uint8Array {
      });
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run`. Expected: FAIL, 41 tests: 16 of 47 in
+- [x] **Step 2: Run them** — `npx vitest run`. Expected: FAIL, 41 tests: 16 of 47 in
   `creature.test.ts`, 16 of 91 in `state.test.ts`, 5 of 35 in `draw-journal.test.ts`, 2 of
   35 in `journal.test.ts`, 1 of 27 in `opening.test.ts` and 1 of 104 in `floor.test.ts`.
   Fourteen of them are older tests whose record now has a second count; twenty-seven are
@@ -1323,7 +1323,7 @@ export function renderMirage(): Uint8Array {
   creature, and that rule does not change. The two recordings pass before and after: they
   hash what they hashed.
 
-- [ ] **Step 3: The species:**
+- [x] **Step 3: The species:**
 
 ```diff
 --- a/src/game/state.ts
@@ -1344,7 +1344,7 @@ export function renderMirage(): Uint8Array {
  /** A creature still in the world (0008). */
 ```
 
-- [ ] **Step 4: Its habits,** and what looked at means:
+- [x] **Step 4: Its habits,** and what looked at means:
 
 ```diff
 --- a/src/game/creature.ts
@@ -1469,7 +1469,7 @@ export function renderMirage(): Uint8Array {
  }
 ```
 
-- [ ] **Step 5: Its entry** in the journal, and its sheet in the loader:
+- [x] **Step 5: Its entry** in the journal, and its sheet in the loader:
 
 ```diff
 --- a/src/game/journal.ts
@@ -1509,10 +1509,10 @@ export function renderMirage(): Uint8Array {
        },
 ```
 
-- [ ] **Step 6: Run** `npx vitest run` — green, the two recordings among them, unchanged. Then
+- [x] **Step 6: Run** `npx vitest run` — green, the two recordings among them, unchanged. Then
   `npm run check`: 1481 unit tests.
 
-- [ ] **Step 7: Commit** — `Add the mirage, which moves only while nobody looks`. Body: the
+- [x] **Step 7: Commit** — `Add the mirage, which moves only while nobody looks`. Body: the
   habits of a species are a table, so the third species brings numbers and no new branch.
 
 ---
@@ -1528,7 +1528,7 @@ export function renderMirage(): Uint8Array {
 - Produces: `creatureFrame(creature, tick, watched = false)`; the scene draws a shy creature
   that is looked at and not lit with frame 0.
 
-- [ ] **Step 1: Write the failing tests** — one import, and one block at the end:
+- [x] **Step 1: Write the failing tests** — one import, and one block at the end:
 
 ```diff
 --- a/tests/unit/draw-scene.test.ts
@@ -1645,12 +1645,12 @@ export function renderMirage(): Uint8Array {
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/draw-scene.test.ts`. Expected: FAIL, 3
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/draw-scene.test.ts`. Expected: FAIL, 3
   of 114 tests. `npx tsc --noEmit` reports six errors: `creatureFrame` takes two arguments.
   Three tests of the block are green already: the frame in the light, the snippet that
   flutters as before, and the order and the sheets of the creatures.
 
-- [ ] **Step 3: The scene:**
+- [x] **Step 3: The scene:**
 
 ```diff
 --- a/src/render/draw-scene.ts
@@ -1710,10 +1710,10 @@ export function renderMirage(): Uint8Array {
      );
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/draw-scene.test.ts` — green, the tests of the
+- [x] **Step 4: Run** `npx vitest run tests/unit/draw-scene.test.ts` — green, the tests of the
   creatures in the scene of 0008 unchanged. Then `npm run check`: 1487 unit tests.
 
-- [ ] **Step 5: Commit** — `Hold a mirage still while it is looked at`. Body: the scene asks
+- [x] **Step 5: Commit** — `Hold a mirage still while it is looked at`. Body: the scene asks
   the same question as the step, against the same map, and builds that map only when a shy
   creature is there.
 
@@ -1730,7 +1730,7 @@ export function renderMirage(): Uint8Array {
 - Produces: `MIRAGES` in `tools/floor-layout.ts`; `floor.tmj` with the points 129 to 131,
   `mirage`, after the traces of 0028.
 
-- [ ] **Step 1: Write the failing tests.** In `tests/unit/floor.test.ts` the older tests
+- [x] **Step 1: Write the failing tests.** In `tests/unit/floor.test.ts` the older tests
   change as the global constraints say, and one block is new, at the end:
 
 ```diff
@@ -2053,7 +2053,7 @@ export function renderMirage(): Uint8Array {
  test('the floor starts with its 22 movers and draws the person of the reception', async ({
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/floor.test.ts`. Expected: FAIL, 13 of
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/floor.test.ts`. Expected: FAIL, 13 of
   113 tests: six older ones that count the objects, the points or the creatures, and seven
   of the new block. `npx tsc --noEmit` reports one error: `floor-layout.ts` has no exported
   member `MIRAGES`. Five tests of the diff are green already, and that is right: the digest
@@ -2062,7 +2062,7 @@ export function renderMirage(): Uint8Array {
   left, which holds both ways. Then `npx playwright test -g "three mirages"`. Expected:
   FAIL, `Expected: 6`, `Received: 3`.
 
-- [ ] **Step 3: The layout.** `MIRAGES`, and the generator writes them at the end:
+- [x] **Step 3: The layout.** `MIRAGES`, and the generator writes them at the end:
 
 ```diff
 --- a/tools/floor-layout.ts
@@ -2113,18 +2113,18 @@ export function renderMirage(): Uint8Array {
      tiledversion: '1.11.2',
 ```
 
-- [ ] **Step 4: Regenerate the floor** — `npm run gen-floor`. Then
+- [x] **Step 4: Regenerate the floor** — `npm run gen-floor`. Then
   `shasum -a 256 public/maps/floor.tmj` gives
   `e1922ddc5fda323157d3169f3a7e8e6f1c4ac428369c2d0c429a3f3994564ef9`, and
   `git diff --stat public/maps/floor.tmj` says 37 insertions and 1 deletion: three points at
   the end of the `objects` layer and `nextobjectid`. If the diff touches anything else,
   stop.
 
-- [ ] **Step 5: Run** `npx vitest run tests/unit/floor.test.ts` — green — then
+- [x] **Step 5: Run** `npx vitest run tests/unit/floor.test.ts` — green — then
   `npm run check`: 1496 unit tests, and `npm run test:e2e` twice: 18 passed, 3 skipped, both
   times.
 
-- [ ] **Step 6: Commit** — `Put three mirages into Marketing`. Body: none stands near the
+- [x] **Step 6: Commit** — `Put three mirages into Marketing`. Body: none stands near the
   doorway, and one comes from behind while the player looks at a screen of the lower row or
   at the printer.
 
@@ -2140,7 +2140,7 @@ The diffs are against `main` at `786e991`. If a line has moved, put the text whe
 means it; do not change the words without a reason. `architecture.md` changes in §1 too,
 beyond the sections the spec names: its directory listing names the generators.
 
-- [ ] **Step 1: `world.md`** §4:
+- [x] **Step 1: `world.md`** §4:
 
 ```diff
 --- a/docs/spec/world.md
@@ -2166,7 +2166,7 @@ beyond the sections the spec names: its directory listing names the generators.
  
 ```
 
-- [ ] **Step 2: `gameplay.md`** §3 and §7:
+- [x] **Step 2: `gameplay.md`** §3 and §7:
 
 ```diff
 --- a/docs/spec/gameplay.md
@@ -2200,7 +2200,7 @@ beyond the sections the spec names: its directory listing names the generators.
  
 ```
 
-- [ ] **Step 3: `visual.md`** §4:
+- [x] **Step 3: `visual.md`** §4:
 
 ```diff
 --- a/docs/spec/visual.md
@@ -2227,7 +2227,7 @@ beyond the sections the spec names: its directory listing names the generators.
  signature colour, with `#181425` for the pattern of the densest wall. Its density is read from how
 ```
 
-- [ ] **Step 4: `architecture.md`** §1, §2, §5 and §7:
+- [x] **Step 4: `architecture.md`** §1, §2, §5 and §7:
 
 ```diff
 --- a/docs/spec/architecture.md
@@ -2296,7 +2296,7 @@ beyond the sections the spec names: its directory listing names the generators.
  derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper
 ```
 
-- [ ] **Step 5: `testing.md`** §2:
+- [x] **Step 5: `testing.md`** §2:
 
 ```diff
 --- a/docs/spec/testing.md
@@ -2322,7 +2322,7 @@ beyond the sections the spec names: its directory listing names the generators.
  
 ```
 
-- [ ] **Step 6: `README.md`:**
+- [x] **Step 6: `README.md`:**
 
 ```diff
 --- a/README.md
@@ -2347,19 +2347,19 @@ beyond the sections the spec names: its directory listing names the generators.
  
 ```
 
-- [ ] **Step 7:** `npm run check`, then commit — `Move the mirage into the spec`.
+- [x] **Step 7:** `npm run check`, then commit — `Move the mirage into the spec`.
 
 ---
 
 ### Task 7: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 18 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 18 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
   `Tick the full check of 0032`.
 
 ---
