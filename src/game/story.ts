@@ -1,6 +1,7 @@
 import { type TextKey, textKey } from '../text/text';
 import { CASES, type Case } from './cases';
-import type { SolvedCase } from './state';
+import type { GameInput } from './player';
+import type { GameState, SolvedCase } from './state';
 
 /**
  * The story (vision.md §4, feature 0026). A scene is text the story itself says: pages in the
@@ -57,6 +58,22 @@ export function closeDue(
     last = Math.max(last, entry.at);
   }
   return tick - last >= CLOSE_DELAY_STEPS;
+}
+
+/**
+ * The state after a step in which the game opens a scene by itself (0034): the scene on its
+ * first page, the figure standing, the lamp off, the tick grown and the input remembered, as
+ * when a talk opens (0017). Nothing else changes, and nothing else is stepped.
+ */
+export function openScene(state: GameState, input: GameInput, scene: number): GameState {
+  return {
+    ...state,
+    tick: state.tick + 1,
+    held: input,
+    player: { ...state.player, frame: 0, frameTimer: 0 },
+    lamp: { ...state.lamp, on: false },
+    dialogue: { speaker: 'story', index: scene, page: 0 },
+  };
 }
 
 /** The pages of the scene with this index; none when there is no such scene. */

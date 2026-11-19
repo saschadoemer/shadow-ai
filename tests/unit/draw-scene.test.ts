@@ -198,6 +198,7 @@ const state = (
 ): GameState => ({
   tick: QUIET_TICK,
   rested: null,
+  finished: null,
   upgrades: [],
   player: player(fields),
   camera,

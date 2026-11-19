@@ -452,3 +452,13 @@ test('the game starts with no upgrade of the lamp', async ({ page }) => {
     .toStrictEqual([]);
   expect(await page.evaluate(() => window.shadowAi?.state.lamp.strength)).toBe(1);
 });
+
+test('the game starts with the close not closed', async ({ page }) => {
+  await start(page);
+  // One poll for the whole value: nothing is read from a page that might still be loading.
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.finished), {
+      message: 'window.shadowAi.state.finished is there and null: the close has not been read',
+    })
+    .toBeNull();
+});

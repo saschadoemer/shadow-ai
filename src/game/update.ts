@@ -20,7 +20,7 @@ import {
   NO_RECOIL,
   type PlayerState,
 } from './state';
-import { OPENING_SCENE } from './story';
+import { CLOSE_SCENE, closeDue, OPENING_SCENE, openScene } from './story';
 import { openDialogue, speakersOf, stepDialogue } from './talk';
 import { hiddenTraces, stepTraces, tracesOf } from './trace';
 import { BASE_STRENGTH } from './world';
@@ -71,6 +71,7 @@ export function createInitialState(map: TileMap): GameState {
     traces: hiddenTraces(tracesOf(map.rects)),
     solved: [],
     rested: null,
+    finished: null,
     figures: figuresFrom(figures),
     dialogue: null,
     journal: null,
@@ -99,8 +100,8 @@ export function newGame(map: TileMap): GameState {
  * What the step that closed a dialogue changes besides closing it (0024, 0025, 0026). Closing
  * the first meeting hands the lamp over. Closing the source's answer of a ready case solves the
  * case, earns the upgrade of its region if it has one (0029), and what is left of the region's
- * shadow goes with it. Every other closing — that of a scene of the story, the call among them
- * — changes nothing more.
+ * shadow goes with it. Closing the close sets `finished` to the step's tick, so it opens once
+ * (0034). Every other closing — that of the call among them — changes nothing more.
  */
 function closed(
   stepped: GameState,
@@ -109,7 +110,7 @@ function closed(
   content: TileMap,
 ): GameState {
   if (dialogue.speaker === 'story') {
-    return stepped;
+    return dialogue.index === CLOSE_SCENE ? { ...stepped, finished: stepped.tick } : stepped;
   }
   if (isFirstMeeting(dialogue, figuresOf(content.points), before.lamp.owned)) {
     return { ...stepped, lamp: { ...stepped.lamp, owned: true } };
@@ -177,6 +178,11 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     const stepped = stepDialogue(state, state.dialogue, input, speakers);
     return stepped.dialogue === null ? closed(stepped, state.dialogue, state, content) : stepped;
   }
+  // The close opens by itself once it is due and the figure is not being pushed (0034) —
+  // instead of the journal, a talk or an ordinary step.
+  if (state.player.recoil.steps === 0 && closeDue(state.tick, state.solved, state.finished)) {
+    return openScene(state, input, CLOSE_SCENE);
+  }
   const journal = openJournal(state, input);
   if (journal !== null) {
     return journal;
@@ -236,6 +242,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
     ),
     solved: state.solved,
     rested,
+    finished: state.finished,
     figures: state.figures,
     dialogue: null,
     journal: null,

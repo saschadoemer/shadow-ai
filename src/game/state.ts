@@ -202,6 +202,11 @@ export interface GameState {
   readonly solved: readonly SolvedCase[];
   /** The last rest taken, or null (0027); the notice of a rest is derived from it. */
   readonly rested: Rested | null;
+  /**
+   * The tick of the step that closed the close — the scene after the last case — or null
+   * (0034). It opens once.
+   */
+  readonly finished: number | null;
   /** The standing figures of the map, in file order (0017). */
   readonly figures: readonly FigureState[];
   /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
