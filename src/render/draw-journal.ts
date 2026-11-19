@@ -3,9 +3,9 @@ import { outcomeOf, policyBlocks } from '../game/cases';
 import { CASE_TEXT, ENTRY_TEXT, entriesOf, REGION_NAME, TAB_TEXT } from '../game/journal';
 import { type GameState, JOURNAL_TABS, type JournalState } from '../game/state';
 import { caseEntries, tracesOf } from '../game/trace';
-import { type TextKey, textOf } from '../text/text';
+import { type Language, type TextKey, textOf } from '../text/text';
 import type { SceneContent, SceneSettings } from './draw-scene';
-import { drawNumber, drawText } from './draw-text';
+import { drawNumber, drawText, LINE_PITCH } from './draw-text';
 import { GLYPH_WIDTH } from './font';
 import { PAGE_BACKGROUND, type PaletteColour } from './palette';
 import type { Renderer } from './renderer';
@@ -43,9 +43,26 @@ export const CASE_LINE: Point = { x: 16, y: 48 };
 export const CASE_PITCH = 36;
 /** The third line of a solved case: its outcome (0024). */
 export const CASE_OUTCOME: Point = { x: 16, y: 60 };
-/** A block k of the policy, from 0, starts POLICY_PITCH below block k − 1 (0024). */
+/** The first block of the policy starts here (0024). */
 export const POLICY_BLOCK: Point = { x: 16, y: 36 };
-export const POLICY_PITCH = 60;
+/** A block starts this far below the last line of the block before it (0037). */
+export const POLICY_GAP = 12;
+
+/**
+ * Where the blocks of the policy start (0037): they are stacked by their height. The first
+ * starts at POLICY_BLOCK, and each further one POLICY_GAP below the last line of the block
+ * before it — a block of n lines is followed by the next one 12n + 12 px lower. The lines of
+ * a block are those of the language it is drawn in.
+ */
+export function policyOrigins(blocks: readonly TextKey[], language: Language): Point[] {
+  const origins: Point[] = [];
+  let y = POLICY_BLOCK.y;
+  for (const block of blocks) {
+    origins.push({ x: POLICY_BLOCK.x, y });
+    y += textOf(block, language).split('\n').length * LINE_PITCH + POLICY_GAP;
+  }
+  return origins;
+}
 
 /** The rectangle of tab k. */
 export function tabBox(k: number): Box {
@@ -140,15 +157,10 @@ export function drawJournal(
       );
     }
   }
+  const origins = policyOrigins(blocks, language);
   for (const [k, block] of blocks.entries()) {
-    drawText(
-      renderer,
-      content.fontSheet,
-      block,
-      language,
-      POLICY_BLOCK.x,
-      POLICY_BLOCK.y + k * POLICY_PITCH,
-    );
+    const origin = origins[k] ?? POLICY_BLOCK;
+    drawText(renderer, content.fontSheet, block, language, origin.x, origin.y);
   }
   for (const [k, species] of entries.entries()) {
     const down = k * ENTRY_PITCH;

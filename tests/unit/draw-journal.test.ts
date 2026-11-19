@@ -15,7 +15,8 @@ import {
   JOURNAL_RULE,
   NOTHING_TEXT,
   POLICY_BLOCK,
-  POLICY_PITCH,
+  POLICY_GAP,
+  policyOrigins,
   TAB_CLOSED,
   TAB_OPEN,
   tabBox,
@@ -28,6 +29,7 @@ import {
   type SceneSettings,
 } from '../../src/render/draw-scene';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
+import { textKey, textOf } from '../../src/text/text';
 import { grassMap } from './grass-map';
 
 /** A renderer that only records what it was asked to draw, one line per call. */
@@ -361,13 +363,12 @@ describe('a solved case in the journal (0024)', () => {
   };
 
   it('places the outcome and the blocks as the spec says', () => {
-    expect([CASE_OUTCOME, POLICY_BLOCK, POLICY_PITCH]).toStrictEqual([
+    expect([CASE_OUTCOME, POLICY_BLOCK, POLICY_GAP]).toStrictEqual([
       { x: 16, y: 60 },
       { x: 16, y: 36 },
-      60,
+      12,
     ]);
-    // Two blocks of four lines fit the surface: the second ends at y = 142.
-    expect(POLICY_BLOCK.y + POLICY_PITCH + 3 * 12 + 10).toBe(142);
+    // Since 0037 a block starts 12 px below the last line of the block before it.
   });
 
   it('adds the outcome as the third line of the case, under its name and its count', () => {
@@ -533,15 +534,17 @@ describe('two solved cases in the journal (0028)', () => {
     expect(entries[41]).toBe('drawSprite 39 at 16,96');
   });
 
-  it('draws the block of the case solved first from (16, 36) and the other from (16, 96)', () => {
+  it('draws the block of the case solved first from (16, 36) and the other 12 px below its last line', () => {
     const all = [0, 1, 2, 3, 4, ...ALL_OF_MARKETING];
     // `Was eine Maschine …`: three lines of 35, 36 and 31 glyphs; `Jeder Text …`: 142.
+    // After the three lines of Marketing the second block starts at y = 84 (0037).
     const marketingFirst = shown('policy', all, [MARKETING, SALES]);
     expect(marketingFirst).toHaveLength(102 + 142);
     expect(marketingFirst[0]).toBe('drawSprite 55 at 16,36');
-    expect(marketingFirst[102]).toBe('drawSprite 42 at 16,96');
+    expect(marketingFirst[102]).toBe('drawSprite 42 at 16,84');
     expect(marketingFirst.slice(0, 102).every((call) => /,(36|48|60)$/.test(call))).toBe(true);
-    expect(marketingFirst.slice(102).every((call) => /,(96|108|120|132)$/.test(call))).toBe(true);
+    expect(marketingFirst.slice(102).every((call) => /,(84|96|108|120)$/.test(call))).toBe(true);
+    // After the four lines of Sales it starts at y = 96, as before.
     const salesFirst = shown('policy', all, [
       { region: 'sales', at: 900 },
       { region: 'marketing', at: 950 },
@@ -564,7 +567,7 @@ describe('two solved cases in the journal (0028)', () => {
     expect(cases[20]).toBe('drawSprite 51 at 16,60');
     const blocks = shown('policy', ALL_OF_MARKETING, [MARKETING, SALES], ENGLISH);
     expect(blocks[0]).toBe('drawSprite 55 at 16,36');
-    expect(blocks).toContain('drawSprite 37 at 16,96');
+    expect(blocks).toContain('drawSprite 37 at 16,84');
   });
 });
 
@@ -675,5 +678,50 @@ describe('the cases tab with three regions (0037)', () => {
     expect(entry).toHaveLength(7 + 11);
     expect(entry[0]).toBe('drawSprite 51 at 16,36');
     expect(entry[7]).toBe('drawSprite 52 at 16,48');
+  });
+});
+
+describe('the policy tab stacks its blocks (0037)', () => {
+  const SALES = textKey('policy.sales');
+  const MARKETING = textKey('policy.marketing');
+  const SUPPORT = textKey('policy.support');
+
+  it('starts the first block at (16, 36) and each further one 12 px below the last line before it', () => {
+    expect(policyOrigins([], 'de')).toStrictEqual([]);
+    expect(policyOrigins([SALES], 'de')).toStrictEqual([{ x: 16, y: 36 }]);
+    // Four lines, then 12 px: 36 + 4 × 12 + 12.
+    expect(policyOrigins([SALES, MARKETING], 'de')).toStrictEqual([
+      { x: 16, y: 36 },
+      { x: 16, y: 96 },
+    ]);
+    // Three lines, then 12 px: 36 + 3 × 12 + 12.
+    expect(policyOrigins([MARKETING, SALES], 'de')).toStrictEqual([
+      { x: 16, y: 36 },
+      { x: 16, y: 84 },
+    ]);
+    expect(policyOrigins([SUPPORT, SALES], 'en')).toStrictEqual([
+      { x: 16, y: 36 },
+      { x: 16, y: 84 },
+    ]);
+  });
+
+  it('fits the three blocks of today on the surface in every order, in both languages', () => {
+    const orders = [
+      [SALES, MARKETING, SUPPORT],
+      [SALES, SUPPORT, MARKETING],
+      [MARKETING, SALES, SUPPORT],
+      [MARKETING, SUPPORT, SALES],
+      [SUPPORT, SALES, MARKETING],
+      [SUPPORT, MARKETING, SALES],
+    ];
+    for (const language of ['de', 'en'] as const) {
+      for (const order of orders) {
+        const origins = policyOrigins(order, language);
+        const last = order[2];
+        const lines = last === undefined ? 0 : textOf(last, language).split('\n').length;
+        // The top of the last line is y = 168: it ends at 178, inside the 180 px.
+        expect((origins[2]?.y ?? 0) + (lines - 1) * 12, `${language} ${order.join()}`).toBe(168);
+      }
+    }
   });
 });
