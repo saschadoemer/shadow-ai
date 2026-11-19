@@ -210,7 +210,21 @@ gcloud run services update-traffic shadow-ai --region=<region> --to-revisions=<r
 
 The next deployment sends all traffic to the newest revision again.
 
-**A custom domain** comes with M8, with the title and the distribution.
+**The address.** The service answers at `https://shadow-ai-<project-number>.<region>.run.app`.
+The address is made of three values: the service name, the project's number and the region. A
+deployment adds a revision behind it and never changes it. It changes only when the service is
+renamed, or the project or the region is replaced — so none of the three is changed, and the
+project and the service are not created anew.
+
+**The redirect.** `shadow-ai.sascha-doemer.de` is a redirect at the author's web host to the
+address above, kept by hand outside this repository. It needs a TLS certificate for the
+subdomain at the host, or `https://` fails before the redirect is sent. The redirect is
+permanent (301), and a browser remembers a 301: if the address ever did change, earlier
+visitors would still be sent to the old one. The container knows nothing of the redirect:
+nginx checks no host name, and the CSP's `'self'` is whatever origin the game was loaded from.
+
+**A custom domain** mapped to the service itself, so that the game's own address stays in the
+address bar, comes with M8, with the title and the distribution.
 
 ## 6. Configuration
 
