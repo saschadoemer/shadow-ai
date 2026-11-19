@@ -11,6 +11,7 @@ import {
   WIDE_LAMP_SHEET_HEIGHT,
   WIDE_LAMP_SHEET_WIDTH,
 } from './placeholder-lamp.ts';
+import { MIRAGE_SHEET_HEIGHT, MIRAGE_SHEET_WIDTH, renderMirage } from './placeholder-mirage.ts';
 import {
   OVERVIEW_SHEET_HEIGHT,
   OVERVIEW_SHEET_WIDTH,
@@ -40,7 +41,8 @@ import { renderVeil, VEIL_SHEET_HEIGHT, VEIL_SHEET_WIDTH } from './placeholder-v
  * of 0017 from tools/placeholder-person.ts; and public/sprites/trace.png of 0022 from
  * tools/placeholder-trace.ts; and public/sprites/shadow-veil.png of 0023 from
  * tools/placeholder-veil.ts; and public/sprites/lamp-wide.png of 0029 from
- * tools/placeholder-lamp.ts. Deterministic — pngjs writes no timestamp — and Node
+ * tools/placeholder-lamp.ts; and public/sprites/mirage.png of 0032 from
+ * tools/placeholder-mirage.ts. Deterministic — pngjs writes no timestamp — and Node
  * runs this TypeScript file directly, without a transpiler.
  */
 
@@ -66,6 +68,13 @@ export function encodeLampWidePng(): Buffer {
 export function encodeSnippetPng(): Buffer {
   const png = new PNG({ width: SNIPPET_SHEET_WIDTH, height: SNIPPET_SHEET_HEIGHT });
   png.data = Buffer.from(renderSnippet());
+  return PNG.sync.write(png);
+}
+
+/** The mirage (0032): the second species. */
+export function encodeMiragePng(): Buffer {
+  const png = new PNG({ width: MIRAGE_SHEET_WIDTH, height: MIRAGE_SHEET_HEIGHT });
+  png.data = Buffer.from(renderMirage());
   return PNG.sync.write(png);
 }
 
@@ -137,6 +146,7 @@ if (import.meta.main) {
   writeFileSync('public/sprites/lamp.png', encodeLampPng());
   writeFileSync('public/sprites/lamp-wide.png', encodeLampWidePng());
   writeFileSync('public/sprites/snippet.png', encodeSnippetPng());
+  writeFileSync('public/sprites/mirage.png', encodeMiragePng());
   writeFileSync('public/sprites/overview.png', encodeOverviewPng());
   for (const look of PERSON_SHIRTS.keys()) {
     writeFileSync(`public/sprites/person-${look + 1}.png`, encodePersonPng(look));
