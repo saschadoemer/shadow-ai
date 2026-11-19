@@ -50,6 +50,7 @@ import {
 import { GLYPH_WIDTH } from '../../src/render/font';
 import type { Renderer, SpriteSheet } from '../../src/render/renderer';
 import { LANGUAGES, TABLE, textOf } from '../../src/text/text';
+import { grassMap } from './grass-map';
 import { solidsOf } from './solids';
 
 /** A renderer that only records what it was asked to draw, one line per call. */
@@ -104,7 +105,11 @@ const CONTENT: SceneContent = {
   playerSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 },
   lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
   lampWideSheet: { image: {} as ImageBitmap, frameWidth: 72, frameHeight: 72 },
-  creatureSheets: { snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 } },
+  creatureSheets: {
+    snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
+    // Its own image, so that toStrictEqual tells the two sheets apart.
+    mirage: { image: { mirage: true } as unknown as ImageBitmap, frameWidth: 16, frameHeight: 16 },
+  },
   overviewSheet: { image: {} as ImageBitmap, frameWidth: 8, frameHeight: 8 },
   shadowWallSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   traceSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
@@ -207,7 +212,7 @@ const state = (
   journal: null,
   help: false,
   held: NO_INPUT,
-  captured: { snippet: 0 },
+  captured: { snippet: 0, mirage: 0 },
   // No hearts: the call lists of the earlier features stay as they were (0009).
   overview: { current: 0, max: 0 },
   dark: 0,
@@ -1825,5 +1830,103 @@ describe('the wider cone in the scene (0029)', () => {
     drawScene(renderer, { ...shining('down', true), lamp: state({}).lamp }, CONTENT);
     expect(renderer.sheets).not.toContain(CONTENT.lampWideSheet);
     expect(renderer.sheets).not.toContain(CONTENT.lampSheet);
+  });
+});
+
+describe('the mirage in the scene (0032)', () => {
+  const mirage = (x: number, y: number, light = 0): CreatureState => ({
+    species: 'mirage',
+    x,
+    y,
+    light,
+    home: { x: 0, y: 0 },
+  });
+  const snippet = (x: number, y: number): CreatureState => ({
+    species: 'snippet',
+    x,
+    y,
+    light: 0,
+    home: { x: 0, y: 0 },
+  });
+  /** 20x12 cells of open floor; a strip of a shadow wall on the cells (5, 6) to (7, 6). */
+  const open: SceneContent = { ...CONTENT, map: grassMap(20, 12, { x: 100, y: 60 }) };
+  const walled: SceneContent = {
+    ...CONTENT,
+    map: grassMap(
+      20,
+      12,
+      { x: 100, y: 60 },
+      [],
+      [{ name: 'shadow:marketing', x: 80, y: 96, width: 48, height: 4 }],
+    ),
+  };
+  /** The figure at (100, 60) looks down, at a tick whose free frame is 1. */
+  const scene = (
+    creatures: readonly CreatureState[],
+    fields: Partial<GameState> = {},
+  ): GameState => ({
+    ...state({ x: 100, y: 60, facing: 'down' }),
+    tick: QUIET_TICK + 15,
+    creatures,
+    ...fields,
+  });
+  /** The frames drawn from a sheet, in the order they were drawn. */
+  const framesOf = (drawn: GameState, content: SceneContent, sheet: SpriteSheet): number[] => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, drawn, content);
+    const sprites = renderer.calls.filter((call) => call.startsWith('drawSprite'));
+    return sprites
+      .filter((_call, n) => renderer.sheets[n] === sheet)
+      .map((call) => Number(call.split(' ')[1]));
+  };
+
+  it('picks the frame by the light, the look and the tick', () => {
+    expect(creatureFrame(mirage(0, 0, 5), QUIET_TICK + 15, true)).toBe(2);
+    expect(creatureFrame(mirage(0, 0, 5), QUIET_TICK + 15, false)).toBe(2);
+    expect(creatureFrame(mirage(0, 0), QUIET_TICK + 15, true)).toBe(0);
+    expect(creatureFrame(mirage(0, 0), QUIET_TICK, true)).toBe(0);
+    expect(creatureFrame(mirage(0, 0), QUIET_TICK + 15, false)).toBe(1);
+    expect(creatureFrame(mirage(0, 0), QUIET_TICK, false)).toBe(0);
+    // Without the third argument it is the frame of 0008.
+    expect(creatureFrame(mirage(0, 0), QUIET_TICK + 15)).toBe(1);
+  });
+
+  it('draws a mirage ahead of the figure with frame 0, and one behind it with the free frame', () => {
+    const sheet = open.creatureSheets.mirage;
+    expect(framesOf(scene([mirage(100, 120)]), open, sheet)).toStrictEqual([0]);
+    expect(framesOf(scene([mirage(100, 30)]), open, sheet)).toStrictEqual([1]);
+    expect(framesOf(scene([mirage(100, 120), mirage(100, 30)]), open, sheet)).toStrictEqual([0, 1]);
+  });
+
+  it('draws a mirage in the light with frame 2, looked at or not', () => {
+    const sheet = open.creatureSheets.mirage;
+    expect(framesOf(scene([mirage(100, 120, 7), mirage(100, 30, 7)]), open, sheet)).toStrictEqual([
+      2, 2,
+    ]);
+  });
+
+  it('draws a snippet ahead of the figure as before: it flutters while it is looked at', () => {
+    const sheet = open.creatureSheets.snippet;
+    expect(framesOf(scene([snippet(100, 120)]), open, sheet)).toStrictEqual([1]);
+    expect(framesOf(scene([snippet(100, 120), mirage(100, 130)]), open, sheet)).toStrictEqual([1]);
+  });
+
+  it('counts a standing shadow wall as the step does: behind it a mirage is not looked at', () => {
+    const sheet = walled.creatureSheets.mirage;
+    const standing = scene([mirage(100, 120)], {
+      shadowWalls: [{ wall: 0, lit: false, light: 0 }],
+    });
+    expect(framesOf(standing, walled, sheet)).toStrictEqual([1]);
+    // With the wall lifted the figure sees it.
+    expect(framesOf(scene([mirage(100, 120)]), walled, sheet)).toStrictEqual([0]);
+  });
+
+  it('draws the creatures in array order, each from the sheet of its species', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene([snippet(100, 120), mirage(60, 120)]), open);
+    const creatures = renderer.sheets.filter(
+      (sheet) => sheet === open.creatureSheets.snippet || sheet === open.creatureSheets.mirage,
+    );
+    expect(creatures).toStrictEqual([open.creatureSheets.snippet, open.creatureSheets.mirage]);
   });
 });

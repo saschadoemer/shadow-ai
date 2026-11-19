@@ -32,6 +32,7 @@ const PLAYER_SHEET_URL = '/sprites/player.png';
 const LAMP_SHEET_URL = '/sprites/lamp.png';
 const LAMP_WIDE_SHEET_URL = '/sprites/lamp-wide.png';
 const SNIPPET_SHEET_URL = '/sprites/snippet.png';
+const MIRAGE_SHEET_URL = '/sprites/mirage.png';
 const OVERVIEW_SHEET_URL = '/sprites/overview.png';
 /** The movers' sheets (0015): a person of look n is person-(n + 1).png. */
 const PERSON_SHEET_URLS = [
@@ -92,6 +93,11 @@ async function loadContent(): Promise<SceneContent> {
     creatureSheets: {
       snippet: {
         image: await loadImage(SNIPPET_SHEET_URL),
+        frameWidth: CREATURE_SIZE,
+        frameHeight: CREATURE_SIZE,
+      },
+      mirage: {
+        image: await loadImage(MIRAGE_SHEET_URL),
         frameWidth: CREATURE_SIZE,
         frameHeight: CREATURE_SIZE,
       },

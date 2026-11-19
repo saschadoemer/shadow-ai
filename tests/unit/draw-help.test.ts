@@ -72,7 +72,11 @@ const CONTENT: SceneContent = {
   playerSheet: sheet(16, 24),
   lampSheet: sheet(48, 48),
   lampWideSheet: sheet(72, 72),
-  creatureSheets: { snippet: sheet(16, 16) },
+  creatureSheets: {
+    snippet: sheet(16, 16),
+    // Its own image, so that the two sheets can be told apart.
+    mirage: { ...sheet(16, 16), image: { mirage: true } as unknown as ImageBitmap },
+  },
   overviewSheet: sheet(8, 8),
   shadowWallSheet: sheet(16, 16),
   traceSheet: sheet(16, 16),
@@ -115,7 +119,7 @@ const playing = (fields: Partial<GameState> = {}): GameState => ({
   journal: null,
   help: false,
   held: NO_INPUT,
-  captured: { snippet: 0 },
+  captured: { snippet: 0, mirage: 0 },
   overview: { current: 5, max: 5 },
   dark: 0,
   ...fields,

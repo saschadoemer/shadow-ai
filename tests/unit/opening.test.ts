@@ -186,7 +186,7 @@ describe('without the lamp (0026)', () => {
       expect(state.shadowWalls).toStrictEqual([{ wall: 0, lit: false, light: 0 }]);
       expect(state.traces).toStrictEqual([{ trace: 0, light: 0, found: null }]);
     }
-    expect(state.captured).toStrictEqual({ snippet: 0 });
+    expect(state.captured).toStrictEqual({ snippet: 0, mirage: 0 });
   });
 
   it('counts the key as not held: the world steps as without it, step for step', () => {

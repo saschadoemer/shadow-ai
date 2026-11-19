@@ -107,14 +107,16 @@ The colour of a transparent pixel is not checked. The palette is data in
 **The signature colour.** One violet of the palette, `#68386c`, is reserved for the shadow and
 for nothing else in the world; the asset test rejects it in every PNG under `public/` except the
 shadow assets, a list in the test: `sprites/snippet.png` (feature 0008),
-`sprites/shadow-wall.png` (feature 0014), `sprites/trace.png` (feature 0022) and
-`sprites/shadow-veil.png` (features 0023 and 0025).
+`sprites/shadow-wall.png` (feature 0014), `sprites/trace.png` (feature 0022),
+`sprites/shadow-veil.png` (features 0023 and 0025) and `sprites/mirage.png` (feature 0032).
 Every trace of shadow AI glows in
 it. The player learns in seconds what to look for, without a word of text. Because colour alone
 excludes colour-blind players, the signature colour is always accompanied by **form and
 motion** — flicker, dithering — so the shadow is unmistakable without it. The snippet carries
 the colour on its border and its lines of text, and it bobs while it is free — form and motion —
-and stands still in the light.
+and stands still in the light. The mirage (feature 0032) carries it on its frame and on the head
+and shoulders of the portrait in it; it sways one pixel to the side while nobody looks at it,
+holds still while it is looked at, and turns white in the light.
 
 The shadow wall (feature 0014) is the second shadow asset: a dithered strip 4 px thick in the
 signature colour, with `#181425` for the pattern of the densest wall. Its density is read from how

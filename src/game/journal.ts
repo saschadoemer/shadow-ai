@@ -41,6 +41,7 @@ export interface EntryText {
 /** A literal over the species, so a new species does not compile until it has its entry. */
 export const ENTRY_TEXT: Readonly<Record<Species, EntryText>> = {
   snippet: { name: textKey('creature.snippet-name'), text: textKey('creature.snippet-text') },
+  mirage: { name: textKey('creature.mirage-name'), text: textKey('creature.mirage-text') },
 };
 
 /** The words of a region's line on the cases tab (0022): `Spuren: 1 von 5`. */

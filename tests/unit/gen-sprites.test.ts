@@ -12,6 +12,7 @@ import {
   encodeDronePng,
   encodeLampPng,
   encodeLampWidePng,
+  encodeMiragePng,
   encodeOfficerPng,
   encodeOverviewPng,
   encodePersonPng,
@@ -33,6 +34,15 @@ import {
   WIDE_LAMP_SHEET_HEIGHT,
   WIDE_LAMP_SHEET_WIDTH,
 } from '../../tools/placeholder-lamp.ts';
+import {
+  MIRAGE_FRAME_SIZE,
+  MIRAGE_FRAMES,
+  MIRAGE_GROUND,
+  MIRAGE_LIT,
+  MIRAGE_SHEET_HEIGHT,
+  MIRAGE_SHEET_WIDTH,
+  renderMirage,
+} from '../../tools/placeholder-mirage.ts';
 import {
   OVERVIEW_EMPTY,
   OVERVIEW_FRAME_SIZE,
@@ -339,6 +349,99 @@ describe('the sheet of the wider cone (0029)', () => {
   it('leaves the lamp sheet of 0007 as it was', () => {
     const committed = PNG.sync.read(readFileSync(LAMP_FILE));
     expect(Buffer.from(renderLamp()).equals(committed.data)).toBe(true);
+  });
+});
+
+const MIRAGE_FILE = join(ROOT, 'public/sprites/mirage.png');
+const MIRAGE = renderMirage();
+
+/** The colour of pixel (i, j) of frame `index` of the mirage sheet, or null when transparent. */
+function miragePixel(index: number, i: number, j: number): string | null {
+  const o = (j * MIRAGE_SHEET_WIDTH + index * MIRAGE_FRAME_SIZE + i) * 4;
+  if (MIRAGE[o + 3] !== 255) {
+    return null;
+  }
+  return `#${[MIRAGE[o], MIRAGE[o + 1], MIRAGE[o + 2]]
+    .map((c) => (c ?? 0).toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+function mirageFrame(index: number): (string | null)[][] {
+  return Array.from({ length: MIRAGE_FRAME_SIZE }, (_, j) =>
+    Array.from({ length: MIRAGE_FRAME_SIZE }, (_, i) => miragePixel(index, i, j)),
+  );
+}
+
+describe('the placeholder mirage generator (0032)', () => {
+  it('is deterministic: two runs give byte-identical files', () => {
+    expect(encodeMiragePng().equals(encodeMiragePng())).toBe(true);
+  });
+
+  it('matches the committed file', () => {
+    const committed = PNG.sync.read(readFileSync(MIRAGE_FILE));
+    expect([committed.width, committed.height]).toStrictEqual([48, 16]);
+    expect(Buffer.from(MIRAGE).equals(committed.data)).toBe(true);
+  });
+
+  it('is 48x16: three 16x16 frames in one row', () => {
+    expect([
+      MIRAGE_SHEET_WIDTH,
+      MIRAGE_SHEET_HEIGHT,
+      MIRAGE_FRAME_SIZE,
+      MIRAGE_FRAMES,
+    ]).toStrictEqual([48, 16, 16, 3]);
+    expect(MIRAGE).toHaveLength(48 * 16 * 4);
+  });
+
+  it('has 120 opaque pixels per frame, 72 of them the signature colour', () => {
+    for (let index = 0; index < MIRAGE_FRAMES; index += 1) {
+      const pixels = mirageFrame(index).flat();
+      expect(
+        pixels.filter((colour) => colour !== null),
+        `frame ${index}`,
+      ).toHaveLength(120);
+      expect(
+        pixels.filter((colour) => colour === SHADOW_COLOUR),
+        `frame ${index}`,
+      ).toHaveLength(72);
+    }
+  });
+
+  it('draws frame 0 as the spec says: the rectangle 3–12 × 2–13, its border, a head and shoulders violet', () => {
+    // The border.
+    expect(miragePixel(0, 3, 2)).toBe(SHADOW_COLOUR);
+    expect(miragePixel(0, 12, 13)).toBe(SHADOW_COLOUR);
+    expect(miragePixel(0, 2, 2)).toBeNull();
+    expect(miragePixel(0, 3, 14)).toBeNull();
+    expect(miragePixel(0, 13, 7)).toBeNull();
+    // The head: columns 7–8, rows 5–6.
+    expect(miragePixel(0, 7, 5)).toBe(SHADOW_COLOUR);
+    expect(miragePixel(0, 8, 6)).toBe(SHADOW_COLOUR);
+    expect(miragePixel(0, 6, 5)).toBe(MIRAGE_GROUND);
+    expect(miragePixel(0, 7, 4)).toBe(MIRAGE_GROUND);
+    expect(miragePixel(0, 7, 7)).toBe(MIRAGE_GROUND);
+    // The shoulders: columns 6–9 in row 8, columns 5–10 in rows 9–12.
+    expect(miragePixel(0, 6, 8)).toBe(SHADOW_COLOUR);
+    expect(miragePixel(0, 9, 8)).toBe(SHADOW_COLOUR);
+    expect(miragePixel(0, 5, 8)).toBe(MIRAGE_GROUND);
+    expect(miragePixel(0, 5, 9)).toBe(SHADOW_COLOUR);
+    expect(miragePixel(0, 10, 12)).toBe(SHADOW_COLOUR);
+    expect(miragePixel(0, 4, 9)).toBe(MIRAGE_GROUND);
+    expect(miragePixel(0, 11, 12)).toBe(MIRAGE_GROUND);
+    expect([MIRAGE_GROUND, MIRAGE_LIT]).toStrictEqual(['#c0cbdc', '#ffffff']);
+  });
+
+  it('frame 1 is frame 0 moved one pixel to the right', () => {
+    expect(mirageFrame(1)).toStrictEqual(
+      mirageFrame(0).map((row) => [null, ...row.slice(0, MIRAGE_FRAME_SIZE - 1)]),
+    );
+  });
+
+  it('frame 2 is frame 0 with a white ground', () => {
+    const lit = mirageFrame(0).map((row) =>
+      row.map((colour) => (colour === MIRAGE_GROUND ? MIRAGE_LIT : colour)),
+    );
+    expect(mirageFrame(2)).toStrictEqual(lit);
   });
 });
 

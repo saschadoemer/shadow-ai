@@ -6,7 +6,11 @@ import {
   CAPTURE_STEPS,
   CREATURE_SPEED_PX_PER_SECOND,
   creaturesFrom,
+  HABITS,
   isLit,
+  isWatched,
+  MIRAGE_NOTICE_RADIUS,
+  MIRAGE_SPEED_PX_PER_SECOND,
   NOTICE_RADIUS,
   noCaptures,
   stepCreature,
@@ -248,20 +252,23 @@ describe('stepCreatures', () => {
     const RIGHT = figure(100, 100, 'right');
     const result = stepCreatures(
       [snippet(130, 100, 59), snippet(136, 100, 3)],
-      { snippet: 4 },
+      { snippet: 4, mirage: 0 },
       RIGHT,
       true,
       OPEN,
     );
-    expect(result).toStrictEqual({ creatures: [snippet(136, 100, 4)], captured: { snippet: 5 } });
+    expect(result).toStrictEqual({
+      creatures: [snippet(136, 100, 4)],
+      captured: { snippet: 5, mirage: 0 },
+    });
   });
 
   it('leaves its arguments unchanged', () => {
     const creatures = [snippet(130, 100, 59)];
-    const captured = { snippet: 0 };
+    const captured = { snippet: 0, mirage: 0 };
     stepCreatures(creatures, captured, figure(100, 100, 'right'), true, OPEN);
     expect(creatures).toStrictEqual([snippet(130, 100, 59)]);
-    expect(captured).toStrictEqual({ snippet: 0 });
+    expect(captured).toStrictEqual({ snippet: 0, mirage: 0 });
   });
 });
 
@@ -314,7 +321,7 @@ describe('creaturesFrom', () => {
   });
 
   it('starts every count at 0', () => {
-    expect(noCaptures()).toStrictEqual({ snippet: 0 });
+    expect(noCaptures()).toStrictEqual({ snippet: 0, mirage: 0 });
   });
 });
 
@@ -344,10 +351,176 @@ describe('a creature and the wider cone (0029)', () => {
   it('is counted by the step of all creatures with the wider cone only', () => {
     const almost = { ...BESIDE, light: CAPTURE_STEPS - 1 };
     const wide = stepCreatures([almost], noCaptures(), PLAYER, true, OPEN, WIDE_SPREAD);
-    expect(wide).toStrictEqual({ creatures: [], captured: { snippet: 1 } });
+    expect(wide).toStrictEqual({ creatures: [], captured: { snippet: 1, mirage: 0 } });
     const narrow = stepCreatures([almost], noCaptures(), PLAYER, true, OPEN);
-    expect(narrow.captured).toStrictEqual({ snippet: 0 });
+    expect(narrow.captured).toStrictEqual({ snippet: 0, mirage: 0 });
     expect(narrow.creatures).toHaveLength(1);
     expect(narrow.creatures[0]?.light).toBe(0);
+  });
+});
+
+describe('the mirage (0032)', () => {
+  const mirage = (x: number, y: number, light = 0): CreatureState => ({
+    species: 'mirage',
+    x,
+    y,
+    light,
+    home: HOME,
+  });
+  /** One step with the lamp off. */
+  const stepped = (creature: CreatureState, player: PlayerState, map = OPEN): CreatureState => {
+    const next = stepCreature(creature, player, false, map);
+    if (next === null) {
+      throw new Error('captured with the lamp off');
+    }
+    return next;
+  };
+
+  it('has its habits: six tiles, 1 px per step, and it moves only while nobody looks', () => {
+    expect([MIRAGE_NOTICE_RADIUS, MIRAGE_SPEED_PX_PER_SECOND]).toStrictEqual([96, 60]);
+    expect(HABITS.mirage).toStrictEqual({ noticeRadius: 96, stepDistance: 1, shy: true });
+    expect(HABITS.snippet).toStrictEqual({ noticeRadius: 64, stepDistance: 40 / 60, shy: false });
+  });
+
+  describe('looked at', () => {
+    /** The centre of the figure's box is (100, 96). */
+    const facing = (to: Facing): PlayerState => figure(100, 100, to);
+    /** The body point of a creature with these feet is 8 px above them. */
+    const below = mirage(100, 154);
+    const above = mirage(100, 54);
+    const right = mirage(150, 104);
+    const left = mirage(50, 104);
+
+    it('is what lies ahead of the figure, for each of the four facings', () => {
+      const seen = (to: Facing): boolean[] =>
+        [below, above, right, left].map((creature) => isWatched(creature, facing(to), OPEN));
+      expect(seen('down')).toStrictEqual([true, false, false, false]);
+      expect(seen('up')).toStrictEqual([false, true, false, false]);
+      expect(seen('right')).toStrictEqual([false, false, true, false]);
+      expect(seen('left')).toStrictEqual([false, false, false, true]);
+    });
+
+    it('is half of the map: a creature far to the side counts as soon as it is a pixel ahead', () => {
+      // The body point is 1 px below the centre of the box, 60 px beside it.
+      expect(isWatched(mirage(160, 105), facing('down'), OPEN)).toBe(true);
+      expect(isWatched(mirage(40, 105), facing('down'), OPEN)).toBe(true);
+    });
+
+    it('is not a creature exactly beside the figure', () => {
+      expect(isWatched(right, facing('down'), OPEN)).toBe(false);
+      expect(isWatched(right, facing('up'), OPEN)).toBe(false);
+    });
+
+    it('is not a creature behind an opaque box, and is one across a low box', () => {
+      // Cell (9, 6) is [144, 160) × [96, 112): on the line from (100, 96) to the body (190, 100).
+      const far = mirage(190, 108);
+      const box = { x: 144, y: 96, width: 16, height: 16 };
+      const placed = solidsWith(20, 12, [{ column: 9, row: 6, box }]);
+      expect(isWatched(far, facing('right'), OPEN)).toBe(true);
+      expect(isWatched(far, facing('right'), { ...OPEN, solids: placed })).toBe(true);
+      expect(isWatched(far, facing('right'), { ...OPEN, solids: placed, opaque: placed })).toBe(
+        false,
+      );
+    });
+  });
+
+  it('stands while it is looked at: 50 px ahead, 600 steps without the lamp', () => {
+    const player = figure(160, 60, 'down');
+    let creature = mirage(160, 118);
+    for (let step = 0; step < 600; step += 1) {
+      creature = stepped(creature, player);
+    }
+    expect(creature).toStrictEqual(mirage(160, 118));
+  });
+
+  it('comes while it is not looked at: 1 px per step toward the feet, and stops 8 px from them', () => {
+    // 50 px behind a figure that looks down.
+    const player = figure(160, 110, 'down');
+    let creature = mirage(160, 60);
+    creature = stepped(creature, player);
+    expect(creature).toStrictEqual(mirage(160, 61));
+    for (let step = 0; step < 41; step += 1) {
+      creature = stepped(creature, player);
+    }
+    expect(creature).toStrictEqual(mirage(160, 102));
+    expect(stepped(creature, player)).toStrictEqual(mirage(160, 102));
+  });
+
+  it('comes from the side as well: beside the figure it is not looked at', () => {
+    // Its body point is 4 px above the centre of the figure's box: not ahead.
+    const player = figure(160, 110, 'down');
+    expect(stepped(mirage(110, 110), player)).toStrictEqual(mirage(111, 110));
+  });
+
+  it('rests at exactly 96 px and comes from 95', () => {
+    const player = figure(200, 100, 'right');
+    expect(stepped(mirage(104, 108), player)).toStrictEqual(mirage(104, 108));
+    const moved = stepped(mirage(105, 108), player);
+    expect(moved.x).toBeGreaterThan(105);
+    // A snippet rests there: its radius is 64 px.
+    expect(stepped(snippet(105, 108), player)).toStrictEqual(snippet(105, 108));
+  });
+
+  it('comes from ahead when an opaque box hides it, and stands behind a low one', () => {
+    const player = figure(100, 100, 'right');
+    const hidden = mirage(170, 108);
+    const box = { x: 128, y: 96, width: 16, height: 16 };
+    const placed = solidsWith(20, 12, [{ column: 8, row: 6, box }]);
+    expect(stepped(hidden, player, { ...OPEN, solids: placed })).toStrictEqual(hidden);
+    const came = stepped(hidden, player, { ...OPEN, solids: placed, opaque: placed });
+    expect(came.x).toBeLessThan(170);
+  });
+
+  it('is held by a solid box as the snippet is', () => {
+    // The box [112, 128) × [96, 112) lies on its way to a figure on its left that looks away.
+    const player = figure(60, 108, 'left');
+    const box = { x: 112, y: 96, width: 16, height: 16 };
+    const low = { ...OPEN, solids: solidsWith(20, 12, [{ column: 7, row: 6, box }]) };
+    let creature = mirage(140, 108);
+    for (let step = 0; step < 30; step += 1) {
+      creature = stepped(creature, player, low);
+    }
+    // Its box is 12 px wide: it stops flush at x = 128 + 6.
+    expect(creature.x).toBe(134);
+  });
+
+  it('freezes in the cone whether it is looked at or not, and is captured in the 60th lit step', () => {
+    const player = figure(100, 100, 'down');
+    let creature: CreatureState | null = mirage(100, 136);
+    for (let step = 1; step < CAPTURE_STEPS; step += 1) {
+      creature = creature === null ? null : stepCreature(creature, player, true, OPEN);
+      expect(creature).toStrictEqual(mirage(100, 136, step));
+    }
+    expect(creature === null ? null : stepCreature(creature, player, true, OPEN)).toBeNull();
+  });
+
+  it('starts its count again when the light breaks', () => {
+    const player = figure(100, 100, 'down');
+    expect(stepped(mirage(100, 136, 30), player)).toStrictEqual(mirage(100, 136));
+  });
+
+  it('is counted as a mirage, and a snippet in the same step goes by its own rule', () => {
+    // Both are 50 px ahead of a figure that looks down, outside the cone.
+    const player = figure(160, 60, 'down');
+    const both = stepCreatures(
+      [snippet(140, 118), mirage(180, 118)],
+      noCaptures(),
+      player,
+      false,
+      OPEN,
+    );
+    expect(both.creatures[0]?.y).toBeLessThan(118);
+    expect(both.creatures[1]).toStrictEqual(mirage(180, 118));
+    const almost = mirage(160, 96, CAPTURE_STEPS - 1);
+    expect(stepCreatures([almost], noCaptures(), player, true, OPEN)).toStrictEqual({
+      creatures: [],
+      captured: { snippet: 0, mirage: 1 },
+    });
+  });
+
+  it('is made from a point named after it', () => {
+    expect(creaturesFrom([{ name: 'mirage', x: 168, y: 1080 }])).toStrictEqual([
+      { species: 'mirage', x: 168, y: 1080, light: 0, home: { x: 168, y: 1080 } },
+    ]);
   });
 });

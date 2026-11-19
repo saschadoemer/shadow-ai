@@ -280,6 +280,23 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the words of the mirage in both languages (0032)', () => {
+    expect(textOf(textKey('creature.mirage-name'), 'de')).toBe('Trugbild');
+    expect(textOf(textKey('creature.mirage-name'), 'en')).toBe('Mirage');
+    expect(textOf(textKey('creature.mirage-text'), 'de').split('\n')).toStrictEqual([
+      'Ein Bild, das eine Maschine erzeugt hat und das',
+      'keiner geprüft hat. Es bewegt sich nur, solange',
+      'niemand hinsieht – und geht, sobald jemand',
+      'draufschaut, bevor es das Haus verlässt.',
+    ]);
+    expect(textOf(textKey('creature.mirage-text'), 'en').split('\n')).toStrictEqual([
+      'A picture a machine made and nobody checked.',
+      'It only moves while nobody is looking – and it',
+      'goes as soon as somebody looks at it before',
+      'it leaves the house.',
+    ]);
+  });
+
   it('holds the line of the wider cone in both languages (0029)', () => {
     expect(textOf(textKey('notice.upgrade-wide-cone'), 'de')).toBe(
       'Die Lampe leuchtet jetzt breiter und stärker.',

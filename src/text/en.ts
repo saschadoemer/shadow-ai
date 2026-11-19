@@ -37,6 +37,13 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'there – and it goes as soon as everyone knows',
     'which data may go where.',
   ].join('\n'),
+  'creature.mirage-name': 'Mirage',
+  'creature.mirage-text': [
+    'A picture a machine made and nobody checked.',
+    'It only moves while nobody is looking – and it',
+    'goes as soon as somebody looks at it before',
+    'it leaves the house.',
+  ].join('\n'),
   'talk.officer-rules-1': [
     'So you can see the shadow too.',
     'It stays behind wherever data leaves the house',

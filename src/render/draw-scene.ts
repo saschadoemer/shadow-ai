@@ -2,13 +2,13 @@ import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
 import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { progressOf } from '../game/cases';
 import { type Figure, figuresIn, figuresOf } from '../game/cast';
-import { CREATURE_SIZE } from '../game/creature';
+import { CREATURE_SIZE, HABITS, isWatched } from '../game/creature';
 import { FRAME_APEX, LAMP_HEIGHT, WIDE_CONE, WIDE_FRAME_APEX } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
 import { DARK_STEPS } from '../game/overview';
 import { areasOf, shadowedAreas, shownVeil, veilOf } from '../game/region';
-import { LIFT_STEPS, wallsOf } from '../game/shadow';
+import { LIFT_STEPS, wallsOf, withWalls } from '../game/shadow';
 import {
   type CreatureState,
   FACINGS,
@@ -116,9 +116,15 @@ export function lampFrameOrigin(
 export const FLUTTER_STEPS = 15;
 export const FROZEN_FRAME = 2;
 
-/** Frozen in the light: frame 2, still. Free: frames 0 and 1 in turn, by the state's tick. */
-export function creatureFrame(creature: CreatureState, tick: number): number {
-  return creature.light > 0 ? FROZEN_FRAME : Math.floor(tick / FLUTTER_STEPS) % 2;
+/**
+ * Frozen in the light: frame 2, still. Looked at, for a species that moves only while nobody
+ * looks (0032): frame 0, still. Otherwise frames 0 and 1 in turn, by the state's tick.
+ */
+export function creatureFrame(creature: CreatureState, tick: number, watched = false): number {
+  if (creature.light > 0) {
+    return FROZEN_FRAME;
+  }
+  return watched ? 0 : Math.floor(tick / FLUTTER_STEPS) % 2;
 }
 
 /** The top-left corner of a creature's frame on the surface: the feet are its bottom centre. */
@@ -446,11 +452,16 @@ export function drawScene(
     content,
   );
   drawFigures(renderer, state.figures, figures, (at) => at.y <= player.y, state, content);
+  // A shy creature holds still while it is looked at (0032): as in `update`, against the
+  // map with the walls standing. That map is built only when such a creature is there.
+  const shy = state.creatures.some((creature) => HABITS[creature.species].shy);
+  const sight = shy ? withWalls(content.map, walls, state.shadowWalls) : content.map;
   for (const creature of state.creatures) {
     const origin = creatureOrigin(creature, camera);
+    const watched = HABITS[creature.species].shy && isWatched(creature, player, sight);
     renderer.drawSprite(
       content.creatureSheets[creature.species],
-      creatureFrame(creature, state.tick),
+      creatureFrame(creature, state.tick, watched),
       origin.x,
       origin.y,
     );

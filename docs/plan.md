@@ -124,12 +124,13 @@ once there is a case to walk into. Overview won back after it; `gameplay.md` §4
 open since 0009. The help label closes the milestone: the line that named the help's key for
 ten seconds, right after the call, was on screen too long, and a small label in the corner
 that stays takes its place. It comes after 0027 because it takes a field out of the state to
-which 0027 adds one. All seven are implemented; the two named below are not specified yet, so
-M5 stays open until they are.
+which 0027 adds one. All seven are implemented; the two named below are approved, so M5
+stays open until they are built.
 
-Named here without a number and specified when their turn comes, both for the teaser
-(`vision.md` §10): the Harmonic station of Sales · the line that says LMIS presents the
-game, which needs a place before the title screen of M8.
+Two more, both for the teaser (`vision.md` §10): 0035 the Harmonic station — the station of
+Sales — and 0036 LMIS presents — the line that says so, on a card before the call, which
+needs a place before the title screen of M8. They are built with the features of M6 that
+make the build playable (below).
 
 ### M6 — The cases of Act 2
 
@@ -142,9 +143,26 @@ cone after it, because the case of Marketing earns it and HR and Accounting open
 creature of Marketing third: every case has its species (`world.md` §4), and the second
 species brings what the journal still lacks — a choice among its entries, and pages.
 
-Named here without a number and specified when their turn comes: the case of Support · the
+Seven features for a build that can be played from the call to a close by somebody who was
+only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034 the close ·
+0035 the Harmonic station · 0036 LMIS presents · 0037 the case of Support · 0038 the
+creature of Support. They are built in this order. 0032 is implemented; the other six are
+approved.
+The creature first, so that the second room has opposition; it is cut small — the choice
+among the journal's entries and its pages wait for a later case and the third species. The
+intern after it: the hint system `world.md` §3 has named since M1, one figure in the break
+room who says where the next step is. The close last, because it follows whatever the last
+case is: the story says once that the rest of the floor follows, and the game goes on.
+Then the two that M5 still names for the teaser — the Harmonic station of Sales, the one
+place where a real product acts in the game, and the card on which LMIS presents it — and
+then the case of Support, by the rules of the first two, so that the third open door leads
+somewhere. Last its creature, the first of the second layer (`gameplay.md` §3): it sits in
+a window on a screen, and the player closes the window before the lamp can hold it. With a
+third species the journal's creatures tab gets pages.
+
+Named here without a number and specified when their turn comes: the
 cases of HR and Accounting · the colour filter · the case of Development · the meeting rooms'
-side case · the vendor in every department · the intern in the break room and the hints ·
+side case · the vendor in every department ·
 who sees the shadow · the two keys · Management and the last case · the two Harmonic stations
 of Act 2, each in its case spec. 0028 and 0029 are implemented.
 

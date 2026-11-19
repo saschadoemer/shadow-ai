@@ -58,6 +58,7 @@ tools/
                         frame per facing, and the wider cone, one 72x72 frame per facing
                         (0029), drawn from game/lamp
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
+  placeholder-mirage.ts the placeholder mirage sheet as pure data: three 16x16 frames (0032)
   placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames,
                         a full and an empty heart
   placeholder-person.ts the placeholder colleagues: the figure's frames in four other shirts,
@@ -189,6 +190,17 @@ toward the figure's feet when they are closer than 64 px and farther than 8 px �
 what is left to 8 px — through `moveBox`, then its feet are clamped so the sprite stays on the
 map. `createInitialState` makes the creatures from `map.points` and rejects a name that is no
 species.
+
+Each species has its **habits** (feature 0032, `HABITS` in `game/creature`): the radius at
+which it notices the figure, the distance of one step, and whether it is **shy** — whether it
+moves only while it is not looked at. The snippet: 64 px, 2/3 px, not shy. The mirage: 96 px
+(`MIRAGE_NOTICE_RADIUS`), 1 px, shy. A creature is **looked at** (`isWatched`) when the vector
+from the figure's box centre (x, y − 4) to its body point has a component above 0 along the
+figure's facing, and no opaque box lies on that line — the line of the light, against the same
+map, the one with the walls standing. A shy creature that is looked at and not lit stands, with
+`light` 0; otherwise it moves by the rule above with its own numbers. `SPECIES` is
+`['snippet', 'mirage']`, so `captured` has two counts. Whether a creature is looked at is
+derived in every step and every frame and is not in the state.
 
 `overview` is `{ current, max }`, 5 of 5 at the start (feature 0012); `dark` is 0 while the game runs (feature
 0009). The order of a step in `update`: the lamp is on when the input holds it and the figure is
@@ -520,7 +532,10 @@ figure. While `upgrades` holds `wide-cone` (feature 0029) the cone is drawn from
 `lampWideSheet` instead, at the same place in the order, its 72x72 frame placed by
 `WIDE_FRAME_APEX` — down (36, 0), up (36, 71), left (71, 36), right (0, 36) — in the same way
 (`lampFrameOrigin(player, camera, apexes)`). A creature's frame has its top-left corner at (round(x) − 8 − camera.x, round(y) − 16 −
-camera.y); its frame is 2 while `light` is above 0, else ⌊tick / 15⌋ mod 2 (feature 0008).
+camera.y); its frame is 2 while `light` is above 0, else ⌊tick / 15⌋ mod 2 (feature 0008). A
+shy creature that is looked at and not lit shows frame 0 and holds still (feature 0032,
+`creatureFrame(creature, tick, watched)`); the scene asks `isWatched` against the map with the
+walls standing, as `update` does, and builds that map only when a shy creature is in the state.
 
 The shadow walls (feature 0014) lie on the floor like the cone, under every figure. A wall whose
 box is (x, y, w, h) is drawn in 16 px segments from the corner of its box: a horizontal wall
@@ -733,7 +748,8 @@ open. A box is half-open: (x, y, width, height) covers [x, x + width) × [y, y +
 `opaque` is built the same way from the tiles that are not low; a cell with no such box shares
 the empty array. `moveBox` reads `solids`, for the figure and the creatures alike; `isLit` hands
 `sightBlocked` a grid whose boxes are `opaque`, so the light stops at walls, closed doors and
-cabinets and passes over everything lower than a person (feature 0011).
+cabinets and passes over everything lower than a person (feature 0011). `isWatched` asks the
+same grid whether the figure sees a creature (feature 0032).
 
 **What the loader accepts.** An orthogonal, finite map with 16x16 tiles, at least 20x12 tiles
 (320x180 px, the surface); exactly one external `.tsj` tileset with 16x16 tiles; layer data in
@@ -1002,6 +1018,12 @@ data: `public/sprites/snippet.png`, 48x16, three 16x16 frames in one row — the
 `npm run gen-sprites` writes it beside the other two; it is committed, deterministic and tested
 against the generator. The art pass replaces it under the same name and frame order.
 
+`tools/placeholder-mirage.ts` draws the mirage sheet (feature 0032) the same way:
+`public/sprites/mirage.png`, 48x16, three 16x16 frames in one row — a framed portrait, the same
+one pixel to the right, and the same with a white ground. The frame, columns 3–12 and rows
+2–13, a head and shoulders are `#68386c`, the ground `#c0cbdc`, the lit ground `#ffffff`; 120
+opaque pixels per frame, 72 of them the signature colour.
+
 `tools/placeholder-overview.ts` draws the overview sheet (features 0009, 0012) and returns its
 pixels as data: `public/sprites/overview.png`, 16x8, two 8x8 frames in one row — a heart 7 wide
 and 7 high, 34 opaque pixels, with a rim of 16 in `#181425`, inside 18 in `#e43b44` for the full
@@ -1106,7 +1128,9 @@ theirs (92–99 today). The standing figure's point follows them (100), and the 
 box. The first five (`FIRST_TRACES`), those of 0022, become rectangle objects after the figure's
 point, ids 101–105. Every later trace is written at the end of the file, after the areas and
 the rests, so that no object of an earlier feature changes its id: the five of Marketing
-(feature 0028) have the ids 124–128, and `nextobjectid` is 129.
+(feature 0028) have the ids 124–128. The mirages (feature 0032) are `MIRAGES`, their feet in
+pixels; they become three point objects named `mirage` after those traces, ids 129–131, and
+`nextobjectid` is 132.
 `floor.tmj` has the layers `ground` (id 1), `detail` (id 3), `above` (id 4) and `objects` (id 2),
 in that order. Posts are
 derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper

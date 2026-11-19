@@ -2089,6 +2089,42 @@
           "width": 16,
           "x": 432,
           "y": 1248
+        },
+        {
+          "height": 0,
+          "id": 129,
+          "name": "mirage",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 168,
+          "y": 1080
+        },
+        {
+          "height": 0,
+          "id": 130,
+          "name": "mirage",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 616,
+          "y": 1048
+        },
+        {
+          "height": 0,
+          "id": 131,
+          "name": "mirage",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 360,
+          "y": 1208
         }
       ],
       "opacity": 1,
@@ -2099,7 +2135,7 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 129,
+  "nextobjectid": 132,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",

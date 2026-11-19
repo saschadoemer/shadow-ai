@@ -259,6 +259,18 @@ that it goes as soon as everyone knows which data may go where. The name is a di
 for a scrap of paper, used for a species and not for a product, a company or a tool; it is fixed
 by the author's decision on that basis, and no trademark register was searched (§5).
 
+**The mirage** (*Trugbild*, feature 0032) is the species of the Marketing case: a small framed
+portrait of nobody, because it feeds on pictures a machine made and nobody checked. Small,
+layer 1. It moves only while nobody looks at it: looked at, it stands; not looked at, it comes
+at the figure from as far as six tiles, faster than a snippet. The lamp freezes and captures it
+like every creature. Its weakness is the countermeasure of its case — somebody looks. Three
+stand in Marketing, on the cells (10, 67), (38, 65) and (22, 75): none near the doorway, and
+placed so that one comes from behind while the player looks at a screen of the lower row or at
+the printer. All three have their home in the region's area and leave the game when the case of
+Marketing is solved (feature 0025). Its displayed name is *Trugbild*, in English *Mirage*:
+dictionary words for a false picture, used for a species and not for a product; fixed by the
+author's decision on that basis, and no trademark register was searched (§5).
+
 ## 5. Names
 
 Every product, company and tool in the game is fictional, with two exceptions: LMIS, which

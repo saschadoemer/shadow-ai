@@ -8,6 +8,7 @@ import { moveBox } from '../../src/engine/collision';
 import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../src/engine/tiled';
 import { CASES, isReady, progressOf } from '../../src/game/cases';
 import { COLLEAGUES, figuresOf, pagesOfRoute } from '../../src/game/cast';
+import { isWatched, MIRAGE_NOTICE_RADIUS } from '../../src/game/creature';
 import { REGION_NAME } from '../../src/game/journal';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
 import { NOTICE_SHADOW_TOO_DENSE, noticeOf } from '../../src/game/notice';
@@ -31,6 +32,7 @@ import {
   FURNITURE,
   floorJson,
   HORIZONTAL_WALLS,
+  MIRAGES,
   POSTS,
   REGION_AREAS,
   RESTS,
@@ -500,9 +502,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 128 }, (_, i) => i + 1),
+      Array.from({ length: 131 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(129);
+    expect(json.nextobjectid).toBe(132);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -948,7 +950,7 @@ describe('the shadow walls of the floor (0014)', () => {
       TABLE.map(([region], i) => [92 + i, `shadow:${region}`]),
     );
     expect(objects.slice(91, 99).some((object) => 'point' in object)).toBe(false);
-    expect(floor.points).toHaveLength(91);
+    expect(floor.points).toHaveLength(94);
   });
 
   it('builds the boxes from the doorway cells of the layout', () => {
@@ -1080,7 +1082,8 @@ describe('the standing figures of the floor (0017)', () => {
 
   it('holds the point figure:officer after the rectangles, with the id 100', () => {
     expect(FIGURES).toStrictEqual([{ id: 'officer', at: OFFICER }]);
-    expect(floor.points.at(-1)).toStrictEqual({ name: 'figure:officer', ...OFFICER });
+    // The 91st point; the mirages of 0032 follow it.
+    expect(floor.points[90]).toStrictEqual({ name: 'figure:officer', ...OFFICER });
     const objects = floorJson().layers[3].objects;
     // The hundredth object; the traces of 0022 follow it.
     const hers = objects[99];
@@ -1228,7 +1231,7 @@ describe('the traces of the floor (0022)', () => {
     );
     expect(objects.some((object) => 'point' in object)).toBe(false);
     expect(floor.rects.slice(8, 13).every((rect) => rect.name === 'trace:sales')).toBe(true);
-    expect(floor.points).toHaveLength(91);
+    expect(floor.points).toHaveLength(94);
   });
 
   it('lie in Sales, each on a desk with a screen whose chair stands on the cell below', () => {
@@ -1373,7 +1376,7 @@ describe('the areas of the regions on the floor (0023)', () => {
     expect(wallsOf(floor.rects)).toHaveLength(8);
     // The five of 0022; the five of 0028 came later.
     expect(tracesOf(floor.rects)).toHaveLength(10);
-    expect(floor.points).toHaveLength(91);
+    expect(floor.points).toHaveLength(94);
   });
 
   it('give every room of a region its area, with exactly the cells of the room', () => {
@@ -1485,17 +1488,21 @@ describe('the cleared region on the floor (0025)', () => {
     expect(solve(ready).solved).toStrictEqual([{ region: 'sales', at: 1005 }]);
   });
 
-  it('leaves one creature when nothing was captured: the one whose home is (1224, 622)', () => {
+  it('leaves one snippet when nothing was captured: the one whose home is (1224, 622)', () => {
     const solved = solve(ready);
-    expect(solved.creatures.map((creature) => creature.home)).toStrictEqual([{ x: 1224, y: 622 }]);
-    expect(solved.captured).toStrictEqual({ snippet: 0 });
+    // The mirages of Marketing (0032) are at home in another region and stay.
+    expect(solved.creatures.map((creature) => creature.home)).toStrictEqual([
+      { x: 1224, y: 622 },
+      ...MIRAGES,
+    ]);
+    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0 });
   });
 
   it('removes none when both snippets of Sales were captured before', () => {
     const corridor = start.creatures.slice(0, 1);
-    const solved = solve({ ...ready, creatures: corridor, captured: { snippet: 2 } });
+    const solved = solve({ ...ready, creatures: corridor, captured: { snippet: 2, mirage: 0 } });
     expect(solved.creatures).toStrictEqual(corridor);
-    expect(solved.captured).toStrictEqual({ snippet: 2 });
+    expect(solved.captured).toStrictEqual({ snippet: 2, mirage: 0 });
   });
 
   it('removes the shadow wall of Sales if it still stands, and no other', () => {
@@ -1557,7 +1564,7 @@ describe('the rests of the floor (0027)', () => {
     // The five of 0022; the five of 0028 came later.
     expect(tracesOf(floor.rects)).toHaveLength(10);
     expect(areas).toHaveLength(10);
-    expect(floor.points).toHaveLength(91);
+    expect(floor.points).toHaveLength(94);
   });
 
   it('lie each on a counter with a coffee machine, and the floor has no such tile without one', () => {
@@ -1641,16 +1648,13 @@ describe('the traces of Marketing on the floor (0028)', () => {
     );
   });
 
-  it('are the last five objects of the file, rectangles with the ids 124 to 128', () => {
+  it('are five rectangles with the ids 124 to 128, after the rests and before the mirages of 0032', () => {
     const objects = floorJson().layers[3].objects;
-    expect(objects).toHaveLength(128);
-    expect(objects.slice(123).map((object) => [object.id, object.name])).toStrictEqual(
+    expect(objects.slice(123, 128).map((object) => [object.id, object.name])).toStrictEqual(
       [124, 125, 126, 127, 128].map((id) => [id, 'trace:marketing']),
     );
-    expect(objects.slice(123).some((object) => 'point' in object)).toBe(false);
-    expect(floorJson().nextobjectid).toBe(129);
+    expect(objects.slice(123, 128).some((object) => 'point' in object)).toBe(false);
     expect(floor.rects).toHaveLength(36);
-    expect(floor.points).toHaveLength(91);
   });
 
   it('leave the 123 objects of 0027 and before exactly as they were', () => {
@@ -1804,13 +1808,15 @@ describe('the case of Marketing on the floor (0028)', () => {
     expect([veilOf(cleared, 100, 70), veilOf(cleared, 5, 5)]).toStrictEqual([1, 2]);
   });
 
-  it('removes the shadow wall of Marketing, and no other and no creature', () => {
+  it('removes the shadow wall of Marketing and no other, and no snippet', () => {
     expect(regionsOf(ready).filter((region) => region === 'marketing')).toHaveLength(1);
     expect(regionsOf(marketing)).not.toContain('marketing');
     expect(regionsOf(marketing)).toContain('sales');
     expect(marketing.shadowWalls).toHaveLength(ready.shadowWalls.length - 1);
-    // No creature is at home in Marketing yet: its species comes with its own feature.
-    expect(marketing.creatures).toStrictEqual(ready.creatures);
+    // The mirages of 0032 are at home in Marketing and go with its shadow; the snippets stay.
+    expect(marketing.creatures).toStrictEqual(
+      ready.creatures.filter((creature) => creature.species === 'snippet'),
+    );
   });
 
   it('is followed by Sales: both solved in that order, seven of seven, both rooms clear', () => {
@@ -1914,5 +1920,144 @@ describe('the wider cone on the floor (0029)', () => {
     const held = shine(below(marketing, 'development'), 180);
     expect(regionsOf(held)).toContain('development');
     expect(noticeOf(held)).toBe(NOTICE_SHADOW_TOO_DENSE);
+  });
+});
+
+describe('the mirages of the floor (0032)', () => {
+  /** Cell and feet, in file order: the spec's table. */
+  const TABLE: readonly (readonly [number, number, Point])[] = [
+    [10, 67, { x: 168, y: 1080 }],
+    [38, 65, { x: 616, y: 1048 }],
+    [22, 75, { x: 360, y: 1208 }],
+  ];
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const start = createInitialState(floor);
+  const mirages = start.creatures.filter((creature) => creature.species === 'mirage');
+  const marketing = areasOf(floor.rects).filter((area) => area.region === 'marketing');
+  const standing = withWalls(floor, wallsOf(floor.rects), start.shadowWalls);
+
+  it('are the three of the table, the middle of a cell each', () => {
+    expect(MIRAGES).toStrictEqual(TABLE.map(([, , feet]) => feet));
+    expect(TABLE.map(([column, row]) => ({ x: 16 * column + 8, y: 16 * row + 8 }))).toStrictEqual([
+      ...MIRAGES,
+    ]);
+  });
+
+  it('are the last three objects of the file, points with the ids 129 to 131', () => {
+    const objects = floorJson().layers[3].objects;
+    expect(objects).toHaveLength(131);
+    expect(objects.slice(128).map((object) => [object.id, object.name])).toStrictEqual(
+      [129, 130, 131].map((id) => [id, 'mirage']),
+    );
+    expect(objects.slice(128).every((object) => 'point' in object)).toBe(true);
+    expect(floorJson().nextobjectid).toBe(132);
+    expect(floor.points.slice(91)).toStrictEqual(
+      TABLE.map(([, , feet]) => ({ name: 'mirage', ...feet })),
+    );
+  });
+
+  it('leave the 128 objects of 0028 and before exactly as they were', () => {
+    // SHA-256 over the first 128 objects, recorded from the generator before this feature.
+    const before = JSON.stringify(floorJson().layers[3].objects.slice(0, 128));
+    expect(createHash('sha256').update(before).digest('hex')).toBe(
+      '785fe89a847f7c06716adefdbcd3420bcf0c2277c8a8cc806268b33433679c0e',
+    );
+  });
+
+  it('give the floor six creatures: the three snippets, then the three mirages', () => {
+    expect(start.creatures.map((creature) => creature.species)).toStrictEqual([
+      'snippet',
+      'snippet',
+      'snippet',
+      'mirage',
+      'mirage',
+      'mirage',
+    ]);
+    expect(mirages.map((creature) => creature.home)).toStrictEqual([...MIRAGES]);
+    expect(start.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+  });
+
+  it('stand each on a free cell of Marketing that is reached on foot, at home in its area', () => {
+    expect(marketing).toHaveLength(1);
+    expect(mirages).toHaveLength(3);
+    for (const { home } of mirages) {
+      const column = Math.floor(home.x / 16);
+      const row = Math.floor(home.y / 16);
+      expect(floor.detail[cell(column, row)], `(${column}, ${row})`).toBe(EMPTY);
+      expect(floor.solids[cell(column, row)], `(${column}, ${row})`).toStrictEqual([]);
+      expect(blocked(boxAt(home)), `(${column}, ${row})`).toBe(false);
+      expect(reached(home), `(${column}, ${row})`).toBe(true);
+      expect(
+        marketing.some((area) => inArea(area, home)),
+        `(${column}, ${row})`,
+      ).toBe(true);
+    }
+  });
+
+  it('are at least 96 px from every cell of the doorway of Marketing', () => {
+    // The doorway cells (23, 58) to (25, 58): the pixels [368, 416) × [928, 944).
+    expect(mirages).toHaveLength(3);
+    for (const { home } of mirages) {
+      const dx = Math.max(368 - home.x, 0, home.x - 416);
+      const dy = Math.max(928 - home.y, 0, home.y - 944);
+      expect(Math.hypot(dx, dy), `(${home.x}, ${home.y})`).toBeGreaterThanOrEqual(
+        MIRAGE_NOTICE_RADIUS,
+      );
+    }
+  });
+
+  it('rest while the figure stands in the doorway, whichever way it looks', () => {
+    for (const facing of ['down', 'up', 'left', 'right'] as const) {
+      const entered: GameState = {
+        ...start,
+        player: { ...start.player, x: 392, y: 956, facing },
+      };
+      const next = update(entered, NO_INPUT, floor);
+      expect(next.creatures.slice(3), facing).toHaveLength(3);
+      expect(next.creatures.slice(3), facing).toStrictEqual(mirages);
+    }
+  });
+
+  it('come from behind while the figure looks at a screen of the lower row or at the printer', () => {
+    // Above the left screen of the first island of the lower row, and above the printer.
+    for (const [x, y] of [
+      [88, 1116],
+      [440, 1244],
+    ] as const) {
+      const player = { ...start.player, x, y, facing: 'down' } as const;
+      const near = mirages.filter(
+        (creature) => Math.hypot(creature.x - x, creature.y - y) < MIRAGE_NOTICE_RADIUS,
+      );
+      expect(near, `(${x}, ${y})`).toHaveLength(1);
+      expect(near.map((creature) => isWatched(creature, player, standing))).toStrictEqual([false]);
+      const next = update({ ...start, player }, NO_INPUT, floor);
+      const moved = next.creatures.filter(
+        (creature, n) =>
+          creature.x !== start.creatures[n]?.x || creature.y !== start.creatures[n]?.y,
+      );
+      expect(moved.map((creature) => creature.home)).toStrictEqual(near.map((c) => c.home));
+    }
+  });
+
+  it('go with the shadow of Marketing when its case is solved: none is captured, the snippets stay', () => {
+    const routes = routesOf(floor.points);
+    const source = start.movers.find((mover) => routes[mover.route]?.name === 'person:marketing');
+    const ready: GameState = {
+      ...start,
+      tick: 1000,
+      player: { ...start.player, x: source?.x ?? 0, y: (source?.y ?? 0) + 24 },
+      traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+    };
+    const solved = [TALK, NO_INPUT, TALK, NO_INPUT, TALK].reduce(
+      (state, input) => update(state, input, floor),
+      ready,
+    );
+    expect(solved.solved).toStrictEqual([{ region: 'marketing', at: 1005 }]);
+    expect(solved.creatures.map((creature) => creature.species)).toStrictEqual([
+      'snippet',
+      'snippet',
+      'snippet',
+    ]);
+    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0 });
   });
 });
