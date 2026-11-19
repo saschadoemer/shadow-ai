@@ -125,7 +125,7 @@ stop and look; do not bend a test. The container was **not** run with the protot
   `talk.intern-hr-start`, `talk.intern-hr-traces`, `talk.intern-hr-source`,
   `notice.upgrade-filter`; new words for `talk.intern-done`.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -273,11 +273,11 @@ stop and look; do not bend a test. The container was **not** run with the protot
          expect(TABLE[language][id as TextId].split('\n'), `${language} ${id}`).toHaveLength(3);
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL,
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL,
   2 of 37 tests: the new test, and the test of the intern's pages, whose last page changes.
   `npx tsc --noEmit` reports 22 errors, in this test only: the ids are not ids of the table yet.
 
-- [ ] **Step 3: The words,** in both tables. Copy them; they are the spec's:
+- [x] **Step 3: The words,** in both tables. Copy them; they are the spec's:
 
 ```diff
 --- a/src/text/de.ts
@@ -456,11 +456,11 @@ stop and look; do not bend a test. The container was **not** run with the protot
  };
 ```
 
-- [ ] **Step 4: Run** `npm run check` — 1701 unit tests. The rule tests cover the new
+- [x] **Step 4: Run** `npm run check` — 1701 unit tests. The rule tests cover the new
   keys: a page of a talk has at most three lines of 47 characters, a notice is one line that
   fits the bar, a policy block has two to four lines.
 
-- [ ] **Step 5: Commit** — `Add the words of the case of HR`. Body: the answer says why
+- [x] **Step 5: Commit** — `Add the words of the case of HR`. Body: the answer says why
   first — two hundred applications and a Friday — and then what went wrong; the block does
   not forbid the tool, it asks for a person who looks and can say what was sorted by.
 
@@ -484,7 +484,7 @@ stop and look; do not bend a test. The container was **not** run with the protot
   `person:hr` as the last of `ROUTES`; `FIRST_ROUTES = 22` in `tools/floor-layout.ts`;
   `floor.tmj` with the points 141 to 144 and `nextobjectid` 145; a 23rd mover of look 4.
 
-- [ ] **Step 1: Write the failing tests.** The sheet and its shirt; the fifth colleague and
+- [x] **Step 1: Write the failing tests.** The sheet and its shirt; the fifth colleague and
   its saying; the route on the floor, with the 140 objects before it held to a digest and
   the 22 movers of before held to another. Two tests used `person:hr` as the example of a
   person without lines — that route is now `person:accounting`. The two recorded runs hash
@@ -940,14 +940,14 @@ stop and look; do not bend a test. The container was **not** run with the protot
    const canvas = page.locator('canvas#game');
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run`. Expected: 16 tests fail in four files — eleven of the floor, two each
+- [x] **Step 2: Run them** — `npx vitest run`. Expected: 16 tests fail in four files — eleven of the floor, two each
   of the cast and of the sheets, one of the assets. `npx tsc --noEmit` reports one error:
   `FIRST_ROUTES` is not exported yet. Two tests of the new block are green before the code,
   because they hold what is already there: the 140 objects of before, and the free cells of
   the route. With a dev server running, `npx playwright test -g "23 movers"` fails: the
   state holds 22.
 
-- [ ] **Step 3: The shirt, the sheet's address and the saying:**
+- [x] **Step 3: The shirt, the sheet's address and the saying:**
 
 ```diff
 --- a/tools/placeholder-person.ts
@@ -1006,7 +1006,7 @@ stop and look; do not bend a test. The container was **not** run with the protot
  /** The pages of the colleague on a route; none when the route has no lines. */
 ```
 
-- [ ] **Step 4: The route.** It is the last entry of `ROUTES`; the generator writes the
+- [x] **Step 4: The route.** It is the last entry of `ROUTES`; the generator writes the
   first 22 routes where they were and every later one at the end of the file:
 
 ```diff
@@ -1089,16 +1089,16 @@ stop and look; do not bend a test. The container was **not** run with the protot
      tiledversion: '1.11.2',
 ```
 
-- [ ] **Step 5: Generate** — `npm run gen-sprites`, then `npm run gen-floor`.
+- [x] **Step 5: Generate** — `npm run gen-sprites`, then `npm run gen-floor`.
   `public/sprites/person-5.png` is new, with the SHA-256
   `1e5e90919552c63eebc4d6b7a4db5d7c1fe61869ef950c42d902db09262cfcbb`; no other sheet changes.
   `public/maps/floor.tmj` gets four points at the end of its objects and `nextobjectid`
   145; nothing else in it changes.
 
-- [ ] **Step 6: Run** `npm run check` — 1708 unit tests. Then `npm run test:e2e`: the
+- [x] **Step 6: Run** `npm run check` — 1708 unit tests. Then `npm run test:e2e`: the
   test of the movers passes with 23.
 
-- [ ] **Step 7: Commit** — `Let a colleague walk in HR`. Body: the case needs its source;
+- [x] **Step 7: Commit** — `Let a colleague walk in HR`. Body: the case needs its source;
   the route is written at the end of the map so that no object and no mover of an earlier
   feature changes its place.
 
@@ -1118,7 +1118,7 @@ stop and look; do not bend a test. The container was **not** run with the protot
   `REGION_NAME.hr`; `floor.tmj` with the rectangles 145 to 147 and `nextobjectid` 148;
   eighteen traces in the state.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/floor.test.ts
@@ -1531,14 +1531,14 @@ stop and look; do not bend a test. The container was **not** run with the protot
  test('the floor starts with its three panes open, none lit', async ({ page }) => {
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run`. Expected: 14 tests fail in three files — ten of the floor, three of
+- [x] **Step 2: Run them** — `npx vitest run`. Expected: 14 tests fail in three files — ten of the floor, three of
   the journal's drawing, one of the state. `npx tsc --noEmit` reports one error:
   `THIRD_TRACES` is not exported yet. Three tests of the new block are green before the code:
   they hold the 144 objects of before, the desks with their chairs, and that the room has
   three screens. With a dev server running, `npx playwright test -g "eighteen traces"`
   fails: the state holds fifteen.
 
-- [ ] **Step 3: The layout and the region's name:**
+- [x] **Step 3: The layout and the region's name:**
 
 ```diff
 --- a/tools/floor-layout.ts
@@ -1615,14 +1615,14 @@ stop and look; do not bend a test. The container was **not** run with the protot
  /** The entries of the creatures tab: every species captured at least once, in SPECIES order. */
 ```
 
-- [ ] **Step 4: Generate the map** — `npm run gen-floor`. `public/maps/floor.tmj` gets three
+- [x] **Step 4: Generate the map** — `npm run gen-floor`. `public/maps/floor.tmj` gets three
   rectangles at the end of its objects and `nextobjectid` 148; nothing else in it changes.
   Its SHA-256 is `5951ec7d3e4e3bd141acf15459d297d76b3464cd2ce7a603f55d22d33f6257d0`.
 
-- [ ] **Step 5: Run** `npm run check` — 1719 unit tests. Then `npm run test:e2e`:
+- [x] **Step 5: Run** `npm run check` — 1719 unit tests. Then `npm run test:e2e`:
   21 passed, 3 skipped.
 
-- [ ] **Step 6: Commit** — `Put the traces of HR on the floor`. Body: three traces, because
+- [x] **Step 6: Commit** — `Put the traces of HR on the floor`. Body: three traces, because
   the room has three screens; the case comes with Task 5, so the journal names the region
   and nothing can be solved yet.
 
@@ -1646,7 +1646,7 @@ stop and look; do not bend a test. The container was **not** run with the protot
 With three cases the tab has one page, so nothing of this task shows in the game yet: the
 tests of two pages come with the fourth case, in Task 5.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/journal.test.ts
@@ -1820,13 +1820,13 @@ tests of two pages come with the fourth case, in Task 5.
        textOf(textKey(id), 'de'),
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run`. Expected: 4 tests fail in three files — two of the journal, one of
+- [x] **Step 2: Run them** — `npx vitest run`. Expected: 4 tests fail in three files — two of the journal, one of
   its drawing, one of the text — and `npx tsc --noEmit` reports nine errors: the names of
   this task do not exist yet. The test of the text fails only because it imports
   `POLICY_PER_PAGE`; the blocks obey its rule already. The tests of one page are green before
   the code: with one page nothing turns, and nothing is drawn above the first block.
 
-- [ ] **Step 3: The pages in the journal's rules:**
+- [x] **Step 3: The pages in the journal's rules:**
 
 ```diff
 --- a/src/game/journal.ts
@@ -1901,7 +1901,7 @@ tests of two pages come with the fourth case, in Task 5.
  }
 ```
 
-- [ ] **Step 4: The open page and its mark in the drawing:**
+- [x] **Step 4: The open page and its mark in the drawing:**
 
 ```diff
 --- a/src/render/draw-journal.ts
@@ -1975,10 +1975,10 @@ tests of two pages come with the fourth case, in Task 5.
      x += (String(journal.page + 1).length + 1) * GLYPH_WIDTH;
 ```
 
-- [ ] **Step 5: Run** `npm run check` — 1725 unit tests. The tests of 0037 for three
+- [x] **Step 5: Run** `npm run check` — 1725 unit tests. The tests of 0037 for three
   blocks and of 0038 for the pages of the creatures tab pass unchanged.
 
-- [ ] **Step 6: Commit** — `Give the policy tab pages of three blocks`. Body: four blocks do
+- [x] **Step 6: Commit** — `Give the policy tab pages of three blocks`. Body: four blocks do
   not fit the screen; the page of the journal that the creatures tab got now counts here
   too.
 
@@ -1998,7 +1998,7 @@ tests of two pages come with the fourth case, in Task 5.
   (Task 4).
 - Produces: the fourth entry of `CASES`; `HINTS.hr`; `NOTICE_UPGRADE.filter`.
 
-- [ ] **Step 1: Write the failing tests.** The case by its rules and on the floor as loaded;
+- [x] **Step 1: Write the failing tests.** The case by its rules and on the floor as loaded;
   the upgrade and its notice; the hints; the close that now waits for the fourth case; two
   pages of the policy, turned and drawn:
 
@@ -2948,12 +2948,12 @@ tests of two pages come with the fourth case, in Task 5.
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run`. Expected: 38 tests fail in nine files — eight each of the cases and
+- [x] **Step 2: Run them** — `npx vitest run`. Expected: 38 tests fail in nine files — eight each of the cases and
   of the floor, four each of the hints, the state, the journal and its drawing, three of
   the notice, two of the story, one of the scene. `npx tsc --noEmit` reports no error: the
   tables take any region.
 
-- [ ] **Step 3: The three tables:**
+- [x] **Step 3: The three tables:**
 
 ```diff
 --- a/src/game/cases.ts
@@ -3006,10 +3006,10 @@ tests of two pages come with the fourth case, in Task 5.
  export const UPGRADE_NOTICE_STEPS = 120;
 ```
 
-- [ ] **Step 4: Run** `npm run check` — 1755 unit tests. Then `npm run test:e2e`:
+- [x] **Step 4: Run** `npm run check` — 1755 unit tests. Then `npm run test:e2e`:
   21 passed, 3 skipped.
 
-- [ ] **Step 5: Commit** — `Add the case of HR`. Body: the fourth case, by the rules of the
+- [x] **Step 5: Commit** — `Add the case of HR`. Body: the fourth case, by the rules of the
   first three; the tables are all that changes. Solving it earns the upgrade the world data
   has given HR since 0014, so the lamp gets through the densest shadow and the way into
   Development is free.
@@ -3025,7 +3025,7 @@ tests of two pages come with the fourth case, in Task 5.
 The diffs are against the branch as it stands before Task 1. If a line has moved, put the
 text where the diff means it; do not change the words without a reason.
 
-- [ ] **Step 1: `world.md`** §1, §2 and §3:
+- [x] **Step 1: `world.md`** §1, §2 and §3:
 
 ```diff
 --- a/docs/spec/world.md
@@ -3085,7 +3085,7 @@ text where the diff means it; do not change the words without a reason.
  - **The customer.** A voice on the phone at the start — one sentence of the call (feature 0026).
 ```
 
-- [ ] **Step 2: `gameplay.md`** §5, §6 and §7:
+- [x] **Step 2: `gameplay.md`** §5, §6 and §7:
 
 ```diff
 --- a/docs/spec/gameplay.md
@@ -3132,7 +3132,7 @@ text where the diff means it; do not change the words without a reason.
  whichever was captured first. Two entries fit the screen; pages come with the third species.
 ```
 
-- [ ] **Step 3: `architecture.md`** §1, §2 and §5 to §8:
+- [x] **Step 3: `architecture.md`** §1, §2 and §5 to §8:
 
 ```diff
 --- a/docs/spec/architecture.md
@@ -3232,7 +3232,7 @@ text where the diff means it; do not change the words without a reason.
  `notice.rest-full` or `notice.rest-shadow` (0027, `NOTICE_REST`); otherwise, while the lamp
 ```
 
-- [ ] **Step 4: `visual.md`** §3:
+- [x] **Step 4: `visual.md`** §3:
 
 ```diff
 --- a/docs/spec/visual.md
@@ -3248,7 +3248,7 @@ text where the diff means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 5: `testing.md`** §1:
+- [x] **Step 5: `testing.md`** §1:
 
 ```diff
 --- a/docs/spec/testing.md
@@ -3268,7 +3268,7 @@ text where the diff means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 6: `README.md`:**
+- [x] **Step 6: `README.md`:**
 
 ```diff
 --- a/README.md
@@ -3288,19 +3288,19 @@ text where the diff means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 7:** `npm run check`, then commit — `Move the case of HR into the spec`.
+- [x] **Step 7:** `npm run check`, then commit — `Move the case of HR into the spec`.
 
 ---
 
 ### Task 7: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 21 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 21 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 7 in this file and commit —
   `Tick the full check of 0040`.
 
 ---
