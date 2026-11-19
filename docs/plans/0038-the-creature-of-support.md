@@ -142,7 +142,7 @@ walk — and the container was **not** run with the prototype.
 - Produces: the text ids `notice.pane-open`, `creature.lurker-name`, `creature.lurker-text`;
   new words for `talk.intern-support-traces`.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -205,12 +205,12 @@ walk — and the container was **not** run with the prototype.
  
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL,
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL,
   2 of 36 tests: the new test, and the test of the words of Support, whose page of the intern
   changes. `npx tsc --noEmit` reports six errors, in this test only: the ids are not ids of the
   table yet.
 
-- [ ] **Step 3: The words,** in both tables. Copy them; they are the spec's:
+- [x] **Step 3: The words,** in both tables. Copy them; they are the spec's:
 
 ```diff
 --- a/src/text/de.ts
@@ -290,11 +290,11 @@ walk — and the container was **not** run with the prototype.
      'Orange shirt, walks between the desks and the',
 ```
 
-- [ ] **Step 4: Run** `npm run check` — 1611 unit tests. The rule tests cover the new
+- [x] **Step 4: Run** `npm run check` — 1611 unit tests. The rule tests cover the new
   keys: a notice is one line that fits the bar, and an entry of the journal has at most four
   lines.
 
-- [ ] **Step 5: Commit** — `Add the words of the lurker`. Body: the notice says what is and
+- [x] **Step 5: Commit** — `Add the words of the lurker`. Body: the notice says what is and
   tells the player nothing to do; the intern's page does, because a player who never presses
   E at a screen could not solve the case.
 
@@ -314,7 +314,7 @@ walk — and the container was **not** run with the prototype.
   `encodeLurkerPng()` in `tools/gen-sprites.ts`; `public/sprites/lurker.png`, 64x16, a
   shadow asset.
 
-- [ ] **Step 1: Write the failing tests.** The generator's test, and the sixth shadow asset:
+- [x] **Step 1: Write the failing tests.** The generator's test, and the sixth shadow asset:
 
 ```diff
 --- a/tests/unit/gen-sprites.test.ts
@@ -532,12 +532,12 @@ walk — and the container was **not** run with the prototype.
    it('checks the shadow-wall sheet under public/sprites/ with every other PNG (0014)', () => {
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/gen-sprites.test.ts
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/gen-sprites.test.ts
   tests/unit/assets.test.ts`. Expected: `gen-sprites.test.ts` does not load — the generator
   does not exist — and the test `checks the lurker sheet under public/sprites/ with every
   other PNG (0038)` fails: there is no such file.
 
-- [ ] **Step 3: The sheet as data.** Create `tools/placeholder-lurker.ts`:
+- [x] **Step 3: The sheet as data.** Create `tools/placeholder-lurker.ts`:
 
 ```ts
 import { type PaletteColour, SHADOW_COLOUR } from '../src/render/palette.ts';
@@ -621,7 +621,7 @@ export function renderLurker(): Uint8Array {
 }
 ```
 
-- [ ] **Step 4: The generator writes it:**
+- [x] **Step 4: The generator writes it:**
 
 ```diff
 --- a/tools/gen-sprites.ts
@@ -658,13 +658,13 @@ export function renderLurker(): Uint8Array {
      writeFileSync(`public/sprites/person-${look + 1}.png`, encodePersonPng(look));
 ```
 
-- [ ] **Step 5: Generate** — `npm run gen-sprites`. `public/sprites/lurker.png` is new, 64x16,
+- [x] **Step 5: Generate** — `npm run gen-sprites`. `public/sprites/lurker.png` is new, 64x16,
   SHA-256 `b80eade42f32b5a972985199c1a577b3f294bdb625cb899a7d0c261e036e93df`; no other sheet
   changes.
 
-- [ ] **Step 6: Run** `npm run check` — 1620 unit tests.
+- [x] **Step 6: Run** `npm run check` — 1620 unit tests.
 
-- [ ] **Step 7: Commit** — `Draw the lurker and its window`. Body: an eye, because it reads
+- [x] **Step 7: Commit** — `Draw the lurker and its window`. Body: an eye, because it reads
   along; the fourth frame is the eye in a small window, where no light holds it.
 
 ---
@@ -683,7 +683,7 @@ export function renderLurker(): Uint8Array {
   `HABITS.lurker`; `ENTRY_TEXT.lurker`; `SceneContent.creatureSheets.lurker`, loaded by
   `main.ts`.
 
-- [ ] **Step 1: The third count in every literal of the captures** — 50 literals — and a
+- [x] **Step 1: The third count in every literal of the captures** — 50 literals — and a
   sheet for the species in the three contents of the scene tests:
 
 ```diff
@@ -1147,7 +1147,7 @@ export function renderLurker(): Uint8Array {
  test('the floor starts with its 22 movers and draws the person of the reception', async ({
 ```
 
-- [ ] **Step 2: The tests of the species.** Create `tests/unit/lurker.test.ts`:
+- [x] **Step 2: The tests of the species.** Create `tests/unit/lurker.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -1246,10 +1246,10 @@ describe('the lurker, the third species (0038)', () => {
 });
 ```
 
-- [ ] **Step 3: Run** `npx tsc --noEmit` — errors in the test files of Step 1 and 2: the
+- [x] **Step 3: Run** `npx tsc --noEmit` — errors in the test files of Step 1 and 2: the
   literals have a count the type does not know. Run `npx vitest run`. Expected: 23 tests fail in four files — the five of `lurker.test.ts`, three of the creatures, twelve of the state and three of the floor.
 
-- [ ] **Step 4: The species,** its habits and its entry:
+- [x] **Step 4: The species,** its habits and its entry:
 
 ```diff
 --- a/src/game/state.ts
@@ -1306,7 +1306,7 @@ describe('the lurker, the third species (0038)', () => {
  /** The words of a region's line on the cases tab (0022): `Spuren: 1 von 5`. */
 ```
 
-- [ ] **Step 5: Its sheet in the content:**
+- [x] **Step 5: Its sheet in the content:**
 
 ```diff
 --- a/src/main.ts
@@ -1350,9 +1350,9 @@ describe('the lurker, the third species (0038)', () => {
    readonly overviewSheet: SpriteSheet;
 ```
 
-- [ ] **Step 6: Run** `npm run check` — 1625 unit tests.
+- [x] **Step 6: Run** `npm run check` — 1625 unit tests.
 
-- [ ] **Step 7: Commit** — `Add the lurker as the third species`. Body: on the floor it goes
+- [x] **Step 7: Commit** — `Add the lurker as the third species`. Body: on the floor it goes
   by the snippet's rule in everything; what makes it a creature of the second layer is where
   it sits before, and that comes with the panes.
 
@@ -1372,7 +1372,7 @@ describe('the lurker, the third species (0038)', () => {
   `PAGE_MARK_RIGHT = 304`, `pageMarkOrigin(page, pages, language): Point` in
   `render/draw-journal`.
 
-- [ ] **Step 1: The page in every literal of the open journal** — 34 literals — and the
+- [x] **Step 1: The page in every literal of the open journal** — 34 literals — and the
   recording of the help hashes the journal as its tab:
 
 ```diff
@@ -1546,7 +1546,7 @@ describe('the lurker, the third species (0038)', () => {
    await expect
 ```
 
-- [ ] **Step 2: The pages in the journal's rules:**
+- [x] **Step 2: The pages in the journal's rules:**
 
 ```diff
 --- a/tests/unit/journal.test.ts
@@ -1763,7 +1763,7 @@ describe('the lurker, the third species (0038)', () => {
  });
 ```
 
-- [ ] **Step 3: The pages on the screen:**
+- [x] **Step 3: The pages on the screen:**
 
 ```diff
 --- a/tests/unit/draw-journal.test.ts
@@ -2000,10 +2000,10 @@ describe('the lurker, the third species (0038)', () => {
  });
 ```
 
-- [ ] **Step 4: Run** `npx tsc --noEmit` — errors in the test files of Steps 1 to 3. Run
+- [x] **Step 4: Run** `npx tsc --noEmit` — errors in the test files of Steps 1 to 3. Run
   `npx vitest run`. Expected: 27 tests fail in five files — seventeen of the journal, five of its drawing, three of the help, and one each of the rest and the state.
 
-- [ ] **Step 5: The state and the rules:**
+- [x] **Step 5: The state and the rules:**
 
 ```diff
 --- a/src/game/state.ts
@@ -2086,7 +2086,7 @@ describe('the lurker, the third species (0038)', () => {
  }
 ```
 
-- [ ] **Step 6: The drawing:**
+- [x] **Step 6: The drawing:**
 
 ```diff
 --- a/src/render/draw-journal.ts
@@ -2151,11 +2151,11 @@ describe('the lurker, the third species (0038)', () => {
  }
 ```
 
-- [ ] **Step 7: Run** `npm run check` — 1643 unit tests. The recorded digest of the
+- [x] **Step 7: Run** `npm run check` — 1643 unit tests. The recorded digest of the
   help passes: it hashes the journal's tab. With a dev server running,
   `npx playwright test -g "J opens the journal"` passes: the smoke test reads the page too.
 
-- [ ] **Step 8: Commit** — `Give the creatures tab pages of two entries`. Body: a third
+- [x] **Step 8: Commit** — `Give the creatures tab pages of two entries`. Body: a third
   species does not fit the screen; down and up turn the page, and the tab says which one is
   open.
 
@@ -2176,7 +2176,7 @@ describe('the lurker, the third species (0038)', () => {
 
 After this task a map may hold panes. They are open in the state and do nothing.
 
-- [ ] **Step 1: The field in every full literal of the state** — ten literals:
+- [x] **Step 1: The field in every full literal of the state** — ten literals:
 
 ```diff
 --- a/tests/unit/draw-help.test.ts
@@ -2283,7 +2283,7 @@ After this task a map may hold panes. They are open in the state and do nothing.
        presented: 0,
 ```
 
-- [ ] **Step 2: The tests of the panes.** Create `tests/unit/pane.test.ts`:
+- [x] **Step 2: The tests of the panes.** Create `tests/unit/pane.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -2454,10 +2454,10 @@ describe('the panes in the state (0038)', () => {
 });
 ```
 
-- [ ] **Step 3: Run** `npx tsc --noEmit` — errors: the field and the module do not exist. Run
+- [x] **Step 3: Run** `npx tsc --noEmit` — errors: the field and the module do not exist. Run
   `npx vitest run`. Expected: `pane.test.ts` does not load, and two tests fail — `the 44th step, dark 45, sets the world right` (overview) and `starts at tick 0 with the player at the spawn, facing down, standing, the camera on it` (state).
 
-- [ ] **Step 4: The kind of rectangle:**
+- [x] **Step 4: The kind of rectangle:**
 
 ```diff
 --- a/src/game/rects.ts
@@ -2491,7 +2491,7 @@ describe('the panes in the state (0038)', () => {
  export function isCell(box: Box): boolean {
 ```
 
-- [ ] **Step 5: The panes.** Create `src/game/pane.ts`:
+- [x] **Step 5: The panes.** Create `src/game/pane.ts`:
 
 ```ts
 import type { Box } from '../engine/collision';
@@ -2579,7 +2579,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
 }
 ```
 
-- [ ] **Step 6: The state, the start and the wake:**
+- [x] **Step 6: The state, the start and the wake:**
 
 ```diff
 --- a/src/game/state.ts
@@ -2660,11 +2660,11 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
      presented: state.presented,
 ```
 
-- [ ] **Step 7: Run** `npm run check` — 1661 unit tests; one of them is the
+- [x] **Step 7: Run** `npm run check` — 1661 unit tests; one of them is the
   architecture test of `pane.ts`. If it reports the browser name `window`, a comment or an
   identifier says window: write pane.
 
-- [ ] **Step 8: Commit** — `Read the panes of a map and keep the open ones in the state`.
+- [x] **Step 8: Commit** — `Read the panes of a map and keep the open ones in the state`.
   Body: a pane is the window of the spec; `src/game/` may not say that word (INV-2).
 
 ---
@@ -2680,7 +2680,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
 - Produces: `coveredCells(states, panes): Box[]`; `stepPanes(states, panes, player, lampOn,
   map, spread?)`; `stepTraces(..., spread?, covered?)`; `NOTICE_PANE_OPEN`.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/pane.test.ts
@@ -2809,13 +2809,13 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
 +});
 ```
 
-- [ ] **Step 2: Run them.** `npx tsc --noEmit` reports four errors in this test: the functions
+- [x] **Step 2: Run them.** `npx tsc --noEmit` reports four errors in this test: the functions
   and the notice do not exist. `npx vitest run tests/unit/pane.test.ts` — 7 of 25 tests fail,
   all of the new block. Its eighth, that the trace beside the pane is found in the 60th lit
   step, is green before the code: it holds what is already there. Vitest does not check
   types: the file loads, and what is missing is `undefined`.
 
-- [ ] **Step 3: The traces skip a covered cell:**
+- [x] **Step 3: The traces skip a covered cell:**
 
 ```diff
 --- a/src/game/trace.ts
@@ -2849,7 +2849,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
      return state.light + 1 < FIND_STEPS
 ```
 
-- [ ] **Step 4: The step of the open panes:**
+- [x] **Step 4: The step of the open panes:**
 
 ```diff
 --- a/src/game/pane.ts
@@ -2903,7 +2903,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
    return states.map((state) => ({ ...state, lit: false }));
 ```
 
-- [ ] **Step 5: The notice,** right after a wall that holds:
+- [x] **Step 5: The notice,** right after a wall that holds:
 
 ```diff
 --- a/src/game/notice.ts
@@ -2941,7 +2941,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
      return NOTICE_CASE_SOLVED;
 ```
 
-- [ ] **Step 6: `update`** steps the panes and tells the traces which cells are covered:
+- [x] **Step 6: `update`** steps the panes and tells the traces which cells are covered:
 
 ```diff
 --- a/src/game/update.ts
@@ -2979,9 +2979,9 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
      presented: state.presented,
 ```
 
-- [ ] **Step 7: Run** `npm run check` — 1669 unit tests.
+- [x] **Step 7: Run** `npm run check` — 1669 unit tests.
 
-- [ ] **Step 8: Commit** — `Let an open pane hide its trace and hold against the light`.
+- [x] **Step 8: Commit** — `Let an open pane hide its trace and hold against the light`.
   Body: the lamp alone does not get this creature; the line says what is and nothing more.
 
 ---
@@ -2998,7 +2998,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
   panes, map): PaneState | null`; `closePane(state, input, map): { panes, lurker } | null`;
   `clearRegion` removes the open panes of the region.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/pane.test.ts
@@ -3211,10 +3211,10 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
  });
 ```
 
-- [ ] **Step 2: Run them.** `npx tsc --noEmit` reports four errors in this test.
+- [x] **Step 2: Run them.** `npx tsc --noEmit` reports four errors in this test.
   `npx vitest run tests/unit/pane.test.ts` — 11 of 39 tests fail, all of the new block.
 
-- [ ] **Step 3: The reach and the press:**
+- [x] **Step 3: The reach and the press:**
 
 ```diff
 --- a/src/game/pane.ts
@@ -3314,7 +3314,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
    return states.map((state) => ({ ...state, lit: false }));
 ```
 
-- [ ] **Step 4: `update`** looks at a pane after a talk and before a rest, and adds the lurker
+- [x] **Step 4: `update`** looks at a pane after a talk and before a rest, and adds the lurker
   after the creatures of the step:
 
 ```diff
@@ -3369,7 +3369,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
      presented: state.presented,
 ```
 
-- [ ] **Step 5: A solved case takes its open panes along:**
+- [x] **Step 5: A solved case takes its open panes along:**
 
 ```diff
 --- a/src/game/cases.ts
@@ -3403,9 +3403,9 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
      ),
 ```
 
-- [ ] **Step 6: Run** `npm run check` — 1683 unit tests.
+- [x] **Step 6: Run** `npm run check` — 1683 unit tests.
 
-- [ ] **Step 7: Commit** — `Close a pane with a press, and drop its lurker`. Body: an action
+- [x] **Step 7: Commit** — `Close a pane with a press, and drop its lurker`. Body: an action
   in the room first, then the lamp — the second layer; a talk comes first and a coffee after.
 
 ---
@@ -3420,7 +3420,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
 - Consumes: `panesOf` (Task 5); `creatureSheets.lurker` (Task 3).
 - Produces: `PANE_FRAME = 3`; the scene draws every open pane on its cell.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/draw-scene.test.ts
@@ -3539,10 +3539,10 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
 +});
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/draw-scene.test.ts`. Expected:
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/draw-scene.test.ts`. Expected:
   FAIL, 4 of 132 tests. Two tests of the new block are green before the code, because they hold what is already there: the lurker on the floor is drawn as every creature, and a pane is drawn in the light as out of it.
 
-- [ ] **Step 3: The scene:**
+- [x] **Step 3: The scene:**
 
 ```diff
 --- a/src/render/draw-scene.ts
@@ -3588,9 +3588,9 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
    const figures = figuresOf(content.map.points);
 ```
 
-- [ ] **Step 4: Run** `npm run check` — 1689 unit tests.
+- [x] **Step 4: Run** `npm run check` — 1689 unit tests.
 
-- [ ] **Step 5: Commit** — `Draw an open pane on its screen`. Body: the eye in its window, in
+- [x] **Step 5: Commit** — `Draw an open pane on its screen`. Body: the eye in its window, in
   the light as out of it, over the traces and under every figure.
 
 ---
@@ -3606,7 +3606,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
 - Produces: `PANES` in `tools/floor-layout.ts`; `floor.tmj` with the rectangles 138 to 140,
   `pane:support`, and `nextobjectid` 141.
 
-- [ ] **Step 1: Write the failing tests.** Two older tests of the floor change their numbers,
+- [x] **Step 1: Write the failing tests.** Two older tests of the floor change their numbers,
   and one block is new, at the end; the smoke spec gets one test:
 
 ```diff
@@ -3873,11 +3873,11 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
  test('H opens the help, the game stands still under it, and H closes it again', async ({
 ```
 
-- [ ] **Step 2: Run them.** `npx tsc --noEmit` reports one error: `PANES` is not exported
+- [x] **Step 2: Run them.** `npx tsc --noEmit` reports one error: `PANES` is not exported
   yet. `npx vitest run tests/unit/floor.test.ts` — 7 of 151 tests fail: `keeps the five points of 0010 first, with their ids` and six of the new block. Four tests of the new block are green before the code: they hold the digest of the 137 objects, the desks and chairs, the free drop cells, and that a solved case leaves no pane. With a dev server running,
   `npx playwright test -g "three panes"` fails: the state holds none.
 
-- [ ] **Step 3: The layout:**
+- [x] **Step 3: The layout:**
 
 ```diff
 --- a/tools/floor-layout.ts
@@ -3930,14 +3930,14 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
      tiledversion: '1.11.2',
 ```
 
-- [ ] **Step 4: Generate the map** — `npm run gen-floor`. `public/maps/floor.tmj` gets three
+- [x] **Step 4: Generate the map** — `npm run gen-floor`. `public/maps/floor.tmj` gets three
   rectangles at the end of its objects and `nextobjectid` 141; nothing else in it changes.
   Its SHA-256 is `b3d80959c8ebd1b04fa8cda933e8f0839cd8278ecfed33898f7fa638b715f408`.
 
-- [ ] **Step 5: Run** `npm run check` — 1700 unit tests. Then `npm run test:e2e`:
+- [x] **Step 5: Run** `npm run check` — 1700 unit tests. Then `npm run test:e2e`:
   21 passed, 3 skipped.
 
-- [ ] **Step 6: Commit** — `Open three windows on the screens of Support`. Body: two of them
+- [x] **Step 6: Commit** — `Open three windows on the screens of Support`. Body: two of them
   lie over a trace, so the case of Support cannot be solved with the lamp alone.
 
 ---
@@ -3951,7 +3951,7 @@ export function restedPanes(states: readonly PaneState[]): PaneState[] {
 The diffs are against the branch as it stands before Task 1. If a line has moved, put the
 text where the diff means it; do not change the words without a reason.
 
-- [ ] **Step 1: `world.md`** §4:
+- [x] **Step 1: `world.md`** §4:
 
 ```diff
 --- a/docs/spec/world.md
@@ -3980,7 +3980,7 @@ text where the diff means it; do not change the words without a reason.
  Every product, company and tool in the game is fictional, with two exceptions: LMIS, which
 ```
 
-- [ ] **Step 2: `gameplay.md`** §3, §6 and §7:
+- [x] **Step 2: `gameplay.md`** §3, §6 and §7:
 
 ```diff
 --- a/docs/spec/gameplay.md
@@ -4031,7 +4031,7 @@ text where the diff means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 3: `visual.md`** §4:
+- [x] **Step 3: `visual.md`** §4:
 
 ```diff
 --- a/docs/spec/visual.md
@@ -4061,7 +4061,7 @@ text where the diff means it; do not change the words without a reason.
  signature colour, with `#181425` for the pattern of the densest wall. Its density is read from how
 ```
 
-- [ ] **Step 4: `architecture.md`** §1, §2, §5, §6 and §7:
+- [x] **Step 4: `architecture.md`** §1, §2, §5, §6 and §7:
 
 ```diff
 --- a/docs/spec/architecture.md
@@ -4168,7 +4168,7 @@ text where the diff means it; do not change the words without a reason.
  pixels as data: `public/sprites/overview.png`, 16x8, two 8x8 frames in one row — a heart 7 wide
 ```
 
-- [ ] **Step 5: `testing.md`** §2:
+- [x] **Step 5: `testing.md`** §2:
 
 ```diff
 --- a/docs/spec/testing.md
@@ -4194,7 +4194,7 @@ text where the diff means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 6: `README.md`:**
+- [x] **Step 6: `README.md`:**
 
 ```diff
 --- a/README.md
@@ -4214,19 +4214,19 @@ text where the diff means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 7:** `npm run check`, then commit — `Move the creature of Support into the spec`.
+- [x] **Step 7:** `npm run check`, then commit — `Move the creature of Support into the spec`.
 
 ---
 
 ### Task 11: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 21 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 21 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 11 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 11 in this file and commit —
   `Tick the full check of 0038`.
 
 ---
