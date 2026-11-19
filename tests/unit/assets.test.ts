@@ -90,9 +90,10 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
     expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/snippet.png');
   });
 
-  it('checks the seven sheets of the movers under public/sprites/ with every other PNG (0015)', () => {
+  it('checks the eight sheets of the movers under public/sprites/ with every other PNG (0015, 0040)', () => {
     const files = globSync('public/**/*.png', { cwd: ROOT });
-    for (const name of ['person-1', 'person-2', 'person-3', 'person-4', 'dog', 'vacuum', 'drone']) {
+    const persons = ['person-1', 'person-2', 'person-3', 'person-4', 'person-5'];
+    for (const name of [...persons, 'dog', 'vacuum', 'drone']) {
       expect(files).toContain(`public/sprites/${name}.png`);
     }
   });

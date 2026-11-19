@@ -365,7 +365,8 @@ describe('a game in which the journal is never opened (0020)', () => {
     { on: state.lamp.on, strength: state.lamp.strength },
     // The creatures and the count as they were recorded: the snippets, before 0032.
     state.creatures.filter((creature) => creature.species === 'snippet'),
-    state.movers,
+    // The movers as they were recorded: the 22 before the colleague of HR of 0040.
+    state.movers.slice(0, 22),
     state.shadowWalls,
     // The figure that was recorded: the officer, before the intern of 0033.
     state.figures.slice(0, 1),

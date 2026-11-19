@@ -224,15 +224,15 @@ test('the floor starts with three snippets and three mirages, and nothing captur
   expect(state?.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
 });
 
-test('the floor starts with its 22 movers and draws the person of the reception', async ({
+test('the floor starts with its 23 movers and draws the person of the reception', async ({
   page,
 }) => {
   await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.movers.length), {
-      message: 'window.shadowAi.state.movers holds the 22 movers of the floor',
+      message: 'window.shadowAi.state.movers holds the 23 movers of the floor',
     })
-    .toBe(22);
+    .toBe(23);
   // The person stands at feet (200, 648) for its first five seconds: its frame's corner is at
   // (96, 0) on the surface, its shirt at (7, 13) in the frame, and the factor is 4.
   const canvas = page.locator('canvas#game');

@@ -117,7 +117,8 @@ const CONTENT: SceneContent = {
   shadowWallSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   traceSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   moverSheets: {
-    person: [0, 1, 2, 3].map(() => ({
+    // Five persons since the colleague of HR (0040).
+    person: [0, 1, 2, 3, 4].map(() => ({
       image: {} as ImageBitmap,
       frameWidth: 16,
       frameHeight: 24,

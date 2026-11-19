@@ -547,15 +547,32 @@ export const ROUTES: readonly {
       [5, 72, 120],
     ],
   },
+  // The colleague of HR (0040): from the desk in the upper left to the table and back.
+  {
+    name: 'person:hr',
+    cells: [
+      [6, 5, 300],
+      [11, 5, 0],
+      [11, 13, 180],
+      [11, 5, 0],
+    ],
+  },
 ];
 
-/** The route points in file order, ids following the five points of 0010. */
-function routePoints(): readonly {
+/**
+ * How many routes stand after the five points of 0010 in the file: the 22 of 0015. Every later
+ * route is written at the end of the file, so that no object of an earlier feature changes its
+ * id and no mover its place in the state (0040).
+ */
+export const FIRST_ROUTES = 22;
+
+/** The points of these routes in file order. */
+function routePoints(routes: typeof ROUTES): readonly {
   readonly name: string;
   readonly at: Point;
   readonly pause: number;
 }[] {
-  return ROUTES.flatMap((route) =>
+  return routes.flatMap((route) =>
     route.cells.map(([column, row, pause], n) => ({
       name: `${route.name}:${n + 1}`,
       at: { x: column * TILE_SIZE + TILE_SIZE / 2, y: row * TILE_SIZE + TILE_SIZE / 2 },
@@ -1247,7 +1264,7 @@ function rectObject(id: number, name: string, box: Box): RectJson {
 
 export function floorJson(): MapJson {
   const { detail, above } = buildFurniture();
-  const routes = routePoints();
+  const routes = routePoints(ROUTES.slice(0, FIRST_ROUTES));
   const firstWall = SNIPPETS.length + 3 + routes.length;
   const firstFigure = firstWall + SHADOW_WALLS.length;
   const firstTrace = firstFigure + FIRST_FIGURES;
@@ -1261,6 +1278,8 @@ export function floorJson(): MapJson {
   const firstLastTrace = firstLaterFigure + laterFigures.length;
   const lastTraces = TRACES.slice(SECOND_TRACES);
   const firstPane = firstLastTrace + lastTraces.length;
+  const firstLaterRoute = firstPane + PANES.length;
+  const laterRoutes = routePoints(ROUTES.slice(FIRST_ROUTES));
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1308,6 +1327,9 @@ export function floorJson(): MapJson {
           ...PANES.map((pane, i) =>
             rectObject(firstPane + i, `pane:${pane.region}`, traceBox(pane.cell)),
           ),
+          ...laterRoutes.map((point, i) =>
+            pointObject(firstLaterRoute + i, point.name, point.at, point.pause),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1317,7 +1339,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstPane + PANES.length,
+    nextobjectid: firstLaterRoute + laterRoutes.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

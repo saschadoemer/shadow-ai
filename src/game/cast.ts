@@ -48,6 +48,7 @@ export const COLLEAGUES: readonly Colleague[] = [
   { route: 'person:marketing', pages: [textKey('talk.marketing-everyday')] },
   { route: 'person:support', pages: [textKey('talk.support-everyday')] },
   { route: 'person:sales', pages: [textKey('talk.sales-everyday')] },
+  { route: 'person:hr', pages: [textKey('talk.hr-everyday')] },
 ];
 
 /** The pages of the colleague on a route; none when the route has no lines. */
