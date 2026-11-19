@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { TileMap } from '../../src/engine/tiled';
 import { CARD_PRESENTS, CARD_STEPS, CARD_TITLE, cardShown, stepCard } from '../../src/game/card';
 import { CASES } from '../../src/game/cases';
-import { CAST, COLLEAGUES, FIRST_MEETING } from '../../src/game/cast';
+import { CAST, COLLEAGUES } from '../../src/game/cast';
 import { HINTS } from '../../src/game/hints';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
 import type { GameState } from '../../src/game/state';
@@ -131,16 +131,7 @@ describe('the card a game opens with (0036)', () => {
   });
 
   it('is the only place of the presenter: no table of the world data holds either name', () => {
-    const world = JSON.stringify([
-      REGIONS,
-      UPGRADES,
-      CAST,
-      FIRST_MEETING,
-      COLLEAGUES,
-      CASES,
-      SCENES,
-      HINTS,
-    ]);
+    const world = JSON.stringify([REGIONS, UPGRADES, CAST, COLLEAGUES, CASES, SCENES, HINTS]);
     // The cast, the cases and the scenes hold keys, never words: LMIS is on the card alone,
     // and Harmonic is a word in three pages of talk (vision.md §10).
     expect(world.toLowerCase().includes('lmis')).toBe(false);

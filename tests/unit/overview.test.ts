@@ -168,7 +168,7 @@ describe('stepDark', () => {
     upgrades: [],
     player: figure(300, 200, 'left', { frame: 2, frameTimer: 3.5 }),
     camera: { x: 140, y: 106 },
-    lamp: { on: true, strength: 1, owned: true, used: true },
+    lamp: { on: true, strength: 1, used: true },
     creatures: [snippet(310, 200)],
     movers: [],
     shadowWalls: [{ wall: 1, lit: true, light: 30 }],
@@ -199,7 +199,7 @@ describe('stepDark', () => {
       finished: null,
       presented: 0,
       upgrades: [],
-      lamp: { on: false, strength: 1, owned: true, used: true },
+      lamp: { on: false, strength: 1, used: true },
       dark: 44,
     });
   });
@@ -215,7 +215,7 @@ describe('stepDark', () => {
       upgrades: [],
       player,
       camera: followPlayer(player, MAP),
-      lamp: { on: false, strength: 1, owned: true, used: true },
+      lamp: { on: false, strength: 1, used: true },
       creatures: [{ ...snippet(40, 40), home: { x: 40, y: 40 } }],
       movers: [],
       shadowWalls: [{ wall: 1, lit: false, light: 0 }],

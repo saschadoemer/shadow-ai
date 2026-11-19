@@ -101,7 +101,7 @@ describe('GameState (INV-1)', () => {
         recoil: { dx: 0, dy: 0, steps: 0 },
       },
       camera: { x: 0, y: 12 },
-      lamp: { on: false, strength: 1, owned: true, used: true },
+      lamp: { on: false, strength: 1, used: true },
       creatures: [],
       movers: [],
       shadowWalls: [],
@@ -129,7 +129,7 @@ describe('GameState (INV-1)', () => {
     expect(Number.isInteger(state.player.x), 'x is fractional after a diagonal').toBe(false);
     expect(state.player.facing).toBe('left');
     expect(state.camera).toStrictEqual({ x: 0, y: 0 });
-    expect(state.lamp).toStrictEqual({ on: true, strength: 1, owned: true, used: true });
+    expect(state.lamp).toStrictEqual({ on: true, strength: 1, used: true });
     const copy: unknown = JSON.parse(JSON.stringify(state));
     expect(copy).toStrictEqual(state);
   });
@@ -165,7 +165,7 @@ describe('update', () => {
         upgrades: [],
         player,
         camera: { x: 0, y: 12 },
-        lamp: { on: false, strength: 1, owned: true, used: true },
+        lamp: { on: false, strength: 1, used: true },
         creatures: [],
         movers: [],
         shadowWalls: [],
@@ -197,7 +197,7 @@ describe('update', () => {
       upgrades: [],
       player,
       camera: { x: 0, y: 12 },
-      lamp: { on: false, strength: 1, owned: true, used: true },
+      lamp: { on: false, strength: 1, used: true },
       creatures: [],
       movers: [],
       shadowWalls: [],
@@ -221,7 +221,7 @@ describe('update', () => {
       upgrades: [],
       player,
       camera: { x: 0, y: 12 },
-      lamp: { on: false, strength: 1, owned: true, used: true },
+      lamp: { on: false, strength: 1, used: true },
       creatures: [],
       movers: [],
       shadowWalls: [],
@@ -277,14 +277,13 @@ describe('the lamp in the state (0007)', () => {
     expect(createInitialState(MAP).lamp).toStrictEqual({
       on: false,
       strength: 1,
-      owned: true,
       used: true,
     });
   });
 
   it('is on in a step whose input holds lamp; the figure stays, turns, and the camera stays on it', () => {
     const state = update(createInitialState(MAP), { ...SHINE, right: true }, MAP);
-    expect(state.lamp).toStrictEqual({ on: true, strength: 1, owned: true, used: true });
+    expect(state.lamp).toStrictEqual({ on: true, strength: 1, used: true });
     expect([state.player.x, state.player.y, state.player.facing]).toStrictEqual([
       136,
       120,
@@ -299,7 +298,6 @@ describe('the lamp in the state (0007)', () => {
     expect(update(shone, NONE, MAP).lamp).toStrictEqual({
       on: false,
       strength: 1,
-      owned: true,
       used: true,
     });
   });
@@ -518,7 +516,7 @@ describe('shadow walls in the state (0014)', () => {
 
   it('starts with every wall of the map standing and a lamp of strength 1', () => {
     const state = createInitialState(WALLS_MAP);
-    expect(state.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: true });
+    expect(state.lamp).toStrictEqual({ on: false, strength: 1, used: true });
     expect(state.shadowWalls).toStrictEqual([
       { wall: 0, lit: false, light: 0 },
       { wall: 1, lit: false, light: 0 },
@@ -630,7 +628,7 @@ describe('shadow walls in the state (0014)', () => {
     const woken = run(map, before, [1, SHINE]);
     expect(woken.dark).toBe(45);
     expect(woken.shadowWalls).toStrictEqual([{ wall: 0, lit: false, light: 0 }]);
-    expect(woken.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: true });
+    expect(woken.lamp).toStrictEqual({ on: false, strength: 1, used: true });
   });
 
   it('steps a state without standing walls exactly as a map without walls (600 steps)', () => {

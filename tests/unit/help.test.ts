@@ -54,7 +54,7 @@ describe('opening the help (0021)', () => {
     const pushed: GameState = {
       ...start,
       player: { ...start.player, frame: 2, recoil: { dx: -3, dy: 0, steps: 4 } },
-      lamp: { on: true, strength: 1, owned: true, used: true },
+      lamp: { on: true, strength: 1, used: true },
     };
     expect(update(pushed, input, OPEN)).toStrictEqual({
       ...pushed,
@@ -211,7 +211,7 @@ describe('the world while the help is open (0021)', () => {
   const start: GameState = {
     ...run(map, createInitialState(map), NONE, NONE, NONE),
     shadowWalls: [{ wall: 0, lit: true, light: 30 }],
-    lamp: { on: true, strength: 1, owned: true, used: true },
+    lamp: { on: true, strength: 1, used: true },
   };
   /** Every key but `help`. */
   const ALL_OTHERS: GameInput = {

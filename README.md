@@ -47,8 +47,9 @@ region's (feature 0023). With all five traces found, the colleague of Sales answ
 the case is solved, the journal records its outcome and the first block of the policy, and
 overview grows by one (feature 0024). In the same moment the room gets its colours back, its
 veil thins out over two seconds, and its shadow wall and the snippets that were left in it are
-gone (feature 0025). The game opens with the call — three pages of story — and without the
-lamp: the data protection officer next door hands it over in the first talk (feature 0026).
+gone (feature 0025). The game opens with the call — three pages of story (feature 0026). The
+player has the lamp from the first step: a line at the bottom names its key until it is held
+once, and the data protection officer next door says what it is for (feature 0039).
 A coffee at a coffee machine wins overview back — in the break room from the start, in a
 department once its case is solved (feature 0027). M6, the second act, has begun: Marketing
 has five traces of its own, on four screens and on the printer, and the colleague in the red
