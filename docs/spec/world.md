@@ -296,6 +296,21 @@ Marketing is solved (feature 0025). Its displayed name is *Trugbild*, in English
 dictionary words for a false picture, used for a species and not for a product; fixed by the
 author's decision on that basis, and no trademark register was searched (§5).
 
+**The lurker** (*Mitleser*, feature 0038) is the species of the Support case: an eye, because
+it is a browser extension somebody installed and that has read everything along ever since.
+Medium, layer 2 — the first creature the lamp alone does not get. It sits in a small window
+that is open on a screen, where no light holds it; the player closes the window with E, and the
+lurker drops to the floor beside the chair. There it goes by the snippet's rule in everything
+and is captured like a snippet. Its weakness is the countermeasure of its case: only approved
+tools and extensions run. Three windows are open in Support, on the screens of the cells
+(72, 61), (93, 67) and (62, 73); the first and the third lie over a trace, which cannot be
+found while the window is open, so the case cannot be solved without closing them. Every
+lurker has its home at its drop point in the region's area and leaves the game when the case
+of Support is solved, and so does every window still open (feature 0025). Its displayed name
+is *Mitleser*, in English *Lurker*: dictionary words, used for a species and not for a
+product; fixed by the author's decision on that basis, and no trademark register was searched
+(§5).
+
 ## 5. Names
 
 Every product, company and tool in the game is fictional, with two exceptions: LMIS, which

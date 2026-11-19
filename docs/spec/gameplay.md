@@ -111,6 +111,15 @@ its facing. So one mirage is harmless while the player faces it, and two are a p
 a trace means looking at a screen with the back to the room. In the light it is frozen and
 captured like the snippet, and it hits like the snippet.
 
+**As built** (feature 0038): the lurker is the first creature of the second layer — an action
+in the room first, then the lamp. It sits in a window that is open on a screen. The light on
+that screen holds nothing: the window stays, nothing is captured, and a line says `Hier liest
+etwas mit. Das Licht hält es nicht.` for as long as the light is on it. A press of E in reach
+of the window — the reach and the sight of a talk, 40 px — closes it for good, and the lurker
+drops to the floor two cells beside the screen; from the next step it comes at the figure and
+is frozen, captured and counted like a snippet. A press of E is looked at in this order: a
+talk, then a window, then a coffee. The lamp must not be held, as for a talk.
+
 ## 4. Overview
 
 Health is called **overview**. Hits from creatures take it. At zero the player is in the dark and
@@ -225,6 +234,13 @@ room: overview grows by one, to eight with all three cases solved. The three cas
 depend on each other and may be solved in any order. The case earns no upgrade. The close
 (feature 0034) follows the last case of the game, so it now waits for Support too.
 
+**As built** (feature 0038): two of the five traces of Support lie under a window that is open
+on their screen. An open window hides its trace: the light finds nothing there until the
+window is closed. So the case of Support cannot be made ready with the lamp alone. The intern
+says so while traces of Support are missing: `Auf manchen ist ein Fenster offen, das keiner
+aufgemacht hat – mach es ruhig zu.` When the case is solved, the windows that are still open
+close with it, and no lurker drops from them.
+
 **As built** (feature 0036): three pages of talk name Harmonic, and no rule of a case changed
 (`vision.md` §10). The page the colleague of Sales says after the case no longer asks what to
 use next time: it says that something like Harmonic would have shown where the text goes. On
@@ -284,6 +300,13 @@ order: the last line ends at y = 178. Pages on this tab come with the fourth blo
 **As built** (feature 0032): with a second species the creatures tab shows two entries, the
 second 72 px below the first, in the order of the species — the snippet, then the mirage —
 whichever was captured first. Two entries fit the screen; pages come with the third species.
+
+**As built** (feature 0038): with the third species the creatures tab has pages of two
+entries. The down arrow, pressed alone, turns to the next page and the up arrow to the one
+before; at either end the page stays. The journal opens on the first page, and a turn to
+another tab opens that tab on its first. With more than one page the tab says which one is
+open — `1 von 2` — at the right of the first entry's name; with one page it shows nothing
+more than before. The cases tab and the policy tab have no pages.
 
 **As built** (feature 0026): the journal does not open while the call is read, like under any
 dialogue. After it, J opens it with or without the lamp.

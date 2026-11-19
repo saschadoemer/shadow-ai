@@ -59,6 +59,7 @@ tools/
                         (0029), drawn from game/lamp
   placeholder-snippet.ts the placeholder snippet sheet as pure data: three 16x16 frames
   placeholder-mirage.ts the placeholder mirage sheet as pure data: three 16x16 frames (0032)
+  placeholder-lurker.ts the placeholder lurker sheet as pure data: four 16x16 frames (0038)
   placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames,
                         a full and an empty heart
   placeholder-person.ts the placeholder colleagues: the figure's frames in four other shirts,
@@ -228,7 +229,13 @@ array is at its home with `light` 0, `captured` unchanged, the camera on the fig
 it would become 90 it is 0. `rested` is `null`, or `{ at, result }` (feature 0027, `game/rest`):
 the last rest the player took — `at` the `tick` of the state that step gave, `result` one of
 `REST_RESULTS`, `restored`, `full` or `shadow`. It is `null` at the start, the wake keeps it,
-and the notice of a rest is derived from it (§8). The wake point is the map's point named `wake`, the spawn when there
+and the notice of a rest is derived from it (§8). `panes` is the list of the windows that are
+open on screens of the map (feature 0038, `game/pane`), `{ pane, lit }` in the map's order:
+`pane` is the index among the panes of the map, `lit` whether the lamp's light was on its cell
+in the last step. Every pane of the map is open at the start; a closed one has left the list
+for good; the wake keeps the list and sets every `lit` to `false`. In `src/game/` and in the
+map the thing is a pane, because the test of INV-2 keeps the browser name `window` out of
+that directory's source text; the game's text calls it a window. The wake point is the map's point named `wake`, the spawn when there
 is none; two stop the game at the start (`createInitialState`).
 
 `movers` is an array of `{ kind, look, route, x, y, facing, frame, frameTimer, target, wait }`,
@@ -360,8 +367,11 @@ first hint of a new game (feature 0039).
 (`NO_INPUT`); it replaced `talkHeld`, the `talk` of the last step, with feature 0020, because the
 journal needs presses of three actions. An action is **pressed** in a step when the input holds
 it and `held` does not (`game/player`, `pressed`; `talkPressed` in `game/talk` reads it for
-`talk`). `journal` is `null`, or `{ tab }` with one of `JOURNAL_TABS` — `creatures`, `cases`,
-`policy` — (feature 0020, `game/journal`). What a tab shows is not in the state: the **entries**
+`talk`). `journal` is `null`, or `{ tab, page }` with one of `JOURNAL_TABS` — `creatures`, `cases`,
+`policy` — and the page of the creatures tab from 0 (feature 0020, `game/journal`; the page
+since feature 0038: `ENTRIES_PER_PAGE` is 2, `entryPages` and `entriesOn` derive the pages from
+`captured`, and a press of `down` or `up` alone turns one page, never past an end; a turn to
+another tab and the opening of the journal give page 0). What a tab shows is not in the state: the **entries**
 of the creatures tab are the species of which at least one was captured, in `SPECIES` order,
 derived from `captured` in every frame by `entriesOf`. The entries of the cases tab are the
 regions of which at least one trace is found, in the order of the world data, each with the
@@ -556,7 +566,7 @@ top-left corner at (x, y), from the decoded image like `drawTile`, smoothing off
 `render/draw-scene` holds the draw order of a frame: clear, then `ground`, `detail`, the veil
 over the cells under shadow (feature 0023) and over those of a region that is clearing (feature
 0025), the lamp's cone when the lamp is on, the standing shadow walls in array order (feature 0014), the traces
-the light is on in array order (feature 0022), the ground movers whose feet y is at most the player's in array order, the standing figures whose feet y is
+the light is on in array order (feature 0022), every open pane with frame 3 (`PANE_FRAME`) of the lurker's sheet on its cell, lit or not (feature 0038), the ground movers whose feet y is at most the player's in array order, the standing figures whose feet y is
 at most the player's (feature 0017), the creatures in array order, the player, the other
 standing figures, the other ground movers in array order, `above` (§6), the drones (feature
 0015), the hearts of overview, the help label (feature 0031), the dialogue box while a dialogue is open or else the notice
@@ -710,7 +720,11 @@ entries that is the tab's line for nothing from (16, 36). With entries, entry k 
 of the species' sheet — the creature as the light shows it, `ENTRY_FRAME`, held equal to
 `FROZEN_FRAME` by a test — with its top-left corner at (16, 32 + 72k), the name from
 (40, 35 + 72k) and the text from (16, 54 + 72k), lines 12 px apart. A line of 47 characters ends
-at x = 298; two entries fit, the second ending at y = 172. On the cases tab (feature 0022) case
+at x = 298; two entries fit, the second ending at y = 172. Since feature 0038 the tab draws
+the entries of its open page, `entriesOn(captured, page)`, and with more than one page the
+mark of the page — its number, `journal.of` and the number of pages, one empty cell between
+two parts — on the line y = 35 with its right end at x = 304 (`PAGE_MARK_RIGHT`,
+`pageMarkOrigin`): `1 von 2` from x = 262, `1 of 2` from x = 268. On the cases tab (feature 0022) case
 k from 0 is two lines: the region's name, `region.<id>`, from (16, 36 + 36k), and from
 (16, 48 + 36k) four parts — `journal.traces`, the number of found traces, `journal.of`, the
 number of all the region's traces on the map — with one empty cell of 6 px between two parts:
@@ -926,6 +940,25 @@ the first in the file. `restUnderShadow` asks the rest's cell of the areas not c
 No coordinate of a rest is in `src/` (INV-7); `tools/floor-layout.ts` holds the floor's eight,
 `RESTS`, written after the areas with the ids 116 to 123.
 
+**Panes** (feature 0038). A rectangle named `pane:<region>` is a window that is open on a
+screen: exactly one cell, on the cell of a desk with a screen. `game/pane` reads them with
+`panesOf(map)` in file order as `{ region, box, drop }` — `drop` is where the pane's lurker
+falls, the middle of the cell two to the right of the pane and one below (`dropPoint`) — and
+refuses the map for a box that is not one cell, for a region the world data does not know
+(`pane pane:cellar names no region`) and for a drop point outside the map or in a solid box
+(`pane pane:support (288, 80, 16, 16) has no free drop point`). In an ordinary step, after the
+speakers had their turn and before a rest is looked at, `closePane` takes a press of `talk`
+when the input does not hold `lamp`, the figure is not being pushed and an open pane is **in
+reach** (`paneInReach`): the centre of its cell at most `PANE_DISTANCE`, 40 px, from the feet,
+and no opaque box of the map as loaded on the line from (x, y − 4) to that centre. The pane
+leaves `panes`, and a lurker joins `creatures` after the creatures of the step, at the drop
+point, which is its home; it is stepped from the next step on. Then `stepPanes` sets `lit` for
+every pane still open, by the test of a trace against the map with the walls standing, and
+`stepTraces` gets the cells of the open panes (`coveredCells`): a trace on one of them is not
+in the light. `clearRegion` removes the open panes of a solved region. No coordinate of a pane
+is in `src/` (INV-7); `tools/floor-layout.ts` holds the floor's three, `PANES`, written at the
+end of the file with the ids 138 to 140, and `nextobjectid` is 141.
+
 Flipped and rotated tiles, more than one tileset per map, embedded tilesets, encoded or
 compressed data and infinite maps stay rejected until a feature needs one and lifts its rule. A
 tileset tile with an `animation` is rejected too: the game has no animated tiles, and a still
@@ -1076,6 +1109,14 @@ against the generator. The art pass replaces it under the same name and frame or
 one pixel to the right, and the same with a white ground. The frame, columns 3–12 and rows
 2–13, a head and shoulders are `#68386c`, the ground `#c0cbdc`, the lit ground `#ffffff`; 120
 opaque pixels per frame, 72 of them the signature colour.
+
+`tools/placeholder-lurker.ts` draws the lurker sheet (feature 0038) the same way:
+`public/sprites/lurker.png`, 64x16, four 16x16 frames in one row. Frames 0 to 2 are an eye —
+lids on rows 6 and 10, the inside on columns 5–10 and rows 7–9, the pupil two columns wide —
+with the pupil on columns 7–8, on columns 8–9, and with a white inside. Frame 3
+(`LURKER_PANE_FRAME`) is the lurker in its window: a frame on columns 2–13 and rows 3–12 with
+a title bar on row 4, and the pupil. Lids, pupil and frame are `#68386c`, the inside `#c0cbdc`,
+the lit inside `#ffffff`.
 
 `tools/placeholder-overview.ts` draws the overview sheet (features 0009, 0012) and returns its
 pixels as data: `public/sprites/overview.png`, 16x8, two 8x8 frames in one row — a heart 7 wide
