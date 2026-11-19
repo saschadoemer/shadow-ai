@@ -219,15 +219,14 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 
 ## Open questions
 
-1. **The behaviour.** The mirage moves only while it is not looked at, and "looked at" is
-   everything in front of the figure and in its sight. It fits the case — nobody looked
-   before it went out — and it needs no new key. Draft: as written.
-2. **The name.** `Trugbild` / `Mirage`: dictionary words for a false picture, used for a
-   species and not for a product. No trademark register was searched, as for the snippet
-   (`world.md` §5). Draft: these two.
-3. **The numbers.** Three in Marketing, on the cells of the table; 96 px; 1 px per step.
-   Draft: as written, all *tune* after the walk.
-4. **The cut.** No picking of a creature at the source and no pages on the creatures tab in
-   this feature, against what `docs/plan.md` §4 said about the second species. Draft: cut
-   both; they come with a later case and with the third species.
-5. **The words** of the journal entry, in German and English. Draft: as in the table.
+None. Five were settled on 2026-11-19, each as drafted:
+
+- The behaviour: the mirage moves only while it is not looked at, and "looked at" is
+  everything in front of the figure and in its sight.
+- The name: `Trugbild` / `Mirage`, dictionary words used for a species; no trademark
+  register was searched, as for the snippet (`world.md` §5).
+- The numbers: three in Marketing on the cells of the table, 96 px, 1 px per step — all
+  *tune* after the walk.
+- The cut: no picking of a creature at the source and no pages on the creatures tab in this
+  feature; the pages come with the third species (0038).
+- The words of the journal entry, in German and English, as in the table.

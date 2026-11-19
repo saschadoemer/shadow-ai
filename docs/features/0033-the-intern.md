@@ -175,18 +175,14 @@ lamp. Arrow keys or WASD walk, `Space` holds the lamp, `E` or `Enter` talks.
 
 ## Open questions
 
-1. **Where the hint comes from.** One figure who is asked, and nothing that is shown
-   unasked. Draft: as written — `world.md` §3 has named the intern as the hint system since
-   M1.
-2. **The order.** He always points to the first case of `CASES` that is not solved — Sales
-   before Marketing — even when the player has begun with Marketing. Draft: as written; it
-   is the order the call gives.
-3. **The place.** The middle of tile (38, 30), below the counter of the break room. He
-   stands; `world.md` §3 says he sits. Draft: standing until the art pass, and `world.md`
-   says so.
-4. **What he does not see.** He never speaks of the shadow, the strips or the traces: he
-   speaks of screens, the printer and shirts. Draft: as written.
-5. **The words**, eight pages in German and English. Draft: as in the table.
-6. **The walk.** It covers five of the eight pages and takes the case of Sales; the other
-   three are held by the tests. Draft: accepted — the walk of all eight would be two cases
-   long.
+None. Six were settled on 2026-11-19, each as drafted:
+
+- Where the hint comes from: one figure who is asked, and nothing that is shown unasked.
+- The order: he always points to the first case of `CASES` that is not solved, also when
+  the player has begun with a later one.
+- The place: the middle of tile (38, 30), standing until the art pass; `world.md` §3 says
+  so.
+- What he does not see: he never speaks of the shadow, the strips or the traces.
+- The words, eight pages in German and English, as in the table.
+- The walk covers five of the eight pages and takes the case of Sales; the tests hold the
+  other three.

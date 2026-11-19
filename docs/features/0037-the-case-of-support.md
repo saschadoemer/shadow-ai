@@ -32,8 +32,8 @@ changes, no new sprite; the floor gets five rectangles.
   §5, §6 and §8; `testing.md` §2; the README.
 
 **Out, explicitly:** the species of Support — every case has one (`world.md` §4); it comes
-with its own feature · a Harmonic station in Support — a station needs the species of its
-region (`gameplay.md` §10), so it is decided with that species · an upgrade — the world
+with the next feature, 0038 · a Harmonic station in Support (`world.md` §6: decided in a
+case spec of Act 2; not this one) · an upgrade — the world
 data has none for Support · the vendor (M6) · pages on the policy tab — three blocks fit;
 pages come with the fourth · the mailbox and the translator as things on the screens (art
 pass) · the browser extension as a creature or a device of its own · a second saying for
@@ -241,16 +241,13 @@ journal.
 
 ## Open questions
 
-1. **A case that is only content.** The case uses the rules of the first two; its species,
-   and a Harmonic station, come with a feature of their own. Draft: as written.
-2. **Five traces, on these screens.** Five of twenty-seven, at least one in every row, in
-   both blocks. Draft: the cells of the table.
-3. **The words:** the answer, "afterwards", the outcome and the block, in German and
-   English. Draft: as in the table.
-4. **The policy tab.** The blocks are stacked by their height instead of 60 px apart, so
-   the second block of a game that solves Marketing first moves from y = 96 to y = 84.
-   Draft: stack them; pages come with the fourth block.
-5. **The hints of the intern** for the case, three pages. Draft: as in the table.
-6. **Where it stands in the order.** Sixth of the six features for the playable build,
-   after the card. It could come earlier; its object ids and the intern's hints follow
-   whatever order is chosen. Draft: last, as numbered.
+None. Six were settled on 2026-11-19:
+
+- The cut: this feature is the case. Its species comes at once, as a feature of its own:
+  0038, the creature of Support.
+- Five traces, on the screens of the table, as drafted.
+- The words — the answer, "afterwards", the outcome and the block — as drafted.
+- The policy tab stacks its blocks by their height, as drafted; pages come with the fourth
+  block.
+- The three hints of the intern, as drafted; 0038 changes the second of them.
+- The order: by number, 0032 to 0038.

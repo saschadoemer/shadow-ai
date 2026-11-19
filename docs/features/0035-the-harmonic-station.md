@@ -223,25 +223,17 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 
 ## Open questions
 
-1. **The cell.** (81, 40): two cells inside the doorway, at the lower edge of the way in.
-   Draft: this cell.
-2. **The plate.** `gameplay.md` §10 says the screen shows the name; a screen of this size
-   cannot. The name stands on a plate over the desk, in the game's font. Draft: the plate,
-   and `gameplay.md` §10 says so.
-3. **The two lines.** `Harmonic läuft. Im Raum wird es still.` and
-   `Was hier umgeht, ist noch nicht verstanden.` Draft: these, in German and English.
-4. **The mark.** The name at the right end of the region's line on the cases tab. Draft: as
-   written.
-5. **After the case.** A station can run in a room whose case is solved; it then only says
-   its line and sets its mark. Draft: allowed — a station runs once, whenever.
-6. **The milestone.** `docs/plan.md` names this station under M5, for the teaser. Draft:
-   M5, built now.
-7. **What the walk does not reach.** The line of a station that cannot run yet. On the
-   floor the snippet of the corridor stands in front of the doorway (`world.md` §6), so a
-   player has captured one before the desk is in reach. Draft: the tests hold that line;
-   the walk does not.
-8. **Who checks.** `vision.md` §10 leaves open whether the advertising is recognizable
-   enough, and §9 how the licences leave out the two names: both are for a competent person
-   to check before the first public release. The address of 0030 is public and not
-   announced. Draft: build the station; the check stays a condition of announcing the
-   address, not of merging.
+None. Eight were settled on 2026-11-19, each as drafted:
+
+- The cell: (81, 40), two cells inside the doorway.
+- The plate: the name stands on a plate over the desk, in the game's font, because a screen
+  of this size cannot show it; `gameplay.md` §10 says so.
+- The two lines, in German and English, as in the table.
+- The mark: the name at the right end of the region's line on the cases tab.
+- After the case: a station can run in a room whose case is solved — once, whenever.
+- The milestone: M5, built now.
+- The walk does not reach the line of a station that cannot run yet; the tests hold it.
+- Who checks: whether the advertising is recognizable enough, and how the licences leave
+  out the two names (`vision.md` §9 and §10), is checked by a competent person before the
+  address of 0030 is announced to anybody outside. It is a condition of announcing, not of
+  merging this feature.

@@ -59,3 +59,4 @@ in two.
 | [0035](0035-the-harmonic-station.md) | The Harmonic station | M5 | draft |
 | [0036](0036-lmis-presents.md) | LMIS presents | M5 | draft |
 | [0037](0037-the-case-of-support.md) | The case of Support | M6 | draft |
+| [0038](0038-the-creature-of-support.md) | The creature of Support | M6 | draft |

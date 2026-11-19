@@ -143,9 +143,10 @@ cone after it, because the case of Marketing earns it and HR and Accounting open
 creature of Marketing third: every case has its species (`world.md` §4), and the second
 species brings what the journal still lacks — a choice among its entries, and pages.
 
-Six features for a build that can be played from the call to a close by somebody who was
+Seven features for a build that can be played from the call to a close by somebody who was
 only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034 the close ·
-0035 the Harmonic station · 0036 LMIS presents · 0037 the case of Support.
+0035 the Harmonic station · 0036 LMIS presents · 0037 the case of Support · 0038 the
+creature of Support. They are built in this order.
 The creature first, so that the second room has opposition; it is cut small — the choice
 among the journal's entries and its pages wait for a later case and the third species. The
 intern after it: the hint system `world.md` §3 has named since M1, one figure in the break
@@ -153,8 +154,10 @@ room who says where the next step is. The close last, because it follows whateve
 case is: the story says once that the rest of the floor follows, and the game goes on.
 Then the two that M5 still names for the teaser — the Harmonic station of Sales, the one
 place where a real product acts in the game, and the card on which LMIS presents it — and
-last the case of Support, by the rules of the first two, so that the third open door leads
-somewhere.
+then the case of Support, by the rules of the first two, so that the third open door leads
+somewhere. Last its creature, the first of the second layer (`gameplay.md` §3): it sits in
+a window on a screen, and the player closes the window before the lamp can hold it. With a
+third species the journal's creatures tab gets pages.
 
 Named here without a number and specified when their turn comes: the
 cases of HR and Accounting · the colour filter · the case of Development · the meeting rooms'

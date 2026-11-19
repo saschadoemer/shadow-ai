@@ -169,13 +169,13 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 
 ## Open questions
 
-1. **A close at all.** `gameplay.md` §6 says the first act has no end card. This is none:
-   it follows the last case of the game, not Act 1, and the game goes on after it. Draft:
-   build it, and say in `gameplay.md` §6 what the difference is.
-2. **The third page.** One page in which the game says how far it goes today — the only
-   text that is not the story's. Draft: keep it while the game is unfinished; the feature
-   that brings the real end removes it.
-3. **When.** 300 steps after the last case, by itself, once. Draft: as written.
-4. **The words**, three pages in German and English, with a second call of the managing
-   director. Draft: as in the table.
-5. **Nothing counted.** No number of cases, creatures or minutes on any page. Draft: none.
+None. Five were settled on 2026-11-19, each as drafted:
+
+- A close at all: it follows the last case of the game, not Act 1, and the game goes on
+  after it; `gameplay.md` §6 says what the difference to an end card is.
+- The third page, in which the game says how far it goes today, stays while the game is
+  unfinished; the feature that brings the real end removes it.
+- When: 300 steps after the last case, by itself, once.
+- The words, three pages in German and English, with a second call of the managing
+  director, as in the table.
+- Nothing is counted on any page.

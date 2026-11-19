@@ -135,17 +135,13 @@ is not loaded yet. `E` or `Enter` talks, `L` switches the language.
 
 ## Open questions
 
-1. **The place.** A card before the call, on an empty screen — the stand-in for the title
-   screen of M8. Draft: the card. A line in the call's box or at the bottom of the screen
-   would put the frame into the world.
-2. **The words.** `LMIS präsentiert` / `LMIS presents` over the title `Shadow AI`. Draft:
-   these, as `vision.md` §10 words it.
-3. **How it ends.** After three seconds by itself, or at a press of `E` or `Enter`. Draft:
-   both, so that nobody is held and nobody is stuck.
-4. **A line about Harmonic.** `vision.md` §10 says the presenter's line tells a player that
-   the product in the game is there on purpose, and leaves to a competent person whether
-   that is enough. A third line on the card — that Harmonic is a product LMIS sells — would
-   say it outright. Draft: no third line now; the question goes to the person who checks
-   the release, and a line is added if that person asks for it.
-5. **The milestone.** `docs/plan.md` names the line under M5, for the teaser. Draft: M5,
-   built now.
+None. Five were settled on 2026-11-19, each as drafted:
+
+- The place: a card before the call, on an empty screen, the stand-in for the title screen
+  of M8.
+- The words: `LMIS präsentiert` / `LMIS presents` over the title `Shadow AI`.
+- How it ends: after three seconds by itself, or at a press of `E` or `Enter`.
+- No line about Harmonic on the card now. Whether the presenter's line is enough is for the
+  person who checks the release (`vision.md` §10); a line is added if that person asks for
+  it.
+- The milestone: M5, built now.
