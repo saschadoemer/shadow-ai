@@ -55,6 +55,8 @@ has five traces of its own, on four screens and on the printer, and the colleagu
 shirt is the source of the second case; the two cases can be solved in either order (feature
 0028). Solving the case of Marketing earns the first upgrade of the lamp: the cone is one and
 a half times as wide, and the shadow walls of HR and Accounting give way to it (feature 0029).
+Marketing has a creature of its own: the mirage, a framed picture that moves only while nobody
+looks at it (feature 0032).
 Every merge to `main` is deployed to Cloud Run (feature 0030).
 The roadmap is in [docs/plan.md](docs/plan.md).
 
@@ -68,7 +70,7 @@ npm run dev          # the dev server at http://localhost:5173
 npm run check        # typecheck, lint, build and the headless tests
 npm run test:e2e     # the smoke test against the dev server
 npm run gen-tiles    # regenerate the placeholder tiles under public/tiles/
-npm run gen-sprites  # regenerate the placeholder figure, the lamp and its wider cone, snippet, overview, movers', shadow-wall, font and officer sheets under public/sprites/
+npm run gen-sprites  # regenerate the placeholder figure, the lamp and its wider cone, snippet, mirage, overview, movers', shadow-wall, font and officer sheets under public/sprites/
 npm run gen-floor    # regenerate the floor map with its creatures and the wake point under public/maps/
 ```
 

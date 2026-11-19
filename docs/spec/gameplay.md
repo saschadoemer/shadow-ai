@@ -96,6 +96,15 @@ in that step — they are not captured, and the journal does not count them — 
 region's shadow wall if it still stands. A creature whose home is outside the region stays,
 wherever it is at that moment: the snippet of the east corridor is still there after Sales.
 
+**As built** (feature 0032): the mirage is the second small creature, and it does not come as
+the snippet does. It moves only while it is not looked at — while it is not ahead of the figure,
+or something opaque stands between them. Looked at, it stands at any distance; not looked at, it
+comes straight at the figure from closer than six tiles, at three quarters of the figure's
+speed, and stops at its feet. Ahead is half of the map: everything in front of the figure, by
+its facing. So one mirage is harmless while the player faces it, and two are a problem: finding
+a trace means looking at a screen with the back to the room. In the light it is frozen and
+captured like the snippet, and it hits like the snippet.
+
 ## 4. Overview
 
 Health is called **overview**. Hits from creatures take it. At zero the player is in the dark and
@@ -234,6 +243,10 @@ within the tab come with the third (M6).
 below the first, in the order of the world data — Sales, then Marketing — whichever was
 solved first. The policy tab shows the two blocks in the order they were solved, the second
 60 px below the first.
+
+**As built** (feature 0032): with a second species the creatures tab shows two entries, the
+second 72 px below the first, in the order of the species — the snippet, then the mirage —
+whichever was captured first. Two entries fit the screen; pages come with the third species.
 
 **As built** (feature 0026): the journal does not open while the call is read, like under any
 dialogue. After it, J opens it with or without the lamp.
