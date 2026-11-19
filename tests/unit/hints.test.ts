@@ -191,7 +191,8 @@ describe('the intern speaks (0033)', () => {
   });
 
   it('says the page of the lamp in a game that has none, and the officer the first meeting', () => {
-    const without = newGame(MAP);
+    // Past the card (0036).
+    const without: GameState = { ...newGame(MAP), presented: 0 };
     expect(pagesIn(without)).toStrictEqual({
       intern: [HINT_LAMP],
       officer: FIRST_MEETING.pages,

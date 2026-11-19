@@ -199,6 +199,7 @@ const state = (
   tick: QUIET_TICK,
   rested: null,
   finished: null,
+  presented: 0,
   upgrades: [],
   player: player(fields),
   camera,

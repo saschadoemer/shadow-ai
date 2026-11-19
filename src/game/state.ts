@@ -207,6 +207,11 @@ export interface GameState {
    * (0034). It opens once.
    */
   readonly finished: number | null;
+  /**
+   * The tick of the step in which the card ended — the card a game opens with — or null while
+   * it is shown (0036). A game past its opening has 0.
+   */
+  readonly presented: number | null;
   /** The standing figures of the map, in file order (0017). */
   readonly figures: readonly FigureState[];
   /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
