@@ -142,8 +142,19 @@ types and constants only.
 There are two starts (feature 0026). `createInitialState(map)` is a game **past its opening**:
 no dialogue open, the lamp owned and used. The tests of the earlier features step
 from it. `newGame(map)` is what a player gets, and what `main.ts` starts with: the same state
-with `dialogue` `{ speaker: 'story', index: 0, page: 0 }` — the call on its first page — and
-`lamp` `{ on: false, strength: 1, owned: false, used: false }`.
+with `dialogue` `{ speaker: 'story', index: 0, page: 0 }` — the call on its first page —,
+`lamp` `{ on: false, strength: 1, owned: false, used: false }` and, since feature 0036,
+`presented` `null`: the card is shown.
+
+`presented` is the tick of the step in which the card ended, or `null` while it is shown
+(feature 0036, `game/card`); a game past its opening has 0. While it is `null` — `cardShown`
+— a step is `stepCard` and nothing else, before the dark, the help and everything after them:
+`tick` grows by one, the input is remembered in `held`, and nothing of the world is stepped.
+The card ends in the step in which `talk` is pressed — `pressed` against `held`, so a key held
+from before does not count — or in the step whose tick reaches `CARD_STEPS`, 180: that step
+sets `presented` to its tick and changes nothing else. The call is open under the card from
+the start, so the next step is the dialogue's, and the key that ended the card, still held, is
+no press for it. The wake keeps `presented`; nothing sets it back to `null`.
 
 The state does not record when the opening ended. Feature 0026 kept that as `started`, for the
 start hint of the help alone; feature 0031 took the hint and the field away.
@@ -330,7 +341,8 @@ The **first meeting** (feature 0026) is data of `game/cast`: `FIRST_MEETING` nam
 that hands the lamp over, `officer`, and its pages, `talk.officer-rules-1` and
 `talk.officer-meeting-2`. While the lamp is not owned, `figuresIn(figures, owned)` gives that
 figure the meeting's pages instead of its own; `update` and the scene both build the speakers
-from it, so the box shows the pages the dialogue has.
+from it, so the box shows the pages the dialogue has. Her own pages are three since feature
+0036: `talk.officer-rules-3` names Harmonic, and the meeting's pages do not.
 
 The **hints** (feature 0033) are data and one rule of `game/hints`. `HINT_FIGURE` names the
 figure that says them, `intern`; `HINTS` holds per case — by its region — three pages, `start`,
@@ -469,6 +481,10 @@ millisecond gives none and then two steps in a row — the moving picture stops 
 a 60 Hz display advances exactly one step per frame and a 120 Hz display one every second frame;
 on 59.94 Hz the game runs 0.1 % slow, which nobody sees. Other rates, such as 144 Hz, are not
 snapped and show the uneven cadence that a fixed step without interpolation implies.
+
+**The card counts steps.** The card of a new game (feature 0036) lasts 180 steps, not three
+seconds of a clock: steps the cap drops after a stall are not counted, so a tab that was in the
+background shows the card for its whole length when it comes back.
 
 **Steps, not milliseconds.** The accumulator counts steps. In milliseconds floating point loses a
 step: five capped steps of `1000 / 60` ms, subtracted one by one, leave 16.66666666666666 and run
@@ -678,6 +694,13 @@ grown upwards to three lines, with the same bottom edge —, the page's lines le
 (12, 138), and, while ⌊tick / 30⌋ is even, the marker: three rectangles in `#ffffff`, (299, 169,
 5, 1), (300, 170, 3, 1) and (301, 171, 1, 1), a small triangle that points down and blinks once a
 second, on every page. A line of 47 characters ends at x = 294, left of the marker.
+
+The card (feature 0036, `render/draw-card`). While `presented` is `null`, `drawScene` calls
+`drawCard` and returns, before it looks at the journal or the help: `clear` to the page
+background, then `card.presents` with its top at y = 74 and `card.title` at y = 94, each from
+x = `centredX(n)`, 160 − 3n for the n characters of the line in the language of the settings —
+112 and 133 in German, 121 and 133 in English. Nothing else is drawn: no layer, no figure, no
+heart, no label of the help, no box, no bar and no lid.
 
 The journal (feature 0020, `render/draw-journal`). While `journal` is not `null`, `drawScene`
 draws the journal and nothing else: no tile, no figure, no heart, no notice, no language line,

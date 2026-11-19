@@ -226,3 +226,16 @@ The rules both are held to:
 - **The advertising is recognizable.** The presenter's line tells a player that the product in
   the game is there on purpose. Whether that is enough has to be checked by a competent person
   before the first public release, together with the licences (§9).
+
+*As built* (feature 0036). The presenter's line stands on a card before the call — `LMIS
+präsentiert` over the title, on an otherwise empty screen, for three seconds or until a press.
+It is the one text of the game that holds the presenter's name, and a test keeps it so. The
+card has no line about Harmonic; one is added if the person who checks the release asks for it.
+
+The three voices, each on one page of talk. The data protection officer, on the third page of
+her own talk, once the lamp is handed over: `Die Lampe hast nur du. Etwas wie Harmonic würde
+dem Haus zeigen, welche KI hier läuft und wohin die Daten gehen.` The colleague of Sales, on
+the page after the case: `Hätte mir etwas wie Harmonic vorher gezeigt, wohin der Text geht –
+ich hätte es gelassen.` The management, on the second page of the close: `Mit Harmonic hätten
+wir es vor dem Kunden gesehen.` A test holds the name to these three pages, in both languages,
+and no table of the world data holds either name.

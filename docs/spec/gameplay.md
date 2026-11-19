@@ -211,6 +211,13 @@ do not depend on each other: Marketing is open from the start, and the player ma
 before Sales. What a case of Act 2 has more than the first — its species, the upgrade it
 earns, the vendor — comes with features of their own.
 
+**As built** (feature 0036): three pages of talk name Harmonic, and no rule of a case changed
+(`vision.md` §10). The page the colleague of Sales says after the case no longer asks what to
+use next time: it says that something like Harmonic would have shown where the text goes. On
+the second page of the close the management says that with Harmonic the house would have seen
+it before the customer did. The third is a page of the data protection officer (§8). No page
+of an answer and no everyday line holds the name.
+
 ## 7. The journal
 
 The only screen besides the game itself, and the only inventory. One screen, three tabs, nothing
@@ -303,6 +310,16 @@ third; until then the world stands still and the other keys do nothing, as with 
 There is no way to skip it before M8. In the first meeting the data protection officer says her
 first page and then the page that hands the lamp over; afterwards she says her two pages of
 0017. A press of E opens a dialogue with Space held as long as the player has no lamp.
+
+**As built** (feature 0036): before the call a game shows a card — a dark screen with two
+lines in its middle, `LMIS präsentiert` and, below it, `Shadow AI`. It ends by itself after
+three seconds, or at a press of E or Enter, and the call follows on its first page; the press
+that ended the card does not turn that page. While the card is shown no other key of the game
+does anything. L switches the language on it as everywhere, and F toggles fullscreen. The
+card is the stand-in for the title screen of M8 and goes when that comes. A page that is
+loaded anew shows it again. The data protection officer's own talk has a third page since
+this feature, the one that compares Harmonic with the lamp; the first meeting keeps its two
+pages, so she says it only once the lamp is handed over.
 
 **As built** (feature 0027): E and Enter also take a coffee at a coffee machine (§4). A
 colleague or a figure in reach comes first: then the press opens the dialogue. The press does

@@ -210,7 +210,8 @@ Kept as small as the story allows. About thirty figures in all.
   from which she can be spoken to: 40 px, and in sight.
   Feature 0026 brings the first meeting: while the player has no lamp she says her first page
   and then `Nimm die Lampe: …` — three sentences in all — and the press that closes it hands
-  the lamp over. From then on she says the two pages of 0017.
+  the lamp over. From then on she says the two pages of 0017 and, since feature 0036, a third
+  that names Harmonic (`vision.md` §10).
 - **The vendor.** See `vision.md` §4. Recurring in every department, never an enemy, changing
   over the game from seller to advisor. As advisor he supplies the approved alternatives that
   solve the later cases. They are fictional products; Harmonic is not his (`vision.md` §10).
