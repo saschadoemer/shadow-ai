@@ -2244,7 +2244,7 @@ describe('the close on the floor (0034)', () => {
     traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
   };
 
-  it('opens 300 steps after the last of the three cases of the floor, and not after the second', () => {
+  it('opens 300 steps after the last of the four cases of the floor, and not after the third', () => {
     let state = answer(beside(ready, 'person:sales'));
     expect(state.solved.map((entry) => entry.region)).toStrictEqual(['sales']);
     state = answer(beside(state, 'person:marketing'));
@@ -2255,8 +2255,19 @@ describe('the close on the floor (0034)', () => {
     }
     expect(state.dialogue).toBeNull();
     state = answer(beside(state, 'person:support'));
-    const last = state.solved[2];
-    expect(last?.region).toBe('support');
+    expect(state.solved.map((entry) => entry.region)).toStrictEqual([
+      'sales',
+      'marketing',
+      'support',
+    ]);
+    // HR is not solved (0040): nothing opens either.
+    for (let step = 0; step < 400; step += 1) {
+      state = update(state, NO_INPUT, floor);
+    }
+    expect(state.dialogue).toBeNull();
+    state = answer(beside(state, 'person:hr'));
+    const last = state.solved[3];
+    expect(last?.region).toBe('hr');
     while (state.tick < (last?.at ?? 0) + 300) {
       state = update(state, NO_INPUT, floor);
       expect(state.dialogue).toBeNull();
@@ -2437,12 +2448,10 @@ describe('the case of Support on the floor (0037)', () => {
     state.shadowWalls.map((standing) => walls[standing.wall]?.region);
   const support = answer(beside(ready, 'person:support'));
 
-  it('is the case of a region that has traces on the floor: Sales, Marketing, Support', () => {
+  it('is the case of every region that has traces on the floor: Sales, Marketing, Support, HR', () => {
+    // HR has had its traces and its case since 0040.
     const regions = [...new Set(tracesOf(floor.rects).map((trace) => trace.region))];
-    // HR has its traces since 0040; its case comes with the same feature.
-    for (const { region } of CASES) {
-      expect(regions, region).toContain(region);
-    }
+    expect(regions).toStrictEqual(CASES.map((entry) => entry.region));
     expect(regions).toStrictEqual(['sales', 'marketing', 'support', 'hr']);
   });
 
@@ -2940,5 +2949,118 @@ describe('the traces of HR on the floor (0040)', () => {
       true,
       true,
     ]);
+  });
+});
+
+describe('the case of HR on the floor (0040)', () => {
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const SHINE: GameInput = { ...NO_INPUT, lamp: true };
+  const areas = areasOf(floor.rects);
+  const walls = wallsOf(floor.rects);
+  const routes = routesOf(floor.points);
+  const start = createInitialState(floor);
+  /** The figure 24 px below the colleague of the given route, where it stands in the state. */
+  const beside = (state: GameState, route: string): GameState => {
+    const source = state.movers.find((mover) => routes[mover.route]?.name === route);
+    return {
+      ...state,
+      player: { ...state.player, x: source?.x ?? 0, y: (source?.y ?? 0) + 24 },
+    };
+  };
+  /** Every trace of the floor found long ago. */
+  const ready: GameState = {
+    ...start,
+    tick: 1000,
+    traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
+  };
+  const answer = (from: GameState): GameState =>
+    [TALK, NO_INPUT, TALK, NO_INPUT, TALK, NO_INPUT].reduce(
+      (state, input) => update(state, input, floor),
+      from,
+    );
+  const regionsOf = (state: GameState): (string | undefined)[] =>
+    state.shadowWalls.map((standing) => walls[standing.wall]?.region);
+  /** The state with the figure 20 px below the wall of a region in the top corridor, looking up. */
+  const below = (state: GameState, region: string): GameState => {
+    const box = walls.find((wall) => wall.region === region)?.box ?? { x: 0, y: 0, width: 0 };
+    return {
+      ...state,
+      player: { ...state.player, x: box.x + box.width / 2, y: box.y + 24, facing: 'up' },
+    };
+  };
+  const shine = (from: GameState, count: number): GameState => {
+    let state = from;
+    for (let step = 0; step < count; step += 1) {
+      state = update(state, SHINE, floor);
+    }
+    return state;
+  };
+  const hr = answer(beside(ready, 'person:hr'));
+  /** Marketing first, for the wider cone; then HR. */
+  const marketing = answer(beside(ready, 'person:marketing'));
+  const both = answer(beside(marketing, 'person:hr'));
+
+  it('is solved from beside its source, before the others: six of six, and the filter', () => {
+    expect(hr.solved).toStrictEqual([{ region: 'hr', at: 1005 }]);
+    expect(hr.overview).toStrictEqual({ current: 6, max: 6 });
+    expect(hr.upgrades).toStrictEqual(['filter']);
+  });
+
+  it('gives the filter after the wider cone: both upgrades and a lamp of strength 3', () => {
+    expect(marketing.upgrades).toStrictEqual(['wide-cone']);
+    expect(both.solved.map((entry) => entry.region)).toStrictEqual(['marketing', 'hr']);
+    expect(both.upgrades).toStrictEqual(['wide-cone', 'filter']);
+    expect(both.lamp.strength).toBe(3);
+  });
+
+  it('takes the shadow from the cells of HR and leaves it on the other regions', () => {
+    const cleared = shadowedAreas(areas, hr.solved);
+    expect(veilOf(areas, 5, 5)).toBe(2);
+    expect(veilOf(cleared, 5, 5)).toBe(0);
+    expect(veilOf(cleared, 20, 18)).toBe(0);
+    // Sales, Marketing, Support and Development.
+    expect([
+      veilOf(cleared, 90, 30),
+      veilOf(cleared, 10, 70),
+      veilOf(cleared, 100, 70),
+      veilOf(cleared, 60, 10),
+    ]).toStrictEqual([1, 1, 1, 3]);
+  });
+
+  it('removes the shadow wall of HR and no other', () => {
+    expect(regionsOf(ready).filter((region) => region === 'hr')).toHaveLength(1);
+    expect(regionsOf(hr)).not.toContain('hr');
+    expect(regionsOf(hr)).toContain('accounting');
+    expect(regionsOf(hr)).toContain('development');
+    expect(hr.shadowWalls).toHaveLength(ready.shadowWalls.length - 1);
+  });
+
+  it('lets the wall of Development give way with the filter, in the 60th lit step', () => {
+    // Without the filter it holds (0029).
+    expect(regionsOf(shine(below(marketing, 'development'), 180))).toContain('development');
+    const almost = shine(below(both, 'development'), 59);
+    expect(regionsOf(almost)).toContain('development');
+    expect(regionsOf(update(almost, SHINE, floor))).not.toContain('development');
+  });
+
+  it('is followed by the other three: nine of nine, and four rooms clear', () => {
+    const all = ['person:sales', 'person:support'].reduce(
+      (state, route) => answer(beside(state, route)),
+      both,
+    );
+    expect(all.solved.map((entry) => entry.region)).toStrictEqual([
+      'marketing',
+      'hr',
+      'sales',
+      'support',
+    ]);
+    expect(all.overview).toStrictEqual({ current: 9, max: 9 });
+    const cleared = shadowedAreas(areas, all.solved);
+    expect([
+      veilOf(cleared, 5, 5),
+      veilOf(cleared, 90, 30),
+      veilOf(cleared, 10, 70),
+      veilOf(cleared, 100, 70),
+    ]).toStrictEqual([0, 0, 0, 0]);
   });
 });

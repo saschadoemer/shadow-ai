@@ -305,7 +305,8 @@ describe('what the journal takes from the cases (0024)', () => {
   it('gives a solved case its outcome and an unsolved one none', () => {
     expect(outcomeOf('sales', [])).toBeNull();
     expect(outcomeOf('sales', [{ region: 'sales', at: 5 }])).toBe(textKey('case.sales-outcome'));
-    expect(outcomeOf('hr', [{ region: 'hr', at: 5 }])).toBeNull();
+    // Accounting has no case: HR has had one since 0040.
+    expect(outcomeOf('accounting', [{ region: 'accounting', at: 5 }])).toBeNull();
   });
 
   it('gives the policy one block per solved case, in the order they were solved', () => {
@@ -667,7 +668,9 @@ describe('the upgrade a case earns (0029)', () => {
     const without = UPGRADES.filter(
       (upgrade) => !CASES.some((entry) => entry.region === upgrade.earnedIn),
     ).map((upgrade) => upgrade.id);
-    expect(without).toStrictEqual(['filter']);
+    // Since 0040 every upgrade of the table has its case: the filter is earned in HR.
+    expect(without).toStrictEqual([]);
+    // Sales and Marketing do not earn it.
     const all = talk(beside(talk(beside(ready, 'marketing')), 'sales'));
     expect(all.upgrades).not.toContain('filter');
   });
@@ -752,8 +755,8 @@ describe('the case of Support (0037)', () => {
         )?.pages;
 
   it('is the third case, after Marketing: its source, its answer, its afterwards, its outcome, its block', () => {
-    expect(CASES).toHaveLength(3);
-    expect(CASES.map((entry) => entry.region)).toStrictEqual(REGIONS_IN_ORDER);
+    // HR is the fourth (0040).
+    expect(CASES.slice(0, 3).map((entry) => entry.region)).toStrictEqual(REGIONS_IN_ORDER);
     expect(CASES[2]).toStrictEqual({
       region: 'support',
       source: 'person:support',
@@ -830,6 +833,189 @@ describe('the case of Support (0037)', () => {
       textKey('policy.marketing'),
       textKey('policy.support'),
       textKey('policy.sales'),
+    ]);
+  });
+});
+
+describe('the case of HR (0040)', () => {
+  type Region = 'sales' | 'marketing' | 'support' | 'hr';
+  const REGIONS_IN_ORDER: readonly Region[] = ['sales', 'marketing', 'support', 'hr'];
+  const EVERYDAY_OF: Readonly<Record<Region, readonly TextKey[]>> = {
+    sales: [textKey('talk.sales-everyday')],
+    marketing: [textKey('talk.marketing-everyday')],
+    support: [textKey('talk.support-everyday')],
+    hr: [textKey('talk.hr-everyday')],
+  };
+  const HR_ANSWER = [textKey('talk.hr-source-1'), textKey('talk.hr-source-2')];
+  const HR_AFTER = [textKey('talk.hr-after')];
+  const ROW: Readonly<Record<Region, number>> = { sales: 48, marketing: 96, support: 144, hr: 192 };
+  /** The four sources, each waiting ten seconds on its first point, 48 px apart. */
+  const SOURCES: readonly NamedPoint[] = REGIONS_IN_ORDER.flatMap((region) => [
+    { name: `person:${region}:1`, x: 64, y: ROW[region], pause: 600 },
+    { name: `person:${region}:2`, x: 128, y: ROW[region] },
+  ]);
+  /** 20x14 cells of open floor: two traces of each region, in the order of the cases. */
+  const FOUR: TileMap = grassMap(
+    20,
+    14,
+    { x: 104, y: 48 },
+    SOURCES,
+    REGIONS_IN_ORDER.flatMap((region): NamedRect[] =>
+      [240, 272].map((x) => ({
+        name: `trace:${region}`,
+        x,
+        y: ROW[region] - 16,
+        width: 16,
+        height: 16,
+      })),
+    ),
+  );
+  /** The start of FOUR at step 1000 with its eight traces found, or not, as given. */
+  const having = (...ticks: readonly (number | null)[]): GameState => ({
+    ...createInitialState(FOUR),
+    tick: T0,
+    traces: found(...ticks),
+  });
+  const ALL = having(10, 20, 30, 40, 50, 60, 70, 80);
+  /** The figure 40 px right of the colleague of the region: in reach of that one alone. */
+  const beside = (state: GameState, region: Region): GameState => ({
+    ...state,
+    player: { ...state.player, x: 104, y: ROW[region] },
+  });
+  const step = (start: GameState, ...inputs: readonly GameInput[]): GameState =>
+    inputs.reduce((state, input) => update(state, input, FOUR), start);
+  /** Three presses of talk: the answer opens, turns to its second page and closes. */
+  const answer = (start: GameState): GameState => step(start, TALK, NONE, TALK, NONE, TALK, NONE);
+  const said = (state: GameState) =>
+    state.dialogue === null
+      ? null
+      : speakerOf(
+          state.dialogue,
+          speakersOf([], state.movers, routesOf(FOUR.points), undefined, progressOf(state, FOUR)),
+        )?.pages;
+  /** Every order of the four regions. */
+  const orders = (regions: readonly Region[]): Region[][] =>
+    regions.length === 0
+      ? [[]]
+      : regions.flatMap((first) =>
+          orders(regions.filter((region) => region !== first)).map((rest) => [first, ...rest]),
+        );
+
+  it('is the fourth case, after Support: its source, its answer, its afterwards, its outcome, its block', () => {
+    expect(CASES).toHaveLength(4);
+    expect(CASES.map((entry) => entry.region)).toStrictEqual(REGIONS_IN_ORDER);
+    expect(CASES[3]).toStrictEqual({
+      region: 'hr',
+      source: 'person:hr',
+      answer: HR_ANSWER,
+      after: HR_AFTER,
+      outcome: textKey('case.hr-outcome'),
+      policy: textKey('policy.hr'),
+    });
+  });
+
+  it('is ready exactly when its own traces are found, whatever is found in the other three', () => {
+    const ready = (state: GameState): boolean[] =>
+      REGIONS_IN_ORDER.map((region) => isReady(region, progressOf(state, FOUR)));
+    const none = [null, null, null, null, null, null] as const;
+    expect(ready(having(...none, 70, 80))).toStrictEqual([false, false, false, true]);
+    expect(ready(having(...none, 70, null))).toStrictEqual([false, false, false, false]);
+    expect(ready(having(10, 20, 30, 40, 50, 60, null, 80))).toStrictEqual([
+      true,
+      true,
+      true,
+      false,
+    ]);
+    expect(ready(having(10, null, 30, 40, null, 60, 70, 80))).toStrictEqual([
+      false,
+      true,
+      false,
+      true,
+    ]);
+    expect(ready(ALL)).toStrictEqual([true, true, true, true]);
+  });
+
+  it('gives its source the answer when it is ready, and the other three their everyday pages', () => {
+    const hr = having(null, null, null, null, null, null, 70, 80);
+    expect(said(step(beside(hr, 'hr'), TALK))).toStrictEqual(HR_ANSWER);
+    for (const region of ['sales', 'marketing', 'support'] as const) {
+      expect(said(step(beside(hr, region), TALK)), region).toStrictEqual(EVERYDAY_OF[region]);
+    }
+    // One trace of HR is missing: the everyday line, whatever is found elsewhere.
+    const almost = having(10, 20, 30, 40, 50, 60, 70, null);
+    expect(said(step(beside(almost, 'hr'), TALK))).toStrictEqual(EVERYDAY_OF.hr);
+    expect(said(step(beside(almost, 'sales'), TALK))).toStrictEqual(ANSWER);
+  });
+
+  it('says "afterwards" once its case is solved, and the other three still their everyday lines', () => {
+    const solved = answer(beside(having(null, null, null, null, null, null, 70, 80), 'hr'));
+    expect(solved.solved).toStrictEqual([{ region: 'hr', at: T0 + 5 }]);
+    expect(said(step(solved, TALK))).toStrictEqual(HR_AFTER);
+    for (const region of ['sales', 'marketing', 'support'] as const) {
+      expect(said(step(beside(solved, region), TALK)), region).toStrictEqual(EVERYDAY_OF[region]);
+    }
+  });
+
+  it('earns the filter in the step that solves it: with the wider cone, a lamp of strength 3', () => {
+    const cone = answer(beside(ALL, 'marketing'));
+    expect(cone.upgrades).toStrictEqual(['wide-cone']);
+    expect(cone.lamp.strength).toBe(2);
+    const before = step(beside(cone, 'hr'), TALK, NONE, TALK, NONE);
+    expect(before.upgrades).toStrictEqual(['wide-cone']);
+    expect(before.lamp.strength).toBe(2);
+    const solved = update(before, TALK, FOUR);
+    expect(solved.solved.at(-1)).toStrictEqual({ region: 'hr', at: T0 + 11 });
+    expect(solved.upgrades).toStrictEqual(['wide-cone', 'filter']);
+    expect(solved.lamp.strength).toBe(3);
+    expect(solved.overview).toStrictEqual({ current: 7, max: 7 });
+  });
+
+  it('earns the filter by the same rule when it is solved first: a lamp of strength 2', () => {
+    const first = answer(beside(ALL, 'hr'));
+    expect(first.solved).toStrictEqual([{ region: 'hr', at: T0 + 5 }]);
+    expect(first.overview).toStrictEqual({ current: 6, max: 6 });
+    expect(first.upgrades).toStrictEqual(['filter']);
+    expect(first.lamp.strength).toBe(2);
+  });
+
+  it('gives nine of nine, both upgrades and a lamp of strength 3 with all four solved, in every order', () => {
+    const all = orders(REGIONS_IN_ORDER);
+    expect(all).toHaveLength(24);
+    for (const order of all) {
+      const state = order.reduce((from, region) => answer(beside(from, region)), ALL);
+      expect(
+        state.solved.map((entry) => entry.region),
+        order.join(),
+      ).toStrictEqual(order);
+      expect(state.overview, order.join()).toStrictEqual({ current: 9, max: 9 });
+      // Each upgrade comes with the case that earns it.
+      expect(state.upgrades, order.join()).toStrictEqual(
+        order.indexOf('marketing') < order.indexOf('hr')
+          ? ['wide-cone', 'filter']
+          : ['filter', 'wide-cone'],
+      );
+      expect(state.lamp.strength, order.join()).toBe(3);
+    }
+  });
+
+  it('gives the journal its outcome and its block, the blocks in the order they were solved', () => {
+    const hr = [{ region: 'hr', at: 5 }];
+    expect(outcomeOf('hr', [])).toBeNull();
+    expect(outcomeOf('hr', hr)).toBe(textKey('case.hr-outcome'));
+    expect(outcomeOf('support', hr)).toBeNull();
+    expect(policyBlocks(hr)).toStrictEqual([textKey('policy.hr')]);
+    expect(
+      policyBlocks([
+        { region: 'support', at: 2 },
+        ...hr,
+        { region: 'sales', at: 9 },
+        { region: 'marketing', at: 12 },
+      ]),
+    ).toStrictEqual([
+      textKey('policy.support'),
+      textKey('policy.hr'),
+      textKey('policy.sales'),
+      textKey('policy.marketing'),
     ]);
   });
 });

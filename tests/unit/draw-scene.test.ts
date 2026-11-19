@@ -2012,8 +2012,11 @@ describe('the intern in the scene (0033)', () => {
       { region: 'marketing', at: 19 },
     ];
     expect(firstGlyph({ ...found, solved: both })).toBe('drawSprite 36 at 12,138');
-    // All three solved: `Mehr weiß ich …`, `M`.
-    const all = [...both, { region: 'support', at: 29 }];
+    // The first three solved: HR is next (0040), `Dann HR …`, `D`.
+    const three = [...both, { region: 'support', at: 29 }];
+    expect(firstGlyph({ ...found, solved: three })).toBe('drawSprite 36 at 12,138');
+    // All four solved: `Mehr weiß ich …`, `M`.
+    const all = [...three, { region: 'hr', at: 39 }];
     expect(firstGlyph({ ...found, solved: all })).toBe('drawSprite 45 at 12,138');
   });
 

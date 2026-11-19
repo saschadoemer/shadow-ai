@@ -544,3 +544,74 @@ describe('the pages of the policy tab (0040)', () => {
     expect(run(OPEN, three, NONE, UP).journal).toStrictEqual({ tab: 'policy', page: 0 });
   });
 });
+
+describe('the policy tab with four solved cases (0040)', () => {
+  const UP: GameInput = { ...NONE, up: true };
+  const DOWN: GameInput = { ...NONE, down: true };
+  const FOUR = [
+    { region: 'sales', at: 900 },
+    { region: 'marketing', at: 930 },
+    { region: 'support', at: 960 },
+    { region: 'hr', at: 990 },
+  ];
+  /** The journal open on the policy, with the four cases solved. */
+  const policy = run(OPEN, { ...opened, solved: FOUR }, NONE, RIGHT, NONE, RIGHT);
+
+  it('has two pages: the three blocks solved first, then the fourth', () => {
+    expect(blockPages(FOUR)).toBe(2);
+    expect(pagesOfTab('policy', policy)).toBe(2);
+    expect(blocksOn(FOUR, 0)).toStrictEqual([
+      textKey('policy.sales'),
+      textKey('policy.marketing'),
+      textKey('policy.support'),
+    ]);
+    expect(blocksOn(FOUR, 1)).toStrictEqual([textKey('policy.hr')]);
+    // In the order they were solved, whatever the order of the cases.
+    expect(blocksOn([...FOUR].reverse(), 1)).toStrictEqual([textKey('policy.sales')]);
+    // The cases tab keeps one page: four entries fit.
+    expect(pagesOfTab('cases', policy)).toBe(1);
+  });
+
+  it('turns to page 1 with a press of down and back with a press of up', () => {
+    expect(policy.journal).toStrictEqual({ tab: 'policy', page: 0 });
+    const second = run(OPEN, policy, NONE, DOWN);
+    expect(second.journal).toStrictEqual({ tab: 'policy', page: 1 });
+    expect(run(OPEN, second, NONE, UP).journal).toStrictEqual({ tab: 'policy', page: 0 });
+    // Nothing else changes: the tick, the input, the page.
+    expect(second).toStrictEqual({
+      ...policy,
+      tick: policy.tick + 2,
+      held: DOWN,
+      journal: { tab: 'policy', page: 1 },
+    });
+  });
+
+  it('turns one page for a key held for 600 steps, and none past either end', () => {
+    let state = update(policy, NONE, OPEN);
+    for (let step = 0; step < 600; step += 1) {
+      state = update(state, DOWN, OPEN);
+    }
+    expect(state.journal?.page).toBe(1);
+    expect(run(OPEN, state, NONE, DOWN).journal?.page).toBe(1);
+    expect(run(OPEN, policy, NONE, UP).journal?.page).toBe(0);
+  });
+
+  it('is page 0 after a turn of the tab and after the journal opens again', () => {
+    const second = run(OPEN, policy, NONE, DOWN);
+    expect(run(OPEN, second, NONE, LEFT).journal).toStrictEqual({ tab: 'cases', page: 0 });
+    // Right on the last tab turns to no other tab, and keeps the page.
+    expect(run(OPEN, second, NONE, RIGHT).journal).toStrictEqual({ tab: 'policy', page: 1 });
+    const again = run(OPEN, second, NONE, JOURNAL, NONE, JOURNAL);
+    expect(again.journal).toStrictEqual({ tab: 'creatures', page: 0 });
+  });
+
+  it('does nothing with up and down on the cases tab, with four cases solved', () => {
+    const cases = run(OPEN, policy, NONE, LEFT);
+    expect(run(OPEN, cases, NONE, DOWN).journal).toStrictEqual({ tab: 'cases', page: 0 });
+  });
+
+  it('survives a JSON round trip on the second page (INV-1)', () => {
+    const second = run(OPEN, policy, NONE, DOWN);
+    expect(JSON.parse(JSON.stringify(second))).toStrictEqual(second);
+  });
+});

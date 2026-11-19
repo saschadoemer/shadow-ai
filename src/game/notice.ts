@@ -19,6 +19,8 @@ export const CASE_NOTICE_STEPS = 120;
 /** An upgrade was earned with a solved case (0029): what it does, by the upgrade's id. */
 export const NOTICE_UPGRADE: Readonly<Partial<Record<string, TextKey>>> = {
   'wide-cone': textKey('notice.upgrade-wide-cone'),
+  // The second upgrade (0040): the lamp's strength for the densest shadow.
+  filter: textKey('notice.upgrade-filter'),
 };
 /** Tune: two seconds, after the two seconds of the solved case's notice. */
 export const UPGRADE_NOTICE_STEPS = 120;

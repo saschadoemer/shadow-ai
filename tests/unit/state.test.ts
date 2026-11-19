@@ -1242,12 +1242,12 @@ describe('the second species in the state (0032)', () => {
 describe('the close in the state (0034)', () => {
   const TALK: GameInput = { ...NONE, talk: true };
   /**
-   * The sources of the three cases (0037), each waiting ten seconds on its first point, and one
-   * trace of each case. The map kept its name from the time of two cases.
+   * The sources of the four cases (0037, 0040), each waiting ten seconds on its first point, and
+   * one trace of each case. The map kept its name from the time of two cases.
    */
   const BOTH = grassMap(
     20,
-    12,
+    14,
     { x: 104, y: 48 },
     [
       { name: 'person:sales:1', x: 64, y: 48, pause: 600 },
@@ -1256,11 +1256,14 @@ describe('the close in the state (0034)', () => {
       { name: 'person:marketing:2', x: 128, y: 96 },
       { name: 'person:support:1', x: 64, y: 144, pause: 600 },
       { name: 'person:support:2', x: 128, y: 144 },
+      { name: 'person:hr:1', x: 64, y: 192, pause: 600 },
+      { name: 'person:hr:2', x: 128, y: 192 },
     ],
     [
       { name: 'trace:sales', x: 240, y: 32, width: 16, height: 16 },
       { name: 'trace:marketing', x: 240, y: 80, width: 16, height: 16 },
       { name: 'trace:support', x: 240, y: 128, width: 16, height: 16 },
+      { name: 'trace:hr', x: 240, y: 176, width: 16, height: 16 },
     ],
   );
   const start = createInitialState(BOTH);
@@ -1273,10 +1276,11 @@ describe('the close in the state (0034)', () => {
     traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
     solved: [
       { region: 'sales', at: 100 },
-      { region: 'marketing', at: 400 },
-      { region: 'support', at: 700 },
+      { region: 'marketing', at: 300 },
+      { region: 'support', at: 500 },
+      { region: 'hr', at: 700 },
     ],
-    overview: { current: 8, max: 8 },
+    overview: { current: 9, max: 9 },
     ...fields,
   });
   const run = (from: GameState, ...inputs: readonly GameInput[]): GameState =>
@@ -1429,20 +1433,21 @@ describe('the close in the state (0034)', () => {
   });
 
   it('follows the solving step of a game: the last answer, 300 steps, the close', () => {
-    // Support ready, the other two solved long ago; the figure beside the colleague of Support.
+    // HR ready, the other three solved long ago; the figure beside the colleague of HR.
     let state: GameState = {
       ...start,
       tick: 1000,
-      player: { ...start.player, x: 104, y: 144 },
+      player: { ...start.player, x: 104, y: 192 },
       traces: start.traces.map((trace) => ({ ...trace, found: 10 })),
       solved: [
         { region: 'sales', at: 100 },
-        { region: 'marketing', at: 400 },
+        { region: 'marketing', at: 300 },
+        { region: 'support', at: 400 },
       ],
-      overview: { current: 7, max: 7 },
+      overview: { current: 8, max: 8 },
     };
     state = run(state, TALK, NONE, TALK, NONE, TALK);
-    expect(state.solved[2]).toStrictEqual({ region: 'support', at: 1005 });
+    expect(state.solved[3]).toStrictEqual({ region: 'hr', at: 1005 });
     const opensAt: number[] = [];
     for (let step = 0; step < 310; step += 1) {
       const next = update(state, NONE, BOTH);

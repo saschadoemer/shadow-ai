@@ -20,7 +20,7 @@ import { grassMap } from './grass-map';
 const NONE = NO_INPUT;
 const TALK: GameInput = { ...NONE, talk: true };
 const box = { x: 0, y: 0, width: 16, height: 16 };
-/** Two traces of Sales, then two of Marketing, then two of Support (0037). */
+/** Two traces of Sales, then two of Marketing, two of Support (0037) and two of HR (0040). */
 const PLACES: readonly Trace[] = [
   { region: 'sales', box },
   { region: 'sales', box },
@@ -28,6 +28,8 @@ const PLACES: readonly Trace[] = [
   { region: 'marketing', box },
   { region: 'support', box },
   { region: 'support', box },
+  { region: 'hr', box },
+  { region: 'hr', box },
 ];
 /** The progress with the traces of the given indices found and the given regions solved. */
 const progress = (found: readonly number[], ...solved: readonly string[]): Progress => ({
@@ -44,6 +46,7 @@ const progress = (found: readonly number[], ...solved: readonly string[]): Progr
 const SALES = HINTS.sales as CaseHints;
 const MARKETING = HINTS.marketing as CaseHints;
 const SUPPORT = HINTS.support as CaseHints;
+const HR = HINTS.hr as CaseHints;
 
 describe('the hints (0033)', () => {
   it('are said by the intern, a member of the cast', () => {
@@ -68,6 +71,11 @@ describe('the hints (0033)', () => {
         start: textKey('talk.intern-support-start'),
         traces: textKey('talk.intern-support-traces'),
         source: textKey('talk.intern-support-source'),
+      },
+      hr: {
+        start: textKey('talk.intern-hr-start'),
+        traces: textKey('talk.intern-hr-traces'),
+        source: textKey('talk.intern-hr-source'),
       },
     });
     // No page sends the player for the lamp (0039): he has it.
@@ -114,19 +122,32 @@ describe('the hint of a moment (0033)', () => {
     expect(hintOf(progress([0, 1, 4, 5], 'sales'))).toBe(MARKETING.start);
   });
 
+  it('goes on to HR once Sales, Marketing and Support are solved, by the same rule (0040)', () => {
+    const three = ['sales', 'marketing', 'support'] as const;
+    expect(hintOf(progress([0, 1, 2, 3, 4, 5], ...three))).toBe(HR.start);
+    expect(hintOf(progress([0, 1, 2, 3, 4, 5, 7], ...three))).toBe(HR.traces);
+    expect(hintOf(progress([0, 1, 2, 3, 4, 5, 6, 7], ...three))).toBe(HR.source);
+    // Whatever is found in HR, the earlier cases come first.
+    expect(hintOf(progress([6, 7]))).toBe(SALES.start);
+    expect(hintOf(progress([0, 1, 2, 3, 6, 7], 'sales', 'marketing'))).toBe(SUPPORT.start);
+  });
+
   it('is the last page once every case is solved, in any order', () => {
-    const all = [0, 1, 2, 3, 4, 5];
-    expect(hintOf(progress(all, 'sales', 'marketing', 'support'))).toBe(HINT_DONE);
-    expect(hintOf(progress(all, 'support', 'marketing', 'sales'))).toBe(HINT_DONE);
-    expect(hintOf(progress(all, 'marketing', 'support', 'sales'))).toBe(HINT_DONE);
+    const all = [0, 1, 2, 3, 4, 5, 6, 7];
+    expect(hintOf(progress(all, 'sales', 'marketing', 'support', 'hr'))).toBe(HINT_DONE);
+    expect(hintOf(progress(all, 'hr', 'support', 'marketing', 'sales'))).toBe(HINT_DONE);
+    expect(hintOf(progress(all, 'marketing', 'hr', 'support', 'sales'))).toBe(HINT_DONE);
+    // With the first three solved and HR not, the last page is not yet said.
+    expect(hintOf(progress(all, 'sales', 'marketing', 'support'))).toBe(HR.source);
   });
 
   it('asks the cases in the order of the table it is given: the game passes its own', () => {
     const turned: readonly Case[] = [...CASES].reverse();
-    expect(hintOf(progress([]), turned)).toBe(SUPPORT.start);
-    expect(hintOf(progress([0]), turned)).toBe(SUPPORT.start);
-    expect(hintOf(progress([], 'support'), turned)).toBe(MARKETING.start);
-    expect(hintOf(progress([], 'support', 'marketing'), turned)).toBe(SALES.start);
+    expect(hintOf(progress([]), turned)).toBe(HR.start);
+    expect(hintOf(progress([0]), turned)).toBe(HR.start);
+    expect(hintOf(progress([], 'hr'), turned)).toBe(SUPPORT.start);
+    expect(hintOf(progress([], 'hr', 'support'), turned)).toBe(MARKETING.start);
+    expect(hintOf(progress([], 'hr', 'support', 'marketing'), turned)).toBe(SALES.start);
   });
 
   it('points to the start of a region that has no trace on the map', () => {
