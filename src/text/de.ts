@@ -40,6 +40,13 @@ export const de = {
     'allem, was dort eingefügt wird – und geht,',
     'sobald klar ist, welche Daten wohin dürfen.',
   ].join('\n'),
+  'creature.mirage-name': 'Trugbild',
+  'creature.mirage-text': [
+    'Ein Bild, das eine Maschine erzeugt hat und das',
+    'keiner geprüft hat. Es bewegt sich nur, solange',
+    'niemand hinsieht – und geht, sobald jemand',
+    'draufschaut, bevor es das Haus verlässt.',
+  ].join('\n'),
   'talk.officer-rules-1': [
     'Du siehst den Schatten also auch.',
     'Er bleibt überall dort zurück, wo Daten das',
