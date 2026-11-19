@@ -2117,5 +2117,6 @@ text where the diff means it; do not change the words without a reason.
   draft 0039 as it is. Commit — `Mark 0037 implemented`.
 - [ ] **Step 3:** push the branch and open the pull request against `main`, titled
   `Feature 0037: the case of Support`, with the walk's result and feel notes in its
-  description. Say in one line that the branch also carries the draft of 0039, which is not
-  approved and of which nothing is built. CI must be green. The author merges.
+  description. Say in one line that the branch also carries the spec of 0039, approved on
+  2026-11-19, with the sentence of `world.md` §3 and the two lines of the spec of 0038 it
+  changes; nothing of 0039 is built here. CI must be green. The author merges.

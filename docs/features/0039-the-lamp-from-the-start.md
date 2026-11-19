@@ -1,6 +1,6 @@
 # 0039 — The lamp from the start
 
-**Status:** draft
+**Status:** approved 2026-11-19
 **Milestone:** M6
 **Drafted:** 2026-11-19
 
@@ -36,9 +36,8 @@ kind (`vision.md` §2) · sound.
 ## Behaviour
 
 Changes what feature 0026 built, and what `world.md` §3 says of the data protection officer:
-she explains the lamp and no longer gives it. With the approval, and before any code, that
-sentence of `world.md` §3 is changed, and 0038 is built on this feature: its walk then begins
-without fetching the lamp.
+she explains the lamp and no longer gives it. With the approval that sentence of `world.md` §3
+was changed, and 0038 is built on this feature: its walk begins without fetching the lamp.
 
 ### The lamp
 
@@ -166,7 +165,7 @@ is not loaded yet. Arrow keys or WASD walk, `Space` holds the lamp, `E` or `Ente
 
 ## Open questions
 
-Five, each with the answer the draft is written for:
+None. Five were settled on 2026-11-19, each as drafted:
 
 - **Where the lamp comes from.** Nowhere: the player has it. No page of the call and no
   figure says so. The other way is one more sentence on the third page of the call.
@@ -176,5 +175,5 @@ Five, each with the answer the draft is written for:
   the lamp is held once. It is the only place that names the key besides the help.
 - **The field.** `LampState.owned` is taken out of the state, with the rules that asked for
   it, and not kept as a field that is always `true`.
-- **The order.** 0037 first, because its plan is being written, then this feature, then
-  0038. The walk of 0038 then begins without fetching the lamp.
+- **The order.** 0037 first, then this feature, then 0038. The walk of 0038 begins without
+  fetching the lamp.
