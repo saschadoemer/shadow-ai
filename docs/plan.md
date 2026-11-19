@@ -32,7 +32,8 @@ specification.
 Audio arrives after M5 and before M8. A silent booth is normal; a silent distributed game is
 not. A gamepad is deferred (§5). The Dockerfile and CI exist from M2. From feature 0030 on, every
 merge to `main` is deployed to Cloud Run (`docs/spec/ops.md` §5): until M8 that address is a
-preview of an unfinished game and is not announced; distribution stays with M8.
+preview of an unfinished game. It is announced as a preview from 2026-11-19, in the README and
+on the graphic in `docs/promo/`; distribution stays with M8.
 
 ## 3. Content budget
 
