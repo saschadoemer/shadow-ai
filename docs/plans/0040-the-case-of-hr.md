@@ -3313,7 +3313,7 @@ prototype. It presses keys and reads `window.shadowAi.state`; it never writes a 
 begins with the spec's precondition, reached by play: the card, the call and the case of
 Marketing. `tests/walk/bot.ts` is already on the branch.
 
-- [ ] **Step 1: The script.**
+- [x] **Step 1: The script.**
 
 Create `tests/walk/0040-the-case-of-hr.walk.ts`:
 
@@ -3534,14 +3534,14 @@ test('0040 — the case of HR: the acceptance plan, steps 1 to 22', async ({ pag
   `npx biome check --write tests/walk`, then `npm run check`. Commit —
   `Write the walk of 0040`.
 
-- [ ] **Step 2: Play.** The walk starts its own dev server on port 5174; when
+- [x] **Step 2: Play.** The walk starts its own dev server on port 5174; when
   `lsof -nP -iTCP:5174 -sTCP:LISTEN` shows a server that is not yours, set `WALK_PORT` to a
   free port instead. Run `npm run walk -- 0040`. Expected: `1 passed`, after about two
   minutes. The report names steps 19 and 20 as skipped: the spec lets a walk skip them
   while Sales and Support are not solved, and the script solves Marketing only. The second
   page of the policy is held by the unit tests of Task 5.
 
-- [ ] **Step 3: Look.** Open every picture under `walk-results/0040/` and hold it against
+- [x] **Step 3: Look.** Open every picture under `walk-results/0040/` and hold it against
   its expected step of the spec:
 
   | Picture | What it must show |
@@ -3559,19 +3559,19 @@ test('0040 — the case of HR: the acceptance plan, steps 1 to 22', async ({ pag
 
   A picture that does not show what its step says is a failed step.
 
-- [ ] **Step 4:** a failed step ends the walk: fix on the branch — or ask, when the fix needs
+- [x] **Step 4:** a failed step ends the walk: fix on the branch — or ask, when the fix needs
   a decision — rerun Task 7, and play again from the start. Never weaken an expectation of
   the script to make it pass. When the script itself is wrong about the spec, say so to the
   author before you change it.
 
-- [ ] **Step 5: The feel questions are the author's.** Start the game for them —
+- [x] **Step 5: The feel questions are the author's.** Start the game for them —
   `npm run dev`, or on another port when 5173 is taken by a server that is not yours — and
   tell them in one message: the walk passed, steps 1 to 22 with 19 and 20 skipped as the
   spec allows; the URL of the running game; the folder of the pictures, and send them the
   pictures if you can. Then ask the five feel questions of the spec, one per message, and
   record each answer as given. Never answer one yourself.
 
-- [ ] **Step 6:** write `**Result:** passed YYYY-MM-DD, steps 1–22, played by the agent;
+- [x] **Step 6:** write `**Result:** passed YYYY-MM-DD, steps 1–22, played by the agent;
   steps 19 and 20 skipped as the plan allows`, followed by the feel notes, into the spec and
   commit it — `Record the walk of 0040`. A feel note that wants something else — the
   creature of HR, more traces, other words — becomes a new draft, not a change on this

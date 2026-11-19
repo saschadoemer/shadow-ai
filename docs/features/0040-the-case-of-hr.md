@@ -278,7 +278,11 @@ With the case of Marketing the walk takes about fifteen minutes.
 - The line about the lamp: does it say enough about what was won?
 - A fourth case by the same rules: still a pleasure, or does HR need its creature first?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–22, played by the agent; steps 19 and 20 skipped as the
+plan allows. Feel, answered by the author: three traces instead of five are a relief; the
+answer sounds like somebody with two hundred applications and a Friday; the block of the
+policy is something a team would accept; the line about the lamp says enough about what was
+won; a fourth case by the same rules is still a pleasure.
 
 ## Open questions
 
