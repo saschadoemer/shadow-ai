@@ -183,13 +183,15 @@ test('without the lamp a held Space turns no light on and does not hold the figu
   await page.keyboard.up('Space');
 });
 
-test('the floor starts with three snippets and nothing captured', async ({ page }) => {
+test('the floor starts with three snippets and three mirages, and nothing captured', async ({
+  page,
+}) => {
   await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.creatures.length), {
-      message: 'window.shadowAi.state.creatures holds the three snippets of the floor',
+      message: 'window.shadowAi.state.creatures holds the six creatures of the floor',
     })
-    .toBe(3);
+    .toBe(6);
   const state = await page.evaluate(() => window.shadowAi?.state);
   expect(state?.creatures[0]).toStrictEqual({
     species: 'snippet',
@@ -198,7 +200,15 @@ test('the floor starts with three snippets and nothing captured', async ({ page 
     light: 0,
     home: { x: 1224, y: 622 },
   });
-  expect(state?.captured).toStrictEqual({ snippet: 0 });
+  expect(state?.creatures.map((creature) => creature.species)).toStrictEqual([
+    'snippet',
+    'snippet',
+    'snippet',
+    'mirage',
+    'mirage',
+    'mirage',
+  ]);
+  expect(state?.captured).toStrictEqual({ snippet: 0, mirage: 0 });
 });
 
 test('the floor starts with its 22 movers and draws the person of the reception', async ({

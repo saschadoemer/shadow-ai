@@ -175,6 +175,18 @@ export const SNIPPETS: readonly Point[] = [
   { x: 1576, y: 718 },
 ];
 
+/**
+ * The mirages (0032), feet in pixels: the middles of the tiles (10, 67), (38, 65) and (22, 75)
+ * of Marketing — two between the rows of desk islands, one in the lower part of the room.
+ * They are written at the end of the file, so that no object of an earlier feature changes
+ * its id.
+ */
+export const MIRAGES: readonly Point[] = [
+  { x: 168, y: 1080 },
+  { x: 616, y: 1048 },
+  { x: 360, y: 1208 },
+];
+
 /** Where the figure wakes (0009), feet in pixels: the middle of tile (18, 31), in the data protection officer's office. */
 export const WAKE: Point = { x: 296, y: 504 };
 
@@ -1209,6 +1221,7 @@ export function floorJson(): MapJson {
   const firstRest = firstArea + REGION_AREAS.length;
   const firstLaterTrace = firstRest + RESTS.length;
   const laterTraces = TRACES.slice(FIRST_TRACES);
+  const firstMirage = firstLaterTrace + laterTraces.length;
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1246,6 +1259,7 @@ export function floorJson(): MapJson {
           ...laterTraces.map((trace, i) =>
             rectObject(firstLaterTrace + i, `trace:${trace.region}`, traceBox(trace.cell)),
           ),
+          ...MIRAGES.map((feet, i) => pointObject(firstMirage + i, 'mirage', feet)),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1255,7 +1269,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstLaterTrace + laterTraces.length,
+    nextobjectid: firstMirage + MIRAGES.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',
