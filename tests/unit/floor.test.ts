@@ -1488,14 +1488,14 @@ describe('the cleared region on the floor (0025)', () => {
   it('leaves one creature when nothing was captured: the one whose home is (1224, 622)', () => {
     const solved = solve(ready);
     expect(solved.creatures.map((creature) => creature.home)).toStrictEqual([{ x: 1224, y: 622 }]);
-    expect(solved.captured).toStrictEqual({ snippet: 0 });
+    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0 });
   });
 
   it('removes none when both snippets of Sales were captured before', () => {
     const corridor = start.creatures.slice(0, 1);
-    const solved = solve({ ...ready, creatures: corridor, captured: { snippet: 2 } });
+    const solved = solve({ ...ready, creatures: corridor, captured: { snippet: 2, mirage: 0 } });
     expect(solved.creatures).toStrictEqual(corridor);
-    expect(solved.captured).toStrictEqual({ snippet: 2 });
+    expect(solved.captured).toStrictEqual({ snippet: 2, mirage: 0 });
   });
 
   it('removes the shadow wall of Sales if it still stands, and no other', () => {

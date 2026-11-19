@@ -299,13 +299,14 @@ describe('a game in which the help is never opened (0021)', () => {
     state.camera,
     // The lamp as it was recorded: without the two fields of 0026.
     { on: state.lamp.on, strength: state.lamp.strength },
-    state.creatures,
+    // The creatures and the count as they were recorded: the snippets, before 0032.
+    state.creatures.filter((creature) => creature.species === 'snippet'),
     state.movers,
     state.shadowWalls,
     state.figures,
     state.dialogue,
     state.journal,
-    state.captured,
+    { snippet: state.captured.snippet },
     state.overview,
     state.dark,
   ];

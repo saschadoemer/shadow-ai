@@ -12,7 +12,7 @@ import {
 } from '../../src/engine/tiled';
 import { ENTRY_TEXT, entriesOf, openJournal, stepJournal, TAB_TEXT } from '../../src/game/journal';
 import { type GameInput, NO_INPUT, pressed } from '../../src/game/player';
-import { type GameState, JOURNAL_TABS } from '../../src/game/state';
+import { type GameState, JOURNAL_TABS, SPECIES } from '../../src/game/state';
 import { createInitialState, update } from '../../src/game/update';
 import { textKey } from '../../src/text/text';
 import { grassMap } from './grass-map';
@@ -88,15 +88,29 @@ describe("the journal's data (0020)", () => {
   });
 
   it('gives the snippet its name and its text', () => {
-    expect(ENTRY_TEXT).toStrictEqual({
-      snippet: { name: textKey('creature.snippet-name'), text: textKey('creature.snippet-text') },
+    expect(ENTRY_TEXT.snippet).toStrictEqual({
+      name: textKey('creature.snippet-name'),
+      text: textKey('creature.snippet-text'),
     });
   });
 
+  it('gives the mirage its name and its text, and has an entry for every species (0032)', () => {
+    expect(ENTRY_TEXT.mirage).toStrictEqual({
+      name: textKey('creature.mirage-name'),
+      text: textKey('creature.mirage-text'),
+    });
+    expect(Object.keys(ENTRY_TEXT)).toStrictEqual([...SPECIES]);
+  });
+
+  it('lists the captured species in the order of the species, not of the captures (0032)', () => {
+    expect(entriesOf({ snippet: 0, mirage: 1 })).toStrictEqual(['mirage']);
+    expect(entriesOf({ snippet: 2, mirage: 1 })).toStrictEqual(['snippet', 'mirage']);
+  });
+
   it('lists a species as soon as one of it is captured', () => {
-    expect(entriesOf({ snippet: 0 })).toStrictEqual([]);
-    expect(entriesOf({ snippet: 1 })).toStrictEqual(['snippet']);
-    expect(entriesOf({ snippet: 3 })).toStrictEqual(['snippet']);
+    expect(entriesOf({ snippet: 0, mirage: 0 })).toStrictEqual([]);
+    expect(entriesOf({ snippet: 1, mirage: 0 })).toStrictEqual(['snippet']);
+    expect(entriesOf({ snippet: 3, mirage: 0 })).toStrictEqual(['snippet']);
   });
 });
 
@@ -327,12 +341,13 @@ describe('a game in which the journal is never opened (0020)', () => {
     state.camera,
     // The lamp as it was recorded: without the two fields of 0026.
     { on: state.lamp.on, strength: state.lamp.strength },
-    state.creatures,
+    // The creatures and the count as they were recorded: the snippets, before 0032.
+    state.creatures.filter((creature) => creature.species === 'snippet'),
     state.movers,
     state.shadowWalls,
     state.figures,
     state.dialogue,
-    state.captured,
+    { snippet: state.captured.snippet },
     state.overview,
     state.dark,
   ];

@@ -48,8 +48,11 @@ export interface LampState {
   readonly used: boolean;
 }
 
-/** The creature species (world.md §4), in journal order. 0008 brings the first. */
-export const SPECIES = ['snippet'] as const;
+/**
+ * The creature species (world.md §4), in journal order. 0008 brings the first, 0032 the
+ * second.
+ */
+export const SPECIES = ['snippet', 'mirage'] as const;
 export type Species = (typeof SPECIES)[number];
 
 /** A creature still in the world (0008). */

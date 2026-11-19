@@ -2,7 +2,7 @@ import { moveBox, sightBlocked } from '../engine/collision';
 import { STEPS_PER_SECOND } from '../engine/loop';
 import { type NamedPoint, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { isFigurePoint } from './cast';
-import { inCone, lampCone, SPREAD } from './lamp';
+import { DIRECTIONS, inCone, lampCone, SPREAD } from './lamp';
 import { isRoutePoint } from './mover';
 import { WAKE_POINT } from './overview';
 import { BOX_HEIGHT, BOX_WIDTH } from './player';
@@ -17,8 +17,9 @@ import {
 /**
  * The creatures (gameplay.md §2 and §3, feature 0008). A small creature rests until the figure
  * is near, comes straight toward it, freezes while the lamp's light is on it and is captured
- * when the light has been held for CAPTURE_STEPS steps without a break. Pure data and pure
- * functions: one creature, one step.
+ * when the light has been held for CAPTURE_STEPS steps without a break. Each species has its
+ * habits (0032): how near the figure must be, how fast it comes, and whether it moves only
+ * while nobody looks at it. Pure data and pure functions: one creature, one step.
  */
 
 /** Tune: four tiles. At this distance and beyond a creature rests. */
@@ -31,8 +32,34 @@ export const CREATURE_SPEED_PX_PER_SECOND = 40;
 export const CAPTURE_STEPS = 60;
 /** A creature's sprite is one tile, 16x16; its feet are the bottom centre. */
 export const CREATURE_SIZE = 16;
+/** Tune: six tiles. At this distance and beyond a mirage rests (0032). */
+export const MIRAGE_NOTICE_RADIUS = 96;
+/** Tune: three quarters of the figure's speed, 1 px per step (0032). */
+export const MIRAGE_SPEED_PX_PER_SECOND = 60;
 
-const STEP_DISTANCE = CREATURE_SPEED_PX_PER_SECOND / STEPS_PER_SECOND;
+/** What a species does while the lamp is not on it. */
+export interface Habits {
+  /** At this distance from the figure's feet and beyond it rests. */
+  readonly noticeRadius: number;
+  /** How far it moves in one step, in pixels. */
+  readonly stepDistance: number;
+  /** Whether it moves only while it is not looked at. */
+  readonly shy: boolean;
+}
+
+/** A literal over the species, so a new species does not compile until it has its habits. */
+export const HABITS: Readonly<Record<Species, Habits>> = {
+  snippet: {
+    noticeRadius: NOTICE_RADIUS,
+    stepDistance: CREATURE_SPEED_PX_PER_SECOND / STEPS_PER_SECOND,
+    shy: false,
+  },
+  mirage: {
+    noticeRadius: MIRAGE_NOTICE_RADIUS,
+    stepDistance: MIRAGE_SPEED_PX_PER_SECOND / STEPS_PER_SECOND,
+    shy: true,
+  },
+};
 
 /** The centre of the sprite: the point the lamp is tested against. */
 export function bodyPoint(creature: CreatureState): Point {
@@ -67,23 +94,47 @@ export function isLit(
   );
 }
 
+/**
+ * Looked at (0032): the creature is in front of the figure and in its sight. With C the centre
+ * of the figure's collision box and B the creature's body point, the vector from C to B has a
+ * component above 0 along the figure's facing, and no opaque box lies on the line from C to B.
+ * A creature exactly beside the figure is not looked at. `map` is the map with the shadow
+ * walls standing, as for the lamp's light.
+ */
+export function isWatched(creature: CreatureState, player: PlayerState, map: TileMap): boolean {
+  const eye = { x: player.x, y: player.y - BOX_HEIGHT / 2 };
+  const body = bodyPoint(creature);
+  const direction = DIRECTIONS[player.facing];
+  const ahead = (body.x - eye.x) * direction.x + (body.y - eye.y) * direction.y;
+  return (
+    ahead > 0 &&
+    !sightBlocked(eye, body, { width: map.width, height: map.height, solids: map.opaque })
+  );
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
 /**
- * Not lit: the count starts again, and the creature moves toward the figure's feet when they are
- * closer than NOTICE_RADIUS and farther than TOUCH_DISTANCE — by 2/3 px, or by what is left to
- * TOUCH_DISTANCE. The figure's box against the solid boxes, X then Y, then the clamp to the map.
+ * Not lit: the count starts again. A shy creature that is looked at stands. Otherwise the
+ * creature moves toward the figure's feet when they are closer than its notice radius and
+ * farther than TOUCH_DISTANCE — by its step distance, or by what is left to TOUCH_DISTANCE.
+ * The figure's box against the solid boxes, X then Y, then the clamp to the map.
  */
 function approach(creature: CreatureState, player: PlayerState, map: TileMap): CreatureState {
+  const habits = HABITS[creature.species];
   const dx = player.x - creature.x;
   const dy = player.y - creature.y;
   const distance = Math.hypot(dx, dy);
-  if (distance >= NOTICE_RADIUS || distance <= TOUCH_DISTANCE) {
+  if (
+    distance >= habits.noticeRadius ||
+    distance <= TOUCH_DISTANCE ||
+    (habits.shy && isWatched(creature, player, map))
+  ) {
     return { ...creature, light: 0 };
   }
-  const reach = Math.min(STEP_DISTANCE, distance - TOUCH_DISTANCE);
+  const reach = Math.min(habits.stepDistance, distance - TOUCH_DISTANCE);
   const box = moveBox(
     {
       x: creature.x - BOX_WIDTH / 2,
@@ -173,5 +224,5 @@ export function creaturesFrom(points: readonly NamedPoint[]): CreatureState[] {
 
 /** Nothing captured yet. A literal, so a new species does not compile until it is listed. */
 export function noCaptures(): Captured {
-  return { snippet: 0 };
+  return { snippet: 0, mirage: 0 };
 }

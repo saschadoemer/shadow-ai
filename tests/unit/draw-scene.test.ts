@@ -104,7 +104,11 @@ const CONTENT: SceneContent = {
   playerSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 24 },
   lampSheet: { image: {} as ImageBitmap, frameWidth: 48, frameHeight: 48 },
   lampWideSheet: { image: {} as ImageBitmap, frameWidth: 72, frameHeight: 72 },
-  creatureSheets: { snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 } },
+  creatureSheets: {
+    snippet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
+    // Its own image, so that toStrictEqual tells the two sheets apart.
+    mirage: { image: { mirage: true } as unknown as ImageBitmap, frameWidth: 16, frameHeight: 16 },
+  },
   overviewSheet: { image: {} as ImageBitmap, frameWidth: 8, frameHeight: 8 },
   shadowWallSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
   traceSheet: { image: {} as ImageBitmap, frameWidth: 16, frameHeight: 16 },
@@ -207,7 +211,7 @@ const state = (
   journal: null,
   help: false,
   held: NO_INPUT,
-  captured: { snippet: 0 },
+  captured: { snippet: 0, mirage: 0 },
   // No hearts: the call lists of the earlier features stay as they were (0009).
   overview: { current: 0, max: 0 },
   dark: 0,
