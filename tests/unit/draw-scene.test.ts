@@ -2019,3 +2019,35 @@ describe('the intern in the scene (0033)', () => {
     );
   });
 });
+
+describe('the close in the scene (0034)', () => {
+  /** The close open on the given page. */
+  const closing = (page: number): GameState => ({
+    ...state({ x: 20, y: 30 }),
+    dialogue: { speaker: 'story', index: 1, page },
+  });
+  const firstGlyph = (scene: GameState, settings: SceneSettings = GERMAN): string | undefined => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene, CONTENT, settings);
+    const sprites = renderer.calls.filter((call) => call.startsWith('drawSprite'));
+    return sprites
+      .filter((_call, n) => renderer.sheets[n] === CONTENT.fontSheet)
+      .find((call) => call.endsWith(' at 12,138'));
+  };
+
+  it('draws its three pages in the box, as it draws the call: `A`, `D` and `S`', () => {
+    expect(firstGlyph(closing(0))).toBe('drawSprite 33 at 12,138');
+    expect(firstGlyph(closing(1))).toBe('drawSprite 36 at 12,138');
+    expect(firstGlyph(closing(2))).toBe('drawSprite 51 at 12,138');
+  });
+
+  it('draws them in English with the language `en`: `E`, `T` and `T`', () => {
+    expect(firstGlyph(closing(0), ENGLISH)).toBe('drawSprite 37 at 12,138');
+    expect(firstGlyph(closing(1), ENGLISH)).toBe('drawSprite 52 at 12,138');
+    expect(firstGlyph(closing(2), ENGLISH)).toBe('drawSprite 52 at 12,138');
+  });
+
+  it('draws no page beyond the third', () => {
+    expect(firstGlyph(closing(3))).toBeUndefined();
+  });
+});
