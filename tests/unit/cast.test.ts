@@ -24,7 +24,12 @@ const SECOND = textKey('talk.officer-rules-2');
 
 describe('the cast (0017)', () => {
   it('has the officer with her two pages', () => {
-    expect(CAST).toStrictEqual([{ id: 'officer', pages: [FIRST, SECOND] }]);
+    expect(CAST[0]).toStrictEqual({ id: 'officer', pages: [FIRST, SECOND] });
+  });
+
+  it('has the intern after her, with the one page he has before anything is known (0033)', () => {
+    expect(CAST.map((member) => member.id)).toStrictEqual(['officer', 'intern']);
+    expect(CAST[1]?.pages).toStrictEqual([textKey('talk.intern-lamp')]);
   });
 
   it('gives every member at least one page', () => {

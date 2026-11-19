@@ -1930,3 +1930,92 @@ describe('the mirage in the scene (0032)', () => {
     expect(creatures).toStrictEqual([open.creatureSheets.snippet, open.creatureSheets.mirage]);
   });
 });
+
+describe('the intern in the scene (0033)', () => {
+  /** The intern at (40, 20) on the 3x2 map, with a sheet of his own, and one trace of Sales. */
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...MAP,
+      points: [{ name: 'figure:intern', x: 40, y: 20 }],
+      rects: [{ name: 'trace:sales', x: 0, y: 0, width: 16, height: 16 }],
+    },
+    figureSheets: {
+      ...CONTENT.figureSheets,
+      intern: {
+        image: { intern: true } as unknown as ImageBitmap,
+        frameWidth: 16,
+        frameHeight: 24,
+      },
+    },
+  };
+  /** The figure beside him; his talk open or not, a trace found or not. */
+  const beside = (fields: Partial<GameState> = {}): GameState => ({
+    ...state({ x: 20, y: 30 }),
+    figures: [{ figure: 0, facing: 'left' }],
+    traces: [{ trace: 0, light: 0, found: null }],
+    ...fields,
+  });
+  const talking: Partial<GameState> = { dialogue: { speaker: 'figure', index: 0, page: 0 } };
+  /** The sprites drawn from a sheet, in the order they were drawn. */
+  const spritesOn = (
+    renderer: ReturnType<typeof recordingRenderer>,
+    sheet: SpriteSheet,
+  ): string[] =>
+    renderer.calls
+      .filter((call) => call.startsWith('drawSprite'))
+      .filter((_call, n) => renderer.sheets[n] === sheet);
+  const firstGlyph = (scene: GameState, settings: SceneSettings = GERMAN): string | undefined => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, scene, content, settings);
+    return spritesOn(renderer, content.fontSheet).find((call) => call.endsWith(' at 12,138'));
+  };
+
+  it('draws him from his own sheet, turned as he stands', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, beside(), content);
+    expect(renderer.sheets).toContain(content.figureSheets.intern);
+    expect(renderer.sheets).not.toContain(content.figureSheets.officer);
+    expect(spritesOn(renderer, content.figureSheets.intern as SpriteSheet)).toStrictEqual([
+      'drawSprite 10 at 32,-4',
+    ]);
+  });
+
+  it('draws the hint of the moment in the box: the start of Sales, `V` or `S`', () => {
+    expect(firstGlyph(beside(talking))).toBe('drawSprite 54 at 12,138');
+    expect(firstGlyph(beside(talking), ENGLISH)).toBe('drawSprite 51 at 12,138');
+  });
+
+  it('draws the page of the lamp while the player has none: `D` or `O`', () => {
+    const without = beside({
+      ...talking,
+      lamp: { on: false, strength: 1, owned: false, used: false },
+    });
+    expect(firstGlyph(without)).toBe('drawSprite 36 at 12,138');
+    expect(firstGlyph(without, ENGLISH)).toBe('drawSprite 47 at 12,138');
+  });
+
+  it('draws the page that follows from the traces and the cases', () => {
+    const found = beside({ ...talking, traces: [{ trace: 0, light: 0, found: 5 }] });
+    // All traces of Sales found: `Du weißt doch …`, `D`.
+    expect(firstGlyph(found)).toBe('drawSprite 36 at 12,138');
+    // Sales solved: `Als Nächstes? …`, `A`.
+    expect(firstGlyph({ ...found, solved: [{ region: 'sales', at: 9 }] })).toBe(
+      'drawSprite 33 at 12,138',
+    );
+    // Both solved: `Mehr weiß ich …`, `M`.
+    const both = [
+      { region: 'sales', at: 9 },
+      { region: 'marketing', at: 19 },
+    ];
+    expect(firstGlyph({ ...found, solved: both })).toBe('drawSprite 45 at 12,138');
+  });
+
+  it('draws no box while nobody talks', () => {
+    const renderer = recordingRenderer();
+    drawScene(renderer, beside(), content);
+    expect(spritesOn(renderer, content.fontSheet).some((call) => call.endsWith(',138'))).toBe(
+      false,
+    );
+  });
+});

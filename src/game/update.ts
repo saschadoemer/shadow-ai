@@ -4,6 +4,7 @@ import { answeredCase, clearRegion, earn, progressOf, solve } from './cases';
 import { figuresFrom, figuresIn, figuresOf, isFirstMeeting } from './cast';
 import { creaturesFrom, noCaptures, stepCreatures } from './creature';
 import { openHelp, stepHelp } from './help';
+import { hintOf, withHint } from './hints';
 import { openJournal, stepJournal } from './journal';
 import { spreadOf } from './lamp';
 import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
@@ -165,8 +166,12 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   }
   const routes = routesOf(content.points);
   const progress = progressOf(state, content);
-  // Without the lamp the data protection officer says the first meeting (0026).
-  const figures = figuresIn(figuresOf(content.points), state.lamp.owned);
+  // Without the lamp the data protection officer says the first meeting (0026); the intern
+  // says the hint of this moment (0033).
+  const figures = withHint(
+    figuresIn(figuresOf(content.points), state.lamp.owned),
+    hintOf(state.lamp.owned, progress),
+  );
   const speakers = speakersOf(figures, state.movers, routes, undefined, progress);
   if (state.dialogue !== null) {
     const stepped = stepDialogue(state, state.dialogue, input, speakers);
