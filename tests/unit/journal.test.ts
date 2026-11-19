@@ -10,7 +10,16 @@ import {
   parseTileset,
   type TileMap,
 } from '../../src/engine/tiled';
-import { ENTRY_TEXT, entriesOf, openJournal, stepJournal, TAB_TEXT } from '../../src/game/journal';
+import {
+  ENTRIES_PER_PAGE,
+  ENTRY_TEXT,
+  entriesOf,
+  entriesOn,
+  entryPages,
+  openJournal,
+  stepJournal,
+  TAB_TEXT,
+} from '../../src/game/journal';
 import { type GameInput, NO_INPUT, pressed } from '../../src/game/player';
 import { type GameState, JOURNAL_TABS, SPECIES } from '../../src/game/state';
 import { createInitialState, update } from '../../src/game/update';
@@ -103,14 +112,14 @@ describe("the journal's data (0020)", () => {
   });
 
   it('lists the captured species in the order of the species, not of the captures (0032)', () => {
-    expect(entriesOf({ snippet: 0, mirage: 1 })).toStrictEqual(['mirage']);
-    expect(entriesOf({ snippet: 2, mirage: 1 })).toStrictEqual(['snippet', 'mirage']);
+    expect(entriesOf({ snippet: 0, mirage: 1, lurker: 0 })).toStrictEqual(['mirage']);
+    expect(entriesOf({ snippet: 2, mirage: 1, lurker: 0 })).toStrictEqual(['snippet', 'mirage']);
   });
 
   it('lists a species as soon as one of it is captured', () => {
-    expect(entriesOf({ snippet: 0, mirage: 0 })).toStrictEqual([]);
-    expect(entriesOf({ snippet: 1, mirage: 0 })).toStrictEqual(['snippet']);
-    expect(entriesOf({ snippet: 3, mirage: 0 })).toStrictEqual(['snippet']);
+    expect(entriesOf({ snippet: 0, mirage: 0, lurker: 0 })).toStrictEqual([]);
+    expect(entriesOf({ snippet: 1, mirage: 0, lurker: 0 })).toStrictEqual(['snippet']);
+    expect(entriesOf({ snippet: 3, mirage: 0, lurker: 0 })).toStrictEqual(['snippet']);
   });
 });
 
@@ -122,7 +131,7 @@ describe('opening the journal (0020)', () => {
       ...start,
       tick: 1,
       held: JOURNAL,
-      journal: { tab: 'creatures' },
+      journal: { tab: 'creatures', page: 0 },
     });
   });
 
@@ -138,14 +147,14 @@ describe('opening the journal (0020)', () => {
       ...pushed,
       tick: 1,
       held: input,
-      journal: { tab: 'creatures' },
+      journal: { tab: 'creatures', page: 0 },
     });
   });
 
   it('opens instead of a dialogue when both keys are pressed next to a figure', () => {
     const map = mapAt(184, 96, [{ name: 'figure:officer', x: 160, y: 96 }]);
     const next = update(createInitialState(map), { ...JOURNAL, talk: true }, map);
-    expect(next.journal).toStrictEqual({ tab: 'creatures' });
+    expect(next.journal).toStrictEqual({ tab: 'creatures', page: 0 });
     expect(next.dialogue).toBeNull();
   });
 
@@ -222,8 +231,13 @@ describe('the tabs of the journal (0020)', () => {
   });
 
   it('is what stepJournal returns: the tick, the input and the tab, nothing else', () => {
-    const stepped = stepJournal(opened, { tab: 'creatures' }, RIGHT);
-    expect(stepped).toStrictEqual({ ...opened, tick: 2, held: RIGHT, journal: { tab: 'cases' } });
+    const stepped = stepJournal(opened, { tab: 'creatures', page: 0 }, RIGHT);
+    expect(stepped).toStrictEqual({
+      ...opened,
+      tick: 2,
+      held: RIGHT,
+      journal: { tab: 'cases', page: 0 },
+    });
   });
 });
 
@@ -243,13 +257,16 @@ describe('closing the journal (0020)', () => {
   });
 
   it('stays open while the key that opened it is held', () => {
-    expect(run(OPEN, opened, JOURNAL, JOURNAL).journal).toStrictEqual({ tab: 'creatures' });
+    expect(run(OPEN, opened, JOURNAL, JOURNAL).journal).toStrictEqual({
+      tab: 'creatures',
+      page: 0,
+    });
   });
 
   it('opens on the creatures again, whatever tab it was closed on', () => {
     const closed = run(OPEN, opened, NONE, RIGHT, NONE, JOURNAL);
     expect(closed.journal).toBeNull();
-    expect(run(OPEN, closed, NONE, JOURNAL).journal).toStrictEqual({ tab: 'creatures' });
+    expect(run(OPEN, closed, NONE, JOURNAL).journal).toStrictEqual({ tab: 'creatures', page: 0 });
   });
 
   it('walks the figure at once with a direction key held through the closing', () => {
@@ -282,7 +299,12 @@ describe('the world while the journal is open (0020)', () => {
   it('is not stepped in the step that opens it', () => {
     expect(start.movers[0]?.x).toBeGreaterThan(64);
     const open = update(start, JOURNAL, map);
-    expect(open).toStrictEqual({ ...start, tick: 4, held: JOURNAL, journal: { tab: 'creatures' } });
+    expect(open).toStrictEqual({
+      ...start,
+      tick: 4,
+      held: JOURNAL,
+      journal: { tab: 'creatures', page: 0 },
+    });
   });
 
   it('stands still for 600 steps with every key but journal, left and right held', () => {
@@ -309,7 +331,7 @@ describe('the journal in a saved state (INV-1, 0020)', () => {
     const start = createInitialState(OPEN);
     expect(JSON.parse(JSON.stringify(start))).toStrictEqual(start);
     const cases = run(OPEN, opened, NONE, RIGHT);
-    expect(cases.journal).toStrictEqual({ tab: 'cases' });
+    expect(cases.journal).toStrictEqual({ tab: 'cases', page: 0 });
     expect(JSON.parse(JSON.stringify(cases))).toStrictEqual(cases);
   });
 });
@@ -367,5 +389,107 @@ describe('a game in which the journal is never opened (0020)', () => {
     }
     expect(talked).toBe(true);
     expect(hash.digest('hex')).toBe(RECORDED);
+  });
+});
+
+describe('the pages of the creatures tab (0038)', () => {
+  const UP: GameInput = { ...NONE, up: true };
+  const DOWN: GameInput = { ...NONE, down: true };
+  const ALL = { snippet: 1, mirage: 1, lurker: 1 };
+  /** The journal open on the creatures, with one of every species captured. */
+  const full: GameState = { ...opened, captured: ALL };
+
+  it('has pages of two entries: one page up to two species, two pages with three', () => {
+    expect(ENTRIES_PER_PAGE).toBe(2);
+    expect(entryPages({ snippet: 0, mirage: 0, lurker: 0 })).toBe(1);
+    expect(entryPages({ snippet: 0, mirage: 0, lurker: 4 })).toBe(1);
+    expect(entryPages({ snippet: 1, mirage: 1, lurker: 0 })).toBe(1);
+    expect(entryPages(ALL)).toBe(2);
+    expect(entriesOn(ALL, 0)).toStrictEqual(['snippet', 'mirage']);
+    expect(entriesOn(ALL, 1)).toStrictEqual(['lurker']);
+    expect(entriesOn(ALL, 2)).toStrictEqual([]);
+    expect(entriesOn({ snippet: 1, mirage: 0, lurker: 1 }, 0)).toStrictEqual(['snippet', 'lurker']);
+  });
+
+  it('opens on page 0', () => {
+    expect(opened.journal).toStrictEqual({ tab: 'creatures', page: 0 });
+    expect(openJournal(createInitialState(OPEN), JOURNAL)?.journal).toStrictEqual({
+      tab: 'creatures',
+      page: 0,
+    });
+  });
+
+  it('turns to the next page with a press of down and back with a press of up', () => {
+    const second = run(OPEN, full, NONE, DOWN);
+    expect(second.journal).toStrictEqual({ tab: 'creatures', page: 1 });
+    const first = run(OPEN, second, NONE, UP);
+    expect(first.journal).toStrictEqual({ tab: 'creatures', page: 0 });
+    // Nothing else changes: the tick, the input, the page.
+    expect(second).toStrictEqual({
+      ...full,
+      tick: full.tick + 2,
+      held: DOWN,
+      journal: { tab: 'creatures', page: 1 },
+    });
+  });
+
+  it('turns one page for a key held for 600 steps, and none past either end', () => {
+    let state = update(full, NONE, OPEN);
+    for (let step = 0; step < 600; step += 1) {
+      state = update(state, DOWN, OPEN);
+    }
+    expect(state.journal?.page).toBe(1);
+    // At the last page another press stays there; at the first, a press of up.
+    expect(run(OPEN, state, NONE, DOWN).journal?.page).toBe(1);
+    expect(run(OPEN, full, NONE, UP).journal?.page).toBe(0);
+  });
+
+  it('turns none when up and down are pressed in the same step', () => {
+    const both: GameInput = { ...NONE, up: true, down: true };
+    expect(run(OPEN, full, NONE, both).journal?.page).toBe(0);
+  });
+
+  it('stays on page 0 while there is one page, whatever is pressed', () => {
+    const two: GameState = { ...opened, captured: { snippet: 1, mirage: 1, lurker: 0 } };
+    expect(run(OPEN, two, NONE, DOWN).journal).toStrictEqual({ tab: 'creatures', page: 0 });
+    expect(run(OPEN, opened, NONE, DOWN, NONE, DOWN).journal?.page).toBe(0);
+  });
+
+  it('is page 0 after a turn of the tab and after the journal opens again', () => {
+    const second = run(OPEN, full, NONE, DOWN);
+    const cases = run(OPEN, second, NONE, RIGHT);
+    expect(cases.journal).toStrictEqual({ tab: 'cases', page: 0 });
+    expect(run(OPEN, cases, NONE, LEFT).journal).toStrictEqual({ tab: 'creatures', page: 0 });
+    const again = run(OPEN, second, NONE, JOURNAL, NONE, JOURNAL);
+    expect(again.journal).toStrictEqual({ tab: 'creatures', page: 0 });
+  });
+
+  it('keeps the page when left is pressed on the first tab: no other tab is opened', () => {
+    const second = run(OPEN, full, NONE, DOWN);
+    expect(run(OPEN, second, NONE, LEFT).journal).toStrictEqual({ tab: 'creatures', page: 1 });
+  });
+
+  it('does nothing with up and down on the cases tab and the policy tab', () => {
+    const cases = run(OPEN, full, NONE, RIGHT);
+    const policy = run(OPEN, cases, NONE, RIGHT);
+    for (const on of [cases, policy]) {
+      expect(run(OPEN, on, NONE, DOWN).journal).toStrictEqual(on.journal);
+      expect(run(OPEN, on, NONE, UP).journal).toStrictEqual(on.journal);
+    }
+  });
+
+  it('is what stepJournal returns: the tick, the input and the journal, nothing else', () => {
+    const waiting = update(full, NONE, OPEN);
+    expect(stepJournal(waiting, { tab: 'creatures', page: 0 }, DOWN)).toStrictEqual({
+      ...waiting,
+      tick: waiting.tick + 1,
+      held: DOWN,
+      journal: { tab: 'creatures', page: 1 },
+    });
+  });
+
+  it('survives a JSON round trip on the second page (INV-1)', () => {
+    const second = run(OPEN, full, NONE, DOWN);
+    expect(JSON.parse(JSON.stringify(second))).toStrictEqual(second);
   });
 });

@@ -37,6 +37,9 @@ export const NOTICE_REST: Readonly<Record<RestResult, TextKey>> = {
 /** Tune: two seconds from the press. */
 export const REST_NOTICE_STEPS = 120;
 
+/** The light is on an open pane (0038): shown while it is, like the line of a wall that holds. */
+export const NOTICE_PANE_OPEN: TextKey = textKey('notice.pane-open');
+
 /** The lamp's key (0026): shown from the step the lamp is handed over until it is held once. */
 export const NOTICE_LAMP: TextKey = textKey('notice.lamp');
 
@@ -65,7 +68,8 @@ function upgradeNotice(state: GameState): TextKey | null {
 /**
  * The notice a state shows, or null. A wall that is lit with a count of 0 is a wall the light
  * is on and cannot lift: a wall that gives way counts from 1 in its first step; that notice
- * comes first. Then, for CASE_NOTICE_STEPS steps from the solving step, that a case is solved
+ * comes first; then, while the light is on an open pane, that the light does not hold what
+ * reads along there (0038). Then, for CASE_NOTICE_STEPS steps from the solving step, that a case is solved
  * (0024), and for the UPGRADE_NOTICE_STEPS steps after them what the case earned, if it earned
  * an upgrade (0029). Then, for TRACE_NOTICE_STEPS steps from the last find, that a trace was
  * found (0022).
@@ -77,6 +81,10 @@ export function noticeOf(state: GameState): TextKey | null {
   const holds = state.shadowWalls.some((wall) => wall.lit && wall.light === 0);
   if (state.lamp.on && holds) {
     return NOTICE_SHADOW_TOO_DENSE;
+  }
+  // The light is on an open pane, and does not hold what sits in it (0038).
+  if (state.lamp.on && state.panes.some((pane) => pane.lit)) {
+    return NOTICE_PANE_OPEN;
   }
   const solved = state.solved.some((entry) => state.tick - entry.at < CASE_NOTICE_STEPS);
   if (solved) {

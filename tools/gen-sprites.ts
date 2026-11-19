@@ -11,6 +11,7 @@ import {
   WIDE_LAMP_SHEET_HEIGHT,
   WIDE_LAMP_SHEET_WIDTH,
 } from './placeholder-lamp.ts';
+import { LURKER_SHEET_HEIGHT, LURKER_SHEET_WIDTH, renderLurker } from './placeholder-lurker.ts';
 import { MIRAGE_SHEET_HEIGHT, MIRAGE_SHEET_WIDTH, renderMirage } from './placeholder-mirage.ts';
 import {
   OVERVIEW_SHEET_HEIGHT,
@@ -82,6 +83,13 @@ export function encodeSnippetPng(): Buffer {
 export function encodeMiragePng(): Buffer {
   const png = new PNG({ width: MIRAGE_SHEET_WIDTH, height: MIRAGE_SHEET_HEIGHT });
   png.data = Buffer.from(renderMirage());
+  return PNG.sync.write(png);
+}
+
+/** The lurker (0038): the third species, and its window. */
+export function encodeLurkerPng(): Buffer {
+  const png = new PNG({ width: LURKER_SHEET_WIDTH, height: LURKER_SHEET_HEIGHT });
+  png.data = Buffer.from(renderLurker());
   return PNG.sync.write(png);
 }
 
@@ -161,6 +169,7 @@ if (import.meta.main) {
   writeFileSync('public/sprites/lamp-wide.png', encodeLampWidePng());
   writeFileSync('public/sprites/snippet.png', encodeSnippetPng());
   writeFileSync('public/sprites/mirage.png', encodeMiragePng());
+  writeFileSync('public/sprites/lurker.png', encodeLurkerPng());
   writeFileSync('public/sprites/overview.png', encodeOverviewPng());
   for (const look of PERSON_SHIRTS.keys()) {
     writeFileSync(`public/sprites/person-${look + 1}.png`, encodePersonPng(look));

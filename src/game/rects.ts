@@ -5,7 +5,7 @@ import { type NamedRect, TILE_SIZE } from '../engine/tiled';
  * The kinds of rectangle a map may hold (architecture.md §6): what a rectangle is, is the
  * game's business, and its name says it. A shadow wall is `shadow:<region>` (0014), a trace
  * `trace:<region>` (0022), an area of a region `region:<id>` (0023), a rest `rest:<what>`
- * (0027). Pure.
+ * (0027), a pane `pane:<region>` (0038). Pure.
  */
 
 /** A rectangle whose name starts with this is a shadow wall; the rest of the name is its region. */
@@ -16,8 +16,16 @@ export const TRACE_PREFIX = 'trace:';
 export const REGION_PREFIX = 'region:';
 /** A rectangle whose name starts with this is a rest; the rest of the name is what it is (0027). */
 export const REST_PREFIX = 'rest:';
+/** A rectangle whose name starts with this is a pane; the rest of the name is its region (0038). */
+export const PANE_PREFIX = 'pane:';
 
-const PREFIXES: readonly string[] = [WALL_PREFIX, TRACE_PREFIX, REGION_PREFIX, REST_PREFIX];
+const PREFIXES: readonly string[] = [
+  WALL_PREFIX,
+  TRACE_PREFIX,
+  REGION_PREFIX,
+  REST_PREFIX,
+  PANE_PREFIX,
+];
 
 /** Exactly one cell: the corner on the grid, a tile wide and a tile high. */
 export function isCell(box: Box): boolean {

@@ -48,9 +48,9 @@ export interface LampState {
 
 /**
  * The creature species (world.md §4), in journal order. 0008 brings the first, 0032 the
- * second.
+ * second, 0038 the third.
  */
-export const SPECIES = ['snippet', 'mirage'] as const;
+export const SPECIES = ['snippet', 'mirage', 'lurker'] as const;
 export type Species = (typeof SPECIES)[number];
 
 /** A creature still in the world (0008). */
@@ -150,6 +150,14 @@ export interface Dialogue {
   readonly page: number;
 }
 
+/** A pane that is open (0038). A closed pane has left the list for good. */
+export interface PaneState {
+  /** Index among the panes of the map. */
+  readonly pane: number;
+  /** Whether the lamp's light was on it in the last step: the light does not hold it. */
+  readonly lit: boolean;
+}
+
 /** The tabs of the journal (gameplay.md §7), in their order on the screen (0020). */
 export const JOURNAL_TABS = ['creatures', 'cases', 'policy'] as const;
 export type JournalTab = (typeof JOURNAL_TABS)[number];
@@ -157,6 +165,8 @@ export type JournalTab = (typeof JOURNAL_TABS)[number];
 /** The open journal (0020). What its tabs show is derived from the rest of the state. */
 export interface JournalState {
   readonly tab: JournalTab;
+  /** The page of the creatures tab, from 0 (0038). 0 on the other tabs. */
+  readonly page: number;
 }
 
 /** How many creatures of each species were captured. */
@@ -198,6 +208,8 @@ export interface GameState {
   readonly traces: readonly TraceState[];
   /** The solved cases, in the order they were solved (0024). */
   readonly solved: readonly SolvedCase[];
+  /** The open panes, in the map's order (0038). */
+  readonly panes: readonly PaneState[];
   /** The last rest taken, or null (0027); the notice of a rest is derived from it. */
   readonly rested: Rested | null;
   /**

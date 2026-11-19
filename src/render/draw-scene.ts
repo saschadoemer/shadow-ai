@@ -9,6 +9,7 @@ import { FRAME_APEX, LAMP_HEIGHT, WIDE_CONE, WIDE_FRAME_APEX } from '../game/lam
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
 import { DARK_STEPS } from '../game/overview';
+import { panesOf } from '../game/pane';
 import { areasOf, shadowedAreas, shownVeil, veilOf } from '../game/region';
 import { LIFT_STEPS, wallsOf, withWalls } from '../game/shadow';
 import {
@@ -55,7 +56,10 @@ export interface SceneContent {
   readonly lampSheet: SpriteSheet;
   /** Four 72x72 frames, one per facing: the cone with the upgrade `wide-cone` (0029). */
   readonly lampWideSheet: SpriteSheet;
-  /** One sheet per species: three 16x16 frames — two free, one frozen (0008). */
+  /**
+   * One sheet per species: three 16x16 frames — two free, one frozen (0008). The lurker's has a
+   * fourth: the lurker in its window (0038).
+   */
   readonly creatureSheets: Readonly<Record<Species, SpriteSheet>>;
   /** Two 8x8 frames: a full heart, an empty heart (0009, 0012). */
   readonly overviewSheet: SpriteSheet;
@@ -118,6 +122,8 @@ export function lampFrameOrigin(
 /** A free creature changes its frame every 15 steps: four changes per second. */
 export const FLUTTER_STEPS = 15;
 export const FROZEN_FRAME = 2;
+/** The frame of the lurker's sheet that shows it in its pane (0038). */
+export const PANE_FRAME = 3;
 
 /**
  * Frozen in the light: frame 2, still. Looked at, for a species that moves only while nobody
@@ -449,6 +455,21 @@ export function drawScene(
       traceFrame(seen),
       trace.box.x - camera.x,
       trace.box.y - camera.y,
+    );
+  }
+  // An open pane shows the lurker that sits in it, in the light or not (0038): on its cell,
+  // over the traces and under every figure. A closed pane is not drawn.
+  const panes = state.panes.length === 0 ? [] : panesOf(content.map);
+  for (const open of state.panes) {
+    const pane = panes[open.pane];
+    if (pane === undefined) {
+      continue;
+    }
+    renderer.drawSprite(
+      content.creatureSheets.lurker,
+      PANE_FRAME,
+      pane.box.x - camera.x,
+      pane.box.y - camera.y,
     );
   }
   const figures = figuresOf(content.map.points);

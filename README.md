@@ -66,7 +66,11 @@ once each and say what it would have shown: the data protection officer, the col
 Sales after the case, and the management at the close (feature 0036). Support has five traces
 of its own, on five of its twenty-seven screens, and the colleague in the orange shirt is the
 source of the third case; the three cases can be solved in any order, and the close follows the
-last of them (feature 0037).
+last of them (feature 0037). Support has a creature of its own: the lurker, an eye in a small
+window that is open on three screens. The lamp does not hold it there — `E` closes the window,
+the lurker drops to the floor and can be captured, and two of the room's traces show only
+then. With three species the journal's creatures tab has two pages, turned with the up and
+down arrows (feature 0038).
 Every merge to `main` is deployed to Cloud Run (feature 0030).
 The roadmap is in [docs/plan.md](docs/plan.md).
 

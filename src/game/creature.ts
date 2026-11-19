@@ -59,6 +59,12 @@ export const HABITS: Readonly<Record<Species, Habits>> = {
     stepDistance: MIRAGE_SPEED_PX_PER_SECOND / STEPS_PER_SECOND,
     shy: true,
   },
+  // On the floor a lurker goes by the snippet's rule in everything (0038).
+  lurker: {
+    noticeRadius: NOTICE_RADIUS,
+    stepDistance: CREATURE_SPEED_PX_PER_SECOND / STEPS_PER_SECOND,
+    shy: false,
+  },
 };
 
 /** The centre of the sprite: the point the lamp is tested against. */
@@ -224,5 +230,5 @@ export function creaturesFrom(points: readonly NamedPoint[]): CreatureState[] {
 
 /** Nothing captured yet. A literal, so a new species does not compile until it is listed. */
 export function noCaptures(): Captured {
-  return { snippet: 0, mirage: 0 };
+  return { snippet: 0, mirage: 0, lurker: 0 };
 }

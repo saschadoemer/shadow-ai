@@ -76,6 +76,7 @@ const CONTENT: SceneContent = {
     snippet: sheet(16, 16),
     // Its own image, so that the two sheets can be told apart.
     mirage: { ...sheet(16, 16), image: { mirage: true } as unknown as ImageBitmap },
+    lurker: { ...sheet(16, 16), image: { lurker: true } as unknown as ImageBitmap },
   },
   overviewSheet: sheet(8, 8),
   shadowWallSheet: sheet(16, 16),
@@ -96,6 +97,7 @@ const BAR = 'fillRect 8,158 304x18 #181425';
 /** A game with five hearts and the officer standing; the help as `fields` say. */
 const playing = (fields: Partial<GameState> = {}): GameState => ({
   tick: 700,
+  panes: [],
   rested: null,
   finished: null,
   presented: 0,
@@ -121,7 +123,7 @@ const playing = (fields: Partial<GameState> = {}): GameState => ({
   journal: null,
   help: false,
   held: NO_INPUT,
-  captured: { snippet: 0, mirage: 0 },
+  captured: { snippet: 0, mirage: 0, lurker: 0 },
   overview: { current: 5, max: 5 },
   dark: 0,
   ...fields,
@@ -366,7 +368,7 @@ describe('the help in the scene (0021)', () => {
   });
 
   it('lies over the journal: the journal, then the help', () => {
-    const reading = playing({ journal: { tab: 'cases' } });
+    const reading = playing({ journal: { tab: 'cases', page: 0 } });
     const without = scene(reading);
     expect(without[0]).toBe('clear #181425');
     expect(without).toContain('fillRect 8,22 304x2 #3a4466');

@@ -14,8 +14,10 @@ import {
   ENTRY_PITCH,
   JOURNAL_RULE,
   NOTHING_TEXT,
+  PAGE_MARK_RIGHT,
   POLICY_BLOCK,
   POLICY_GAP,
+  pageMarkOrigin,
   policyOrigins,
   TAB_CLOSED,
   TAB_OPEN,
@@ -75,6 +77,7 @@ const CONTENT: SceneContent = {
     snippet: sheet(16, 16),
     // Its own image, so that the two sheets can be told apart.
     mirage: { ...sheet(16, 16), image: { mirage: true } as unknown as ImageBitmap },
+    lurker: { ...sheet(16, 16), image: { lurker: true } as unknown as ImageBitmap },
   },
   overviewSheet: sheet(8, 8),
   shadowWallSheet: sheet(16, 16),
@@ -93,6 +96,7 @@ const ENGLISH: SceneSettings = { language: 'en', switchedAt: null };
 /** A game with the journal open on `tab`: five hearts, the lamp on, `snippets` captured. */
 const reading = (tab: JournalTab, snippets = 0): GameState => ({
   tick: 100,
+  panes: [],
   rested: null,
   finished: null,
   presented: 0,
@@ -115,10 +119,10 @@ const reading = (tab: JournalTab, snippets = 0): GameState => ({
   solved: [],
   figures: [],
   dialogue: null,
-  journal: { tab },
+  journal: { tab, page: 0 },
   help: false,
   held: NO_INPUT,
-  captured: { snippet: snippets, mirage: 0 },
+  captured: { snippet: snippets, mirage: 0, lurker: 0 },
   overview: { current: 5, max: 5 },
   dark: 0,
 });
@@ -279,7 +283,7 @@ describe('the cases tab (0022)', () => {
   const cases = (found: number, settings = GERMAN): string[] => {
     const renderer = recordingRenderer();
     const state: GameState = { ...reading('cases'), traces: traces(found) };
-    drawJournal(renderer, state, { tab: 'cases' }, content, settings);
+    drawJournal(renderer, state, { tab: 'cases', page: 0 }, content, settings);
     return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
   };
 
@@ -329,7 +333,13 @@ describe('the cases tab (0022)', () => {
   it('leaves the creatures and the policy as they were', () => {
     for (const tab of ['creatures', 'policy'] as const) {
       const renderer = recordingRenderer();
-      drawJournal(renderer, { ...reading(tab), traces: traces(3) }, { tab }, content, GERMAN);
+      drawJournal(
+        renderer,
+        { ...reading(tab), traces: traces(3) },
+        { tab, page: 0 },
+        content,
+        GERMAN,
+      );
       expect(renderer.calls).toStrictEqual(draw(reading(tab)).calls);
     }
   });
@@ -358,7 +368,7 @@ describe('a solved case in the journal (0024)', () => {
       traces: all,
       solved: solved ? [{ region: 'sales', at: 900 }] : [],
     };
-    drawJournal(renderer, state, { tab }, content, settings);
+    drawJournal(renderer, state, { tab, page: 0 }, content, settings);
     return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
   };
 
@@ -406,7 +416,7 @@ describe('a solved case in the journal (0024)', () => {
     drawJournal(
       renderer,
       { ...reading('creatures', 1), solved: [{ region: 'sales', at: 900 }] },
-      { tab: 'creatures' },
+      { tab: 'creatures', page: 0 },
       content,
       GERMAN,
     );
@@ -439,7 +449,7 @@ describe('the cases tab with two regions (0028)', () => {
   const cases = (found: readonly number[], settings = GERMAN): string[] => {
     const renderer = recordingRenderer();
     const state: GameState = { ...reading('cases'), traces: traces(...found) };
-    drawJournal(renderer, state, { tab: 'cases' }, content, settings);
+    drawJournal(renderer, state, { tab: 'cases', page: 0 }, content, settings);
     return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
   };
 
@@ -508,7 +518,7 @@ describe('two solved cases in the journal (0028)', () => {
       })),
       solved,
     };
-    drawJournal(renderer, state, { tab }, content, settings);
+    drawJournal(renderer, state, { tab, page: 0 }, content, settings);
     return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
   };
   const ALL_OF_MARKETING = [5, 6, 7, 8, 9];
@@ -575,13 +585,13 @@ describe('the second entry of the creatures tab (0032)', () => {
   const shown = (captured: GameState['captured'], settings = GERMAN) => {
     const renderer = recordingRenderer();
     const state: GameState = { ...reading('creatures'), captured };
-    drawJournal(renderer, state, { tab: 'creatures' }, CONTENT, settings);
+    drawJournal(renderer, state, { tab: 'creatures', page: 0 }, CONTENT, settings);
     const from = renderer.calls.indexOf(RULE) + 1;
     return { calls: renderer.calls.slice(from), sheets: renderer.sheets.slice(from - 5) };
   };
 
   it('draws the mirage alone in the first place when only a mirage is captured', () => {
-    const { calls } = shown({ snippet: 0, mirage: 1 });
+    const { calls } = shown({ snippet: 0, mirage: 1, lurker: 0 });
     expect(calls[0]).toBe(`drawSprite ${ENTRY_FRAME} at 16,32`);
     // `Trugbild`: `T` is glyph 52; the text starts with `Ein Bild …`, `E` is glyph 37.
     expect(calls[1]).toBe('drawSprite 52 at 40,35');
@@ -592,8 +602,8 @@ describe('the second entry of the creatures tab (0032)', () => {
     const only = recordingRenderer();
     drawJournal(
       only,
-      { ...reading('creatures'), captured: { snippet: 0, mirage: 1 } },
-      { tab: 'creatures' },
+      { ...reading('creatures'), captured: { snippet: 0, mirage: 1, lurker: 0 } },
+      { tab: 'creatures', page: 0 },
       CONTENT,
       GERMAN,
     );
@@ -602,9 +612,9 @@ describe('the second entry of the creatures tab (0032)', () => {
   });
 
   it('draws the mirage 72 px below the snippet when both are captured', () => {
-    const both = shown({ snippet: 1, mirage: 2 }).calls;
-    const snippetOnly = shown({ snippet: 1, mirage: 0 }).calls;
-    const mirageOnly = shown({ snippet: 0, mirage: 1 }).calls;
+    const both = shown({ snippet: 1, mirage: 2, lurker: 0 }).calls;
+    const snippetOnly = shown({ snippet: 1, mirage: 0, lurker: 0 }).calls;
+    const mirageOnly = shown({ snippet: 0, mirage: 1, lurker: 0 }).calls;
     // The first entry is what it was; the second is the mirage's, every call 72 px lower.
     expect(both.slice(0, snippetOnly.length)).toStrictEqual(snippetOnly);
     const lower = (call: string): string =>
@@ -614,7 +624,7 @@ describe('the second entry of the creatures tab (0032)', () => {
   });
 
   it('fits the screen with both: no line starts below y = 162', () => {
-    const rows = shown({ snippet: 1, mirage: 1 }).calls.map((call) =>
+    const rows = shown({ snippet: 1, mirage: 1, lurker: 0 }).calls.map((call) =>
       Number(call.slice(call.lastIndexOf(',') + 1)),
     );
     expect(Math.max(...rows)).toBe(162);
@@ -622,7 +632,7 @@ describe('the second entry of the creatures tab (0032)', () => {
 
   it('reads `Mirage` in English', () => {
     // `M` is glyph 45; the text starts with `A picture …`, `A` is glyph 33.
-    const { calls } = shown({ snippet: 0, mirage: 1 }, ENGLISH);
+    const { calls } = shown({ snippet: 0, mirage: 1, lurker: 0 }, ENGLISH);
     expect(calls[1]).toBe('drawSprite 45 at 40,35');
     expect(calls[7]).toBe('drawSprite 33 at 16,54');
   });
@@ -651,7 +661,13 @@ describe('the cases tab with three regions (0037)', () => {
       light: 0,
       found: found.includes(trace) ? 60 : null,
     }));
-    drawJournal(renderer, { ...reading('cases'), traces }, { tab: 'cases' }, content, settings);
+    drawJournal(
+      renderer,
+      { ...reading('cases'), traces },
+      { tab: 'cases', page: 0 },
+      content,
+      settings,
+    );
     return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
   };
 
@@ -749,7 +765,7 @@ describe('three solved cases in the journal (0037)', () => {
       traces: Array.from({ length: 15 }, (_, trace) => ({ trace, light: 0, found: 60 })),
       solved,
     };
-    drawJournal(renderer, state, { tab }, content, settings);
+    drawJournal(renderer, state, { tab, page: 0 }, content, settings);
     return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
   };
   /** The calls that draw on the line with its top at y. */
@@ -827,5 +843,107 @@ describe('three solved cases in the journal (0037)', () => {
     // `Solved: customer mails went into a translator.`
     expect(at(entries, 132)[0]).toBe('drawSprite 51 at 16,132');
     expect(at(entries, 132)).toHaveLength(40);
+  });
+});
+
+describe('the pages of the creatures tab in the journal (0038)', () => {
+  const ALL = { snippet: 1, mirage: 1, lurker: 1 };
+  const shown = (captured: GameState['captured'], page = 0, settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    const state: GameState = { ...reading('creatures'), captured };
+    drawJournal(renderer, state, { tab: 'creatures', page }, CONTENT, settings);
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+  /** The calls that draw right of x = 256 on the line of the first name. */
+  const mark = (calls: readonly string[]): string[] =>
+    calls.filter((call) => / at (2[6-9]\d|30\d),35$/.test(call));
+
+  it('places the mark with its right end at x = 304, on the line of the first name', () => {
+    expect([PAGE_MARK_RIGHT, ENTRY_NAME]).toStrictEqual([304, { x: 40, y: 35 }]);
+    // `1 von 2`: seven cells; `1 of 2`: six.
+    expect(pageMarkOrigin(0, 2, 'de')).toStrictEqual({ x: 262, y: 35 });
+    expect(pageMarkOrigin(1, 2, 'en')).toStrictEqual({ x: 268, y: 35 });
+    expect(pageMarkOrigin(9, 12, 'de')).toStrictEqual({ x: 250, y: 35 });
+  });
+
+  it('shows the first two species on page 0, as with two captured, and the mark `1 von 2`', () => {
+    const two = shown({ snippet: 1, mirage: 1, lurker: 0 });
+    const first = shown(ALL);
+    expect(first.slice(0, two.length)).toStrictEqual(two);
+    // `1`, `v`, `o`, `n`, `2`: glyphs 17, 86, 79, 78 and 18, one empty cell between two parts.
+    expect(first.slice(two.length)).toStrictEqual([
+      'drawSprite 17 at 262,35',
+      'drawSprite 86 at 274,35',
+      'drawSprite 79 at 280,35',
+      'drawSprite 78 at 286,35',
+      'drawSprite 18 at 298,35',
+    ]);
+  });
+
+  it('shows the lurker alone on page 1, in the first place, and the mark `2 von 2`', () => {
+    const second = shown(ALL, 1);
+    const alone = shown({ snippet: 0, mirage: 0, lurker: 1 });
+    // The entry is drawn as when the lurker is the only species captured.
+    expect(second.slice(0, alone.length)).toStrictEqual(alone);
+    expect(second[0]).toBe(`drawSprite ${ENTRY_FRAME} at 16,32`);
+    // `Mitleser`: `M` is glyph 45; the text starts with `Eine Erweiterung …`, `E` is glyph 37.
+    expect(second[1]).toBe('drawSprite 45 at 40,35');
+    expect(second[9]).toBe('drawSprite 37 at 16,54');
+    expect(mark(second)).toStrictEqual([
+      'drawSprite 18 at 262,35',
+      'drawSprite 86 at 274,35',
+      'drawSprite 79 at 280,35',
+      'drawSprite 78 at 286,35',
+      'drawSprite 18 at 298,35',
+    ]);
+  });
+
+  it('draws the lurker from its own sheet, and four lines of text', () => {
+    const renderer = recordingRenderer();
+    drawJournal(
+      renderer,
+      { ...reading('creatures'), captured: ALL },
+      { tab: 'creatures', page: 1 },
+      CONTENT,
+      GERMAN,
+    );
+    expect(renderer.sheets).toContain(CONTENT.creatureSheets.lurker);
+    expect(renderer.sheets).not.toContain(CONTENT.creatureSheets.snippet);
+    expect(renderer.sheets).not.toContain(CONTENT.creatureSheets.mirage);
+    const rows = renderer.calls
+      .filter((call) => call.startsWith('drawSprite'))
+      .map((call) => Number(call.slice(call.lastIndexOf(',') + 1)));
+    expect([...new Set(rows)].filter((row) => row >= 54)).toStrictEqual([54, 66, 78, 90]);
+  });
+
+  it('reads `1 of 2` and `Lurker` in English', () => {
+    // `1`, `o`, `f`, `2`: glyphs 17, 79, 70 and 18.
+    expect(mark(shown(ALL, 0, ENGLISH))).toStrictEqual([
+      'drawSprite 17 at 268,35',
+      'drawSprite 79 at 280,35',
+      'drawSprite 70 at 286,35',
+      'drawSprite 18 at 298,35',
+    ]);
+    // `Lurker`: `L` is glyph 44.
+    expect(shown(ALL, 1, ENGLISH)[1]).toBe('drawSprite 44 at 40,35');
+  });
+
+  it('draws no mark with one page: one species, two species, or none', () => {
+    for (const captured of [
+      { snippet: 0, mirage: 0, lurker: 0 },
+      { snippet: 0, mirage: 0, lurker: 1 },
+      { snippet: 1, mirage: 1, lurker: 0 },
+      { snippet: 1, mirage: 0, lurker: 1 },
+    ]) {
+      expect(mark(shown(captured))).toStrictEqual([]);
+    }
+  });
+
+  it('draws no mark on the cases tab and the policy tab', () => {
+    for (const tab of ['cases', 'policy'] as const) {
+      const renderer = recordingRenderer();
+      drawJournal(renderer, { ...reading(tab), captured: ALL }, { tab, page: 0 }, CONTENT, GERMAN);
+      expect(mark(renderer.calls)).toStrictEqual([]);
+    }
   });
 });

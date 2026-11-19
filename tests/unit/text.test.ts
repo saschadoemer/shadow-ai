@@ -372,15 +372,16 @@ describe('the language table (INV-4, 0016)', () => {
       'corridor. They answer mails in eleven',
       'languages – ask yourself how.',
     ]);
+    // Since 0038 this page says what to do at a screen: close the window that is open on it.
     expect(lines('talk.intern-support-traces', 'de')).toStrictEqual([
       'Im Support sind es wieder die Bildschirme.',
-      'Drei Reihen, und in jeder sitzt jemand, der',
-      'gerade etwas übersetzen lässt.',
+      'Auf manchen ist ein Fenster offen, das keiner',
+      'aufgemacht hat – mach es ruhig zu.',
     ]);
     expect(lines('talk.intern-support-traces', 'en')).toStrictEqual([
-      'In Support it is the screens again. Three',
-      'rows, and in each somebody is having',
-      'something translated right now.',
+      'In Support it is the screens again. On some',
+      'a window is open that nobody opened – go',
+      'ahead and close it.',
     ]);
     expect(lines('talk.intern-support-source', 'de')).toStrictEqual([
       'Oranges Hemd, läuft zwischen den Tischen und',
@@ -391,6 +392,33 @@ describe('the language table (INV-4, 0016)', () => {
       'Orange shirt, walks between the desks and the',
       'printer. Forty tickets before the first',
       'coffee – ask about the languages.',
+    ]);
+  });
+
+  it('holds the words of the lurker in both languages (0038)', () => {
+    const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
+      textOf(textKey(id), language).split('\n');
+    expect(lines('notice.pane-open', 'de')).toStrictEqual([
+      'Hier liest etwas mit. Das Licht hält es nicht.',
+    ]);
+    expect(lines('notice.pane-open', 'en')).toStrictEqual([
+      'It reads along here. The light does not hold it.',
+    ]);
+    expect([
+      lines('creature.lurker-name', 'de'),
+      lines('creature.lurker-name', 'en'),
+    ]).toStrictEqual([['Mitleser'], ['Lurker']]);
+    expect(lines('creature.lurker-text', 'de')).toStrictEqual([
+      'Eine Erweiterung im Browser, die jemand',
+      'installiert hat und die seither alles mitliest.',
+      'Solange ihr Fenster offen ist, hält sie kein',
+      'Licht – sie geht, wenn nur Freigegebenes läuft.',
+    ]);
+    expect(lines('creature.lurker-text', 'en')).toStrictEqual([
+      'A browser extension somebody installed, which',
+      'has read everything along ever since. While',
+      'its window is open no light holds it – it',
+      'goes when only approved tools are running.',
     ]);
   });
 

@@ -92,7 +92,8 @@ export function traceInLight(
  * One step of the traces against the stepped figure and the lamp of that step. A found trace
  * never changes. A trace in the light counts one step more, and in the step it reaches
  * FIND_STEPS it is found: `found` is `tick`, the tick of this step, and the count is 0 again.
- * A trace out of the light starts again from 0.
+ * A trace out of the light starts again from 0. A trace whose cell is one of `covered` — the
+ * cells of the open panes (0038) — is not in the light, whatever the lamp does.
  */
 export function stepTraces(
   states: readonly TraceState[],
@@ -102,13 +103,15 @@ export function stepTraces(
   map: TileMap,
   tick: number,
   spread: number = SPREAD,
+  covered: readonly Box[] = [],
 ): TraceState[] {
   return states.map((state) => {
     const trace = traces[state.trace];
     if (state.found !== null || trace === undefined) {
       return state;
     }
-    if (!traceInLight(trace, player, lampOn, map, spread)) {
+    const hidden = covered.some((box) => box.x === trace.box.x && box.y === trace.box.y);
+    if (hidden || !traceInLight(trace, player, lampOn, map, spread)) {
       return state.light === 0 ? state : { ...state, light: 0 };
     }
     return state.light + 1 < FIND_STEPS

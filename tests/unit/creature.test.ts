@@ -252,23 +252,23 @@ describe('stepCreatures', () => {
     const RIGHT = figure(100, 100, 'right');
     const result = stepCreatures(
       [snippet(130, 100, 59), snippet(136, 100, 3)],
-      { snippet: 4, mirage: 0 },
+      { snippet: 4, mirage: 0, lurker: 0 },
       RIGHT,
       true,
       OPEN,
     );
     expect(result).toStrictEqual({
       creatures: [snippet(136, 100, 4)],
-      captured: { snippet: 5, mirage: 0 },
+      captured: { snippet: 5, mirage: 0, lurker: 0 },
     });
   });
 
   it('leaves its arguments unchanged', () => {
     const creatures = [snippet(130, 100, 59)];
-    const captured = { snippet: 0, mirage: 0 };
+    const captured = { snippet: 0, mirage: 0, lurker: 0 };
     stepCreatures(creatures, captured, figure(100, 100, 'right'), true, OPEN);
     expect(creatures).toStrictEqual([snippet(130, 100, 59)]);
-    expect(captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 });
 
@@ -321,7 +321,7 @@ describe('creaturesFrom', () => {
   });
 
   it('starts every count at 0', () => {
-    expect(noCaptures()).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(noCaptures()).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 });
 
@@ -351,9 +351,9 @@ describe('a creature and the wider cone (0029)', () => {
   it('is counted by the step of all creatures with the wider cone only', () => {
     const almost = { ...BESIDE, light: CAPTURE_STEPS - 1 };
     const wide = stepCreatures([almost], noCaptures(), PLAYER, true, OPEN, WIDE_SPREAD);
-    expect(wide).toStrictEqual({ creatures: [], captured: { snippet: 1, mirage: 0 } });
+    expect(wide).toStrictEqual({ creatures: [], captured: { snippet: 1, mirage: 0, lurker: 0 } });
     const narrow = stepCreatures([almost], noCaptures(), PLAYER, true, OPEN);
-    expect(narrow.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(narrow.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
     expect(narrow.creatures).toHaveLength(1);
     expect(narrow.creatures[0]?.light).toBe(0);
   });
@@ -514,7 +514,7 @@ describe('the mirage (0032)', () => {
     const almost = mirage(160, 96, CAPTURE_STEPS - 1);
     expect(stepCreatures([almost], noCaptures(), player, true, OPEN)).toStrictEqual({
       creatures: [],
-      captured: { snippet: 0, mirage: 1 },
+      captured: { snippet: 0, mirage: 1, lurker: 0 },
     });
   });
 

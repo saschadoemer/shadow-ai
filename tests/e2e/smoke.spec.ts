@@ -221,7 +221,7 @@ test('the floor starts with three snippets and three mirages, and nothing captur
     'mirage',
     'mirage',
   ]);
-  expect(state?.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+  expect(state?.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
 });
 
 test('the floor starts with its 22 movers and draws the person of the reception', async ({
@@ -355,11 +355,13 @@ test('J opens the journal on the creatures and closes it again', async ({ page }
   await page.keyboard.down('KeyJ');
   await expect.poll(journal, { message: 'J opens the journal' }).toStrictEqual({
     tab: 'creatures',
+    page: 0,
   });
   await page.keyboard.up('KeyJ');
   await page.keyboard.down('ArrowRight');
   await expect.poll(journal, { message: 'the right arrow turns to the cases' }).toStrictEqual({
     tab: 'cases',
+    page: 0,
   });
   await page.keyboard.up('ArrowRight');
   await expect
@@ -381,6 +383,16 @@ test('the floor starts with its fifteen traces, none seen and none found', async
         'window.shadowAi.state.traces holds five traces each of Sales, Marketing and Support',
     })
     .toStrictEqual(Array.from({ length: 15 }, (_, trace) => ({ trace, light: 0, found: null })));
+});
+
+test('the floor starts with its three panes open, none lit', async ({ page }) => {
+  await start(page);
+  // The windows that are open on three screens of Support (0038); in the state they are panes.
+  await expect
+    .poll(() => page.evaluate(() => window.shadowAi?.state.panes), {
+      message: 'window.shadowAi.state.panes holds the three open panes of Support',
+    })
+    .toStrictEqual([0, 1, 2].map((pane) => ({ pane, lit: false })));
 });
 
 test('H opens the help, the game stands still under it, and H closes it again', async ({

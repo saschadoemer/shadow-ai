@@ -13,6 +13,7 @@ import {
   encodeInternPng,
   encodeLampPng,
   encodeLampWidePng,
+  encodeLurkerPng,
   encodeMiragePng,
   encodeOfficerPng,
   encodeOverviewPng,
@@ -35,6 +36,18 @@ import {
   WIDE_LAMP_SHEET_HEIGHT,
   WIDE_LAMP_SHEET_WIDTH,
 } from '../../tools/placeholder-lamp.ts';
+import {
+  eyeInk,
+  LURKER_FRAME_SIZE,
+  LURKER_FRAMES,
+  LURKER_GROUND,
+  LURKER_LIT,
+  LURKER_PANE_FRAME,
+  LURKER_SHEET_HEIGHT,
+  LURKER_SHEET_WIDTH,
+  paneInk,
+  renderLurker,
+} from '../../tools/placeholder-lurker.ts';
 import {
   MIRAGE_FRAME_SIZE,
   MIRAGE_FRAMES,
@@ -896,5 +909,141 @@ describe('the placeholder shadow-wall generator (0014)', () => {
 
   it('rejects a look outside 0–7', () => {
     expect(() => wallInk(8, 0, 0)).toThrow('a shadow wall has looks 0 to 7, not 8');
+  });
+});
+
+const LURKER_FILE = join(ROOT, 'public/sprites/lurker.png');
+const LURKER = renderLurker();
+
+/** The colour of pixel (i, j) of frame `index` of the lurker sheet, or null when transparent. */
+function lurkerPixel(index: number, i: number, j: number): string | null {
+  const o = (j * LURKER_SHEET_WIDTH + index * LURKER_FRAME_SIZE + i) * 4;
+  if (LURKER[o + 3] !== 255) {
+    return null;
+  }
+  return `#${[LURKER[o], LURKER[o + 1], LURKER[o + 2]]
+    .map((c) => (c ?? 0).toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+function lurkerFrame(index: number): (string | null)[][] {
+  return Array.from({ length: LURKER_FRAME_SIZE }, (_, j) =>
+    Array.from({ length: LURKER_FRAME_SIZE }, (_, i) => lurkerPixel(index, i, j)),
+  );
+}
+
+describe('the placeholder lurker generator (0038)', () => {
+  it('is deterministic', () => {
+    expect(encodeLurkerPng().equals(encodeLurkerPng())).toBe(true);
+  });
+
+  it('matches the committed public/sprites/lurker.png', () => {
+    const committed = PNG.sync.read(readFileSync(LURKER_FILE));
+    expect([committed.width, committed.height]).toStrictEqual([64, 16]);
+    expect(Buffer.from(LURKER).equals(committed.data)).toBe(true);
+  });
+
+  it('is 64x16: four frames of 16x16 in one row, the fourth the lurker in its window', () => {
+    expect([
+      LURKER_SHEET_WIDTH,
+      LURKER_SHEET_HEIGHT,
+      LURKER_FRAME_SIZE,
+      LURKER_FRAMES,
+      LURKER_PANE_FRAME,
+    ]).toStrictEqual([64, 16, 16, 4, 3]);
+    expect(LURKER).toHaveLength(64 * 16 * 4);
+    expect([LURKER_GROUND, LURKER_LIT]).toStrictEqual(['#c0cbdc', '#ffffff']);
+  });
+
+  it('uses the signature colour and one ground colour per frame, and nothing else', () => {
+    for (let index = 0; index < LURKER_FRAMES; index += 1) {
+      const colours = new Set(lurkerFrame(index).flat());
+      colours.delete(null);
+      expect([...colours].sort(), `frame ${index}`).toStrictEqual(
+        [SHADOW_COLOUR, index === 2 ? LURKER_LIT : LURKER_GROUND].sort(),
+      );
+    }
+  });
+
+  it('draws frame 0 as an eye: the lids, the corners, the inside and the pupil of the spec', () => {
+    // The lids: rows 6 and 10, columns 5–10.
+    for (const j of [6, 10]) {
+      expect(lurkerPixel(0, 4, j)).toBeNull();
+      expect(lurkerPixel(0, 5, j)).toBe(SHADOW_COLOUR);
+      expect(lurkerPixel(0, 10, j)).toBe(SHADOW_COLOUR);
+      expect(lurkerPixel(0, 11, j)).toBeNull();
+    }
+    // The corners: columns 4 and 11, rows 7–9.
+    for (const i of [4, 11]) {
+      expect(lurkerPixel(0, i, 6)).toBeNull();
+      expect([7, 8, 9].map((j) => lurkerPixel(0, i, j))).toStrictEqual([
+        SHADOW_COLOUR,
+        SHADOW_COLOUR,
+        SHADOW_COLOUR,
+      ]);
+      expect(lurkerPixel(0, i, 10)).toBeNull();
+    }
+    // The inside, columns 5–10 and rows 7–9, with the pupil on columns 7–8.
+    for (const j of [7, 8, 9]) {
+      expect([5, 6, 7, 8, 9, 10].map((i) => lurkerPixel(0, i, j))).toStrictEqual([
+        LURKER_GROUND,
+        LURKER_GROUND,
+        SHADOW_COLOUR,
+        SHADOW_COLOUR,
+        LURKER_GROUND,
+        LURKER_GROUND,
+      ]);
+    }
+    expect(
+      lurkerFrame(0)
+        .flat()
+        .filter((colour) => colour !== null),
+    ).toHaveLength(12 + 6 + 18);
+    expect([eyeInk(7, 8, 7), eyeInk(9, 8, 7), eyeInk(3, 8, 7)]).toStrictEqual([
+      'edge',
+      'ground',
+      null,
+    ]);
+  });
+
+  it('draws frame 1 as frame 0 with the pupil on columns 8–9: it looks to the side', () => {
+    const moved = lurkerFrame(0).map((row, j) =>
+      row.map((colour, i) => {
+        if (j < 7 || j > 9 || i < 7 || i > 9) {
+          return colour;
+        }
+        return i === 7 ? LURKER_GROUND : SHADOW_COLOUR;
+      }),
+    );
+    expect(lurkerFrame(1)).toStrictEqual(moved);
+  });
+
+  it('draws frame 2 as frame 0 with the inside white: the lurker in the light', () => {
+    const lit = lurkerFrame(0).map((row) =>
+      row.map((colour) => (colour === LURKER_GROUND ? LURKER_LIT : colour)),
+    );
+    expect(lurkerFrame(2)).toStrictEqual(lit);
+  });
+
+  it('draws frame 3 as the window: its border, its title bar, its inside and the pupil', () => {
+    const frame = lurkerFrame(LURKER_PANE_FRAME);
+    for (let j = 0; j < 16; j += 1) {
+      for (let i = 0; i < 16; i += 1) {
+        const inside = i >= 2 && i <= 13 && j >= 3 && j <= 12;
+        const border = i === 2 || i === 13 || j === 3 || j === 12;
+        const pupil = i >= 7 && i <= 8 && j >= 7 && j <= 9;
+        let expected: string | null = null;
+        if (inside) {
+          expected = border || j === 4 || pupil ? SHADOW_COLOUR : LURKER_GROUND;
+        }
+        expect(frame[j]?.[i], `(${i}, ${j})`).toBe(expected);
+      }
+    }
+    expect([paneInk(2, 3), paneInk(5, 4), paneInk(5, 5), paneInk(1, 5)]).toStrictEqual([
+      'edge',
+      'edge',
+      'ground',
+      null,
+    ]);
   });
 });
