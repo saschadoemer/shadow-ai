@@ -142,8 +142,9 @@ it go — the lesson of its case (`world.md` §2). No brand and no person is nam
    count again.
 9. A free mirage within 10 px of the figure's feet takes one point of overview and pushes
    the figure, by the rule of 0009.
-10. The snippet steps as before: the tests of 0008 pass unchanged, and the 600 recorded
-    steps of 0020 give the same digest, with the count of the snippet hashed as it was
+10. The snippet steps as before: the tests of 0008 pass with no change but the second count
+    in the record of captures, and the 600 recorded steps of 0020 give the same digest, with
+    the snippets among the creatures and the count of the snippet hashed as they were
     recorded.
 11. Solving the case of Marketing removes every mirage that is left, captures none, and
     leaves the snippet of the east corridor.
