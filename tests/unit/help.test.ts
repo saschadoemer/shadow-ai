@@ -303,7 +303,8 @@ describe('a game in which the help is never opened (0021)', () => {
     state.creatures.filter((creature) => creature.species === 'snippet'),
     state.movers,
     state.shadowWalls,
-    state.figures,
+    // The figure that was recorded: the officer, before the intern of 0033.
+    state.figures.slice(0, 1),
     state.dialogue,
     state.journal,
     { snippet: state.captured.snippet },

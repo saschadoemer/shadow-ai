@@ -219,13 +219,22 @@ export function shadowWallBox(rect: CellRect): Box {
 }
 
 /**
- * The standing figures (0017): per figure its id in the cast and its feet in pixels. The
+ * The standing figures (0017, 0033): per figure its id in the cast and its feet in pixels. The
  * data protection officer stands in the middle of tile (16, 29), in her office — two tiles
- * left of and two above the wake point, in the view when the player wakes.
+ * left of and two above the wake point, in the view when the player wakes. The intern stands
+ * in the middle of tile (38, 30), in the break room, four tiles below the counter.
  */
 export const FIGURES: readonly { readonly id: string; readonly at: Point }[] = [
   { id: 'officer', at: { x: 264, y: 472 } },
+  { id: 'intern', at: { x: 616, y: 488 } },
 ];
+
+/**
+ * How many figures stand after the shadow walls in the file: the one of 0017. Every later
+ * figure is written at the end of the file, so that no object of an earlier feature changes
+ * its id (0033).
+ */
+export const FIRST_FIGURES = 1;
 
 /**
  * The traces (0022, 0028): per trace its region and the cell of the device it lies on. Five in
@@ -1216,12 +1225,14 @@ export function floorJson(): MapJson {
   const routes = routePoints();
   const firstWall = SNIPPETS.length + 3 + routes.length;
   const firstFigure = firstWall + SHADOW_WALLS.length;
-  const firstTrace = firstFigure + FIGURES.length;
+  const firstTrace = firstFigure + FIRST_FIGURES;
   const firstArea = firstTrace + FIRST_TRACES;
   const firstRest = firstArea + REGION_AREAS.length;
   const firstLaterTrace = firstRest + RESTS.length;
   const laterTraces = TRACES.slice(FIRST_TRACES);
   const firstMirage = firstLaterTrace + laterTraces.length;
+  const firstLaterFigure = firstMirage + MIRAGES.length;
+  const laterFigures = FIGURES.slice(FIRST_FIGURES);
   return {
     compressionlevel: -1,
     height: FLOOR_HEIGHT,
@@ -1244,7 +1255,7 @@ export function floorJson(): MapJson {
           ...SHADOW_WALLS.map((wall, i) =>
             rectObject(firstWall + i, `shadow:${wall.region}`, shadowWallBox(wall.cells)),
           ),
-          ...FIGURES.map((figure, i) =>
+          ...FIGURES.slice(0, FIRST_FIGURES).map((figure, i) =>
             pointObject(firstFigure + i, `figure:${figure.id}`, figure.at),
           ),
           ...TRACES.slice(0, FIRST_TRACES).map((trace, i) =>
@@ -1260,6 +1271,9 @@ export function floorJson(): MapJson {
             rectObject(firstLaterTrace + i, `trace:${trace.region}`, traceBox(trace.cell)),
           ),
           ...MIRAGES.map((feet, i) => pointObject(firstMirage + i, 'mirage', feet)),
+          ...laterFigures.map((figure, i) =>
+            pointObject(firstLaterFigure + i, `figure:${figure.id}`, figure.at),
+          ),
         ],
         opacity: 1,
         type: 'objectgroup',
@@ -1269,7 +1283,7 @@ export function floorJson(): MapJson {
       },
     ],
     nextlayerid: 5,
-    nextobjectid: firstMirage + MIRAGES.length,
+    nextobjectid: firstLaterFigure + laterFigures.length,
     orientation: 'orthogonal',
     renderorder: 'right-down',
     tiledversion: '1.11.2',

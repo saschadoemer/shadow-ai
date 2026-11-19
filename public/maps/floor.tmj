@@ -2125,6 +2125,18 @@
           "width": 0,
           "x": 360,
           "y": 1208
+        },
+        {
+          "height": 0,
+          "id": 132,
+          "name": "figure:intern",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 616,
+          "y": 488
         }
       ],
       "opacity": 1,
@@ -2135,7 +2147,7 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 132,
+  "nextobjectid": 133,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",
