@@ -274,6 +274,12 @@ conversation, a wall does. The colleague stands where it is and turns to the pla
 saying of one page, the same every time. After it the colleague goes on its round, and keeps its
 facing until it moves.
 
+**As built** (feature 0033): a player who does not know where to go asks the intern in the break
+room. He is spoken to like the data protection officer and has one page — the hint of that
+moment (`world.md` §3). Asking costs nothing and changes nothing. At a coffee machine a press
+of E still takes the coffee: he stands out of reach of every place from which a machine is in
+reach.
+
 **As built** (feature 0019): a press of L switches the language at any moment — while walking,
 with the lamp held, with a dialogue open, in the dark. Every text on screen changes at once: the
 notice, and the page of an open dialogue, which shows the same page in the other language.
