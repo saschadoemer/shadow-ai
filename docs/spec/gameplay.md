@@ -42,6 +42,12 @@ the figure in her office — beside her. From the step that closes the first mee
 the bottom says `Die Lampe: Leertaste halten.`, until the lamp is held once; it does not come
 back.
 
+**As built** (feature 0039): the player has the lamp from the first step, and nobody hands it
+over. Space shines as soon as the call is closed; while the card is shown or the call is open
+it does nothing, as every key but E. The line `Die Lampe: Leertaste halten.` stands at the
+bottom from the end of the call until the lamp is held once, and does not come back. A figure
+that falls into the dark wakes with the lamp.
+
 **As built** (feature 0008): a creature whose body is in the cone, with no solid tile between it
 and the figure, freezes. After one second of unbroken light — 60 steps, *tune* — it is captured
 and gone. A break starts the second again. Solid tiles block the light: walls, and fences and
@@ -335,6 +341,11 @@ card is the stand-in for the title screen of M8 and goes when that comes. A page
 loaded anew shows it again. The data protection officer's own talk has a third page since
 this feature, the one that compares Harmonic with the lamp; the first meeting keeps its two
 pages, so she says it only once the lamp is handed over.
+
+**As built** (feature 0039): there is no first meeting. The data protection officer says her
+three pages from the first talk, and closing them changes nothing. A press of E with Space
+held opens no dialogue, from the first step of a game: the keys mean the same everywhere. The
+intern's first hint is where Sales is; his page that sent the player for the lamp is gone.
 
 **As built** (feature 0027): E and Enter also take a coffee at a coffee machine (§4). A
 colleague or a figure in reach comes first: then the press opens the dialogue. The press does

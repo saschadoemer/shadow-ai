@@ -226,6 +226,8 @@ Kept as small as the story allows. About thirty figures in all.
   and then `Nimm die Lampe: …` — three sentences in all — and the press that closes it hands
   the lamp over. From then on she says the two pages of 0017 and, since feature 0036, a third
   that names Harmonic (`vision.md` §10).
+  Feature 0039 takes the first meeting out again: the player has the lamp from the first step,
+  and she says her three pages from the first talk. Nothing in the game needs the visit.
 - **The vendor.** See `vision.md` §4. Recurring in every department, never an enemy, changing
   over the game from seller to advisor. As advisor he supplies the approved alternatives that
   solve the later cases. They are fictional products; Harmonic is not his (`vision.md` §10).
@@ -234,11 +236,12 @@ Kept as small as the story allows. About thirty figures in all.
   without a walkthrough, this matters more than it sounds.
   *As built* (feature 0033): he stands, until the art pass gives him a chair — in the middle
   of tile (38, 30), four tiles below the counter of the break room, in a blue shirt. He says one
-  page, picked from how far the player has come: before the lamp, that the data protection
-  officer has something; per case where the room is, what to look at, and whom to ask; and at
-  the end that he knows no more. The cases are asked in their order, Sales first, whatever the
-  player has begun. He does not see the shadow and never speaks of it: he speaks of rooms,
-  screens, the printer and shirts. Nothing is shown unasked — no arrow, no marker.
+  page, picked from how far the player has come: per case where the room is, what to look at,
+  and whom to ask; and at the end that he knows no more. Until feature 0039 he had a page
+  before the lamp, which sent the player to the data protection officer. The cases are asked
+  in their order, Sales first, whatever the player has begun. He does not see the shadow and
+  never speaks of it: he speaks of rooms, screens, the printer and shirts. Nothing is shown
+  unasked — no arrow, no marker.
 - **The works council.** Not a global character but part of the HR case. Nothing moves there
   without him, and he is the one who asks about fairness. A German specific that gives the case
   depth.

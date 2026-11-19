@@ -61,7 +61,8 @@ customer's call, the managing director's order, the first sight of the shadow. T
 the managing director say one sentence each and are not on the map in the first act. The
 managing director stops the player at the reception, where the game begins: the floor has no
 room of the player's own, so nobody can stand in its door. The third page points next door, to
-the data protection officer, who hands the lamp over in the first talk.
+the data protection officer. Until feature 0039 she handed the lamp over in the first talk;
+since then the player has it from the first step, and she says what it is for.
 
 *As built* (feature 0034): while the game is unfinished, the story speaks once more after the
 last case there is — three pages, five seconds after it is solved. The evening, and nobody got
@@ -233,7 +234,7 @@ It is the one text of the game that holds the presenter's name, and a test keeps
 card has no line about Harmonic; one is added if the person who checks the release asks for it.
 
 The three voices, each on one page of talk. The data protection officer, on the third page of
-her own talk, once the lamp is handed over: `Die Lampe hast nur du. Etwas wie Harmonic würde
+her talk: `Die Lampe hast nur du. Etwas wie Harmonic würde
 dem Haus zeigen, welche KI hier läuft und wohin die Daten gehen.` The colleague of Sales, on
 the page after the case: `Hätte mir etwas wie Harmonic vorher gezeigt, wohin der Text geht –
 ich hätte es gelassen.` The management, on the second page of the close: `Mit Harmonic hätten
