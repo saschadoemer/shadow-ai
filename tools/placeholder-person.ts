@@ -16,6 +16,9 @@ export const PERSON_SHIRTS: readonly PaletteColour[] = ['#3e8948', '#e43b44', '#
 /** The data protection officer's shirt (0017): light grey, the colour of no other shirt. */
 export const OFFICER_SHIRT: PaletteColour = '#c0cbdc';
 
+/** The intern's shirt (0033): blue, the colour of no other shirt. */
+export const INTERN_SHIRT: PaletteColour = '#0099db';
+
 /** The player's twenty frames in a shirt of `shirt`, without the lanyard. RGBA, row-major, SHEET_WIDTH × SHEET_HEIGHT × 4 bytes; alpha 0 or 255. */
 export function renderFigure(shirt: PaletteColour): Uint8Array {
   const colours = new Map<string, PaletteColour>(Object.entries({ ...INKS, T: shirt, L: shirt }));
