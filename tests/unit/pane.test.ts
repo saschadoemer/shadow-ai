@@ -1,15 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import type { NamedPoint, NamedRect, TileMap } from '../../src/engine/tiled';
-import { dropPoint, openPanes, panesOf, restedPanes } from '../../src/game/pane';
+import { SPREAD } from '../../src/game/lamp';
+import { NOTICE_PANE_OPEN, NOTICE_SHADOW_TOO_DENSE, noticeOf } from '../../src/game/notice';
+import {
+  coveredCells,
+  dropPoint,
+  openPanes,
+  panesOf,
+  restedPanes,
+  stepPanes,
+} from '../../src/game/pane';
 import { type GameInput, NO_INPUT } from '../../src/game/player';
 import { PANE_PREFIX, rectsOf } from '../../src/game/rects';
 import { restsOf } from '../../src/game/rest';
 import type { GameState } from '../../src/game/state';
-import { tracesOf } from '../../src/game/trace';
+import { stepTraces, tracesOf } from '../../src/game/trace';
 import { createInitialState, newGame, update } from '../../src/game/update';
+import { textKey } from '../../src/text/text';
 import { grassMap } from './grass-map';
 
 const NONE = NO_INPUT;
+const SHINE: GameInput = { ...NONE, lamp: true };
 const rect = (name: string, x: number, y: number, width = 16, height = 16): NamedRect => ({
   name,
   x,
@@ -162,5 +173,94 @@ describe('the panes in the state (0038)', () => {
     for (const state of [start, { ...start, panes: [{ pane: 1, lit: true }] }]) {
       expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
     }
+  });
+});
+
+describe('an open pane (0038)', () => {
+  const start = createInitialState(MAP);
+  const LIT = [
+    { pane: 0, lit: true },
+    { pane: 1, lit: false },
+  ];
+
+  it('is lit while the light is on its cell, and not with the lamp off or turned away', () => {
+    const lit = update(start, SHINE, MAP);
+    expect(lit.panes).toStrictEqual(LIT);
+    expect(update(lit, NONE, MAP).panes).toStrictEqual(start.panes);
+    // With the lamp on a direction key only turns the figure: up, away from the pane.
+    const away = update(lit, { ...SHINE, up: true }, MAP);
+    expect([away.lamp.on, away.player.facing]).toStrictEqual([true, 'up']);
+    expect(away.panes).toStrictEqual(start.panes);
+  });
+
+  it('is what stepPanes returns: the same state while nothing changes', () => {
+    const panes = panesOf(MAP);
+    expect(stepPanes(start.panes, panes, start.player, true, MAP)).toStrictEqual(LIT);
+    const dark = stepPanes(start.panes, panes, start.player, false, MAP);
+    expect(dark).toStrictEqual(start.panes);
+    expect(dark[0]).toBe(start.panes[0]);
+  });
+
+  it('holds against the light: 600 lit steps close nothing and capture nothing', () => {
+    const held = steps(start, SHINE, 600);
+    expect(held.panes).toStrictEqual(LIT);
+    expect(held.creatures).toStrictEqual([]);
+    expect(held.captured).toStrictEqual(start.captured);
+  });
+
+  it('hides the trace on its cell: it is not found in 600 lit steps, and its count stays 0', () => {
+    let state = start;
+    for (let step = 0; step < 600; step += 1) {
+      state = update(state, SHINE, MAP);
+      expect(state.traces[0], `step ${step}`).toStrictEqual({ trace: 0, light: 0, found: null });
+    }
+  });
+
+  it('does not hide the trace beside it: that one is found in the 60th lit step', () => {
+    const before = steps(start, SHINE, 59);
+    expect(before.traces[1]).toStrictEqual({ trace: 1, light: 59, found: null });
+    expect(update(before, SHINE, MAP).traces[1]).toStrictEqual({ trace: 1, light: 0, found: 60 });
+  });
+
+  it('is told to the traces as a covered cell: out of the light, whatever the lamp does', () => {
+    const traces = tracesOf(RECTS);
+    const covered = coveredCells(start.panes, panesOf(MAP));
+    expect(covered).toStrictEqual([
+      { x: 96, y: 128, width: 16, height: 16 },
+      { x: 240, y: 48, width: 16, height: 16 },
+    ]);
+    expect(coveredCells([{ pane: 1, lit: false }], panesOf(MAP))).toStrictEqual([covered[1]]);
+    const lights = (cells: typeof covered): number[] =>
+      stepTraces(start.traces, traces, start.player, true, MAP, 5, SPREAD, cells).map(
+        (trace) => trace.light,
+      );
+    expect(lights(covered)).toStrictEqual([0, 1]);
+    expect(lights([])).toStrictEqual([1, 1]);
+  });
+
+  it('says so in the notice while the light is on it, and no longer', () => {
+    expect(NOTICE_PANE_OPEN).toBe(textKey('notice.pane-open'));
+    expect(noticeOf(start)).toBeNull();
+    const lit = update(start, SHINE, MAP);
+    expect(noticeOf(lit)).toBe(NOTICE_PANE_OPEN);
+    expect(noticeOf(steps(lit, SHINE, 300))).toBe(NOTICE_PANE_OPEN);
+    expect(noticeOf(update(lit, NONE, MAP))).toBeNull();
+  });
+
+  it('comes right after a wall that holds in the order of the notices, before everything else', () => {
+    const lit = update(start, SHINE, MAP);
+    const walled: GameState = { ...lit, shadowWalls: [{ wall: 0, lit: true, light: 0 }] };
+    expect(noticeOf(walled)).toBe(NOTICE_SHADOW_TOO_DENSE);
+    // A case solved and a trace found in this very step, and a coffee taken: the pane's line.
+    const busy: GameState = {
+      ...lit,
+      solved: [{ region: 'sales', at: lit.tick }],
+      traces: [
+        { trace: 0, light: 0, found: lit.tick },
+        { trace: 1, light: 0, found: null },
+      ],
+      rested: { at: lit.tick, result: 'restored' },
+    };
+    expect(noticeOf(busy)).toBe(NOTICE_PANE_OPEN);
   });
 });

@@ -1,7 +1,9 @@
 import type { Box } from '../engine/collision';
 import { type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
+import { SPREAD } from './lamp';
 import { isCell, PANE_PREFIX, rectsOf } from './rects';
-import type { PaneState } from './state';
+import type { PaneState, PlayerState } from './state';
+import { traceInLight } from './trace';
 import { densityOf } from './world';
 
 /**
@@ -75,6 +77,35 @@ export function panesOf(map: TileMap): Pane[] {
 /** Every pane of the map open and not lit: the panes a game starts with. */
 export function openPanes(panes: readonly Pane[]): PaneState[] {
   return panes.map((_pane, pane) => ({ pane, lit: false }));
+}
+
+/** The cells of the open panes: a trace on one of them is hidden. */
+export function coveredCells(states: readonly PaneState[], panes: readonly Pane[]): Box[] {
+  return states.flatMap((state) => {
+    const pane = panes[state.pane];
+    return pane === undefined ? [] : [pane.box];
+  });
+}
+
+/**
+ * One step of the open panes against the stepped figure and the lamp of that step: a pane
+ * is lit while the light is on its cell, by the test of a trace — and nothing else happens to
+ * it. The light does not hold a lurker in its pane. `map` is the map with the shadow walls
+ * standing, as for a trace.
+ */
+export function stepPanes(
+  states: readonly PaneState[],
+  panes: readonly Pane[],
+  player: PlayerState,
+  lampOn: boolean,
+  map: TileMap,
+  spread: number = SPREAD,
+): PaneState[] {
+  return states.map((state) => {
+    const pane = panes[state.pane];
+    const lit = pane !== undefined && traceInLight(pane, player, lampOn, map, spread);
+    return lit === state.lit ? state : { ...state, lit };
+  });
 }
 
 /** The panes when the figure wakes (0009): the open ones stay open, and none is lit. */

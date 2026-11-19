@@ -10,7 +10,7 @@ import { openJournal, stepJournal } from './journal';
 import { spreadOf } from './lamp';
 import { checkRoutes, moversFrom, routesOf, stepMovers } from './mover';
 import { applyHit, hittingCreature, initialOverview, stepDark, wakePoint } from './overview';
-import { openPanes, panesOf } from './pane';
+import { coveredCells, openPanes, panesOf, stepPanes } from './pane';
 import { type GameInput, NO_INPUT, stepPlayer } from './player';
 import { areasOf } from './region';
 import { restsOf, takeRest } from './rest';
@@ -208,6 +208,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   // The figure, the push and the creatures meet the walls standing at the start of the step.
   const walled = withWalls(content, walls, state.shadowWalls);
   const stepped = stepPlayer(state.player, input, walled);
+  const panes = panesOf(content);
   const { creatures, captured } = stepCreatures(
     state.creatures,
     state.captured,
@@ -240,9 +241,12 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
       walled,
       state.tick + 1,
       spread,
+      // A trace under an open pane is hidden (0038).
+      coveredCells(state.panes, panes),
     ),
     solved: state.solved,
-    panes: state.panes,
+    // The light does not hold a lurker in its pane; the pane only knows it is lit.
+    panes: stepPanes(state.panes, panes, stepped, lamp.on, walled, spread),
     rested,
     finished: state.finished,
     presented: state.presented,
