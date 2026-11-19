@@ -221,7 +221,7 @@ test('the floor starts with three snippets and three mirages, and nothing captur
     'mirage',
     'mirage',
   ]);
-  expect(state?.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+  expect(state?.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
 });
 
 test('the floor starts with its 22 movers and draws the person of the reception', async ({

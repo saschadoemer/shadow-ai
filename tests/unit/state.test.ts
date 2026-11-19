@@ -112,7 +112,7 @@ describe('GameState (INV-1)', () => {
       journal: null,
       help: false,
       held: NO_INPUT,
-      captured: { snippet: 0, mirage: 0 },
+      captured: { snippet: 0, mirage: 0, lurker: 0 },
       overview: { current: 5, max: 5 },
       dark: 0,
     });
@@ -176,7 +176,7 @@ describe('update', () => {
         journal: null,
         help: false,
         held: NO_INPUT,
-        captured: { snippet: 0, mirage: 0 },
+        captured: { snippet: 0, mirage: 0, lurker: 0 },
         overview: { current: 3, max: 3 },
         dark: 0,
       },
@@ -208,7 +208,7 @@ describe('update', () => {
       journal: null,
       help: false,
       held: NO_INPUT,
-      captured: { snippet: 0, mirage: 0 },
+      captured: { snippet: 0, mirage: 0, lurker: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
     };
@@ -232,7 +232,7 @@ describe('update', () => {
       journal: null,
       help: false,
       held: NO_INPUT,
-      captured: { snippet: 0, mirage: 0 },
+      captured: { snippet: 0, mirage: 0, lurker: 0 },
       overview: { current: 3, max: 3 },
       dark: 0,
     });
@@ -324,7 +324,7 @@ describe('the creatures in the state (0008)', () => {
     expect(state.creatures).toStrictEqual([
       { species: 'snippet', x: 1070, y: 734, light: 0, home: { x: 1070, y: 734 } },
     ]);
-    expect(state.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(state.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 
   it('rejects a point whose name is no species', () => {
@@ -345,7 +345,7 @@ describe('the creatures in the state (0008)', () => {
     ]);
     const done = run(MAP_ONE, [60, RIGHT_SHINE]);
     expect(done.creatures).toStrictEqual([]);
-    expect(done.captured).toStrictEqual({ snippet: 1, mirage: 0 });
+    expect(done.captured).toStrictEqual({ snippet: 1, mirage: 0, lurker: 0 });
   });
 
   it('survives a JSON round trip with a frozen creature and a count of 1 (INV-1)', () => {
@@ -359,7 +359,7 @@ describe('the creatures in the state (0008)', () => {
     ]);
     const DOWN: GameInput = { ...NONE, down: true };
     const state = run(map, [60, RIGHT_SHINE], [45, DOWN], [30, DOWN_SHINE]);
-    expect(state.captured).toStrictEqual({ snippet: 1, mirage: 0 });
+    expect(state.captured).toStrictEqual({ snippet: 1, mirage: 0, lurker: 0 });
     expect(state.creatures).toHaveLength(1);
     expect(state.creatures[0]?.light).toBe(30);
     expect(state.creatures[0]?.x).toBe(1024);
@@ -572,7 +572,7 @@ describe('shadow walls in the state (0014)', () => {
       expect(state.creatures).toStrictEqual([
         { species: 'snippet', x: 152, y: 108, light: 0, home: { x: 152, y: 120 } },
       ]);
-      expect(state.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+      expect(state.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
       expect(state.shadowWalls).toStrictEqual([{ wall: 0, lit: true, light: 0 }]);
     });
 
@@ -580,7 +580,7 @@ describe('shadow walls in the state (0014)', () => {
       const lifted: GameState = { ...createInitialState(map), shadowWalls: [] };
       const state = run(map, lifted, [60, SHINE]);
       expect(state.creatures).toStrictEqual([]);
-      expect(state.captured).toStrictEqual({ snippet: 1, mirage: 0 });
+      expect(state.captured).toStrictEqual({ snippet: 1, mirage: 0, lurker: 0 });
     });
 
     it('walks through the doorway once the wall is lifted', () => {
@@ -926,7 +926,7 @@ describe('the cleared region in the state (0025)', () => {
     expect(solved.solved).toStrictEqual([{ region: 'sales', at: 1005 }]);
     expect(solved.creatures).toStrictEqual([OUTSIDE]);
     expect(solved.shadowWalls).toStrictEqual([{ wall: 1, lit: false, light: 0 }]);
-    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 
   it('removes nothing in a step that solves nothing', () => {
@@ -946,7 +946,7 @@ describe('the cleared region in the state (0025)', () => {
     expect(woken.dark).toBe(45);
     expect(woken.creatures).toStrictEqual([OUTSIDE]);
     expect(woken.shadowWalls).toStrictEqual([{ wall: 1, lit: false, light: 0 }]);
-    expect(woken.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(woken.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 
   it('keeps them gone: 600 steps later the creature and the wall are still not there', () => {
@@ -1089,17 +1089,17 @@ describe('the upgrades in the state (0029)', () => {
     ]);
     const almost = run(upgraded(SNIPPET_MAP), SNIPPET_MAP, SHINE, 59);
     expect(almost.creatures[0]?.light).toBe(59);
-    expect(almost.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(almost.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
     const captured = update(almost, SHINE, SNIPPET_MAP);
     expect(captured.creatures).toStrictEqual([]);
-    expect(captured.captured).toStrictEqual({ snippet: 1, mirage: 0 });
+    expect(captured.captured).toStrictEqual({ snippet: 1, mirage: 0, lurker: 0 });
   });
 
   it('does not light the same creature without the wider cone: it comes nearer', () => {
     const dark = update(createInitialState(SNIPPET_MAP), SHINE, SNIPPET_MAP);
     expect(dark.creatures[0]?.light).toBe(0);
     expect(dark.creatures[0]?.x).toBeLessThan(128);
-    expect(dark.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(dark.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 
   /**
@@ -1183,10 +1183,10 @@ describe('the second species in the state (0032)', () => {
   /** The apex is (100, 48); the body of the mirage is 40 px along the axis, in the cone. */
   const AHEAD = grassMap(20, 12, { x: 100, y: 60 }, [{ name: 'mirage', x: 100, y: 96 }]);
 
-  it('has two species, and a count for each from the start', () => {
-    expect(SPECIES).toStrictEqual(['snippet', 'mirage']);
-    expect(createInitialState(MAP).captured).toStrictEqual({ snippet: 0, mirage: 0 });
-    expect(newGame(MAP).captured).toStrictEqual({ snippet: 0, mirage: 0 });
+  it('has three species, and a count for each from the start (0032, 0038)', () => {
+    expect(SPECIES).toStrictEqual(['snippet', 'mirage', 'lurker']);
+    expect(createInitialState(MAP).captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
+    expect(newGame(MAP).captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 
   it('makes a mirage from a point of the map, and it comes while the figure looks away', () => {
@@ -1214,7 +1214,7 @@ describe('the second species in the state (0032)', () => {
     expect(state.creatures[0]?.light).toBe(59);
     state = update(state, SHINE, AHEAD);
     expect(state.creatures).toStrictEqual([]);
-    expect(state.captured).toStrictEqual({ snippet: 0, mirage: 1 });
+    expect(state.captured).toStrictEqual({ snippet: 0, mirage: 1, lurker: 0 });
     expect(JSON.parse(JSON.stringify(state))).toStrictEqual(state);
   });
 

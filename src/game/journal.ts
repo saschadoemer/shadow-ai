@@ -42,6 +42,7 @@ export interface EntryText {
 export const ENTRY_TEXT: Readonly<Record<Species, EntryText>> = {
   snippet: { name: textKey('creature.snippet-name'), text: textKey('creature.snippet-text') },
   mirage: { name: textKey('creature.mirage-name'), text: textKey('creature.mirage-text') },
+  lurker: { name: textKey('creature.lurker-name'), text: textKey('creature.lurker-text') },
 };
 
 /** The words of a region's line on the cases tab (0022): `Spuren: 1 von 5`. */

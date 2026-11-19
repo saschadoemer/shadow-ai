@@ -48,9 +48,9 @@ export interface LampState {
 
 /**
  * The creature species (world.md §4), in journal order. 0008 brings the first, 0032 the
- * second.
+ * second, 0038 the third.
  */
-export const SPECIES = ['snippet', 'mirage'] as const;
+export const SPECIES = ['snippet', 'mirage', 'lurker'] as const;
 export type Species = (typeof SPECIES)[number];
 
 /** A creature still in the world (0008). */

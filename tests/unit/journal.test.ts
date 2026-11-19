@@ -103,14 +103,14 @@ describe("the journal's data (0020)", () => {
   });
 
   it('lists the captured species in the order of the species, not of the captures (0032)', () => {
-    expect(entriesOf({ snippet: 0, mirage: 1 })).toStrictEqual(['mirage']);
-    expect(entriesOf({ snippet: 2, mirage: 1 })).toStrictEqual(['snippet', 'mirage']);
+    expect(entriesOf({ snippet: 0, mirage: 1, lurker: 0 })).toStrictEqual(['mirage']);
+    expect(entriesOf({ snippet: 2, mirage: 1, lurker: 0 })).toStrictEqual(['snippet', 'mirage']);
   });
 
   it('lists a species as soon as one of it is captured', () => {
-    expect(entriesOf({ snippet: 0, mirage: 0 })).toStrictEqual([]);
-    expect(entriesOf({ snippet: 1, mirage: 0 })).toStrictEqual(['snippet']);
-    expect(entriesOf({ snippet: 3, mirage: 0 })).toStrictEqual(['snippet']);
+    expect(entriesOf({ snippet: 0, mirage: 0, lurker: 0 })).toStrictEqual([]);
+    expect(entriesOf({ snippet: 1, mirage: 0, lurker: 0 })).toStrictEqual(['snippet']);
+    expect(entriesOf({ snippet: 3, mirage: 0, lurker: 0 })).toStrictEqual(['snippet']);
   });
 });
 

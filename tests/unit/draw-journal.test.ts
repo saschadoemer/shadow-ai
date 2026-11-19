@@ -75,6 +75,7 @@ const CONTENT: SceneContent = {
     snippet: sheet(16, 16),
     // Its own image, so that the two sheets can be told apart.
     mirage: { ...sheet(16, 16), image: { mirage: true } as unknown as ImageBitmap },
+    lurker: { ...sheet(16, 16), image: { lurker: true } as unknown as ImageBitmap },
   },
   overviewSheet: sheet(8, 8),
   shadowWallSheet: sheet(16, 16),
@@ -118,7 +119,7 @@ const reading = (tab: JournalTab, snippets = 0): GameState => ({
   journal: { tab },
   help: false,
   held: NO_INPUT,
-  captured: { snippet: snippets, mirage: 0 },
+  captured: { snippet: snippets, mirage: 0, lurker: 0 },
   overview: { current: 5, max: 5 },
   dark: 0,
 });
@@ -581,7 +582,7 @@ describe('the second entry of the creatures tab (0032)', () => {
   };
 
   it('draws the mirage alone in the first place when only a mirage is captured', () => {
-    const { calls } = shown({ snippet: 0, mirage: 1 });
+    const { calls } = shown({ snippet: 0, mirage: 1, lurker: 0 });
     expect(calls[0]).toBe(`drawSprite ${ENTRY_FRAME} at 16,32`);
     // `Trugbild`: `T` is glyph 52; the text starts with `Ein Bild …`, `E` is glyph 37.
     expect(calls[1]).toBe('drawSprite 52 at 40,35');
@@ -592,7 +593,7 @@ describe('the second entry of the creatures tab (0032)', () => {
     const only = recordingRenderer();
     drawJournal(
       only,
-      { ...reading('creatures'), captured: { snippet: 0, mirage: 1 } },
+      { ...reading('creatures'), captured: { snippet: 0, mirage: 1, lurker: 0 } },
       { tab: 'creatures' },
       CONTENT,
       GERMAN,
@@ -602,9 +603,9 @@ describe('the second entry of the creatures tab (0032)', () => {
   });
 
   it('draws the mirage 72 px below the snippet when both are captured', () => {
-    const both = shown({ snippet: 1, mirage: 2 }).calls;
-    const snippetOnly = shown({ snippet: 1, mirage: 0 }).calls;
-    const mirageOnly = shown({ snippet: 0, mirage: 1 }).calls;
+    const both = shown({ snippet: 1, mirage: 2, lurker: 0 }).calls;
+    const snippetOnly = shown({ snippet: 1, mirage: 0, lurker: 0 }).calls;
+    const mirageOnly = shown({ snippet: 0, mirage: 1, lurker: 0 }).calls;
     // The first entry is what it was; the second is the mirage's, every call 72 px lower.
     expect(both.slice(0, snippetOnly.length)).toStrictEqual(snippetOnly);
     const lower = (call: string): string =>
@@ -614,7 +615,7 @@ describe('the second entry of the creatures tab (0032)', () => {
   });
 
   it('fits the screen with both: no line starts below y = 162', () => {
-    const rows = shown({ snippet: 1, mirage: 1 }).calls.map((call) =>
+    const rows = shown({ snippet: 1, mirage: 1, lurker: 0 }).calls.map((call) =>
       Number(call.slice(call.lastIndexOf(',') + 1)),
     );
     expect(Math.max(...rows)).toBe(162);
@@ -622,7 +623,7 @@ describe('the second entry of the creatures tab (0032)', () => {
 
   it('reads `Mirage` in English', () => {
     // `M` is glyph 45; the text starts with `A picture …`, `A` is glyph 33.
-    const { calls } = shown({ snippet: 0, mirage: 1 }, ENGLISH);
+    const { calls } = shown({ snippet: 0, mirage: 1, lurker: 0 }, ENGLISH);
     expect(calls[1]).toBe('drawSprite 45 at 40,35');
     expect(calls[7]).toBe('drawSprite 33 at 16,54');
   });

@@ -179,7 +179,7 @@ describe('stepDark', () => {
     journal: null,
     help: false,
     held: NO_INPUT,
-    captured: { snippet: 2, mirage: 0 },
+    captured: { snippet: 2, mirage: 0, lurker: 0 },
     overview: { current: 0, max: 3 },
     dark: 1,
   };
@@ -226,7 +226,7 @@ describe('stepDark', () => {
       journal: null,
       help: false,
       held: NO_INPUT,
-      captured: { snippet: 2, mirage: 0 },
+      captured: { snippet: 2, mirage: 0, lurker: 0 },
       overview: { current: 3, max: 3 },
       dark: 45,
     });

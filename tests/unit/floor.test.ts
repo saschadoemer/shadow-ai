@@ -1503,14 +1503,18 @@ describe('the cleared region on the floor (0025)', () => {
       { x: 1224, y: 622 },
       ...MIRAGES,
     ]);
-    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 
   it('removes none when both snippets of Sales were captured before', () => {
     const corridor = start.creatures.slice(0, 1);
-    const solved = solve({ ...ready, creatures: corridor, captured: { snippet: 2, mirage: 0 } });
+    const solved = solve({
+      ...ready,
+      creatures: corridor,
+      captured: { snippet: 2, mirage: 0, lurker: 0 },
+    });
     expect(solved.creatures).toStrictEqual(corridor);
-    expect(solved.captured).toStrictEqual({ snippet: 2, mirage: 0 });
+    expect(solved.captured).toStrictEqual({ snippet: 2, mirage: 0, lurker: 0 });
   });
 
   it('removes the shadow wall of Sales if it still stands, and no other', () => {
@@ -1982,7 +1986,7 @@ describe('the mirages of the floor (0032)', () => {
       'mirage',
     ]);
     expect(mirages.map((creature) => creature.home)).toStrictEqual([...MIRAGES]);
-    expect(start.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(start.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 
   it('stand each on a free cell of Marketing that is reached on foot, at home in its area', () => {
@@ -2066,7 +2070,7 @@ describe('the mirages of the floor (0032)', () => {
       'snippet',
       'snippet',
     ]);
-    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+    expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0, lurker: 0 });
   });
 });
 

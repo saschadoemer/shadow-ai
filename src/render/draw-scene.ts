@@ -55,7 +55,10 @@ export interface SceneContent {
   readonly lampSheet: SpriteSheet;
   /** Four 72x72 frames, one per facing: the cone with the upgrade `wide-cone` (0029). */
   readonly lampWideSheet: SpriteSheet;
-  /** One sheet per species: three 16x16 frames — two free, one frozen (0008). */
+  /**
+   * One sheet per species: three 16x16 frames — two free, one frozen (0008). The lurker's has a
+   * fourth: the lurker in its window (0038).
+   */
   readonly creatureSheets: Readonly<Record<Species, SpriteSheet>>;
   /** Two 8x8 frames: a full heart, an empty heart (0009, 0012). */
   readonly overviewSheet: SpriteSheet;

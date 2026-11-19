@@ -365,7 +365,7 @@ describe('what goes with the shadow of a solved region (0025)', () => {
   const start: GameState = {
     ...createInitialState(ROOMS),
     creatures: [LEFT_HOME, VISITOR, NEIGHBOUR],
-    captured: { snippet: 2, mirage: 0 },
+    captured: { snippet: 2, mirage: 0, lurker: 0 },
   };
 
   it('starts with both walls standing', () => {
@@ -410,7 +410,11 @@ describe('what goes with the shadow of a solved region (0025)', () => {
       shadowWalls: [{ wall: 1, lit: false, light: 0 }],
       creatures: [VISITOR, NEIGHBOUR],
     });
-    expect(clearRegion(start, 'sales', ROOMS).captured).toStrictEqual({ snippet: 2, mirage: 0 });
+    expect(clearRegion(start, 'sales', ROOMS).captured).toStrictEqual({
+      snippet: 2,
+      mirage: 0,
+      lurker: 0,
+    });
   });
 
   it('removes the creatures of every area of a region with two', () => {
