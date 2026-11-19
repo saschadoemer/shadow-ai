@@ -82,8 +82,11 @@ library is added to the job by name.
 
 **What runs where.** One Cloud Run service, `shadow-ai`, in a Google Cloud project of the
 author's own, region `europe-west1` unless the bootstrap was given another. It is public, without
-login, and serves the newest `main`. Until M8 its address is a preview of an unfinished game and
-is not announced; the README names no address.
+login, and serves the newest `main`. Until M8 its address is a preview of an unfinished game. The
+author announces it all the same, from 2026-11-19: the README names it and says that it is a
+preview, and the graphic in `docs/promo/` carries it as text and as a QR code, for talks.
+Whether an announced site needs an imprint or a privacy notice (feature 0030) stays a question
+the author has checked by a qualified person; this spec does not decide law.
 
 **What the author does once.** Creates the project and links it to a billing account, by hand —
 no script holds the right to do either. Then, logged in to `gcloud` as an owner of the project
