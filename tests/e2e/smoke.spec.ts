@@ -474,3 +474,54 @@ test('the game starts with the close not closed', async ({ page }) => {
     })
     .toBeNull();
 });
+
+test('the game opens with the card of its presenter, and a press of E goes on to the call', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const shown = () =>
+    page.evaluate(() => {
+      const state = window.shadowAi?.state;
+      return state === undefined
+        ? undefined
+        : { presented: state.presented === null ? null : 'ended', dialogue: state.dialogue };
+    });
+  // One poll for the whole value: nothing is read from a page that might still be loading.
+  await expect
+    .poll(shown, { message: 'a new game: the card is shown, the call waits under it' })
+    .toStrictEqual({ presented: null, dialogue: call(0) });
+  const canvas = page.locator('canvas#game');
+  /** The game pixel (0, 0), and how many pixels of the dialogue box are not background. */
+  const drawn = () =>
+    canvas.evaluate((element: HTMLCanvasElement) => {
+      // Desktop Chrome in Playwright draws at factor 4; the box is (8, 134, 304, 42).
+      const context = element.getContext('2d');
+      const box = context?.getImageData(32, 536, 1216, 168).data ?? [];
+      let ink = 0;
+      for (let i = 0; i < box.length; i += 4) {
+        if (box[i] !== 0x18 || box[i + 1] !== 0x14 || box[i + 2] !== 0x25) {
+          ink += 1;
+        }
+      }
+      return { corner: Array.from(context?.getImageData(0, 0, 1, 1).data ?? []), ink };
+    });
+  await expect
+    .poll(drawn, { message: 'the card: no map in the corner, no page of the call drawn' })
+    .toStrictEqual({ corner: [0x18, 0x14, 0x25, 255], ink: 0 });
+  await page.keyboard.down('KeyE');
+  await expect
+    .poll(shown, { message: 'E ends the card; the press does not turn the page of the call' })
+    .toStrictEqual({ presented: 'ended', dialogue: call(0) });
+  await expect
+    .poll(async () => (await drawn()).ink, { message: 'the call is drawn in its box' })
+    .toBeGreaterThan(0);
+  expect((await drawn()).corner).toStrictEqual([0x8b, 0x9b, 0xb4, 255]);
+  // Still held, E turns nothing: the call stays on its first page.
+  expect((await shown())?.dialogue).toStrictEqual(call(0));
+  await letGo(page);
+  await page.keyboard.down('KeyE');
+  await expect
+    .poll(async () => (await shown())?.dialogue, { message: 'a new press turns the page' })
+    .toStrictEqual(call(1));
+  await page.keyboard.up('KeyE');
+});

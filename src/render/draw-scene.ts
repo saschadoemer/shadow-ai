@@ -1,5 +1,6 @@
 import { FRAME_HEIGHT, FRAME_WIDTH } from '../engine/sprite';
 import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
+import { cardShown } from '../game/card';
 import { progressOf } from '../game/cases';
 import { type Figure, figuresIn, figuresOf } from '../game/cast';
 import { CREATURE_SIZE, HABITS, isWatched } from '../game/creature';
@@ -26,6 +27,7 @@ import {
 import { pagesOf, speakersOf } from '../game/talk';
 import { FIND_STEPS, tracesOf } from '../game/trace';
 import { type Language, type TextKey, textKey, textOf } from '../text/text';
+import { drawCard } from './draw-card';
 import { drawHelp, drawHelpLabel } from './draw-help';
 import { drawJournal } from './draw-journal';
 import { drawLayer, drawVeil, type Shadow } from './draw-map';
@@ -376,6 +378,7 @@ export function lidHeight(dark: number): number {
  * label.
  * While the help is open (0021, render/draw-help) its box is drawn last but for the lids, over
  * the world and over the journal alike, and the bar does not show the language line.
+ * While the card is shown the frame is the card's alone (0036, render/draw-card).
  */
 export function drawScene(
   renderer: Renderer,
@@ -383,6 +386,10 @@ export function drawScene(
   content: SceneContent,
   settings: SceneSettings,
 ): void {
+  if (cardShown(state)) {
+    drawCard(renderer, content.fontSheet, settings.language);
+    return;
+  }
   if (state.journal !== null) {
     drawJournal(renderer, state, state.journal, content, settings);
     if (state.help) {
