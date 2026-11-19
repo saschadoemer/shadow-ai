@@ -1100,11 +1100,11 @@ describe('the standing figures of the floor (0017)', () => {
     expect(hers !== undefined && 'point' in hers).toBe(true);
   });
 
-  it('gives the floor the officer as its first figure, with her two pages', () => {
+  it('gives the floor the officer as its first figure, with her three pages', () => {
     // The intern of 0033 is the second.
     expect(
       figures.slice(0, 1).map((figure) => [figure.id, figure.x, figure.y, figure.pages.length]),
-    ).toStrictEqual([['officer', 264, 472, 2]]);
+    ).toStrictEqual([['officer', 264, 472, 3]]);
     expect(createInitialState(floor).figures[0]).toStrictEqual({ figure: 0, facing: 'down' });
   });
 
@@ -2104,7 +2104,7 @@ describe('the intern of the floor (0033)', () => {
     expect(
       figures.map((figure) => [figure.id, figure.x, figure.y, figure.pages.length]),
     ).toStrictEqual([
-      ['officer', 264, 472, 2],
+      ['officer', 264, 472, 3],
       ['intern', 616, 488, 1],
     ]);
     expect(start.figures).toStrictEqual([

@@ -296,14 +296,15 @@ describe('the first meeting (0026)', () => {
     expect(closed.lamp).toStrictEqual({ on: false, strength: 1, owned: false, used: false });
   });
 
-  it('says the two pages of 0017 once the lamp is owned, and closing them changes neither field', () => {
+  it('says her own three pages once the lamp is owned, and closing them changes neither field', () => {
     const met = run(MAP, start, NONE, TALK, NONE, TALK, NONE, TALK);
     const again = run(MAP, met, NONE, TALK);
     expect(again.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
-    const closed = run(MAP, again, NONE, TALK, NONE, TALK);
+    // The two pages of 0017 and the third of 0036.
+    const closed = run(MAP, again, NONE, TALK, NONE, TALK, NONE, TALK);
     expect(closed.dialogue).toBeNull();
     expect(closed.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
-    const past = run(MAP, createInitialState(MAP), TALK, NONE, TALK, NONE, TALK);
+    const past = run(MAP, createInitialState(MAP), TALK, NONE, TALK, NONE, TALK, NONE, TALK);
     expect(past.dialogue).toBeNull();
     expect(past.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: true });
   });
@@ -363,5 +364,23 @@ describe('card, call and first meeting in a row (0036)', () => {
     // The same game as one that began past the card, two steps later.
     const met = run(MAP, called(MAP), NONE, TALK, NONE, TALK, NONE, TALK);
     expect(state).toStrictEqual({ ...met, tick: met.tick + 2, presented: 1 });
+  });
+});
+
+describe('the officer after the meeting (0036)', () => {
+  it('says her three pages once the lamp is handed over, and a fourth press closes them', () => {
+    const met = run(MAP, called(MAP), NONE, TALK, NONE, TALK, NONE, TALK);
+    expect(met.lamp.owned).toBe(true);
+    const opened = run(MAP, met, NONE, TALK);
+    expect(opened.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 0 });
+    // The third is the page that names Harmonic; the first meeting did not have it.
+    expect(spoken(MAP, opened)).toStrictEqual([
+      textKey('talk.officer-rules-1'),
+      textKey('talk.officer-rules-2'),
+      textKey('talk.officer-rules-3'),
+    ]);
+    const third = run(MAP, opened, NONE, TALK, NONE, TALK);
+    expect(third.dialogue).toStrictEqual({ speaker: 'figure', index: 0, page: 2 });
+    expect(run(MAP, third, NONE, TALK).dialogue).toBeNull();
   });
 });

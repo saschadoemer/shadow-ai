@@ -53,6 +53,11 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'The lamp holds still whatever stirs in it –',
     'not to drive it away, but to understand it.',
   ].join('\n'),
+  'talk.officer-rules-3': [
+    'Only you have the lamp. Something like Harmonic',
+    'would show the house which AI runs here',
+    'and where the data goes.',
+  ].join('\n'),
   'talk.officer-meeting-2': [
     'Take the lamp: it holds still whatever stirs',
     'in it – not to drive it away, but to',
@@ -79,9 +84,9 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'and nobody got into trouble.',
   ].join('\n'),
   'story.close-2': [
-    'The managing director calls: “Good. But that',
-    'was only the beginning, was it not?” The',
-    'shadow still lies over the other doors.',
+    'The managing director calls: “Good. With',
+    'Harmonic we would have seen it before the',
+    'customer did.” Other doors are still in shadow.',
   ].join('\n'),
   'story.close-3': [
     'This is how far the game goes today.',
@@ -115,8 +120,8 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
   'talk.sales-source-2': ['Where the text goes from there, I never', 'thought about.'].join('\n'),
   'talk.sales-after': [
     'Thanks for asking instead of telling me off.',
-    'Just tell me what I may use for it',
-    'next time.',
+    'Had something like Harmonic shown me where',
+    'the text goes, I would have left it.',
   ].join('\n'),
   'case.sales-outcome': 'Solved: offers went into a chatbot.',
   'policy.sales': [

@@ -22,7 +22,13 @@ export interface CastMember {
 export const CAST: readonly CastMember[] = [
   {
     id: 'officer',
-    pages: [textKey('talk.officer-rules-1'), textKey('talk.officer-rules-2')],
+    // Her third page names Harmonic (0036, vision.md §10); the pages of the first meeting do
+    // not: the line compares it with the lamp, which she has handed over by then.
+    pages: [
+      textKey('talk.officer-rules-1'),
+      textKey('talk.officer-rules-2'),
+      textKey('talk.officer-rules-3'),
+    ],
   },
   // The intern (0033). What he says is picked in every step by `game/hints`; this is the
   // page he has before anything is known.
