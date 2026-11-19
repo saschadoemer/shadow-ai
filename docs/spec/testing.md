@@ -38,7 +38,9 @@ differently. A feature that only adds content leaves both as they are: with the 
 without an upgrade (0029): the cone's spread and the lamp's strength are then what they were.
 A recording hashes what was recorded and no more: since the second species (0032) the two
 tests hash the snippets among the creatures and the count of the snippet, so three mirages
-that rest in Marketing do not change a digest that was taken before they existed.
+that rest in Marketing do not change a digest that was taken before they existed. Since the
+second standing figure (0033) they hash the first figure of the state, the officer, for the
+same reason.
 
 ## 3. Test first
 

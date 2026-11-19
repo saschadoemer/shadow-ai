@@ -133,6 +133,46 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'before it leaves the house.',
     'Image or text – rather once too often.',
   ].join('\n'),
+  'talk.intern-lamp': [
+    'Off to Sales? Go next door first, to the data',
+    'protection officer. She has something you',
+    'are going to need.',
+  ].join('\n'),
+  'talk.intern-sales-start': [
+    'Sales? At the end of the corridor to the east.',
+    'They no longer type their offers themselves.',
+    'Have a look at their screens.',
+  ].join('\n'),
+  'talk.intern-sales-traces': [
+    'Sales has sixteen screens, and you have not',
+    'seen them all. One in every row is worth',
+    'a look.',
+  ].join('\n'),
+  'talk.intern-sales-source': [
+    'You know who it was by now. Pink shirt,',
+    'walks between the desks and the coffee.',
+    'Just ask – nobody bites.',
+  ].join('\n'),
+  'talk.intern-marketing-start': [
+    'Next? Marketing, down at the left of the',
+    'south corridor. Their posters have looked',
+    'suspiciously good lately.',
+  ].join('\n'),
+  'talk.intern-marketing-traces': [
+    'In Marketing it is the screens on the desk',
+    'islands. And do not forget the printer – it',
+    'prints everything twice, after all.',
+  ].join('\n'),
+  'talk.intern-marketing-source': [
+    'Red shirt, goes back and forth between the',
+    'desk islands and the printer. You know the',
+    'answer already – you only have to hear it.',
+  ].join('\n'),
+  'talk.intern-done': [
+    'That is all I know for now. Off the north',
+    'corridor you can get into HR and Accounting',
+    'now – what goes on there, you tell me.',
+  ].join('\n'),
   'talk.sales-everyday': [
     'Three offers by tonight, and each one should',
     'sound as if I had had a week for it.',

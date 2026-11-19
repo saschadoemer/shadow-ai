@@ -250,15 +250,20 @@ test('the floor starts with its eight shadow walls standing and a lamp of streng
   expect(state?.lamp.strength).toBe(1);
 });
 
-test('the floor starts with the officer standing and no dialogue open', async ({ page }) => {
+test('the floor starts with the officer and the intern standing and no dialogue open', async ({
+  page,
+}) => {
   await start(page);
   await expect
     .poll(() => page.evaluate(() => window.shadowAi?.state.figures.length), {
-      message: 'window.shadowAi.state.figures holds the one figure of the floor',
+      message: 'window.shadowAi.state.figures holds the two figures of the floor',
     })
-    .toBe(1);
+    .toBe(2);
   const state = await page.evaluate(() => window.shadowAi?.state);
-  expect(state?.figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
+  expect(state?.figures).toStrictEqual([
+    { figure: 0, facing: 'down' },
+    { figure: 1, facing: 'down' },
+  ]);
   expect(state?.dialogue).toBeNull();
   expect(state?.held.talk).toBe(false);
 });

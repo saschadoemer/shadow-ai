@@ -280,6 +280,58 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the eight pages of the intern in both languages (0033)', () => {
+    const first = (id: Parameters<typeof textKey>[0]): string[] => [
+      textOf(textKey(id), 'de').split('\n')[0] ?? '',
+      textOf(textKey(id), 'en').split('\n')[0] ?? '',
+    ];
+    expect(first('talk.intern-lamp')).toStrictEqual([
+      'Du willst in den Vertrieb? Geh erst nach',
+      'Off to Sales? Go next door first, to the data',
+    ]);
+    expect(first('talk.intern-sales-start')).toStrictEqual([
+      'Vertrieb? Am Ende des Flurs nach Osten.',
+      'Sales? At the end of the corridor to the east.',
+    ]);
+    expect(first('talk.intern-sales-traces')).toStrictEqual([
+      'Im Vertrieb stehen sechzehn Bildschirme, und',
+      'Sales has sixteen screens, and you have not',
+    ]);
+    expect(first('talk.intern-sales-source')).toStrictEqual([
+      'Du weißt doch längst, wer es war. Rosa Hemd,',
+      'You know who it was by now. Pink shirt,',
+    ]);
+    expect(first('talk.intern-marketing-start')).toStrictEqual([
+      'Als Nächstes? Marketing, unten links am',
+      'Next? Marketing, down at the left of the',
+    ]);
+    expect(first('talk.intern-marketing-traces')).toStrictEqual([
+      'Im Marketing sind es die Bildschirme auf den',
+      'In Marketing it is the screens on the desk',
+    ]);
+    expect(first('talk.intern-marketing-source')).toStrictEqual([
+      'Rotes Hemd, pendelt zwischen den Tischinseln',
+      'Red shirt, goes back and forth between the',
+    ]);
+    expect(first('talk.intern-done')).toStrictEqual([
+      'Mehr weiß ich gerade auch nicht. Am Nordflur',
+      'That is all I know for now. Off the north',
+    ]);
+    expect(textOf(textKey('talk.intern-done'), 'de').split('\n')).toStrictEqual([
+      'Mehr weiß ich gerade auch nicht. Am Nordflur',
+      'kommst du jetzt in HR und Buchhaltung rein –',
+      'was da los ist, erzählst du mir.',
+    ]);
+    // Eight keys, each one page of three lines.
+    const ids = Object.keys(TABLE.de).filter((id) => id.startsWith('talk.intern-'));
+    expect(ids).toHaveLength(8);
+    for (const language of LANGUAGES) {
+      for (const id of ids) {
+        expect(TABLE[language][id as TextId].split('\n'), `${language} ${id}`).toHaveLength(3);
+      }
+    }
+  });
+
   it('holds the words of the mirage in both languages (0032)', () => {
     expect(textOf(textKey('creature.mirage-name'), 'de')).toBe('Trugbild');
     expect(textOf(textKey('creature.mirage-name'), 'en')).toBe('Mirage');

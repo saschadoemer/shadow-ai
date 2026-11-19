@@ -62,7 +62,8 @@ tools/
   placeholder-overview.ts the placeholder overview sheet as pure data: two 8x8 frames,
                         a full and an empty heart
   placeholder-person.ts the placeholder colleagues: the figure's frames in four other shirts,
-                        and the data protection officer in a fifth (0017)
+                        the data protection officer in a fifth (0017) and the intern in a
+                        sixth (0033)
   placeholder-dog.ts    the placeholder office dog: one row of 24 16x16 frames, two coats
   placeholder-vacuum.ts the placeholder robot vacuum: two 16x16 frames, the light on and off
   placeholder-drone.ts  the placeholder drone: two 16x16 frames, the rotors as bars and dots
@@ -317,6 +318,18 @@ that hands the lamp over, `officer`, and its pages, `talk.officer-rules-1` and
 `talk.officer-meeting-2`. While the lamp is not owned, `figuresIn(figures, owned)` gives that
 figure the meeting's pages instead of its own; `update` and the scene both build the speakers
 from it, so the box shows the pages the dialogue has.
+
+The **hints** (feature 0033) are data and one rule of `game/hints`. `HINT_FIGURE` names the
+figure that says them, `intern`; `HINTS` holds per case — by its region — three pages, `start`,
+`traces` and `source`; `HINT_LAMP` and `HINT_DONE` are the page before the lamp and the page
+after the last case. `hintOf(lampOwned, progress)` picks one: without the lamp `HINT_LAMP`;
+else the first case of `CASES` that is not solved decides — `start` while no trace of its
+region is found, `traces` while some are and not all, `source` once it is ready (`isReady`);
+with every case solved `HINT_DONE`. `withHint(figures, hint)` gives `HINT_FIGURE` that one page
+instead of its own, after `figuresIn`; `update` and the scene both do it, so the box shows the
+page the dialogue has. The hint is derived on every call and is not in the state; a talk with
+the intern changes what a talk changes and nothing more. `CAST` holds the intern as its second
+member, with the page of the lamp as the page he has before anything is known.
 
 `held` is the last step's input, a plain `GameInput`, every action false at the start
 (`NO_INPUT`); it replaced `talkHeld`, the `talk` of the last step, with feature 0020, because the
@@ -814,7 +827,8 @@ stands; its position is the feet. It is no route point and makes no creature: `i
 `createInitialState`, refuses the map — each with its message — for an id the cast does not have
 (`figure point figure:cellar names no figure`) and for two points with the same id (`more than one
 point object "figure:officer"`). A map without such points has no figures; a figure of the cast
-without a point is simply not there.
+without a point is simply not there. The floor has two: `figure:officer`, and since feature
+0033 `figure:intern`.
 
 **Kinds of rectangle** (features 0022, 0023, 0027). A rectangle has a kind by the prefix of its
 name: `shadow:` a shadow wall, `trace:` a trace, `region:` an area of a region, `rest:` a rest.
@@ -1038,8 +1052,9 @@ frame order of `player.png` — the figure's twenty frames with the shirt in `#3
 `#f77622` or `#b55088` and the lanyard's pixels in the shirt's colour; a person of `look` n uses
 `person-(n + 1)`. The data protection officer's sheet (feature 0017), `officer.png`, comes
 from the same generator: the size and frame order of `player.png`, with the shirt and the
-lanyard's pixels in `#c0cbdc`, the colour of no other shirt. A figure of the cast `<id>` has the
-sheet `public/sprites/<id>.png`, and `main.ts` loads one per member of the cast.
+lanyard's pixels in `#c0cbdc`, the colour of no other shirt. The intern's sheet (feature 0033),
+`intern.png`, is the same with `#0099db`, blue, which no other shirt has. A figure of the cast
+`<id>` has the sheet `public/sprites/<id>.png`, and `main.ts` loads one per member of the cast.
 `tools/placeholder-dog.ts`: `dog.png`, 384x16, one row of 24 frames of 16x16,
 frame = `look` × 12 + facing × 3 + phase, facings in `FACINGS` order, phase 0 stands, 1 steps,
 2 sits; `look` 0 has the coat `#b86f50`, `look` 1 `#ead4aa`, ears, nose and eyes `#3e2731`; left
@@ -1130,7 +1145,10 @@ point, ids 101–105. Every later trace is written at the end of the file, after
 the rests, so that no object of an earlier feature changes its id: the five of Marketing
 (feature 0028) have the ids 124–128. The mirages (feature 0032) are `MIRAGES`, their feet in
 pixels; they become three point objects named `mirage` after those traces, ids 129–131, and
-`nextobjectid` is 132.
+`nextobjectid` is 132. The standing figures are `FIGURES`; the first (`FIRST_FIGURES`, 1), the
+officer, keeps her place after the shadow walls, and every later one is written at the end of
+the file: the intern (feature 0033) is the point `figure:intern` with the id 132, and
+`nextobjectid` is 133.
 `floor.tmj` has the layers `ground` (id 1), `detail` (id 3), `above` (id 4) and `objects` (id 2),
 in that order. Posts are
 derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper

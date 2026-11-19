@@ -218,6 +218,13 @@ Kept as small as the story allows. About thirty figures in all.
 - **The intern.** Sits in the break room, knows everything, likes to say it. This is the hint
   system in diegetic form: a player who is stuck goes to the break room. For a game played at home
   without a walkthrough, this matters more than it sounds.
+  *As built* (feature 0033): he stands, until the art pass gives him a chair — in the middle
+  of tile (38, 30), four tiles below the counter of the break room, in a blue shirt. He says one
+  page, picked from how far the player has come: before the lamp, that the data protection
+  officer has something; per case where the room is, what to look at, and whom to ask; and at
+  the end that he knows no more. The cases are asked in their order, Sales first, whatever the
+  player has begun. He does not see the shadow and never speaks of it: he speaks of rooms,
+  screens, the printer and shirts. Nothing is shown unasked — no arrow, no marker.
 - **The works council.** Not a global character but part of the HR case. Nothing moves there
   without him, and he is the one who asks about fairness. A German specific that gives the case
   depth.

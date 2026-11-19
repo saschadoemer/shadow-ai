@@ -54,7 +54,7 @@ in two.
 | [0030](0030-cloud-run-deployment.md) | Cloud Run deployment | M8 | implemented 2026-11-18 |
 | [0031](0031-the-help-label.md) | The help label | M5 | implemented 2026-11-19 |
 | [0032](0032-the-creature-of-marketing.md) | The creature of Marketing | M6 | implemented 2026-11-19 |
-| [0033](0033-the-intern.md) | The intern | M6 | approved 2026-11-19 |
+| [0033](0033-the-intern.md) | The intern | M6 | implemented 2026-11-19 |
 | [0034](0034-the-close.md) | The close | M6 | approved 2026-11-19 |
 | [0035](0035-the-harmonic-station.md) | The Harmonic station | M5 | approved 2026-11-19 |
 | [0036](0036-lmis-presents.md) | LMIS presents | M5 | approved 2026-11-19 |

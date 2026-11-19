@@ -24,6 +24,9 @@ export const CAST: readonly CastMember[] = [
     id: 'officer',
     pages: [textKey('talk.officer-rules-1'), textKey('talk.officer-rules-2')],
   },
+  // The intern (0033). What he says is picked in every step by `game/hints`; this is the
+  // page he has before anything is known.
+  { id: 'intern', pages: [textKey('talk.intern-lamp')] },
 ];
 
 /**

@@ -1,6 +1,6 @@
 # 0033 — The intern
 
-**Status:** approved 2026-11-19
+**Status:** implemented 2026-11-19
 **Milestone:** M6
 **Drafted:** 2026-11-19
 
@@ -48,7 +48,7 @@ the id 132; `nextobjectid` is 133. He stands in the middle of tile (38, 30), fee
 From every place where a coffee machine is in reach (0027) he is out of reach, 40 px, so a
 press of `E` at a machine still takes the coffee. No route passes within 24 px of him.
 
-His sheet, `public/sprites/intern.png`, is 80x96: the twenty 16x24 frames of a figure in a
+His sheet, `public/sprites/intern.png`, is 320x24: the twenty 16x24 frames of a figure in a
 shirt of `#0099db`, blue, which no other shirt of the floor has.
 
 ### What he says
@@ -115,7 +115,7 @@ them (0029). A feature that adds a case changes this page with it.
    what a talk changes (0017): his facing.
 9. The scene draws him from his own sheet, and the page of the hint that holds at that
    moment, in both languages.
-10. `intern.png` is 80x96, equals its generator's output, passes the asset test, and its
+10. `intern.png` is 320x24, equals its generator's output, passes the asset test, and its
     shirt colour is the shirt of no other sheet.
 11. `de` and `en` hold the eight keys of the spec, each a page by the rule of 0017.
 12. A game in which nobody speaks to him steps exactly as before: the 600 recorded steps of
@@ -171,7 +171,10 @@ lamp. Arrow keys or WASD walk, `Space` holds the lamp, `E` or `Enter` talks.
 - Is one page enough, or does he need a first line of his own before the hint?
 - Would you have found him without being told that he is there?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–14. Feel: he helps without taking the finding away —
+yes; he sounds like somebody who knows everything and likes to say it, and is still likeable —
+yes; one page is enough, he needs no first line of his own; the author would have found him
+without being told that he is there.
 
 ## Open questions
 

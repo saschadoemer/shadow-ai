@@ -10,6 +10,7 @@ import { type PaletteColour, SHADOW_COLOUR } from '../../src/render/palette';
 import {
   encodeDogPng,
   encodeDronePng,
+  encodeInternPng,
   encodeLampPng,
   encodeLampWidePng,
   encodeMiragePng,
@@ -54,6 +55,7 @@ import {
   renderOverview,
 } from '../../tools/placeholder-overview.ts';
 import {
+  INTERN_SHIRT,
   OFFICER_SHIRT,
   PERSON_SHIRTS,
   renderFigure,
@@ -620,6 +622,40 @@ describe('the movers’ sheets (0015)', () => {
   const pixel = (data: Uint8Array, width: number, x: number, y: number) => [
     ...data.slice((y * width + x) * 4, (y * width + x) * 4 + 4),
   ];
+
+  it('intern.png equals its generator and is the officer in a blue shirt (0033)', () => {
+    const png = read('intern.png');
+    expect([png.width, png.height]).toStrictEqual([320, 24]);
+    expect(encodeInternPng().equals(file('intern.png'))).toBe(true);
+    expect(encodeInternPng().equals(encodeInternPng())).toBe(true);
+    expect(Buffer.from(renderFigure(INTERN_SHIRT)).equals(png.data)).toBe(true);
+    // Pixel for pixel the officer's sheet, with the shirt's colour swapped.
+    const officer = renderFigure(OFFICER_SHIRT);
+    const intern = renderFigure(INTERN_SHIRT);
+    const hex = (data: Uint8Array, i: number): string =>
+      `#${[data[i], data[i + 1], data[i + 2]]
+        .map((c) => (c ?? 0).toString(16).padStart(2, '0'))
+        .join('')}`;
+    let shirt = 0;
+    for (let i = 0; i < officer.length; i += 4) {
+      expect(intern[i + 3], `alpha at ${i}`).toBe(officer[i + 3]);
+      if (officer[i + 3] !== 255) {
+        continue;
+      }
+      if (hex(officer, i) === OFFICER_SHIRT) {
+        expect(hex(intern, i), `shirt at ${i}`).toBe(INTERN_SHIRT);
+        shirt += 1;
+      } else {
+        expect(hex(intern, i), `pixel at ${i}`).toBe(hex(officer, i));
+      }
+    }
+    expect(shirt).toBeGreaterThan(0);
+  });
+
+  it('gives the intern a shirt no other figure has (0033)', () => {
+    expect(INTERN_SHIRT).toBe('#0099db');
+    expect([...PERSON_SHIRTS, OFFICER_SHIRT]).not.toContain(INTERN_SHIRT);
+  });
 
   it('officer.png equals its generator and is the player in a light grey shirt, without the lanyard (0017)', () => {
     const png = read('officer.png');

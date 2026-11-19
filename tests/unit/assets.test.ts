@@ -73,6 +73,10 @@ describe('every PNG under public/ is a palette PNG (INV-6)', () => {
     expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/lamp-wide.png');
   });
 
+  it("checks the intern's sheet under public/sprites/ with every other PNG (0033)", () => {
+    expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/intern.png');
+  });
+
   it('checks the mirage sheet under public/sprites/ with every other PNG (0032)', () => {
     expect(globSync('public/**/*.png', { cwd: ROOT })).toContain('public/sprites/mirage.png');
   });

@@ -3,6 +3,7 @@ import { type Box, type Point, TILE_SIZE, type TileMap } from '../engine/tiled';
 import { progressOf } from '../game/cases';
 import { type Figure, figuresIn, figuresOf } from '../game/cast';
 import { CREATURE_SIZE, HABITS, isWatched } from '../game/creature';
+import { hintOf, withHint } from '../game/hints';
 import { FRAME_APEX, LAMP_HEIGHT, WIDE_CONE, WIDE_FRAME_APEX } from '../game/lamp';
 import { DOG_LOOKS, MOVER_SIZE, routesOf } from '../game/mover';
 import { noticeOf } from '../game/notice';
@@ -498,18 +499,20 @@ export function drawScene(
   }
   // The label that names the help's key (0031): in every frame of the world, whatever else is on it.
   drawHelpLabel(renderer, content.fontSheet, language);
+  const progress = progressOf(state, content.map);
   const page =
     state.dialogue === null
       ? undefined
       : pagesOf(
           state.dialogue,
           speakersOf(
-            // As in `update`: without the lamp the officer says the first meeting (0026).
-            figuresIn(figures, state.lamp.owned),
+            // As in `update`: without the lamp the officer says the first meeting (0026), and
+            // the intern says the hint of this moment (0033).
+            withHint(figuresIn(figures, state.lamp.owned), hintOf(state.lamp.owned, progress)),
             state.movers,
             routesOf(content.map.points),
             undefined,
-            progressOf(state, content.map),
+            progress,
           ),
         )[state.dialogue.page];
   const notice = noticeOf(state);

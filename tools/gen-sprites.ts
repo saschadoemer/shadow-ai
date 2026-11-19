@@ -17,7 +17,13 @@ import {
   OVERVIEW_SHEET_WIDTH,
   renderOverview,
 } from './placeholder-overview.ts';
-import { OFFICER_SHIRT, PERSON_SHIRTS, renderFigure, renderPerson } from './placeholder-person.ts';
+import {
+  INTERN_SHIRT,
+  OFFICER_SHIRT,
+  PERSON_SHIRTS,
+  renderFigure,
+  renderPerson,
+} from './placeholder-person.ts';
 import { renderPlayer, SHEET_HEIGHT, SHEET_WIDTH } from './placeholder-player.ts';
 import {
   renderShadowWall,
@@ -42,7 +48,8 @@ import { renderVeil, VEIL_SHEET_HEIGHT, VEIL_SHEET_WIDTH } from './placeholder-v
  * tools/placeholder-trace.ts; and public/sprites/shadow-veil.png of 0023 from
  * tools/placeholder-veil.ts; and public/sprites/lamp-wide.png of 0029 from
  * tools/placeholder-lamp.ts; and public/sprites/mirage.png of 0032 from
- * tools/placeholder-mirage.ts. Deterministic — pngjs writes no timestamp — and Node
+ * tools/placeholder-mirage.ts; and public/sprites/intern.png of 0033 from
+ * tools/placeholder-person.ts. Deterministic — pngjs writes no timestamp — and Node
  * runs this TypeScript file directly, without a transpiler.
  */
 
@@ -95,6 +102,13 @@ export function encodePersonPng(look: number): Buffer {
 export function encodeOfficerPng(): Buffer {
   const png = new PNG({ width: SHEET_WIDTH, height: SHEET_HEIGHT });
   png.data = Buffer.from(renderFigure(OFFICER_SHIRT));
+  return PNG.sync.write(png);
+}
+
+/** The intern (0033): the second figure of the cast with a sheet of its own. */
+export function encodeInternPng(): Buffer {
+  const png = new PNG({ width: SHEET_WIDTH, height: SHEET_HEIGHT });
+  png.data = Buffer.from(renderFigure(INTERN_SHIRT));
   return PNG.sync.write(png);
 }
 
@@ -157,6 +171,7 @@ if (import.meta.main) {
   writeFileSync('public/sprites/shadow-wall.png', encodeShadowWallPng());
   writeFileSync('public/sprites/font.png', encodeFontPng());
   writeFileSync('public/sprites/officer.png', encodeOfficerPng());
+  writeFileSync('public/sprites/intern.png', encodeInternPng());
   writeFileSync('public/sprites/trace.png', encodeTracePng());
   writeFileSync('public/sprites/shadow-veil.png', encodeVeilPng());
 }

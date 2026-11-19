@@ -9,6 +9,7 @@ import { type Box, EMPTY, type Point, parseTileMap, parseTileset } from '../../s
 import { CASES, isReady, progressOf } from '../../src/game/cases';
 import { COLLEAGUES, figuresOf, pagesOfRoute } from '../../src/game/cast';
 import { isWatched, MIRAGE_NOTICE_RADIUS } from '../../src/game/creature';
+import { HINT_FIGURE, HINTS } from '../../src/game/hints';
 import { REGION_NAME } from '../../src/game/journal';
 import { checkRoutes, isRoutePoint, routesOf } from '../../src/game/mover';
 import { NOTICE_SHADOW_TOO_DENSE, noticeOf } from '../../src/game/notice';
@@ -26,6 +27,7 @@ import {
   CLOSED_DOORS,
   CORRIDORS,
   FIGURES,
+  FIRST_FIGURES,
   FIRST_TRACES,
   FLOOR_HEIGHT,
   FLOOR_WIDTH,
@@ -502,9 +504,9 @@ describe('the routes of the floor (0015)', () => {
     ]);
     const json = floorJson();
     expect(json.layers[3].objects.map((object) => object.id)).toStrictEqual(
-      Array.from({ length: 131 }, (_, i) => i + 1),
+      Array.from({ length: 132 }, (_, i) => i + 1),
     );
-    expect(json.nextobjectid).toBe(132);
+    expect(json.nextobjectid).toBe(133);
   });
 
   it('shows the person and the dog of the reception in the first view, not the vacuum', () => {
@@ -950,7 +952,7 @@ describe('the shadow walls of the floor (0014)', () => {
       TABLE.map(([region], i) => [92 + i, `shadow:${region}`]),
     );
     expect(objects.slice(91, 99).some((object) => 'point' in object)).toBe(false);
-    expect(floor.points).toHaveLength(94);
+    expect(floor.points).toHaveLength(95);
   });
 
   it('builds the boxes from the doorway cells of the layout', () => {
@@ -1081,7 +1083,8 @@ describe('the standing figures of the floor (0017)', () => {
   const figures = figuresOf(floor.points);
 
   it('holds the point figure:officer after the rectangles, with the id 100', () => {
-    expect(FIGURES).toStrictEqual([{ id: 'officer', at: OFFICER }]);
+    // The first of the figures; the intern of 0033 follows her.
+    expect(FIGURES[0]).toStrictEqual({ id: 'officer', at: OFFICER });
     // The 91st point; the mirages of 0032 follow it.
     expect(floor.points[90]).toStrictEqual({ name: 'figure:officer', ...OFFICER });
     const objects = floorJson().layers[3].objects;
@@ -1096,11 +1099,12 @@ describe('the standing figures of the floor (0017)', () => {
     expect(hers !== undefined && 'point' in hers).toBe(true);
   });
 
-  it('gives the floor one figure, the officer, with her two pages', () => {
+  it('gives the floor the officer as its first figure, with her two pages', () => {
+    // The intern of 0033 is the second.
     expect(
-      figures.map((figure) => [figure.id, figure.x, figure.y, figure.pages.length]),
+      figures.slice(0, 1).map((figure) => [figure.id, figure.x, figure.y, figure.pages.length]),
     ).toStrictEqual([['officer', 264, 472, 2]]);
-    expect(createInitialState(floor).figures).toStrictEqual([{ figure: 0, facing: 'down' }]);
+    expect(createInitialState(floor).figures[0]).toStrictEqual({ figure: 0, facing: 'down' });
   });
 
   it("stands in the middle of tile (16, 29), in the data protection officer's office", () => {
@@ -1161,10 +1165,12 @@ describe('the colleagues of the floor and their lines (0018)', () => {
     }
   });
 
-  it('has five speakers: the officer, then the four colleagues in the order of the movers', () => {
+  it('has six speakers: the two standing figures, then the four colleagues in the order of the movers', () => {
     const speakers = speakersOf(figuresOf(floor.points), start.movers, routes);
     expect(speakers.map((speaker) => [speaker.speaker, speaker.index])).toStrictEqual([
       ['figure', 0],
+      // The intern (0033).
+      ['figure', 1],
       ['mover', 0],
       ['mover', 1],
       ['mover', 2],
@@ -1231,7 +1237,7 @@ describe('the traces of the floor (0022)', () => {
     );
     expect(objects.some((object) => 'point' in object)).toBe(false);
     expect(floor.rects.slice(8, 13).every((rect) => rect.name === 'trace:sales')).toBe(true);
-    expect(floor.points).toHaveLength(94);
+    expect(floor.points).toHaveLength(95);
   });
 
   it('lie in Sales, each on a desk with a screen whose chair stands on the cell below', () => {
@@ -1376,7 +1382,7 @@ describe('the areas of the regions on the floor (0023)', () => {
     expect(wallsOf(floor.rects)).toHaveLength(8);
     // The five of 0022; the five of 0028 came later.
     expect(tracesOf(floor.rects)).toHaveLength(10);
-    expect(floor.points).toHaveLength(94);
+    expect(floor.points).toHaveLength(95);
   });
 
   it('give every room of a region its area, with exactly the cells of the room', () => {
@@ -1564,7 +1570,7 @@ describe('the rests of the floor (0027)', () => {
     // The five of 0022; the five of 0028 came later.
     expect(tracesOf(floor.rects)).toHaveLength(10);
     expect(areas).toHaveLength(10);
-    expect(floor.points).toHaveLength(94);
+    expect(floor.points).toHaveLength(95);
   });
 
   it('lie each on a counter with a coffee machine, and the floor has no such tile without one', () => {
@@ -1943,15 +1949,13 @@ describe('the mirages of the floor (0032)', () => {
     ]);
   });
 
-  it('are the last three objects of the file, points with the ids 129 to 131', () => {
+  it('are three points with the ids 129 to 131, after the traces of 0028 and before the intern of 0033', () => {
     const objects = floorJson().layers[3].objects;
-    expect(objects).toHaveLength(131);
-    expect(objects.slice(128).map((object) => [object.id, object.name])).toStrictEqual(
+    expect(objects.slice(128, 131).map((object) => [object.id, object.name])).toStrictEqual(
       [129, 130, 131].map((id) => [id, 'mirage']),
     );
-    expect(objects.slice(128).every((object) => 'point' in object)).toBe(true);
-    expect(floorJson().nextobjectid).toBe(132);
-    expect(floor.points.slice(91)).toStrictEqual(
+    expect(objects.slice(128, 131).every((object) => 'point' in object)).toBe(true);
+    expect(floor.points.slice(91, 94)).toStrictEqual(
       TABLE.map(([, , feet]) => ({ name: 'mirage', ...feet })),
     );
   });
@@ -2059,5 +2063,136 @@ describe('the mirages of the floor (0032)', () => {
       'snippet',
     ]);
     expect(solved.captured).toStrictEqual({ snippet: 0, mirage: 0 });
+  });
+});
+
+describe('the intern of the floor (0033)', () => {
+  const INTERN = { x: 616, y: 488 };
+  const TALK: GameInput = { ...NO_INPUT, talk: true };
+  const figures = figuresOf(floor.points);
+  const start = createInitialState(floor);
+  const rests = restsOf(floor.rects);
+  const breakRoom = ROOMS.find((room) => room.name === 'break room');
+
+  it('is the second figure of the layout, and the only one written at the end of the file', () => {
+    expect(FIGURES[1]).toStrictEqual({ id: 'intern', at: INTERN });
+    expect(FIGURES).toHaveLength(2);
+    expect(FIRST_FIGURES).toBe(1);
+    expect(HINT_FIGURE).toBe('intern');
+  });
+
+  it('is the last object of the file, the point figure:intern with the id 132', () => {
+    const objects = floorJson().layers[3].objects;
+    expect(objects).toHaveLength(132);
+    const his = objects[131];
+    expect([his?.id, his?.name, his?.x, his?.y]).toStrictEqual([132, 'figure:intern', 616, 488]);
+    expect(his !== undefined && 'point' in his).toBe(true);
+    expect(floorJson().nextobjectid).toBe(133);
+    expect(floor.points.at(-1)).toStrictEqual({ name: 'figure:intern', ...INTERN });
+  });
+
+  it('leaves the 131 objects of 0032 and before exactly as they were', () => {
+    // SHA-256 over the first 131 objects, recorded from the generator before this feature.
+    const before = JSON.stringify(floorJson().layers[3].objects.slice(0, 131));
+    expect(createHash('sha256').update(before).digest('hex')).toBe(
+      'db04c22504878d1281eac2cb8dd3e7c9e789f5ef8ac201420bead11da87d8e92',
+    );
+  });
+
+  it('gives the floor two figures: the officer, then the intern with one page', () => {
+    expect(
+      figures.map((figure) => [figure.id, figure.x, figure.y, figure.pages.length]),
+    ).toStrictEqual([
+      ['officer', 264, 472, 2],
+      ['intern', 616, 488, 1],
+    ]);
+    expect(start.figures).toStrictEqual([
+      { figure: 0, facing: 'down' },
+      { figure: 1, facing: 'down' },
+    ]);
+  });
+
+  it('stands in the middle of tile (38, 30), in the break room, four tiles below the counter', () => {
+    expect(figures[1]).toMatchObject(INTERN);
+    expect([(INTERN.x - 8) / 16, (INTERN.y - 8) / 16]).toStrictEqual([38, 30]);
+    const { c0, c1, r0, r1 } = breakRoom?.cells ?? { c0: 0, c1: -1, r0: 0, r1: -1 };
+    expect(38 >= c0 && 38 <= c1 && 30 >= r0 && 30 <= r1).toBe(true);
+    // The counter with the two coffee machines is row 26.
+    expect(floor.detail[cell(35, 26)]).toBe(COUNTER_COFFEE);
+    expect(floor.detail[cell(42, 26)]).toBe(COUNTER_COFFEE);
+    expect(floor.detail[cell(38, 26)]).toBe(COUNTER);
+  });
+
+  it('is free of every solid box and reached on foot from the spawn', () => {
+    expect(figures[1]).toMatchObject(INTERN);
+    expect(floor.solids[cell(38, 30)]).toStrictEqual([]);
+    expect(blocked(boxAt(INTERN))).toBe(false);
+    expect(reached(INTERN)).toBe(true);
+  });
+
+  it('has no route passing within 24 px of him', () => {
+    expect(figures[1]).toMatchObject(INTERN);
+    for (const route of routesOf(floor.points)) {
+      route.points.forEach((from, i) => {
+        const to = route.points[(i + 1) % route.points.length] ?? from;
+        const x = Math.min(Math.max(INTERN.x, Math.min(from.x, to.x)), Math.max(from.x, to.x));
+        const y = Math.min(Math.max(INTERN.y, Math.min(from.y, to.y)), Math.max(from.y, to.y));
+        expect(
+          Math.hypot(x - INTERN.x, y - INTERN.y),
+          `${route.name} leg ${i + 1}`,
+        ).toBeGreaterThan(24);
+      });
+    }
+  });
+
+  it('is out of reach from every place where a coffee machine is in reach: the coffee stays a press', () => {
+    const { c0, c1, r0, r1 } = breakRoom?.cells ?? { c0: 0, c1: -1, r0: 0, r1: -1 };
+    const speakers = speakersOf(figures, [], []);
+    expect(speakers.map((speaker) => [speaker.x, speaker.y])).toContainEqual([INTERN.x, INTERN.y]);
+    let places = 0;
+    for (let x = c0 * 16; x <= (c1 + 1) * 16; x += 2) {
+      for (let y = r0 * 16; y <= (r1 + 1) * 16; y += 2) {
+        if (!reached({ x, y }) || restInReach({ x, y }, rests, floor) === null) {
+          continue;
+        }
+        places += 1;
+        expect(speakerInReach({ x, y }, speakers, floor), `(${x}, ${y})`).toBeNull();
+      }
+    }
+    expect(places).toBeGreaterThan(0);
+  });
+
+  it('takes a coffee at the machine and opens no talk there', () => {
+    // Below the left machine of the break room, cell (35, 26).
+    const there: GameState = {
+      ...start,
+      player: { ...start.player, x: 568, y: 440 },
+      overview: { current: 2, max: 5 },
+    };
+    const drunk = update(there, TALK, floor);
+    expect(drunk.dialogue).toBeNull();
+    expect(drunk.overview).toStrictEqual({ current: 5, max: 5 });
+  });
+
+  it('is spoken to from 24 px below him, and has one page', () => {
+    const there: GameState = {
+      ...start,
+      player: { ...start.player, x: INTERN.x, y: INTERN.y + 24 },
+    };
+    expect(reached(there.player)).toBe(true);
+    const opened = update(there, TALK, floor);
+    expect(opened.dialogue).toStrictEqual({ speaker: 'figure', index: 1, page: 0 });
+    expect(opened.figures[1]).toStrictEqual({ figure: 1, facing: 'down' });
+    expect(opened.player.facing).toBe('up');
+    const closed = update(update(opened, NO_INPUT, floor), TALK, floor);
+    expect(closed.dialogue).toBeNull();
+  });
+
+  it('has hints for every case that has traces on the floor', () => {
+    const regions = [...new Set(tracesOf(floor.rects).map((trace) => trace.region))];
+    expect(regions).toStrictEqual(CASES.map((entry) => entry.region));
+    for (const region of regions) {
+      expect(HINTS[region], region).toBeDefined();
+    }
   });
 });
