@@ -63,6 +63,19 @@ export function entriesOf(captured: Captured): Species[] {
   return SPECIES.filter((species) => captured[species] > 0);
 }
 
+/** Two entries fit the screen: the creatures tab has pages of two (0038). */
+export const ENTRIES_PER_PAGE = 2;
+
+/** How many pages the creatures tab has: at least one, also while nothing is captured. */
+export function entryPages(captured: Captured): number {
+  return Math.max(1, Math.ceil(entriesOf(captured).length / ENTRIES_PER_PAGE));
+}
+
+/** The entries of one page of the creatures tab, in SPECIES order. */
+export function entriesOn(captured: Captured, page: number): Species[] {
+  return entriesOf(captured).slice(page * ENTRIES_PER_PAGE, (page + 1) * ENTRIES_PER_PAGE);
+}
+
 /**
  * The state after a press that opens the journal, or null when `journal` is not pressed: the
  * journal on its first tab, the tick grown, the input remembered. Nothing else changes,
@@ -73,13 +86,20 @@ export function openJournal(state: GameState, input: GameInput): GameState | nul
   if (!pressed(state.held, input, 'journal')) {
     return null;
   }
-  return { ...state, tick: state.tick + 1, held: input, journal: { tab: JOURNAL_TABS[0] } };
+  return {
+    ...state,
+    tick: state.tick + 1,
+    held: input,
+    journal: { tab: JOURNAL_TABS[0], page: 0 },
+  };
 }
 
 /**
  * One step with the journal open: the tick grows and the input is remembered. A press of
  * `journal` closes it. Otherwise a press of `right` alone turns to the next tab and a press of
- * `left` alone to the one before; at either end the tab stays. Nothing else changes.
+ * `left` alone to the one before; at either end the tab stays. A turn to another tab opens it
+ * on page 0. On the creatures tab a press of `down` alone turns to the next page and a press
+ * of `up` alone to the one before; at either end the page stays (0038). Nothing else changes.
  */
 export function stepJournal(state: GameState, journal: JournalState, input: GameInput): GameState {
   const stepped = { ...state, tick: state.tick + 1, held: input };
@@ -88,6 +108,16 @@ export function stepJournal(state: GameState, journal: JournalState, input: Game
   }
   const turn =
     (pressed(state.held, input, 'right') ? 1 : 0) - (pressed(state.held, input, 'left') ? 1 : 0);
-  const index = JOURNAL_TABS.indexOf(journal.tab) + turn;
-  return { ...stepped, journal: { tab: JOURNAL_TABS[index] ?? journal.tab } };
+  const tab = JOURNAL_TABS[JOURNAL_TABS.indexOf(journal.tab) + turn] ?? journal.tab;
+  if (tab !== journal.tab) {
+    return { ...stepped, journal: { tab, page: 0 } };
+  }
+  if (tab !== 'creatures') {
+    return { ...stepped, journal };
+  }
+  const leaf =
+    (pressed(state.held, input, 'down') ? 1 : 0) - (pressed(state.held, input, 'up') ? 1 : 0);
+  const last = entryPages(state.captured) - 1;
+  const page = Math.min(Math.max(journal.page + leaf, 0), last);
+  return { ...stepped, journal: { tab, page } };
 }

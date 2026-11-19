@@ -367,7 +367,7 @@ describe('the help in the scene (0021)', () => {
   });
 
   it('lies over the journal: the journal, then the help', () => {
-    const reading = playing({ journal: { tab: 'cases' } });
+    const reading = playing({ journal: { tab: 'cases', page: 0 } });
     const without = scene(reading);
     expect(without[0]).toBe('clear #181425');
     expect(without).toContain('fillRect 8,22 304x2 #3a4466');

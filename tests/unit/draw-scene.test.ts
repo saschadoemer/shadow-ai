@@ -1726,7 +1726,7 @@ describe('the help label in the scene (0031)', () => {
 
   it('is not on the screen of the journal, with or without the help over it', () => {
     for (const help of [false, true]) {
-      const calls = whole(playing({ journal: { tab: 'policy' }, help }));
+      const calls = whole(playing({ journal: { tab: 'policy', page: 0 }, help }));
       for (const call of GERMAN_LABEL) {
         expect(calls, `help ${help}: ${call}`).not.toContain(call);
       }
@@ -1742,7 +1742,7 @@ describe('the help label in the scene (0031)', () => {
         playing(),
         playing({ dialogue: { speaker: 'figure', index: 0, page: 0 } }),
         playing({ help: true }),
-        playing({ journal: { tab: 'cases' } }),
+        playing({ journal: { tab: 'cases', page: 0 } }),
       ]) {
         const seen = recordingRenderer();
         drawScene(seen, scene, content, settings);
@@ -2113,7 +2113,7 @@ describe('the card in the scene (0036)', () => {
     // The language was switched in this step: its line is not on the card either.
     expect(drawn(card(), { language: 'de', switchedAt: QUIET_TICK }).calls).toStrictEqual(plain);
     expect(drawn(card({ help: true })).calls).toStrictEqual(plain);
-    expect(drawn(card({ journal: { tab: 'creatures' } })).calls).toStrictEqual(plain);
+    expect(drawn(card({ journal: { tab: 'creatures', page: 0 } })).calls).toStrictEqual(plain);
     expect(drawn(card({ overview: { current: 1, max: 5 } })).calls).toStrictEqual(plain);
     expect(plain.some((call) => call.startsWith('fillRect'))).toBe(false);
   });

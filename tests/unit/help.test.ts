@@ -75,7 +75,7 @@ describe('opening the help (0021)', () => {
   });
 
   it('opens over the journal on the cases, which keeps its tab', () => {
-    expect(reading.journal).toStrictEqual({ tab: 'cases' });
+    expect(reading.journal).toStrictEqual({ tab: 'cases', page: 0 });
     expect(update(reading, HELP, OPEN)).toStrictEqual({
       ...reading,
       tick: reading.tick + 1,
@@ -146,7 +146,7 @@ describe('the help while it is open (0021)', () => {
   it('turns no tab of the journal under it, and a press of `journal` does not close that', () => {
     const over = run(OPEN, reading, HELP, NONE, RIGHT, NONE, JOURNAL, NONE);
     expect(over.help).toBe(true);
-    expect(over.journal).toStrictEqual({ tab: 'cases' });
+    expect(over.journal).toStrictEqual({ tab: 'cases', page: 0 });
   });
 });
 
@@ -190,9 +190,9 @@ describe('closing the help (0021)', () => {
   it('leaves the journal on its tab when `right` is held since before the closing', () => {
     const closed = run(OPEN, reading, HELP, RIGHT, { ...RIGHT, help: true });
     expect(closed.help).toBe(false);
-    expect(closed.journal).toStrictEqual({ tab: 'cases' });
-    expect(update(closed, RIGHT, OPEN).journal).toStrictEqual({ tab: 'cases' });
-    expect(run(OPEN, closed, NONE, RIGHT).journal).toStrictEqual({ tab: 'policy' });
+    expect(closed.journal).toStrictEqual({ tab: 'cases', page: 0 });
+    expect(update(closed, RIGHT, OPEN).journal).toStrictEqual({ tab: 'cases', page: 0 });
+    expect(run(OPEN, closed, NONE, RIGHT).journal).toStrictEqual({ tab: 'policy', page: 0 });
   });
 });
 
@@ -306,7 +306,8 @@ describe('a game in which the help is never opened (0021)', () => {
     // The figure that was recorded: the officer, before the intern of 0033.
     state.figures.slice(0, 1),
     state.dialogue,
-    state.journal,
+    // The journal as it was recorded: its tab, before the page of 0038.
+    state.journal === null ? null : { tab: state.journal.tab },
     { snippet: state.captured.snippet },
     state.overview,
     state.dark,

@@ -355,11 +355,13 @@ test('J opens the journal on the creatures and closes it again', async ({ page }
   await page.keyboard.down('KeyJ');
   await expect.poll(journal, { message: 'J opens the journal' }).toStrictEqual({
     tab: 'creatures',
+    page: 0,
   });
   await page.keyboard.up('KeyJ');
   await page.keyboard.down('ArrowRight');
   await expect.poll(journal, { message: 'the right arrow turns to the cases' }).toStrictEqual({
     tab: 'cases',
+    page: 0,
   });
   await page.keyboard.up('ArrowRight');
   await expect

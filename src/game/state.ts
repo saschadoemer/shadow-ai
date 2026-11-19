@@ -157,6 +157,8 @@ export type JournalTab = (typeof JOURNAL_TABS)[number];
 /** The open journal (0020). What its tabs show is derived from the rest of the state. */
 export interface JournalState {
   readonly tab: JournalTab;
+  /** The page of the creatures tab, from 0 (0038). 0 on the other tabs. */
+  readonly page: number;
 }
 
 /** How many creatures of each species were captured. */

@@ -748,7 +748,12 @@ describe('the journal in the state (0020)', () => {
   it('opens on the floor with a press and closes with the next, and nothing has moved', () => {
     const start = createInitialState(FLOOR_MAP);
     const open = update(start, JOURNAL, FLOOR_MAP);
-    expect(open).toStrictEqual({ ...start, tick: 1, held: JOURNAL, journal: { tab: 'creatures' } });
+    expect(open).toStrictEqual({
+      ...start,
+      tick: 1,
+      held: JOURNAL,
+      journal: { tab: 'creatures', page: 0 },
+    });
     const closed = update(update(open, NONE, FLOOR_MAP), JOURNAL, FLOOR_MAP);
     expect(closed).toStrictEqual({ ...start, tick: 3, held: JOURNAL });
   });
@@ -1057,7 +1062,7 @@ describe('the upgrades in the state (0029)', () => {
       update(start, { ...NONE, talk: true }, TALKERS_MAP),
       update(start, { ...NONE, journal: true }, TALKERS_MAP),
       update(start, { ...NONE, help: true }, TALKERS_MAP),
-      update({ ...start, journal: { tab: 'cases' } }, NONE, TALKERS_MAP),
+      update({ ...start, journal: { tab: 'cases', page: 0 } }, NONE, TALKERS_MAP),
       update({ ...start, help: true }, NONE, TALKERS_MAP),
       update({ ...start, dark: 10 }, NONE, TALKERS_MAP),
     ];
@@ -1374,7 +1379,7 @@ describe('the close in the state (0034)', () => {
 
   it('waits while the dark, the help, the journal, a talk or a push has the step, and opens after it', () => {
     // The journal: open over the due step, closed with a press, and the close opens next.
-    const reading = solvedAt(1000, { journal: { tab: 'creatures' } });
+    const reading = solvedAt(1000, { journal: { tab: 'creatures', page: 0 } });
     const stillReading = update(reading, NONE, BOTH);
     expect(stillReading.dialogue).toBeNull();
     const shut = update(stillReading, { ...NONE, journal: true }, BOTH);

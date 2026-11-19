@@ -337,7 +337,7 @@ describe('a coffee (0027)', () => {
     const frozen: readonly GameState[] = [
       { ...start, dark: 10 },
       { ...start, help: true },
-      { ...start, journal: { tab: 'creatures' } },
+      { ...start, journal: { tab: 'creatures', page: 0 } },
       { ...start, dialogue: { speaker: 'story', index: 0, page: 0 } },
     ];
     for (const state of frozen) {
@@ -349,7 +349,7 @@ describe('a coffee (0027)', () => {
 
   it('is not taken by the press that opens the journal', () => {
     const opened = update(tired(OPEN), { ...TALK, journal: true }, OPEN);
-    expect(opened.journal).toStrictEqual({ tab: 'creatures' });
+    expect(opened.journal).toStrictEqual({ tab: 'creatures', page: 0 });
     expect(opened.rested).toBeNull();
   });
 

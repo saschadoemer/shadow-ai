@@ -1,6 +1,13 @@
 import type { Box, Point } from '../engine/tiled';
 import { outcomeOf, policyBlocks } from '../game/cases';
-import { CASE_TEXT, ENTRY_TEXT, entriesOf, REGION_NAME, TAB_TEXT } from '../game/journal';
+import {
+  CASE_TEXT,
+  ENTRY_TEXT,
+  entriesOn,
+  entryPages,
+  REGION_NAME,
+  TAB_TEXT,
+} from '../game/journal';
 import { type GameState, JOURNAL_TABS, type JournalState } from '../game/state';
 import { caseEntries, tracesOf } from '../game/trace';
 import { type Language, type TextKey, textOf } from '../text/text';
@@ -43,6 +50,16 @@ export const CASE_LINE: Point = { x: 16, y: 48 };
 export const CASE_PITCH = 36;
 /** The third line of a solved case: its outcome (0024). */
 export const CASE_OUTCOME: Point = { x: 16, y: 60 };
+/** The mark of the open page ends here: `1 von 2`, right-aligned on the first name's line (0038). */
+export const PAGE_MARK_RIGHT = 304;
+
+/** Where the mark of page `page` of `pages` starts: its parts with one empty cell between two. */
+export function pageMarkOrigin(page: number, pages: number, language: Language): Point {
+  const cells =
+    String(page + 1).length + 1 + textOf(CASE_TEXT.of, language).length + 1 + String(pages).length;
+  return { x: PAGE_MARK_RIGHT - cells * GLYPH_WIDTH, y: ENTRY_NAME.y };
+}
+
 /** The first block of the policy starts here (0024). */
 export const POLICY_BLOCK: Point = { x: 16, y: 36 };
 /** A block starts this far below the last line of the block before it (0037). */
@@ -107,7 +124,8 @@ export function drawJournal(
     JOURNAL_RULE.height,
     TAB_OPEN,
   );
-  const entries = journal.tab === 'creatures' ? entriesOf(state.captured) : [];
+  // The creatures tab shows the entries of its open page (0038).
+  const entries = journal.tab === 'creatures' ? entriesOn(state.captured, journal.page) : [];
   // The cases are the regions with a found trace (0022).
   const cases =
     journal.tab === 'cases' ? caseEntries(state.traces, tracesOf(content.map.rects)) : [];
@@ -173,5 +191,16 @@ export function drawJournal(
     );
     drawText(renderer, content.fontSheet, name, language, ENTRY_NAME.x, ENTRY_NAME.y + down);
     drawText(renderer, content.fontSheet, text, language, ENTRY_LINES.x, ENTRY_LINES.y + down);
+  }
+  // With more than one page the tab says which one is open: `1 von 2` (0038).
+  const pages = journal.tab === 'creatures' ? entryPages(state.captured) : 1;
+  if (pages > 1) {
+    const origin = pageMarkOrigin(journal.page, pages, language);
+    let { x } = origin;
+    drawNumber(renderer, content.fontSheet, journal.page + 1, x, origin.y);
+    x += (String(journal.page + 1).length + 1) * GLYPH_WIDTH;
+    drawText(renderer, content.fontSheet, CASE_TEXT.of, language, x, origin.y);
+    x += (textOf(CASE_TEXT.of, language).length + 1) * GLYPH_WIDTH;
+    drawNumber(renderer, content.fontSheet, pages, x, origin.y);
   }
 }
