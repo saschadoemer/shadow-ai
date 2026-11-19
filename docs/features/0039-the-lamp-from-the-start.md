@@ -161,7 +161,9 @@ is not loaded yet. Arrow keys or WASD walk, `Space` holds the lamp, `E` or `Ente
 - Does the game say clearly enough what the lamp is for, for a player who never talks to
   her?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–14. Feel: the line at the bottom is enough to learn the
+key — fits; the data protection officer is still worth the walk next door — yes, fits; the game
+says clearly enough what the lamp is for, for a player who never talks to her — yes, fits.
 
 ## Open questions
 
