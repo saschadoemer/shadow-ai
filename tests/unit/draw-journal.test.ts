@@ -17,6 +17,7 @@ import {
   PAGE_MARK_RIGHT,
   POLICY_BLOCK,
   POLICY_GAP,
+  POLICY_MARK_Y,
   pageMarkOrigin,
   policyOrigins,
   TAB_CLOSED,
@@ -1014,5 +1015,46 @@ describe('the cases tab with four regions (0040)', () => {
     expect(entry).toHaveLength(2 + 11);
     expect(entry[0]).toBe('drawSprite 40 at 16,36');
     expect(entry[2]).toBe('drawSprite 52 at 16,48');
+  });
+});
+
+describe('the pages of the policy tab in the journal (0040)', () => {
+  const SALES = { region: 'sales', at: 900 };
+  const MARKETING = { region: 'marketing', at: 930 };
+  const SUPPORT = { region: 'support', at: 960 };
+  const shown = (solved: GameState['solved'], settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    drawJournal(
+      renderer,
+      { ...reading('policy'), solved },
+      { tab: 'policy', page: 0 },
+      CONTENT,
+      settings,
+    );
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+
+  it('places the mark on the line y = 26, with its right end at x = 304', () => {
+    // Between the rule under the tabs, which ends at y = 24, and the first block at y = 36.
+    expect(POLICY_MARK_Y).toBe(26);
+    expect(PAGE_MARK_RIGHT).toBe(304);
+    // `1 von 2`: seven cells; `1 of 2`: six.
+    expect(pageMarkOrigin(0, 2, 'de', POLICY_MARK_Y)).toStrictEqual({ x: 262, y: 26 });
+    expect(pageMarkOrigin(1, 2, 'de', POLICY_MARK_Y)).toStrictEqual({ x: 262, y: 26 });
+    expect(pageMarkOrigin(0, 2, 'en', POLICY_MARK_Y)).toStrictEqual({ x: 268, y: 26 });
+    // The creatures tab keeps its line: the first name's (0038).
+    expect(pageMarkOrigin(0, 2, 'de')).toStrictEqual({ x: 262, y: 35 });
+  });
+
+  it('draws no mark and nothing above y = 36 with up to three solved cases, in both languages', () => {
+    for (const settings of [GERMAN, ENGLISH]) {
+      for (const solved of [[SALES], [SUPPORT, MARKETING], [MARKETING, SUPPORT, SALES]]) {
+        const calls = shown(solved, settings);
+        expect(calls[0]).toMatch(/ at 16,36$/);
+        expect(
+          calls.filter((call) => Number(call.slice(call.lastIndexOf(',') + 1)) < 36),
+        ).toStrictEqual([]);
+      }
+    }
   });
 });

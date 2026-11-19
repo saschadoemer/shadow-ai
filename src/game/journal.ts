@@ -1,4 +1,5 @@
 import { type TextKey, textKey } from '../text/text';
+import { policyBlocks } from './cases';
 import { type GameInput, pressed } from './player';
 import {
   type Captured,
@@ -6,6 +7,7 @@ import {
   JOURNAL_TABS,
   type JournalState,
   type JournalTab,
+  type SolvedCase,
   SPECIES,
   type Species,
 } from './state';
@@ -77,6 +79,27 @@ export function entriesOn(captured: Captured, page: number): Species[] {
   return entriesOf(captured).slice(page * ENTRIES_PER_PAGE, (page + 1) * ENTRIES_PER_PAGE);
 }
 
+/** Three blocks of the policy fit the screen: the policy tab has pages of three (0040). */
+export const POLICY_PER_PAGE = 3;
+
+/** How many pages the policy tab has: at least one, also while no case is solved. */
+export function blockPages(solved: readonly SolvedCase[]): number {
+  return Math.max(1, Math.ceil(policyBlocks(solved).length / POLICY_PER_PAGE));
+}
+
+/** The blocks of one page of the policy tab, in the order the cases were solved. */
+export function blocksOn(solved: readonly SolvedCase[], page: number): TextKey[] {
+  return policyBlocks(solved).slice(page * POLICY_PER_PAGE, (page + 1) * POLICY_PER_PAGE);
+}
+
+/** How many pages a tab has in this state: the cases tab has one. */
+export function pagesOfTab(tab: JournalTab, state: GameState): number {
+  if (tab === 'creatures') {
+    return entryPages(state.captured);
+  }
+  return tab === 'policy' ? blockPages(state.solved) : 1;
+}
+
 /**
  * The state after a press that opens the journal, or null when `journal` is not pressed: the
  * journal on its first tab, the tick grown, the input remembered. Nothing else changes,
@@ -99,8 +122,9 @@ export function openJournal(state: GameState, input: GameInput): GameState | nul
  * One step with the journal open: the tick grows and the input is remembered. A press of
  * `journal` closes it. Otherwise a press of `right` alone turns to the next tab and a press of
  * `left` alone to the one before; at either end the tab stays. A turn to another tab opens it
- * on page 0. On the creatures tab a press of `down` alone turns to the next page and a press
- * of `up` alone to the one before; at either end the page stays (0038). Nothing else changes.
+ * on page 0. On the creatures tab (0038) and on the policy tab (0040) a press of `down` alone
+ * turns to the next page and a press of `up` alone to the one before; at either end the page
+ * stays. Nothing else changes.
  */
 export function stepJournal(state: GameState, journal: JournalState, input: GameInput): GameState {
   const stepped = { ...state, tick: state.tick + 1, held: input };
@@ -113,12 +137,9 @@ export function stepJournal(state: GameState, journal: JournalState, input: Game
   if (tab !== journal.tab) {
     return { ...stepped, journal: { tab, page: 0 } };
   }
-  if (tab !== 'creatures') {
-    return { ...stepped, journal };
-  }
   const leaf =
     (pressed(state.held, input, 'down') ? 1 : 0) - (pressed(state.held, input, 'up') ? 1 : 0);
-  const last = entryPages(state.captured) - 1;
+  const last = pagesOfTab(tab, state) - 1;
   const page = Math.min(Math.max(journal.page + leaf, 0), last);
   return { ...stepped, journal: { tab, page } };
 }

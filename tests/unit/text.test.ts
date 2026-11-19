@@ -1,4 +1,5 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
+import { POLICY_PER_PAGE } from '../../src/game/journal';
 import {
   DEFAULT_LANGUAGE,
   LANGUAGES,
@@ -708,6 +709,26 @@ describe('the language table (INV-4, 0016)', () => {
         for (const line of lines) {
           expect(line.length, `${language} ${key}: "${line}"`).toBeLessThanOrEqual(width);
           expect(line.trim(), `${language} ${key}`).not.toBe('');
+        }
+      }
+    }
+  });
+
+  it('keeps any three blocks of the policy at ten lines together, in both languages (0040)', () => {
+    // A page of the policy tab holds three blocks: ten lines and two gaps end at y = 178.
+    expect(POLICY_PER_PAGE).toBe(3);
+    for (const language of LANGUAGES) {
+      const lines = Object.entries(TABLE[language])
+        .filter(([id]) => id.startsWith('policy.'))
+        .map(([id, text]) => [id, text.split('\n').length] as const);
+      expect(lines.length, language).toBeGreaterThanOrEqual(POLICY_PER_PAGE);
+      for (const [i, [a, one]] of lines.entries()) {
+        for (const [j, [b, two]] of lines.entries()) {
+          for (const [k, [c, three]] of lines.entries()) {
+            if (i < j && j < k) {
+              expect(one + two + three, `${language} ${a} ${b} ${c}`).toBeLessThanOrEqual(10);
+            }
+          }
         }
       }
     }

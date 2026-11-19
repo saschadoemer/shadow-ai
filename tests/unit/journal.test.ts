@@ -11,12 +11,16 @@ import {
   type TileMap,
 } from '../../src/engine/tiled';
 import {
+  blockPages,
+  blocksOn,
   ENTRIES_PER_PAGE,
   ENTRY_TEXT,
   entriesOf,
   entriesOn,
   entryPages,
   openJournal,
+  POLICY_PER_PAGE,
+  pagesOfTab,
   stepJournal,
   TAB_TEXT,
 } from '../../src/game/journal';
@@ -492,5 +496,51 @@ describe('the pages of the creatures tab (0038)', () => {
   it('survives a JSON round trip on the second page (INV-1)', () => {
     const second = run(OPEN, full, NONE, DOWN);
     expect(JSON.parse(JSON.stringify(second))).toStrictEqual(second);
+  });
+});
+
+describe('the pages of the policy tab (0040)', () => {
+  const UP: GameInput = { ...NONE, up: true };
+  const DOWN: GameInput = { ...NONE, down: true };
+  const SALES = { region: 'sales', at: 900 };
+  const MARKETING = { region: 'marketing', at: 930 };
+  const SUPPORT = { region: 'support', at: 960 };
+  /** The journal open on the policy, with the given cases solved. */
+  const policy = (...solved: GameState['solved']): GameState =>
+    run(OPEN, { ...opened, solved }, NONE, RIGHT, NONE, RIGHT);
+
+  it('has pages of three blocks: one page while no more than three cases are solved', () => {
+    expect(POLICY_PER_PAGE).toBe(3);
+    expect(blockPages([])).toBe(1);
+    expect(blockPages([SALES])).toBe(1);
+    expect(blockPages([SUPPORT, SALES, MARKETING])).toBe(1);
+    // The blocks of a page, in the order the cases were solved.
+    expect(blocksOn([SUPPORT, SALES, MARKETING], 0)).toStrictEqual([
+      textKey('policy.support'),
+      textKey('policy.sales'),
+      textKey('policy.marketing'),
+    ]);
+    expect(blocksOn([SUPPORT, SALES, MARKETING], 1)).toStrictEqual([]);
+    expect(blocksOn([], 0)).toStrictEqual([]);
+  });
+
+  it('counts the pages of each tab: the creatures by their entries, the cases one, the policy by its blocks', () => {
+    const all: GameState = {
+      ...opened,
+      captured: { snippet: 1, mirage: 1, lurker: 1 },
+      solved: [SALES, MARKETING, SUPPORT],
+    };
+    expect(pagesOfTab('creatures', all)).toBe(2);
+    expect(pagesOfTab('cases', all)).toBe(1);
+    expect(pagesOfTab('policy', all)).toBe(1);
+    expect(pagesOfTab('policy', opened)).toBe(1);
+  });
+
+  it('stays on page 0 of the policy tab with one page, whatever is pressed', () => {
+    const three = policy(SALES, MARKETING, SUPPORT);
+    expect(three.journal).toStrictEqual({ tab: 'policy', page: 0 });
+    expect(run(OPEN, three, NONE, DOWN).journal).toStrictEqual({ tab: 'policy', page: 0 });
+    expect(run(OPEN, three, NONE, DOWN, NONE, DOWN).journal?.page).toBe(0);
+    expect(run(OPEN, three, NONE, UP).journal).toStrictEqual({ tab: 'policy', page: 0 });
   });
 });
