@@ -33,6 +33,7 @@ export const de = {
   'journal.of': 'von',
   'region.sales': 'Vertrieb',
   'region.marketing': 'Marketing',
+  'region.support': 'Support',
   'creature.snippet-name': 'Schnipsel',
   'creature.snippet-text': [
     'Ein Stück Text, das jemand in einen',
@@ -157,6 +158,27 @@ export const de = {
     'ein Mensch an, bevor es das Haus verlässt.',
     'Bild oder Text – lieber einmal zu viel.',
   ].join('\n'),
+  'talk.support-source-1': [
+    'Die Mails kommen in elf Sprachen. Ich kopiere',
+    'sie in einen Übersetzer aus dem Netz – sonst',
+    'wartet der Kunde drei Tage auf Antwort.',
+  ].join('\n'),
+  'talk.support-source-2': [
+    'Dass da Namen und Adressen drinstehen, war mir',
+    'klar. Dass die Erweiterung im Browser gleich',
+    'das ganze Postfach mitliest, nicht.',
+  ].join('\n'),
+  'talk.support-after': [
+    'Danke. Sag mir, welchen Übersetzer ich nehmen',
+    'darf – und die Erweiterung fliegt heute noch',
+    'raus.',
+  ].join('\n'),
+  'case.support-outcome': 'Gelöst: Kundenmails gingen in einen Übersetzer.',
+  'policy.support': [
+    'Werkzeuge und Erweiterungen kommen von der',
+    'freigegebenen Liste – und nur von dort. Fehlt',
+    'eines, sag es: Dann kommt es auf die Liste.',
+  ].join('\n'),
   'talk.intern-lamp': [
     'Du willst in den Vertrieb? Geh erst nach',
     'nebenan, zur Datenschutzbeauftragten. Sie hat',
@@ -191,6 +213,21 @@ export const de = {
     'Rotes Hemd, pendelt zwischen den Tischinseln',
     'und dem Drucker. Die Antwort kennst du schon,',
     'du musst sie nur noch hören.',
+  ].join('\n'),
+  'talk.intern-support-start': [
+    'Dann der Support, unten rechts am Südflur.',
+    'Die beantworten Mails in elf Sprachen –',
+    'frag dich mal, wie.',
+  ].join('\n'),
+  'talk.intern-support-traces': [
+    'Im Support sind es wieder die Bildschirme.',
+    'Drei Reihen, und in jeder sitzt jemand, der',
+    'gerade etwas übersetzen lässt.',
+  ].join('\n'),
+  'talk.intern-support-source': [
+    'Oranges Hemd, läuft zwischen den Tischen und',
+    'dem Drucker hin und her. Vierzig Tickets vor',
+    'dem ersten Kaffee – frag nach den Sprachen.',
   ].join('\n'),
   'talk.intern-done': [
     'Mehr weiß ich gerade auch nicht. Am Nordflur',

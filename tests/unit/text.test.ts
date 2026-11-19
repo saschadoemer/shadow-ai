@@ -310,6 +310,90 @@ describe('the language table (INV-4, 0016)', () => {
     ]);
   });
 
+  it('holds the words of the case of Support in both languages (0037)', () => {
+    const lines = (id: Parameters<typeof textKey>[0], language: 'de' | 'en'): string[] =>
+      textOf(textKey(id), language).split('\n');
+    expect([lines('region.support', 'de'), lines('region.support', 'en')]).toStrictEqual([
+      ['Support'],
+      ['Support'],
+    ]);
+    expect(lines('talk.support-source-1', 'de')).toStrictEqual([
+      'Die Mails kommen in elf Sprachen. Ich kopiere',
+      'sie in einen Übersetzer aus dem Netz – sonst',
+      'wartet der Kunde drei Tage auf Antwort.',
+    ]);
+    expect(lines('talk.support-source-1', 'en')).toStrictEqual([
+      'The mails come in eleven languages. I paste',
+      'them into a translator from the web – or the',
+      'customer waits three days for an answer.',
+    ]);
+    expect(lines('talk.support-source-2', 'de')).toStrictEqual([
+      'Dass da Namen und Adressen drinstehen, war mir',
+      'klar. Dass die Erweiterung im Browser gleich',
+      'das ganze Postfach mitliest, nicht.',
+    ]);
+    expect(lines('talk.support-source-2', 'en')).toStrictEqual([
+      'That names and addresses are in them, I knew.',
+      'That the browser extension reads the whole',
+      'mailbox along with it, I did not.',
+    ]);
+    expect(lines('talk.support-after', 'de')).toStrictEqual([
+      'Danke. Sag mir, welchen Übersetzer ich nehmen',
+      'darf – und die Erweiterung fliegt heute noch',
+      'raus.',
+    ]);
+    expect(lines('talk.support-after', 'en')).toStrictEqual([
+      'Thanks. Tell me which translator I may use –',
+      'and the extension goes today.',
+    ]);
+    expect(lines('case.support-outcome', 'de')).toStrictEqual([
+      'Gelöst: Kundenmails gingen in einen Übersetzer.',
+    ]);
+    expect(lines('case.support-outcome', 'en')).toStrictEqual([
+      'Solved: customer mails went into a translator.',
+    ]);
+    expect(lines('policy.support', 'de')).toStrictEqual([
+      'Werkzeuge und Erweiterungen kommen von der',
+      'freigegebenen Liste – und nur von dort. Fehlt',
+      'eines, sag es: Dann kommt es auf die Liste.',
+    ]);
+    expect(lines('policy.support', 'en')).toStrictEqual([
+      'Tools and extensions come from the approved',
+      'list – and only from there. If one is missing,',
+      'say so: then it gets onto the list.',
+    ]);
+    expect(lines('talk.intern-support-start', 'de')).toStrictEqual([
+      'Dann der Support, unten rechts am Südflur.',
+      'Die beantworten Mails in elf Sprachen –',
+      'frag dich mal, wie.',
+    ]);
+    expect(lines('talk.intern-support-start', 'en')).toStrictEqual([
+      'Support next, down at the right of the south',
+      'corridor. They answer mails in eleven',
+      'languages – ask yourself how.',
+    ]);
+    expect(lines('talk.intern-support-traces', 'de')).toStrictEqual([
+      'Im Support sind es wieder die Bildschirme.',
+      'Drei Reihen, und in jeder sitzt jemand, der',
+      'gerade etwas übersetzen lässt.',
+    ]);
+    expect(lines('talk.intern-support-traces', 'en')).toStrictEqual([
+      'In Support it is the screens again. Three',
+      'rows, and in each somebody is having',
+      'something translated right now.',
+    ]);
+    expect(lines('talk.intern-support-source', 'de')).toStrictEqual([
+      'Oranges Hemd, läuft zwischen den Tischen und',
+      'dem Drucker hin und her. Vierzig Tickets vor',
+      'dem ersten Kaffee – frag nach den Sprachen.',
+    ]);
+    expect(lines('talk.intern-support-source', 'en')).toStrictEqual([
+      'Orange shirt, walks between the desks and the',
+      'printer. Forty tickets before the first',
+      'coffee – ask about the languages.',
+    ]);
+  });
+
   it('holds the two lines of the card in both languages (0036)', () => {
     const both = (id: Parameters<typeof textKey>[0]): string[] => [
       textOf(textKey(id), 'de'),
@@ -426,9 +510,9 @@ describe('the language table (INV-4, 0016)', () => {
       'kommst du jetzt in HR und Buchhaltung rein –',
       'was da los ist, erzählst du mir.',
     ]);
-    // Eight keys, each one page of three lines.
+    // Eight keys of 0033 and the three of Support (0037), each one page of three lines.
     const ids = Object.keys(TABLE.de).filter((id) => id.startsWith('talk.intern-'));
-    expect(ids).toHaveLength(8);
+    expect(ids).toHaveLength(11);
     for (const language of LANGUAGES) {
       for (const id of ids) {
         expect(TABLE[language][id as TextId].split('\n'), `${language} ${id}`).toHaveLength(3);

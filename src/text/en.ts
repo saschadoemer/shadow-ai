@@ -30,6 +30,7 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
   'journal.of': 'of',
   'region.sales': 'Sales',
   'region.marketing': 'Marketing',
+  'region.support': 'Support',
   'creature.snippet-name': 'Snippet',
   'creature.snippet-text': [
     'A piece of text somebody pasted into a public',
@@ -153,6 +154,26 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'before it leaves the house.',
     'Image or text – rather once too often.',
   ].join('\n'),
+  'talk.support-source-1': [
+    'The mails come in eleven languages. I paste',
+    'them into a translator from the web – or the',
+    'customer waits three days for an answer.',
+  ].join('\n'),
+  'talk.support-source-2': [
+    'That names and addresses are in them, I knew.',
+    'That the browser extension reads the whole',
+    'mailbox along with it, I did not.',
+  ].join('\n'),
+  'talk.support-after': [
+    'Thanks. Tell me which translator I may use –',
+    'and the extension goes today.',
+  ].join('\n'),
+  'case.support-outcome': 'Solved: customer mails went into a translator.',
+  'policy.support': [
+    'Tools and extensions come from the approved',
+    'list – and only from there. If one is missing,',
+    'say so: then it gets onto the list.',
+  ].join('\n'),
   'talk.intern-lamp': [
     'Off to Sales? Go next door first, to the data',
     'protection officer. She has something you',
@@ -187,6 +208,21 @@ export const en: Readonly<Record<keyof typeof de, string>> = {
     'Red shirt, goes back and forth between the',
     'desk islands and the printer. You know the',
     'answer already – you only have to hear it.',
+  ].join('\n'),
+  'talk.intern-support-start': [
+    'Support next, down at the right of the south',
+    'corridor. They answer mails in eleven',
+    'languages – ask yourself how.',
+  ].join('\n'),
+  'talk.intern-support-traces': [
+    'In Support it is the screens again. Three',
+    'rows, and in each somebody is having',
+    'something translated right now.',
+  ].join('\n'),
+  'talk.intern-support-source': [
+    'Orange shirt, walks between the desks and the',
+    'printer. Forty tickets before the first',
+    'coffee – ask about the languages.',
   ].join('\n'),
   'talk.intern-done': [
     'That is all I know for now. Off the north',
