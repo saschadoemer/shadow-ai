@@ -221,7 +221,7 @@ with the call (0026), the call is read and the lamp fetched first. Arrow keys or
 
 **Result:** rejected 2026-11-19. Steps 1–8 passed; at step 9 the author stopped the walk and
 turned the feature down: a desk that empties a room is too strong a hand in the play. Nothing
-of it is on `main`. Harmonic is named in one line of a talk instead (0039).
+of it is on `main`. Harmonic is named in three lines of talk instead (0036).
 
 ## Open questions
 

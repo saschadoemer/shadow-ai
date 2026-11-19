@@ -149,7 +149,8 @@ Dialogue and descriptions are written by many hands, some of them agents. This i
 - Lecturing. No line that would fit on a compliance slide.
 - Real company or product names, or thin disguises of them. LMIS and Harmonic are the two
   exceptions (§10).
-- Praise for a product. Nobody recommends Harmonic, says what it costs or where to get it.
+- Praise for a product. A figure may say what Harmonic would have shown (§10). Nobody says it
+  is good, tells the player to get it, says what it costs or where to get it.
 - Threats, warnings, consequences for a person.
 - Jokes that need the player to know the industry.
 
@@ -184,9 +185,10 @@ first public release.
 ## 10. LMIS and Harmonic
 
 Two real names are in the game, and only these two (§6, §8): **LMIS**, the author's employer,
-which presents the game, and **Harmonic**, a safe AI workplace a company can approve for its
-people. Harmonic is made by a partner of LMIS, and LMIS sells it. Its maker has agreed to the
-name appearing in the game.
+which presents the game, and **Harmonic**, a monitoring product: it makes visible which AI
+tools are used in a company and where data leaves it. It watches and reports; it is no
+workplace and no tool to work in. Harmonic is made by a partner of LMIS, and LMIS sells it. Its
+maker has agreed to the name appearing in the game.
 
 **LMIS is the frame, not the world.** The name stands where the game is presented: on the title
 screen, as in `LMIS präsentiert`. The teaser is shown before the title screen exists (M8), so it
@@ -195,21 +197,27 @@ credits — is decided in the feature that builds it. LMIS is never the company 
 That company stays fictional (`world.md` §5): it is the house the data leaks from, and no real
 company is put in that place.
 
-**Harmonic is the approved way, said once.** The message says the shadow gives way where it
-becomes unnecessary (§3). When the case of Sales is solved, the colleague who was its source
-says what the offers are written in from now on, and names Harmonic. That is why a real product
+**Harmonic is the lamp for the whole house.** The shadow remains where data leaves the house
+unseen (§3), and at first only the player sees it. Harmonic is the real thing that does what
+the lamp does in the game: it makes visible, and it forbids nothing. That is why a real product
 may be named in this world at all. It does not sit beside the message; it is an instance of it.
-The line belongs to the case (`gameplay.md` §6).
+It is named in talks and nowhere else. Three voices say, each once, what it would have shown:
+the management, the data protection officer and a colleague.
 
 The rules both are held to:
 
 - **Harmonic is a word in a talk, and nothing more.** No rule of the play knows the name: there
   is no thing to use, no entry in the journal and no effect. The lamp, the traces and the talk
   with the source carry every case, and no product takes any part of that over.
-- **It is rare.** One line in the whole game names it (`docs/plan.md` §3). A further line is a
-  number in the budget first.
-- **Said, not praised.** The colleague says what they work with, as a fact. No figure
-  recommends Harmonic, says what it costs or where to get it (§6).
+- **Three voices, once each.** Three lines in the whole game name it (`docs/plan.md` §3). A
+  further line is a number in the budget first.
+- **Hindsight and wish, not praise.** A figure says what Harmonic would have shown — earlier,
+  to the house, to a colleague. No figure says it is good, tells the player to get it, says
+  what it costs or where to get it (§6).
+- **It sees; it does not catch.** No line about Harmonic is about finding out a person or about
+  consequences for one (§3, §6).
+- **A line claims nothing the product does not do.** What a figure says Harmonic shows is
+  checked against what the product does before the line is approved.
 - **LMIS is in no talk.** No figure names LMIS; the name stands only where the game is
   presented.
 - **A name, not a logo.** Both names are written in the game's own font. No logo of either is

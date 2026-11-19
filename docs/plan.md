@@ -48,7 +48,7 @@ Upper limits. Whoever wants more changes the number here first, then the content
 | Lamp upgrades | 3 |
 | Keys | 2 |
 | Policy blocks | 8 |
-| Lines of a talk that name Harmonic | 1 (the source of Sales, after its case) |
+| Lines of a talk that name Harmonic | 3 (the management in the close, the data protection officer, the source of Sales) |
 | Playing time | 2–3 hours in total; Act 1 about 15 minutes |
 
 ## 4. Open milestones, specified
@@ -124,15 +124,14 @@ once there is a case to walk into. Overview won back after it; `gameplay.md` §4
 open since 0009. The help label closes the milestone: the line that named the help's key for
 ten seconds, right after the call, was on screen too long, and a small label in the corner
 that stays takes its place. It comes after 0027 because it takes a field out of the state to
-which 0027 adds one. All seven are implemented; the two named below are not, so M5 stays
-open until they are built.
+which 0027 adds one. All seven are implemented; the one named below is not, so M5 stays
+open until it is built.
 
-Two more, both for the teaser (`vision.md` §10): 0039 Harmonic by name — the one line in
-which a colleague names the product, after the case of Sales — and 0036 LMIS presents — the
-line that says so, on a card before the call, which needs a place before the title screen of
-M8. They are built with the features of M6 that make the build playable (below). 0035, the
-Harmonic station, was built and rejected in its acceptance walk: a desk that emptied a room
-of its creatures took too much of the play.
+One more, for the teaser (`vision.md` §10): 0036 LMIS and Harmonic — the card on which LMIS
+presents the game, before the call, which needs a place before the title screen of M8, and
+the three lines of talk that name Harmonic. It is built with the features of M6 that make
+the build playable (below). 0035, the Harmonic station, was built and rejected in its
+acceptance walk: a desk that emptied a room of its creatures took too much of the play.
 
 ### M6 — The cases of Act 2
 
@@ -145,18 +144,18 @@ cone after it, because the case of Marketing earns it and HR and Accounting open
 creature of Marketing third: every case has its species (`world.md` §4), and the second
 species brings what the journal still lacks — a choice among its entries, and pages.
 
-Seven features for a build that can be played from the call to a close by somebody who was
+Six features for a build that can be played from the call to a close by somebody who was
 only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034 the close ·
-0039 Harmonic by name · 0036 LMIS presents · 0037 the case of Support · 0038 the creature
-of Support. They are built in this order. 0032 to 0034 are implemented; 0039 is a draft; the
-other three are approved.
+0036 LMIS and Harmonic · 0037 the case of Support · 0038 the creature of Support. They are
+built in this order. 0032 to 0034 are implemented; 0036 is a draft; the other two are
+approved.
 The creature first, so that the second room has opposition; it is cut small — the choice
 among the journal's entries and its pages wait for a later case and the third species. The
 intern after it: the hint system `world.md` §3 has named since M1, one figure in the break
 room who says where the next step is. The close last, because it follows whatever the last
 case is: the story says once that the rest of the floor follows, and the game goes on.
-Then the two that M5 still names for the teaser — the line in which a colleague names
-Harmonic, and the card on which LMIS presents the game — and
+Then the one that M5 still names for the teaser — the card on which LMIS presents the game,
+and the lines that name Harmonic — and
 then the case of Support, by the rules of the first two, so that the third open door leads
 somewhere. Last its creature, the first of the second layer (`gameplay.md` §3): it sits in
 a window on a screen, and the player closes the window before the lamp can hold it. With a

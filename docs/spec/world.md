@@ -280,7 +280,7 @@ author's decision on that basis, and no trademark register was searched (§5).
 ## 5. Names
 
 Every product, company and tool in the game is fictional, with two exceptions: LMIS, which
-presents the game, and Harmonic, which a colleague names once (`vision.md` §10). Before any other
+presents the game, and Harmonic, which three voices name (`vision.md` §10). Before any other
 name is fixed in the world data it is checked against real trademarks and products; a name that
 exists, or is a thin disguise of one that exists, is not used. Domains and mail addresses in the
 game use reserved example domains. The company in the game has no name that resembles a real

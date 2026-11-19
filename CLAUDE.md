@@ -80,7 +80,9 @@ change that weakens the test has violated the invariant.
   product LMIS sells as a partner (`docs/spec/vision.md` §10). Both appear as a name in the
   game's own font, never as a logo. Everything else is fictional, and a fictional name is
   checked against real trademarks before it is fixed.
-- No praise for a product. No figure recommends Harmonic, says what it costs or where to get it.
+- No praise for a product. A figure may say what Harmonic would have shown, in hindsight or as a
+  wish (`docs/spec/vision.md` §10). No figure says it is good, tells the player to get it, says
+  what it costs or where to get it.
 - No feature, however small, without an approved spec (§3).
 
 ---
