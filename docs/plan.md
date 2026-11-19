@@ -148,9 +148,9 @@ Six features for a build that can be played from the call to a close by somebody
 only sent the address: 0032 the creature of Marketing · 0033 the intern · 0034 the close ·
 0036 LMIS and Harmonic · 0037 the case of Support · 0038 the creature of Support. They are
 built in this order. 0032 to 0034, 0036 and 0037 are implemented; 0038 is approved.
-A seventh is approved and comes between the last two: 0039 the lamp from the start — the
+A seventh came between the last two and is implemented: 0039 the lamp from the start — the
 player has the lamp from the first step, and the data protection officer explains it without
-handing it over.
+handing it over. 0038 is the one still approved.
 The creature first, so that the second room has opposition; it is cut small — the choice
 among the journal's entries and its pages wait for a later case and the third species. The
 intern after it: the hint system `world.md` §3 has named since M1, one figure in the break

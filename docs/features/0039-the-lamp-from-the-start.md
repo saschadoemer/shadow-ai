@@ -1,6 +1,6 @@
 # 0039 — The lamp from the start
 
-**Status:** approved 2026-11-19
+**Status:** implemented 2026-11-19
 **Milestone:** M6
 **Drafted:** 2026-11-19
 

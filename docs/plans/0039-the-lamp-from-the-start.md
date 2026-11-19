@@ -2431,9 +2431,9 @@ text where the diff means it; do not change the words without a reason.
 
 ### Task 7: The pull request
 
-- [ ] **Step 1:** merge the latest `main` again and rerun Task 5. If the merge changed code,
+- [x] **Step 1:** merge the latest `main` again and rerun Task 5. If the merge changed code,
   the walk is run again.
-- [ ] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
+- [x] **Step 2:** set `**Status:** implemented YYYY-MM-DD` in the spec and in the table of
   `docs/features/README.md`. In `docs/plan.md` §4, in the M6 section, the sentence about the
   seventh feature says that 0039 is approved; say that it is implemented, and that 0038 is
   the one still approved. Commit — `Mark 0039 implemented`.
