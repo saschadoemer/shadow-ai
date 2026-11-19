@@ -137,6 +137,46 @@ export const de = {
     'ein Mensch an, bevor es das Haus verlässt.',
     'Bild oder Text – lieber einmal zu viel.',
   ].join('\n'),
+  'talk.intern-lamp': [
+    'Du willst in den Vertrieb? Geh erst nach',
+    'nebenan, zur Datenschutzbeauftragten. Sie hat',
+    'etwas, das du brauchen wirst.',
+  ].join('\n'),
+  'talk.intern-sales-start': [
+    'Vertrieb? Am Ende des Flurs nach Osten.',
+    'Die tippen ihre Angebote neuerdings nicht mehr',
+    'selbst. Schau dir mal die Bildschirme an.',
+  ].join('\n'),
+  'talk.intern-sales-traces': [
+    'Im Vertrieb stehen sechzehn Bildschirme, und',
+    'du hast noch nicht alle gesehen. In jeder',
+    'Reihe lohnt sich einer.',
+  ].join('\n'),
+  'talk.intern-sales-source': [
+    'Du weißt doch längst, wer es war. Rosa Hemd,',
+    'läuft zwischen Schreibtisch und Kaffee.',
+    'Frag einfach – da beißt keiner.',
+  ].join('\n'),
+  'talk.intern-marketing-start': [
+    'Als Nächstes? Marketing, unten links am',
+    'Südflur. Deren Plakate sehen seit Kurzem',
+    'verdächtig gut aus.',
+  ].join('\n'),
+  'talk.intern-marketing-traces': [
+    'Im Marketing sind es die Bildschirme auf den',
+    'Tischinseln. Und vergiss den Drucker nicht –',
+    'der druckt ja alles doppelt.',
+  ].join('\n'),
+  'talk.intern-marketing-source': [
+    'Rotes Hemd, pendelt zwischen den Tischinseln',
+    'und dem Drucker. Die Antwort kennst du schon,',
+    'du musst sie nur noch hören.',
+  ].join('\n'),
+  'talk.intern-done': [
+    'Mehr weiß ich gerade auch nicht. Am Nordflur',
+    'kommst du jetzt in HR und Buchhaltung rein –',
+    'was da los ist, erzählst du mir.',
+  ].join('\n'),
   'talk.sales-everyday': [
     'Drei Angebote bis heute Abend, und jedes soll',
     'klingen, als hätte ich eine Woche Zeit gehabt.',
