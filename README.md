@@ -1,5 +1,7 @@
 # Shadow AI
 
+[![Shadow AI — the head of IT shines the lamp on a QR code that leads to the game; the right half of the office lies under a violet shadow](docs/promo/shadow-ai-promo.png)](http://shadow-ai.sascha-doemer.de)
+
 A browser game in pixel-art 2D, in the tradition of early top-down adventures, about shadow AI
 in a mid-sized company. You are the head of IT. All over the building people use AI tools nobody
 approved — because the tools fill gaps nobody else fills. Where data leaves the house unseen, a
@@ -8,6 +10,55 @@ understood, never killed.
 
 The game is a two-to-three hour browser game to play at home, and afterwards a conversation
 opener for customers and trade fairs. German first, English second.
+
+**Play it:** [shadow-ai.sascha-doemer.de](http://shadow-ai.sascha-doemer.de) — the newest
+`main`, a preview of an unfinished game. It needs a desktop browser and a keyboard.
+
+## How it plays
+
+You walk one office floor, seen from above. Some departments lie under shadow: they are drawn
+darker and without colour, under a violet veil, and a shadow wall closes their doorway. The loop
+is the same in each of them: **explore, find the traces, talk to the person behind them, and the
+room clears.**
+
+**The lamp** is the only tool. Hold `Space` and a cone of yellow light appears in front of you;
+while you hold it you stand, and the direction keys turn it. One second of unbroken light does
+the work:
+
+- a **creature** in the light freezes and is captured — it goes into the journal, nothing is
+  killed;
+- a **trace** shows on a screen or a printer and is found — each case has five;
+- a thin **shadow wall** is lifted for good. A dense one holds until the lamp is stronger.
+
+**The creatures** are what the shadow leaves behind. The snippet comes straight at you once you
+are close. The mirage, a framed picture, moves only while you do not look at it — one is
+harmless, two are a problem when you turn your back to search a screen.
+
+**Overview** is your health: five hearts at the start. A creature's touch costs one and pushes
+you back. At zero the screen closes like an eye and you wake in the data protection officer's
+office — there is no game over, only a way back. A coffee at a coffee machine fills the hearts
+again.
+
+**A case** is solved by a conversation, not by the lamp. With all five traces of a department
+found, the colleague behind them answers honestly. The room gets its colours back, its veil and
+the creatures left in it are gone, the journal records the outcome and a block of the policy,
+and your overview grows by one heart. The case of Marketing also makes the lamp wider and
+stronger, which opens the denser walls. Three cases can be played today — Sales, Marketing and
+Support — in any order.
+
+If you do not know where to go, ask the intern in the break room.
+
+| Key | What it does |
+|---|---|
+| Arrow keys or `W` `A` `S` `D` | walk, in eight directions |
+| `Space` (hold) | the lamp |
+| `E` or `Enter` | talk, turn the page, take a coffee |
+| `J` | the journal: creatures, cases, policy |
+| `H` | the help, a list of every key |
+| `L` | switch between German and English |
+| `F` | fullscreen |
+
+The rules in full are in [docs/spec/gameplay.md](docs/spec/gameplay.md).
 
 ## Status
 
@@ -125,6 +176,7 @@ that was not approved first.
 | [docs/plan.md](docs/plan.md) | roadmap, content budget, deferred ideas |
 | [docs/features/](docs/features/) | one spec per feature, with its status |
 | [docs/adr/](docs/adr/) | architecture decision records |
+| [docs/promo/](docs/promo/) | the graphic that announces the game, 3840x2160, with a QR code to its address |
 | `src/`, `public/`, `tools/`, `tests/` | the code and what the game loads — kept strictly apart from `docs/` |
 
 TypeScript, Canvas 2D, Vite, Vitest — and no game framework, for the reasons in
