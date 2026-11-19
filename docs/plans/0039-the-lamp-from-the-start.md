@@ -115,7 +115,7 @@ and the container was **not** run with the prototype.
 - Removed: `Meeting`, `FIRST_MEETING`, `figuresIn`, `isFirstMeeting` of `game/cast`;
   `HINT_LAMP` of `game/hints`.
 
-- [ ] **Step 1: The opening.** The tests of the player without the lamp and of the first
+- [x] **Step 1: The opening.** The tests of the player without the lamp and of the first
   meeting go; in their place stand the lamp from the first step and the officer's own pages
   from the first talk:
 
@@ -477,7 +477,7 @@ and the container was **not** run with the prototype.
 -});
 ```
 
-- [ ] **Step 2: The cast and the hints.** The first meeting leaves the tests of the cast;
+- [x] **Step 2: The cast and the hints.** The first meeting leaves the tests of the cast;
   `hintOf` loses its first argument everywhere:
 
 ```diff
@@ -731,7 +731,7 @@ and the container was **not** run with the prototype.
    it('says the hint of the moment, and the officer her own pages', () => {
 ```
 
-- [ ] **Step 3: The notice, the rest, the scene and the card:**
+- [x] **Step 3: The notice, the rest, the scene and the card:**
 
 ```diff
 --- a/tests/unit/notice.test.ts
@@ -902,7 +902,7 @@ and the container was **not** run with the prototype.
      expect(world.toLowerCase().includes('lmis')).toBe(false);
 ```
 
-- [ ] **Step 4: The smoke tests** of the opening and of the lamp:
+- [x] **Step 4: The smoke tests** of the opening and of the lamp:
 
 ```diff
 --- a/tests/e2e/smoke.spec.ts
@@ -979,14 +979,14 @@ and the container was **not** run with the prototype.
  test('the floor starts with three snippets and three mirages, and nothing captured', async ({
 ```
 
-- [ ] **Step 5: Run** `npx tsc --noEmit` — 29 errors, all in `hints.test.ts`: `hintOf` still
+- [x] **Step 5: Run** `npx tsc --noEmit` — 29 errors, all in `hints.test.ts`: `hintOf` still
   takes the lamp first. Run `npx vitest run`. Expected: 28 tests fail in six files — twelve
   of the opening, twelve of the hints, and one each of the cast, the rest, the notice and the
   scene. With a dev server running,
   `npx playwright test -g "and the lamp|a held Space"` fails twice: the lamp of a new game is
   not owned, and Space turns nothing on.
 
-- [ ] **Step 6: A new game has the lamp, and no talk hands it over:**
+- [x] **Step 6: A new game has the lamp, and no talk hands it over:**
 
 ```diff
 --- a/src/game/update.ts
@@ -1056,7 +1056,7 @@ and the container was **not** run with the prototype.
      const stepped = stepDialogue(state, state.dialogue, input, speakers);
 ```
 
-- [ ] **Step 7: The cast without the first meeting:**
+- [x] **Step 7: The cast without the first meeting:**
 
 ```diff
 --- a/src/game/cast.ts
@@ -1146,7 +1146,7 @@ and the container was **not** run with the prototype.
 -}
 ```
 
-- [ ] **Step 8: The hints without the lamp:**
+- [x] **Step 8: The hints without the lamp:**
 
 ```diff
 --- a/src/game/hints.ts
@@ -1194,7 +1194,7 @@ and the container was **not** run with the prototype.
      if (pages === undefined || isSolved(region, progress.solved)) {
 ```
 
-- [ ] **Step 9: The scene** builds the speakers as `update` does:
+- [x] **Step 9: The scene** builds the speakers as `update` does:
 
 ```diff
 --- a/src/render/draw-scene.ts
@@ -1222,10 +1222,10 @@ and the container was **not** run with the prototype.
              undefined,
 ```
 
-- [ ] **Step 10: Run** `npm run check` — 1609 unit tests. Then
+- [x] **Step 10: Run** `npm run check` — 1609 unit tests. Then
   `npx playwright test -g "and the lamp|a held Space"`: 2 passed.
 
-- [ ] **Step 11: Commit** — `Give the player the lamp from the first step`. Body: the
+- [x] **Step 11: Commit** — `Give the player the lamp from the first step`. Body: the
   handover made Space mean something only after a talk; now the keys mean the same from the
   first second, and the data protection officer explains the lamp without giving it.
 
@@ -1240,7 +1240,7 @@ and the container was **not** run with the prototype.
 **Interfaces:**
 - Produces: `LampState` is `{ on: boolean; strength: number; used: boolean }`.
 
-- [ ] **Step 1: The literals.** In every file under `tests/`, the text `owned: true, ` or
+- [x] **Step 1: The literals.** In every file under `tests/`, the text `owned: true, ` or
   `owned: false, ` goes — 52 places. Two literals of `tests/unit/state.test.ts` hold the field
   on a line of its own; that line goes. A few tests get a name or a comment that no longer
   speaks of owning, one test of the opening asserts the three fields of the lamp, and one
@@ -1827,12 +1827,12 @@ and the container was **not** run with the prototype.
    const held = await page.evaluate(() => window.shadowAi?.state);
 ```
 
-- [ ] **Step 2: Run** `npx tsc --noEmit` — 33 errors in eleven test files: the literals lack
+- [x] **Step 2: Run** `npx tsc --noEmit` — 33 errors in eleven test files: the literals lack
   a field the type still has. Run `npx vitest run`. Expected: 18 tests fail in four files —
   seven of the state, six of the opening, three of the notice and two of the scene: the
   states the game makes still hold `owned`.
 
-- [ ] **Step 3: The type:**
+- [x] **Step 3: The type:**
 
 ```diff
 --- a/src/game/state.ts
@@ -1859,7 +1859,7 @@ and the container was **not** run with the prototype.
  
 ```
 
-- [ ] **Step 4: The rules that asked for it:**
+- [x] **Step 4: The rules that asked for it:**
 
 ```diff
 --- a/src/game/update.ts
@@ -1969,10 +1969,10 @@ and the container was **not** run with the prototype.
  }
 ```
 
-- [ ] **Step 5: Run** `npm run check` — 1609 unit tests. Then `npm run test:e2e`: 20 passed,
+- [x] **Step 5: Run** `npm run check` — 1609 unit tests. Then `npm run test:e2e`: 20 passed,
   3 skipped.
 
-- [ ] **Step 6: Commit** — `Take the lamp's ownership out of the state`. Body: the player
+- [x] **Step 6: Commit** — `Take the lamp's ownership out of the state`. Body: the player
   always has the lamp, so a field that is always true and the rules that read it are gone.
 
 ---
@@ -1983,7 +1983,7 @@ and the container was **not** run with the prototype.
 - Modify: `src/text/de.ts`, `src/text/en.ts`
 - Test: `tests/unit/text.test.ts`
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -2052,12 +2052,12 @@ and the container was **not** run with the prototype.
    });
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 2 of 35
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 2 of 35
   tests: `holds the eight pages of the intern in both languages (0033)` counts eleven keys
   where it expects ten, and `has no page that hands the lamp over and none that sends for it
   (0039)`.
 
-- [ ] **Step 3: The two keys leave both tables:**
+- [x] **Step 3: The two keys leave both tables:**
 
 ```diff
 --- a/src/text/de.ts
@@ -2117,9 +2117,9 @@ and the container was **not** run with the prototype.
      'They no longer type their offers themselves.',
 ```
 
-- [ ] **Step 4: Run** `npm run check` — 1610 unit tests.
+- [x] **Step 4: Run** `npm run check` — 1610 unit tests.
 
-- [ ] **Step 5: Commit** — `Remove the page that handed the lamp over and the hint that sent
+- [x] **Step 5: Commit** — `Remove the page that handed the lamp over and the hint that sent
   for it`.
 
 ---
@@ -2133,7 +2133,7 @@ and the container was **not** run with the prototype.
 The diffs are against the branch as it stands before Task 1. If a line has moved, put the
 text where the diff means it; do not change the words without a reason.
 
-- [ ] **Step 1: `vision.md`** §4 and §10:
+- [x] **Step 1: `vision.md`** §4 and §10:
 
 ```diff
 --- a/docs/spec/vision.md
@@ -2159,7 +2159,7 @@ text where the diff means it; do not change the words without a reason.
  ich hätte es gelassen.` The management, on the second page of the close: `Mit Harmonic hätten
 ```
 
-- [ ] **Step 2: `world.md`** §3:
+- [x] **Step 2: `world.md`** §3:
 
 ```diff
 --- a/docs/spec/world.md
@@ -2188,7 +2188,7 @@ text where the diff means it; do not change the words without a reason.
  - **The works council.** Not a global character but part of the HR case. Nothing moves there
 ```
 
-- [ ] **Step 3: `gameplay.md`** §2 and §8:
+- [x] **Step 3: `gameplay.md`** §2 and §8:
 
 ```diff
 --- a/docs/spec/gameplay.md
@@ -2220,7 +2220,7 @@ text where the diff means it; do not change the words without a reason.
  nothing at a machine while the lamp is held or the figure is being pushed. The help still lists
 ```
 
-- [ ] **Step 4: `architecture.md`** §2, §4, §5 and §8:
+- [x] **Step 4: `architecture.md`** §2, §4, §5 and §8:
 
 ```diff
 --- a/docs/spec/architecture.md
@@ -2358,7 +2358,7 @@ text where the diff means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 5: `testing.md`** §2:
+- [x] **Step 5: `testing.md`** §2:
 
 ```diff
 --- a/docs/spec/testing.md
@@ -2374,7 +2374,7 @@ text where the diff means it; do not change the words without a reason.
  | INV-4 text through keys | the compiler, via `TextKey`: `drawText`, `textOf` and `textKey` are type-tested with `expectTypeOf` — a string is no `TextKey` and `textKey` accepts only the ids of the table (0016); unit tests that `de` and `en` have identical key sets and no empty string, that every character of both tables has a glyph in the font — line breaks skipped —, and that every notice fits the bar and has no line break; every page of the kind `talk` has at most three lines of at most 47 characters and no empty line, in both languages, and fits the dialogue box (0017); a tab's title of the journal is one line of at most 16 characters, a tab's line for nothing one line of at most 47, a species' name one line of at most 24, and a species' text two to four lines of at most 47 with no empty line, in both languages (0020); a region's name one line of at most 24, and `journal.traces` and `journal.of` one line of at most 16 each, in both languages, and `drawNumber` takes a number and nothing else (0022); a case's outcome is one line of at most 47 characters, and a policy block two to four lines of at most 47 with no empty line, in both languages (0024); a name of a key in the help is one line of at most 17 characters, and what it does one line of at most 16, in both languages (0021); a page of the story obeys the rule of a page of talk, in both languages (0026); each line of the card is one line that fits the surface, no other key of either table holds the presenter's name, and the name Harmonic is in three pages of talk and in no other key (0036); the scene tests draw the notice and a page in both languages, and the smoke test switches the language with `L` (0019) |
 ```
 
-- [ ] **Step 6: `README.md`:**
+- [x] **Step 6: `README.md`:**
 
 ```diff
 --- a/README.md
@@ -2393,19 +2393,19 @@ text where the diff means it; do not change the words without a reason.
  has five traces of its own, on four screens and on the printer, and the colleague in the red
 ```
 
-- [ ] **Step 7:** `npm run check`, then commit — `Move the lamp from the start into the spec`.
+- [x] **Step 7:** `npm run check`, then commit — `Move the lamp from the start into the spec`.
 
 ---
 
 ### Task 5: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 20 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 20 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 5 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 5 in this file and commit —
   `Tick the full check of 0039`.
 
 ---
