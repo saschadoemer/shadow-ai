@@ -152,10 +152,9 @@ export function speakerInReach(
 
 /**
  * The state after a press that opens a dialogue, or null when this step opens none: `talk` is
- * not pressed, the lamp is held, the player is being pushed, or no speaker is in reach. A
- * player without the lamp holds none, whatever the input says (0026). The player and the
- * speaker turn to each other, the player stands, a colleague stands where it is, the lamp is
- * off; nothing else is stepped.
+ * not pressed, the lamp is held, the player is being pushed, or no speaker is in reach. The
+ * player and the speaker turn to each other, the player stands, a colleague stands where it
+ * is, the lamp is off; nothing else is stepped.
  */
 export function openDialogue(
   state: GameState,
@@ -163,8 +162,7 @@ export function openDialogue(
   speakers: readonly Speaker[],
   map: TileMap,
 ): GameState | null {
-  const lampHeld = state.lamp.owned && input.lamp;
-  if (!talkPressed(state, input) || lampHeld || state.player.recoil.steps > 0) {
+  if (!talkPressed(state, input) || input.lamp || state.player.recoil.steps > 0) {
     return null;
   }
   const { player } = state;

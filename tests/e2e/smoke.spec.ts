@@ -104,12 +104,12 @@ test('the game opens with the call and the lamp, and three presses of E close it
     )
     .toStrictEqual({
       dialogue: call(0),
-      lamp: { on: false, strength: 1, owned: true, used: false },
+      lamp: { on: false, strength: 1, used: false },
     });
   await start(page);
   const state = await page.evaluate(() => window.shadowAi?.state);
   expect(state?.dialogue).toBeNull();
-  expect(state?.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+  expect(state?.lamp).toStrictEqual({ on: false, strength: 1, used: false });
 });
 
 test('the page loads with its title, its canvas and the dark background', async ({ page }) => {
@@ -183,7 +183,7 @@ test('a held Space turns the lamp on and holds the figure, from the first step a
     .poll(() => page.evaluate(() => window.shadowAi?.state.lamp), {
       message: 'Space turns the lamp on',
     })
-    .toStrictEqual({ on: true, strength: 1, owned: true, used: true });
+    .toStrictEqual({ on: true, strength: 1, used: true });
   await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(300);
   const held = await page.evaluate(() => window.shadowAi?.state);

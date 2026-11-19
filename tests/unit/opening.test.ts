@@ -60,18 +60,19 @@ const spoken = (map: TileMap, state: GameState) =>
 
 describe('the two starts (0026)', () => {
   it('starts a played game with the card, the call open under it, and the lamp not yet used', () => {
-    // The lamp is the player's from the first step (0039).
+    // The lamp is the player's from the first step (0039): the state has no field that says so.
+    expect(Object.keys(newGame(MAP).lamp)).toStrictEqual(['on', 'strength', 'used']);
     expect(newGame(MAP)).toStrictEqual({
       ...createInitialState(MAP),
-      lamp: { on: false, strength: 1, owned: true, used: false },
+      lamp: { on: false, strength: 1, used: false },
       dialogue: { speaker: 'story', index: 0, page: 0 },
       presented: null,
     });
   });
 
-  it('keeps the initial state a game past its opening: the lamp owned and used, no dialogue', () => {
+  it('keeps the initial state a game past its opening: the lamp used, no dialogue', () => {
     const state = createInitialState(MAP);
-    expect(state.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: true });
+    expect(state.lamp).toStrictEqual({ on: false, strength: 1, used: true });
     expect(state.dialogue).toBeNull();
   });
 
@@ -176,9 +177,9 @@ describe('the lamp from the first step (0039)', () => {
   const start = called(LIT);
 
   it('is on in the first step with the key held, right after the call, and was used from then', () => {
-    expect(start.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+    expect(start.lamp).toStrictEqual({ on: false, strength: 1, used: false });
     const first = update(start, SHINE, LIT);
-    expect(first.lamp).toStrictEqual({ on: true, strength: 1, owned: true, used: true });
+    expect(first.lamp).toStrictEqual({ on: true, strength: 1, used: true });
   });
 
   it('lights the snippet, the wall and the trace of a new game, as in a game past its opening', () => {
@@ -203,7 +204,7 @@ describe('the lamp from the first step (0039)', () => {
     const waiting = steps(LIT, newGame(LIT), SHINE, 600);
     expect(waiting.presented).toBe(180);
     expect(waiting.dialogue).toStrictEqual({ speaker: 'story', index: 0, page: 0 });
-    expect(waiting.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+    expect(waiting.lamp).toStrictEqual({ on: false, strength: 1, used: false });
     expect(waiting.creatures.every((creature) => creature.light === 0)).toBe(true);
     expect(waiting.traces).toStrictEqual([{ trace: 0, light: 0, found: null }]);
   });
@@ -213,7 +214,7 @@ describe('the lamp from the first step (0039)', () => {
     expect(hit.overview.current).toBeLessThan(5);
     const woken = update({ ...start, dark: 44 }, NONE, LIT);
     expect(woken.dark).toBe(45);
-    expect(woken.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+    expect(woken.lamp).toStrictEqual({ on: false, strength: 1, used: false });
     expect(update(woken, SHINE, LIT).dark).toBe(46);
   });
 });
@@ -273,9 +274,9 @@ describe('the lamp used for the first time (0026)', () => {
 
   it('is used from the first step in which the lamp is on, and stays so', () => {
     const first = run(MAP, start, NONE, SHINE);
-    expect(first.lamp).toStrictEqual({ on: true, strength: 1, owned: true, used: true });
+    expect(first.lamp).toStrictEqual({ on: true, strength: 1, used: true });
     const off = update(first, NONE, MAP);
-    expect(off.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: true });
+    expect(off.lamp).toStrictEqual({ on: false, strength: 1, used: true });
     expect(steps(MAP, off, NONE, 600).lamp.used).toBe(true);
     expect(update({ ...off, dark: 44 }, NONE, MAP).lamp.used).toBe(true);
   });

@@ -110,7 +110,7 @@ const playing = (fields: Partial<GameState> = {}): GameState => ({
     recoil: NO_RECOIL,
   },
   camera: { x: 0, y: 0 },
-  lamp: { on: false, strength: 1, owned: true, used: true },
+  lamp: { on: false, strength: 1, used: true },
   creatures: [],
   movers: [],
   shadowWalls: [],
@@ -349,7 +349,7 @@ describe('the help in the scene (0021)', () => {
   it('leaves the notice of 0016 under it', () => {
     const holding = playing({
       help: true,
-      lamp: { on: true, strength: 1, owned: true, used: true },
+      lamp: { on: true, strength: 1, used: true },
       shadowWalls: [{ wall: 0, lit: true, light: 0 }],
     });
     const calls = scene(holding);

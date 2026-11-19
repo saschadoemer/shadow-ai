@@ -35,16 +35,14 @@ export interface PlayerState {
 }
 
 /**
- * The lamp (0007, 0014, 0026): on in every step whose input holds `lamp`, once the player has
- * it. Later field: charge (M6).
+ * The lamp (0007, 0014, 0026, 0039): on in every step whose input holds `lamp`. The player has
+ * it from the first step. Later field: charge (M6).
  */
 export interface LampState {
   readonly on: boolean;
   /** Against a region's density (gameplay.md §5): BASE_STRENGTH plus the upgrades earned. */
   readonly strength: number;
-  /** Whether the player has the lamp (0026). Without it the input's `lamp` counts as not held. */
-  readonly owned: boolean;
-  /** Whether the lamp was on in any step since it was owned (0026). It never goes back. */
+  /** Whether the lamp was on in any step of the game (0026). It never goes back. */
   readonly used: boolean;
 }
 

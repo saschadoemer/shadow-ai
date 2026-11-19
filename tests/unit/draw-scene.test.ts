@@ -204,7 +204,7 @@ const state = (
   upgrades: [],
   player: player(fields),
   camera,
-  lamp: { on: lampOn, strength: 1, owned: true, used: true },
+  lamp: { on: lampOn, strength: 1, used: true },
   creatures: [],
   movers: [],
   shadowWalls: [],
@@ -778,7 +778,7 @@ describe('the notice in the scene (0016)', () => {
     for (const scene of [
       holding({ shadowWalls: [{ wall: 0, lit: true, light: 1 }] }),
       holding({ shadowWalls: [] }),
-      holding({ lamp: { on: false, strength: 1, owned: true, used: true } }),
+      holding({ lamp: { on: false, strength: 1, used: true } }),
     ]) {
       const renderer = recordingRenderer();
       drawScene(renderer, scene, CONTENT);
@@ -1080,7 +1080,7 @@ describe('the language line in the scene (0019)', () => {
 
   it('leaves the bar to the notice of 0016, which itself changes its language', () => {
     const holding = quiet(100, {
-      lamp: { on: true, strength: 1, owned: true, used: true },
+      lamp: { on: true, strength: 1, used: true },
       shadowWalls: [{ wall: 0, lit: true, light: 0 }],
     });
     const renderer = recordingRenderer();
@@ -1204,13 +1204,17 @@ describe('the bar without a start hint (0031)', () => {
     }
   });
 
-  it('is not drawn after the call either, while the lamp is not owned', () => {
-    const closed = { lamp: { on: false, strength: 1, owned: false, used: false } };
+  it("holds the lamp's line after the call and no start hint, whatever the tick (0039)", () => {
+    const closed = { lamp: { on: false, strength: 1, used: false } };
     for (const tick of [5, 100, 604, 605]) {
       const renderer = recordingRenderer();
       drawScene(renderer, fresh(tick, closed), CONTENT);
-      expect(renderer.calls, `tick ${tick}`).not.toContain(BAR);
-      expect(fontCalls(renderer)).toStrictEqual([]);
+      expect(
+        renderer.calls.filter((call) => call === BAR),
+        `tick ${tick}`,
+      ).toHaveLength(1);
+      // `Die Lampe: Leertaste halten.`: 25 glyphs, and nothing else in the game's font.
+      expect(fontCalls(renderer), `tick ${tick}`).toHaveLength(25);
     }
   });
 
@@ -1442,7 +1446,7 @@ describe('the cleared region in the scene (0025)', () => {
     const renderer = recordingRenderer();
     drawScene(
       renderer,
-      { ...cleared('sales', 40), lamp: { on: true, strength: 1, owned: true, used: true } },
+      { ...cleared('sales', 40), lamp: { on: true, strength: 1, used: true } },
       content,
     );
     const detail = renderer.calls.indexOf('drawTile 4 at 16,16');
@@ -1483,8 +1487,9 @@ describe('the cleared region in the scene (0025)', () => {
 describe('the story in the scene (0026)', () => {
   const BOX = 'fillRect 8,134 304x42 #181425';
   const BAR = 'fillRect 8,158 304x18 #181425';
-  const NO_LAMP = { on: false, strength: 1, owned: false, used: false };
-  /** A new game on the 3x2 map: the call open on `page`, no lamp. */
+  /** The lamp of a new game: off, and not yet used (0039). */
+  const NO_LAMP = { on: false, strength: 1, used: false };
+  /** A new game on the 3x2 map: the call open on `page`. */
   const calling = (page: number, tick = 0): GameState => ({
     ...state({ x: 20, y: 30 }),
     tick,
@@ -1552,13 +1557,13 @@ describe('the story in the scene (0026)', () => {
     expect(renderer.calls).not.toContain(BOX);
   });
 
-  it('draws no cone while the lamp is not owned, whatever is held', () => {
+  it('draws no cone while the lamp is off, and the cone as soon as it is on', () => {
     const renderer = recordingRenderer();
     drawScene(renderer, { ...calling(0), dialogue: null }, CONTENT);
     expect(renderer.sheets).not.toContain(CONTENT.lampSheet);
-    const owned = recordingRenderer();
-    drawScene(owned, state({ x: 20, y: 30 }, { x: 0, y: 0 }, true), CONTENT);
-    expect(owned.sheets).toContain(CONTENT.lampSheet);
+    const lit = recordingRenderer();
+    drawScene(lit, state({ x: 20, y: 30 }, { x: 0, y: 0 }, true), CONTENT);
+    expect(lit.sheets).toContain(CONTENT.lampSheet);
   });
 
   it('draws her own second page from the first talk: no page hands the lamp over (0039)', () => {
@@ -1586,10 +1591,10 @@ describe('the story in the scene (0026)', () => {
     expect(fontCalls(third, content)[0]).toBe('drawSprite 36 at 12,138');
   });
 
-  it("shows the lamp's line in the bar from the hand-over until the lamp was held once", () => {
+  it("shows the lamp's line in the bar from the first step until the lamp was held once", () => {
     const waiting: GameState = {
       ...state({ x: 20, y: 30 }),
-      lamp: { on: false, strength: 1, owned: true, used: false },
+      lamp: { on: false, strength: 1, used: false },
     };
     const renderer = recordingRenderer();
     drawScene(renderer, waiting, CONTENT);
@@ -1685,7 +1690,7 @@ describe('the help label in the scene (0031)', () => {
       [
         'the call',
         playing({
-          lamp: { on: false, strength: 1, owned: false, used: false },
+          lamp: { on: false, strength: 1, used: false },
           dialogue: { speaker: 'story', index: 0, page: 0 },
         }),
         GERMAN,
@@ -1695,7 +1700,7 @@ describe('the help label in the scene (0031)', () => {
       [
         'a notice',
         playing({
-          lamp: { on: true, strength: 1, owned: true, used: true },
+          lamp: { on: true, strength: 1, used: true },
           shadowWalls: [{ wall: 0, lit: true, light: 0 }],
         }),
         GERMAN,
@@ -2050,10 +2055,10 @@ describe('the close in the scene (0034)', () => {
 });
 
 describe('the card in the scene (0036)', () => {
-  /** A new game as the scene gets it: the card shown, the call open under it, no lamp. */
+  /** A new game as the scene gets it: the card shown, the call open under it. */
   const card = (fields: Partial<GameState> = {}): GameState => ({
     ...state({ x: 8, y: 8 }),
-    lamp: { on: false, strength: 1, owned: false, used: false },
+    lamp: { on: false, strength: 1, used: false },
     dialogue: { speaker: 'story', index: 0, page: 0 },
     presented: null,
     ...fields,

@@ -107,7 +107,7 @@ const reading = (tab: JournalTab, snippets = 0): GameState => ({
     recoil: NO_RECOIL,
   },
   camera: { x: 0, y: 0 },
-  lamp: { on: true, strength: 1, owned: true, used: true },
+  lamp: { on: true, strength: 1, used: true },
   creatures: [],
   movers: [],
   shadowWalls: [],

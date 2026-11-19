@@ -294,7 +294,7 @@ describe('the notice of a solved case (0024)', () => {
     expect(noticeOf({ ...both, solved: [] })).toBe(textKey('notice.trace-found'));
     const holding: GameState = {
       ...both,
-      lamp: { on: true, strength: 1, owned: true, used: true },
+      lamp: { on: true, strength: 1, used: true },
       shadowWalls: [{ wall: 0, lit: true, light: 0 }],
     };
     expect(noticeOf(holding)).toBe(textKey('notice.shadow-too-dense'));

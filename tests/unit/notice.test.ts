@@ -32,7 +32,7 @@ const HOLDS: ShadowWallState = { wall: 0, lit: true, light: 0 };
 const BASE = createInitialState(grassMap(20, 12, { x: 152, y: 96 }));
 const withWalls = (lampOn: boolean, ...shadowWalls: ShadowWallState[]): GameState => ({
   ...BASE,
-  lamp: { on: lampOn, strength: 1, owned: true, used: true },
+  lamp: { on: lampOn, strength: 1, used: true },
   shadowWalls,
 });
 
@@ -124,7 +124,7 @@ describe("the line that names the lamp's key (0026)", () => {
 
   it('is the notice of a new game from its first step, for as long as the lamp is not held (0039)', () => {
     expect(noticeOf(newGame(map))).toBe(NOTICE_LAMP);
-    expect(called.lamp).toStrictEqual({ on: false, strength: 1, owned: true, used: false });
+    expect(called.lamp).toStrictEqual({ on: false, strength: 1, used: false });
     let state = called;
     for (let step = 0; step < 600; step += 1) {
       expect(noticeOf(state), `step ${step}`).toBe(NOTICE_LAMP);
@@ -155,7 +155,7 @@ describe("the line that names the lamp's key (0026)", () => {
     const waiting: GameState = {
       ...BASE,
       tick: 1000,
-      lamp: { on: false, strength: 1, owned: true, used: false },
+      lamp: { on: false, strength: 1, used: false },
     };
     expect(noticeOf(waiting)).toBe(NOTICE_LAMP);
     expect(noticeOf({ ...waiting, traces: [{ trace: 0, light: 0, found: 950 }] })).toBe(
@@ -215,7 +215,7 @@ describe('the notice of a rest (0027)', () => {
     expect(
       noticeOf({
         ...coffee,
-        lamp: { on: true, strength: 1, owned: true, used: true },
+        lamp: { on: true, strength: 1, used: true },
         shadowWalls: [HOLDS],
       }),
     ).toBe(NOTICE_SHADOW_TOO_DENSE);
@@ -232,7 +232,7 @@ describe('the notice of a rest (0027)', () => {
   });
 
   it("comes before the line that names the lamp's key, which is back when it is over", () => {
-    const waiting = { on: false, strength: 1, owned: true, used: false };
+    const waiting = { on: false, strength: 1, used: false };
     expect(noticeOf({ ...rested('full', 10), lamp: waiting })).toBe(NOTICE_REST.full);
     expect(noticeOf({ ...rested('full', 120), lamp: waiting })).toBe(NOTICE_LAMP);
   });
@@ -318,7 +318,7 @@ describe('the notice of an upgrade (0029)', () => {
   it('comes after a wall that holds and before a found trace, a rest and the lamp key', () => {
     const holds: GameState = {
       ...earned(150),
-      lamp: { on: true, strength: 2, owned: true, used: true },
+      lamp: { on: true, strength: 2, used: true },
       shadowWalls: [HOLDS],
     };
     expect(noticeOf(holds)).toBe(NOTICE_SHADOW_TOO_DENSE);
@@ -326,7 +326,7 @@ describe('the notice of an upgrade (0029)', () => {
       ...earned(150),
       traces: [{ trace: 0, light: 0, found: 1140 }],
       rested: { at: 1140, result: 'restored' },
-      lamp: { on: false, strength: 2, owned: true, used: false },
+      lamp: { on: false, strength: 2, used: false },
     };
     expect(noticeOf(found)).toBe(WIDER);
     expect(noticeOf({ ...found, tick: 1240 })).toBe(NOTICE_TRACE_FOUND);

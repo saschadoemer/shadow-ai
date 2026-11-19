@@ -162,7 +162,7 @@ describe('the step of the walls (0014)', () => {
     wall({ x: 160, y: 80, width: 4, height: 32 }, 'hr', 2),
   ];
   const PLAYER = figure(152, 80, 'down');
-  const BASIC = { on: true, strength: 1, owned: true, used: true };
+  const BASIC = { on: true, strength: 1, used: true };
   const run = (
     standing: readonly ShadowWallState[],
     steps: number,
@@ -207,7 +207,7 @@ describe('the step of the walls (0014)', () => {
 
   it('a wall of density 2 holds against strength 1 however long, and is gone after 60 steps of strength 2', () => {
     expect(run(standingWalls(WALLS), 600)).toStrictEqual([{ wall: 1, lit: true, light: 0 }]);
-    const strong = { on: true, strength: 2, owned: true, used: true };
+    const strong = { on: true, strength: 2, used: true };
     expect(run([{ wall: 1, lit: false, light: 0 }], 59, strong)).toStrictEqual([
       { wall: 1, lit: true, light: 59 },
     ]);
@@ -217,7 +217,7 @@ describe('the step of the walls (0014)', () => {
   it('a step out of the light starts the second again', () => {
     const half = run(standingWalls(WALLS), 30);
     expect(half[0]).toStrictEqual({ wall: 0, lit: true, light: 30 });
-    const broken = run(half, 1, { on: false, strength: 1, owned: true, used: true });
+    const broken = run(half, 1, { on: false, strength: 1, used: true });
     expect(broken).toStrictEqual([
       { wall: 0, lit: false, light: 0 },
       { wall: 1, lit: false, light: 0 },
@@ -324,7 +324,7 @@ describe('a box and the wider cone (0029)', () => {
   it('steps a wall at the wider edge with the wider cone only', () => {
     const walls = [wall({ x: 126, y: 140, width: 16, height: 4 })];
     const player = figure(100, 112, 'down');
-    const lamp = { on: true, strength: 1, owned: true, used: true };
+    const lamp = { on: true, strength: 1, used: true };
     expect(stepWalls(standingWalls(walls), walls, player, lamp, OPEN, WIDE_SPREAD)).toStrictEqual([
       { wall: 0, lit: true, light: 1 },
     ]);

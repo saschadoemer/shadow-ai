@@ -70,8 +70,8 @@ function upgradeNotice(state: GameState): TextKey | null {
  * an upgrade (0029). Then, for TRACE_NOTICE_STEPS steps from the last find, that a trace was
  * found (0022).
  * Then, for REST_NOTICE_STEPS steps from a press at a rest, what the rest gave (0027). Last,
- * while the lamp is owned and was never on, the line that names its key (0026): it has no time,
- * and it does not come back.
+ * while the lamp was never on, the line that names its key (0026, 0039): it has no time, and
+ * it does not come back.
  */
 export function noticeOf(state: GameState): TextKey | null {
   const holds = state.shadowWalls.some((wall) => wall.lit && wall.light === 0);
@@ -95,5 +95,5 @@ export function noticeOf(state: GameState): TextKey | null {
   if (state.rested !== null && state.tick - state.rested.at < REST_NOTICE_STEPS) {
     return NOTICE_REST[state.rested.result];
   }
-  return state.lamp.owned && !state.lamp.used ? NOTICE_LAMP : null;
+  return state.lamp.used ? null : NOTICE_LAMP;
 }

@@ -34,8 +34,8 @@ import { BASE_STRENGTH } from './world';
  * every standing figure of the map facing down and no dialogue (0017); the journal closed and
  * no key remembered (0020); the help closed (0021); every trace of the map unseen and not found
  * (0022); no case solved (0024); no upgrade earned (0029). It is a game past its opening
- * (0026): the lamp is owned and was used, no scene is open, and the card ended at tick 0
- * (0036); `newGame` is the state a player starts with.
+ * (0026): the lamp was used, no scene is open, and the card ended at tick 0 (0036); `newGame`
+ * is the state a player starts with.
  * A map with two wake points, a route that is malformed or crosses a solid tile, a
  * rectangle of no known kind, a shadow wall or a trace the world data or the grid refuses, an
  * area of a region the world data does not know or of a box that is not whole cells (0023), or
@@ -64,7 +64,7 @@ export function createInitialState(map: TileMap): GameState {
     tick: 0,
     player,
     camera: followPlayer(player, map),
-    lamp: { on: false, strength: BASE_STRENGTH, owned: true, used: true },
+    lamp: { on: false, strength: BASE_STRENGTH, used: true },
     upgrades: [],
     creatures: creaturesFrom(map.points),
     movers: moversFrom(routes),
@@ -94,7 +94,7 @@ export function createInitialState(map: TileMap): GameState {
 export function newGame(map: TileMap): GameState {
   return {
     ...createInitialState(map),
-    lamp: { on: false, strength: BASE_STRENGTH, owned: true, used: false },
+    lamp: { on: false, strength: BASE_STRENGTH, used: false },
     dialogue: { speaker: 'story', index: OPENING_SCENE, page: 0 },
     presented: null,
   };
@@ -193,13 +193,11 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   if (opened !== null) {
     return opened;
   }
-  // Without the lamp the input's `lamp` counts as not held: for the light and for the figure.
-  const acting: GameInput = { ...input, lamp: input.lamp && state.lamp.owned };
   // A press at a coffee machine in reach takes the rest (0027); the step goes on from there.
-  const rest = takeRest(state, acting, content);
+  const rest = takeRest(state, input, content);
   const rested = rest === null ? state.rested : rest.rested;
   const before = rest === null ? state.overview : rest.overview;
-  const on = acting.lamp && state.player.recoil.steps === 0;
+  const on = input.lamp && state.player.recoil.steps === 0;
   const lamp: LampState = { ...state.lamp, on, used: state.lamp.used || on };
   // The cone is as wide as the upgrades make it (0029): for the creatures, the walls and the
   // traces.
@@ -207,7 +205,7 @@ export function update(state: GameState, input: GameInput, content: TileMap): Ga
   const walls = wallsOf(content.rects);
   // The figure, the push and the creatures meet the walls standing at the start of the step.
   const walled = withWalls(content, walls, state.shadowWalls);
-  const stepped = stepPlayer(state.player, acting, walled);
+  const stepped = stepPlayer(state.player, input, walled);
   const { creatures, captured } = stepCreatures(
     state.creatures,
     state.captured,
