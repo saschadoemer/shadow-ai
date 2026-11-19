@@ -1,6 +1,6 @@
 # 0040 — The case of HR
 
-**Status:** draft
+**Status:** approved 2026-11-19
 **Milestone:** M6
 **Drafted:** 2026-11-19
 
@@ -282,7 +282,7 @@ With the case of Marketing the walk takes about fifteen minutes.
 
 ## Open questions
 
-Seven, each with the answer the draft is written for:
+None. Seven were settled on 2026-11-19, each as drafted:
 
 - **The cut.** This feature is the case. The species of HR comes at once, as a feature of
   its own, as with Marketing and Support.
@@ -292,8 +292,8 @@ Seven, each with the answer the draft is written for:
   has no name, as the other four.
 - **The works council.** Not in this feature. `world.md` §3 makes him part of the HR case —
   "nothing moves there without him" — and that is a rule the cases do not have yet: a second
-  person the case needs. Drafted as its own feature after this one, so that the author can
-  say what he does.
+  person the case needs. He gets a feature of his own after this one, in which the author
+  says what he does.
 - **The upgrade.** The world data gives HR the colour filter (`world.md` §1). Solving the
   case earns it by the rule of 0029, and this feature gives it its strength and one line.
   What the filter shows comes later. The other way is to move the upgrade to another case in
