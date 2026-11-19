@@ -624,3 +624,56 @@ describe('the second entry of the creatures tab (0032)', () => {
     expect(calls[7]).toBe('drawSprite 33 at 16,54');
   });
 });
+
+describe('the cases tab with three regions (0037)', () => {
+  /** Five traces each of Sales, Marketing and Support, in the order of the floor. */
+  const REGION_OF = ['sales', 'marketing', 'support'] as const;
+  const content: SceneContent = {
+    ...CONTENT,
+    map: {
+      ...CONTENT.map,
+      rects: Array.from({ length: 15 }, (_, n) => ({
+        name: `trace:${REGION_OF[Math.floor(n / 5)]}`,
+        x: 16 * n,
+        y: 0,
+        width: 16,
+        height: 16,
+      })),
+    },
+  };
+  const cases = (found: readonly number[], settings = GERMAN): string[] => {
+    const renderer = recordingRenderer();
+    const traces: TraceState[] = Array.from({ length: 15 }, (_, trace) => ({
+      trace,
+      light: 0,
+      found: found.includes(trace) ? 60 : null,
+    }));
+    drawJournal(renderer, { ...reading('cases'), traces }, { tab: 'cases' }, content, settings);
+    return renderer.calls.slice(renderer.calls.indexOf(RULE) + 1);
+  };
+
+  it('shows Support alone, in the first place, while no trace of the other two is found', () => {
+    const entry = cases([10]);
+    // `Support` 7 and `Spuren: 1 von 5` 12 glyphs.
+    expect(entry).toHaveLength(7 + 12);
+    expect(entry[0]).toBe('drawSprite 51 at 16,36');
+    expect(entry[7]).toBe('drawSprite 51 at 16,48');
+  });
+
+  it('shows Sales, Marketing and Support 36 px apart, with a trace of each found', () => {
+    const entries = cases([0, 5, 10]);
+    // `Vertrieb` 8, `Marketing` 9 and `Support` 7 glyphs, each with its count of 12.
+    expect(entries).toHaveLength(8 + 12 + 9 + 12 + 7 + 12);
+    expect(entries[0]).toBe('drawSprite 54 at 16,36');
+    expect(entries[20]).toBe('drawSprite 45 at 16,72');
+    expect(entries[41]).toBe('drawSprite 51 at 16,108');
+    expect(entries[48]).toBe('drawSprite 51 at 16,120');
+  });
+
+  it('reads `Support` and `Traces: 5 of 5` in English', () => {
+    const entry = cases([10, 11, 12, 13, 14], ENGLISH);
+    expect(entry).toHaveLength(7 + 11);
+    expect(entry[0]).toBe('drawSprite 51 at 16,36');
+    expect(entry[7]).toBe('drawSprite 52 at 16,48');
+  });
+});
