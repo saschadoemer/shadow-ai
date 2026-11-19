@@ -109,7 +109,7 @@ prototype.
 - Produces: the text ids `story.close-1`, `story.close-2` and `story.close-3`, in both
   languages.
 
-- [ ] **Step 1: Write the failing test:**
+- [x] **Step 1: Write the failing test:**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -164,11 +164,11 @@ prototype.
        textOf(textKey(id), 'de').split('\n')[0] ?? '',
 ```
 
-- [ ] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 28
+- [x] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 28
   tests. `npx tsc --noEmit` reports seven errors, all in this test: the three ids are not
   ids of the table yet.
 
-- [ ] **Step 3: The words,** in both tables:
+- [x] **Step 3: The words,** in both tables:
 
 ```diff
 --- a/src/text/de.ts
@@ -224,11 +224,11 @@ prototype.
    'notice.rest-full': 'Coffee. You have your overview already.',
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green; the test that gives a
+- [x] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green; the test that gives a
   page of talk and of the story at most three lines of at most 47 characters covers the
   three. Then `npm run check`: 1537 unit tests.
 
-- [ ] **Step 5: Commit** — `Add the words of the close`.
+- [x] **Step 5: Commit** — `Add the words of the close`.
 
 ---
 
@@ -245,7 +245,7 @@ prototype.
   - `SCENES[1]`, the scene `close`; `CLOSE_SCENE = 1`; `CLOSE_DELAY_STEPS = 300`
   - `closeDue(tick: number, solved: readonly SolvedCase[], finished: number | null, cases: readonly Pick<Case, 'region'>[] = CASES): boolean`
 
-- [ ] **Step 1: Write the failing tests.** `tests/unit/story.test.ts` — two older tests no
+- [x] **Step 1: Write the failing tests.** `tests/unit/story.test.ts` — two older tests no
   longer take the call for the whole list, and one block is new, at the end:
 
 ```diff
@@ -396,14 +396,14 @@ prototype.
  });
 ```
 
-- [ ] **Step 2: Run them** —
+- [x] **Step 2: Run them** —
   `npx vitest run tests/unit/story.test.ts tests/unit/draw-scene.test.ts`. Expected: FAIL, 9
   tests: 7 of 11 in `story.test.ts`, 2 of 122 in `draw-scene.test.ts`. `npx tsc --noEmit`
   reports three errors: the three names are not exported. One new test is green already —
   no page beyond the third is drawn, which holds for a scene that does not exist too — and
   the two older tests of `story.test.ts` hold before and after.
 
-- [ ] **Step 3: The scene and the rule:**
+- [x] **Step 3: The scene and the rule:**
 
 ```diff
 --- a/src/game/story.ts
@@ -470,10 +470,10 @@ prototype.
    return scenes[index]?.pages ?? [];
 ```
 
-- [ ] **Step 4: Run** the two test files of Step 2 — green, the tests of the call unchanged.
+- [x] **Step 4: Run** the two test files of Step 2 — green, the tests of the call unchanged.
   Then `npm run check`: 1547 unit tests.
 
-- [ ] **Step 5: Commit** — `Add the close and the rule that says when it is due`. Body: the
+- [x] **Step 5: Commit** — `Add the close and the rule that says when it is due`. Body: the
   rule reads the list of the cases, so a case that is added moves the close behind it.
 
 ---
@@ -496,7 +496,7 @@ prototype.
     `game/story`
   - `update`: opens the close when it is due; the step that closes it sets `finished`
 
-- [ ] **Step 1: Write the failing tests.** `tests/unit/state.test.ts` — four literals get the
+- [x] **Step 1: Write the failing tests.** `tests/unit/state.test.ts` — four literals get the
   field, and one block is new, at the end:
 
 ```diff
@@ -920,14 +920,14 @@ prototype.
  });
 ```
 
-- [ ] **Step 2: Run them** —
+- [x] **Step 2: Run them** —
   `npx vitest run tests/unit/state.test.ts tests/unit/overview.test.ts tests/unit/floor.test.ts`.
   Expected: FAIL, 15 tests: 13 of 103 in `state.test.ts`, 1 of 26 in `overview.test.ts` —
   the wake, whose literal now has the field — and 1 of 125 in `floor.test.ts`.
   `npx tsc --noEmit` reports 20 errors: `finished` is no field of the state. Then
   `npx playwright test -g "close not closed"`. Expected: FAIL, `Received: undefined`.
 
-- [ ] **Step 3: The field:**
+- [x] **Step 3: The field:**
 
 ```diff
 --- a/src/game/state.ts
@@ -946,7 +946,7 @@ prototype.
    /** The dialogue that is open, or null. While it is open nothing else is stepped (0017). */
 ```
 
-- [ ] **Step 4: A scene that the game opens by itself:**
+- [x] **Step 4: A scene that the game opens by itself:**
 
 ```diff
 --- a/src/game/story.ts
@@ -985,7 +985,7 @@ prototype.
    return scenes[index]?.pages ?? [];
 ```
 
-- [ ] **Step 5: The step** starts with the close not closed, opens it when it is due, and
+- [x] **Step 5: The step** starts with the close not closed, opens it when it is due, and
   remembers the step that closes it:
 
 ```diff
@@ -1050,7 +1050,7 @@ prototype.
      journal: null,
 ```
 
-- [ ] **Step 6: The wake** keeps it:
+- [x] **Step 6: The wake** keeps it:
 
 ```diff
 --- a/src/game/overview.ts
@@ -1065,11 +1065,11 @@ prototype.
      journal: null,
 ```
 
-- [ ] **Step 7: Run** the three test files of Step 2 — green — then `npm run check`: 1560 unit
+- [x] **Step 7: Run** the three test files of Step 2 — green — then `npm run check`: 1560 unit
   tests, the two recorded digests among them, and `npm run test:e2e` twice: 19 passed, 3
   skipped, both times.
 
-- [ ] **Step 8: Commit** — `Open the close once, five seconds after the last case`. Body: it
+- [x] **Step 8: Commit** — `Open the close once, five seconds after the last case`. Body: it
   waits for whatever has the step and comes before the journal and a talk; the step that
   closes it is remembered, so it never opens again.
 
@@ -1084,7 +1084,7 @@ prototype.
 The diffs are against `main` at `199085c`. If a line has moved, put the text where the diff
 means it; do not change the words without a reason.
 
-- [ ] **Step 1: `vision.md`** §4:
+- [x] **Step 1: `vision.md`** §4:
 
 ```diff
 --- a/docs/spec/vision.md
@@ -1105,7 +1105,7 @@ means it; do not change the words without a reason.
  corridors like a wall of flicker. Where the use gets dense, it condenses into creatures — one
 ```
 
-- [ ] **Step 2: `gameplay.md`** §6:
+- [x] **Step 2: `gameplay.md`** §6:
 
 ```diff
 --- a/docs/spec/gameplay.md
@@ -1128,7 +1128,7 @@ means it; do not change the words without a reason.
  the printer. Its five traces lie on four screens and on the printer. With all five found the
 ```
 
-- [ ] **Step 3: `architecture.md`** §2 and §8:
+- [x] **Step 3: `architecture.md`** §2 and §8:
 
 ```diff
 --- a/docs/spec/architecture.md
@@ -1175,7 +1175,7 @@ means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 4: `testing.md`** §2:
+- [x] **Step 4: `testing.md`** §2:
 
 ```diff
 --- a/docs/spec/testing.md
@@ -1191,7 +1191,7 @@ means it; do not change the words without a reason.
  | INV-4 text through keys | the compiler, via `TextKey`: `drawText`, `textOf` and `textKey` are type-tested with `expectTypeOf` — a string is no `TextKey` and `textKey` accepts only the ids of the table (0016); unit tests that `de` and `en` have identical key sets and no empty string, that every character of both tables has a glyph in the font — line breaks skipped —, and that every notice fits the bar and has no line break; every page of the kind `talk` has at most three lines of at most 47 characters and no empty line, in both languages, and fits the dialogue box (0017); a tab's title of the journal is one line of at most 16 characters, a tab's line for nothing one line of at most 47, a species' name one line of at most 24, and a species' text two to four lines of at most 47 with no empty line, in both languages (0020); a region's name one line of at most 24, and `journal.traces` and `journal.of` one line of at most 16 each, in both languages, and `drawNumber` takes a number and nothing else (0022); a case's outcome is one line of at most 47 characters, and a policy block two to four lines of at most 47 with no empty line, in both languages (0024); a name of a key in the help is one line of at most 17 characters, and what it does one line of at most 16, in both languages (0021); a page of the story obeys the rule of a page of talk, in both languages (0026); the scene tests draw the notice and a page in both languages, and the smoke test switches the language with `L` (0019) |
 ```
 
-- [ ] **Step 5: `README.md`:**
+- [x] **Step 5: `README.md`:**
 
 ```diff
 --- a/README.md
@@ -1208,19 +1208,19 @@ means it; do not change the words without a reason.
  
 ```
 
-- [ ] **Step 6:** `npm run check`, then commit — `Move the close into the spec`.
+- [x] **Step 6:** `npm run check`, then commit — `Move the close into the spec`.
 
 ---
 
 ### Task 5: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 19 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 19 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 5 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 5 in this file and commit —
   `Tick the full check of 0034`.
 
 ---
