@@ -1835,19 +1835,19 @@ text where the diff means it; do not change the words without a reason.
 
 ### Task 7: The acceptance walk
 
-- [ ] **Step 1:** start the dev server as the spec's preconditions say (`npm run dev`), and tell
+- [x] **Step 1:** start the dev server as the spec's preconditions say (`npm run dev`), and tell
   the author in one message: the URL — **not to be loaded yet**, because the walk begins with
   loading the page —, a desktop browser, a window of at least 1280x720, the keys of the
   spec's preconditions, and that the walk solves both cases and takes about twenty minutes.
   Wait until the author is ready.
-- [ ] **Step 2:** guide the author through steps 1–24 of the spec's acceptance plan, one action
+- [x] **Step 2:** guide the author through steps 1–24 of the spec's acceptance plan, one action
   step with its expected step per message, in the spec's numbering and words. Record each answer
   as given. Never answer a step yourself.
-- [ ] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
+- [x] **Step 3:** a failed step ends the walk: fix on the branch — or ask, when the fix needs a
   decision — rerun Task 6, and start again at step 1. A step that fails because the author
   wants other words for a line is a decision: ask, and change the spec's table first.
-- [ ] **Step 4:** after step 24 ask the seven feel questions, one per message.
-- [ ] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–24`, followed by the feel
+- [x] **Step 4:** after step 24 ask the seven feel questions, one per message.
+- [x] **Step 5:** write `**Result:** passed YYYY-MM-DD, steps 1–24`, followed by the feel
   notes, into the spec and commit it — `Record the walk of 0036`. A feel note that wants
   something else — another length of the card, a fourth line, a softer cut to the call —
   becomes a new draft, not a change on this branch. The spec marks the three seconds *tune*:

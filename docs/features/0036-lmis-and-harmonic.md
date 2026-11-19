@@ -232,7 +232,12 @@ takes about twenty minutes.
 - The management's line is nearly the last word of the game. Too much there?
 - Three times: right, too few, too many?
 
-**Result:** not yet walked.
+**Result:** passed 2026-11-19, steps 1–24. Feel: three seconds are long enough to read and
+short enough not to wait — pass; the card reads as a frame round the game, not as an
+advertisement — fine as it is; the step from the card to the call is not too hard a cut —
+fine as it is; the three lines sound like the people who say them — fine as it is; the
+comparison with the lamp lands — pass; the management's line near the last word of the game
+is not too much — fine as it is; three times is right — fine as it is.
 
 ## Open questions
 
