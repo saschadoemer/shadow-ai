@@ -128,7 +128,7 @@ a browser — that is the walk — and the container was **not** run with the pr
   `talk.intern-marketing-traces`, `talk.intern-marketing-source` and `talk.intern-done`, in
   both languages.
 
-- [ ] **Step 1: Write the failing test:**
+- [x] **Step 1: Write the failing test:**
 
 ```diff
 --- a/tests/unit/text.test.ts
@@ -195,11 +195,11 @@ a browser — that is the walk — and the container was **not** run with the pr
    it('holds the words of the mirage in both languages (0032)', () => {
 ```
 
-- [ ] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 27
+- [x] **Step 2: Run it** — `npx vitest run tests/unit/text.test.ts`. Expected: FAIL, 1 of 27
   tests. `npx tsc --noEmit` reports nine errors, all in this test: the eight ids are not ids
   of the table yet.
 
-- [ ] **Step 3: The words,** in both tables:
+- [x] **Step 3: The words,** in both tables:
 
 ```diff
 --- a/src/text/de.ts
@@ -305,11 +305,11 @@ a browser — that is the walk — and the container was **not** run with the pr
      'sound as if I had had a week for it.',
 ```
 
-- [ ] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green; the test that gives a
+- [x] **Step 4: Run** `npx vitest run tests/unit/text.test.ts` — green; the test that gives a
   page of talk at most three lines of at most 47 characters covers the eight. Then
   `npm run check`: 1497 unit tests.
 
-- [ ] **Step 5: Commit** — `Add the words of the intern`.
+- [x] **Step 5: Commit** — `Add the words of the intern`.
 
 ---
 
@@ -324,7 +324,7 @@ a browser — that is the walk — and the container was **not** run with the pr
 - Produces: `INTERN_SHIRT = '#0099db'` in `tools/placeholder-person.ts`;
   `encodeInternPng()` in `tools/gen-sprites.ts`; `public/sprites/intern.png`, 320x24.
 
-- [ ] **Step 1: Write the failing tests.** `tests/unit/gen-sprites.test.ts`:
+- [x] **Step 1: Write the failing tests.** `tests/unit/gen-sprites.test.ts`:
 
 ```diff
 --- a/tests/unit/gen-sprites.test.ts
@@ -407,12 +407,12 @@ a browser — that is the walk — and the container was **not** run with the pr
    });
 ```
 
-- [ ] **Step 2: Run them** —
+- [x] **Step 2: Run them** —
   `npx vitest run tests/unit/gen-sprites.test.ts tests/unit/assets.test.ts`. Expected: FAIL,
   3 tests: 2 of 64 in `gen-sprites.test.ts`, 1 of 27 in `assets.test.ts`. `npx tsc --noEmit`
   reports two errors: the two names are not exported.
 
-- [ ] **Step 3: The shirt and the sheet:**
+- [x] **Step 3: The shirt and the sheet:**
 
 ```diff
 --- a/tools/placeholder-person.ts
@@ -481,16 +481,16 @@ a browser — that is the walk — and the container was **not** run with the pr
  }
 ```
 
-- [ ] **Step 4: Generate** — `npm run gen-sprites`. Then `git status --short public` shows one
+- [x] **Step 4: Generate** — `npm run gen-sprites`. Then `git status --short public` shows one
   line, `?? public/sprites/intern.png`: no other sheet changed.
   `shasum -a 256 public/sprites/intern.png` gives
   `935b07c5147ab65cd7d542ab6b5f4cfb0da56d70113ec5c2572a8776fe7cf8a3`.
   If another sheet changed, stop.
 
-- [ ] **Step 5: Run** the two test files of Step 2 — green — then `npm run check`: 1500 unit
+- [x] **Step 5: Run** the two test files of Step 2 — green — then `npm run check`: 1500 unit
   tests.
 
-- [ ] **Step 6: Commit** — `Draw the sheet of the intern`, with the PNG.
+- [x] **Step 6: Commit** — `Draw the sheet of the intern`, with the PNG.
 
 ---
 
@@ -515,7 +515,7 @@ a browser — that is the walk — and the container was **not** run with the pr
   - `withHint(figures: readonly Figure[], hint: TextKey): readonly Figure[]`
 - Produces: `CAST[1]`, the intern.
 
-- [ ] **Step 1: Write the failing tests.** Create `tests/unit/hints.test.ts`:
+- [x] **Step 1: Write the failing tests.** Create `tests/unit/hints.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -865,14 +865,14 @@ describe('the intern speaks (0033)', () => {
 +});
 ```
 
-- [ ] **Step 2: Run them** —
+- [x] **Step 2: Run them** —
   `npx vitest run tests/unit/hints.test.ts tests/unit/cast.test.ts tests/unit/draw-scene.test.ts`.
   Expected: FAIL: `hints.test.ts` does not load — it imports a file that does not exist, so
   the file fails as a whole and none of its tests runs —, 1 of 20 fails in `cast.test.ts`,
   and 5 of 119 in `draw-scene.test.ts`: the cast does not know the figure of the fixture.
   `npx tsc --noEmit` reports two errors.
 
-- [ ] **Step 3: The rule.** Create `src/game/hints.ts`:
+- [x] **Step 3: The rule.** Create `src/game/hints.ts`:
 
 ```ts
 import { type TextKey, textKey } from '../text/text';
@@ -958,7 +958,7 @@ export function withHint(figures: readonly Figure[], hint: TextKey): readonly Fi
 }
 ```
 
-- [ ] **Step 4: The cast** gets its second member:
+- [x] **Step 4: The cast** gets its second member:
 
 ```diff
 --- a/src/game/cast.ts
@@ -975,7 +975,7 @@ export function withHint(figures: readonly Figure[], hint: TextKey): readonly Fi
  /**
 ```
 
-- [ ] **Step 5: The step and the scene** give him the hint of the moment:
+- [x] **Step 5: The step and the scene** give him the hint of the moment:
 
 ```diff
 --- a/src/game/update.ts
@@ -1042,10 +1042,10 @@ export function withHint(figures: readonly Figure[], hint: TextKey): readonly Fi
    const notice = noticeOf(state);
 ```
 
-- [ ] **Step 6: Run** the three test files of Step 2 — green, the tests of 0017, 0018 and 0026
+- [x] **Step 6: Run** the three test files of Step 2 — green, the tests of 0017, 0018 and 0026
   unchanged but for the one of the cast. Then `npm run check`: 1525 unit tests.
 
-- [ ] **Step 7: Commit** — `Let the intern say where the next step is`. Body: one rule picks
+- [x] **Step 7: Commit** — `Let the intern say where the next step is`. Body: one rule picks
   the page from the lamp, the traces and the solved cases; nothing of it is stored.
 
 ---
@@ -1062,7 +1062,7 @@ export function withHint(figures: readonly Figure[], hint: TextKey): readonly Fi
 - Produces: `FIGURES[1]`, `FIRST_FIGURES = 1` in `tools/floor-layout.ts`; `floor.tmj` with
   the point 132, `figure:intern`, at the end.
 
-- [ ] **Step 1: Write the failing tests.** In `tests/unit/floor.test.ts` the older tests
+- [x] **Step 1: Write the failing tests.** In `tests/unit/floor.test.ts` the older tests
   change as the global constraints say, and one block is new, at the end:
 
 ```diff
@@ -1393,7 +1393,7 @@ export function withHint(figures: readonly Figure[], hint: TextKey): readonly Fi
  });
 ```
 
-- [ ] **Step 2: Run them** — `npx vitest run tests/unit/floor.test.ts`. Expected: FAIL, 14 of
+- [x] **Step 2: Run them** — `npx vitest run tests/unit/floor.test.ts`. Expected: FAIL, 14 of
   124 tests: six older ones that count the objects, the points or the speakers, and eight
   of the new block. `npx tsc --noEmit` reports one error: `floor-layout.ts` has no exported
   member `FIRST_FIGURES`. Six tests of the diff are green already, and that is right: the
@@ -1403,7 +1403,7 @@ export function withHint(figures: readonly Figure[], hint: TextKey): readonly Fi
   recordings pass before and after. Then `npx playwright test -g "the officer and the intern"`.
   Expected: FAIL, `Expected: 2`, `Received: 1`.
 
-- [ ] **Step 3: The layout.** The intern in `FIGURES`, `FIRST_FIGURES`, and the generator
+- [x] **Step 3: The layout.** The intern in `FIGURES`, `FIRST_FIGURES`, and the generator
   writes the later figures at the end:
 
 ```diff
@@ -1480,17 +1480,17 @@ export function withHint(figures: readonly Figure[], hint: TextKey): readonly Fi
      tiledversion: '1.11.2',
 ```
 
-- [ ] **Step 4: Regenerate the floor** — `npm run gen-floor`. Then
+- [x] **Step 4: Regenerate the floor** — `npm run gen-floor`. Then
   `shasum -a 256 public/maps/floor.tmj` gives
   `66dfcaab17cd4fd650be051c6b9e6bc624f11ce8c618fc39daadb9dd494b65d8`, and
   `git diff --stat public/maps/floor.tmj` says 13 insertions and 1 deletion: one point at the
   end of the `objects` layer and `nextobjectid`. If the diff touches anything else, stop.
 
-- [ ] **Step 5: Run** `npx vitest run tests/unit/floor.test.ts tests/unit/journal.test.ts tests/unit/help.test.ts` —
+- [x] **Step 5: Run** `npx vitest run tests/unit/floor.test.ts tests/unit/journal.test.ts tests/unit/help.test.ts` —
   green — then `npm run check`: 1536 unit tests, and `npm run test:e2e` twice: 18 passed, 3
   skipped, both times.
 
-- [ ] **Step 6: Commit** — `Put the intern into the break room`. Body: he stands out of reach
+- [x] **Step 6: Commit** — `Put the intern into the break room`. Body: he stands out of reach
   of every place from which a coffee machine is in reach, so a press there still takes the
   coffee.
 
@@ -1506,7 +1506,7 @@ The diffs are against `main` at `9794d43`. If a line has moved, put the text whe
 means it; do not change the words without a reason. `architecture.md` changes in §1 too,
 beyond the sections the spec names: its directory listing names the figures' generator.
 
-- [ ] **Step 1: `world.md`** §3:
+- [x] **Step 1: `world.md`** §3:
 
 ```diff
 --- a/docs/spec/world.md
@@ -1527,7 +1527,7 @@ beyond the sections the spec names: its directory listing names the figures' gen
    depth.
 ```
 
-- [ ] **Step 2: `gameplay.md`** §8:
+- [x] **Step 2: `gameplay.md`** §8:
 
 ```diff
 --- a/docs/spec/gameplay.md
@@ -1547,7 +1547,7 @@ beyond the sections the spec names: its directory listing names the figures' gen
  with the lamp held, with a dialogue open, in the dark. Every text on screen changes at once: the
 ```
 
-- [ ] **Step 3: `architecture.md`** §1, §2, §6 and §7:
+- [x] **Step 3: `architecture.md`** §1, §2, §6 and §7:
 
 ```diff
 --- a/docs/spec/architecture.md
@@ -1617,7 +1617,7 @@ beyond the sections the spec names: its directory listing names the figures' gen
  derived, not listed: a cell with no strip whose left neighbour has a top strip and whose upper
 ```
 
-- [ ] **Step 4: `testing.md`** §2:
+- [x] **Step 4: `testing.md`** §2:
 
 ```diff
 --- a/docs/spec/testing.md
@@ -1635,7 +1635,7 @@ beyond the sections the spec names: its directory listing names the figures' gen
  
 ```
 
-- [ ] **Step 5: `README.md`:**
+- [x] **Step 5: `README.md`:**
 
 ```diff
 --- a/README.md
@@ -1661,19 +1661,19 @@ beyond the sections the spec names: its directory listing names the figures' gen
  
 ```
 
-- [ ] **Step 6:** `npm run check`, then commit — `Move the intern into the spec`.
+- [x] **Step 6:** `npm run check`, then commit — `Move the intern into the spec`.
 
 ---
 
 ### Task 6: The full check
 
-- [ ] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
-- [ ] **Step 2:** `npm run check` and `npm run test:e2e` — green: 18 passed, 3 skipped.
-- [ ] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
+- [x] **Step 1:** merge the latest `main` into the branch; resolve on the branch.
+- [x] **Step 2:** `npm run check` and `npm run test:e2e` — green: 18 passed, 3 skipped.
+- [x] **Step 3:** build and run the container as `docs/spec/ops.md` §3 says, and run the smoke
   spec against it with `BASE_URL` set — green, the CSP header included.
-- [ ] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
+- [x] **Step 4:** `git status` is clean; `npm run gen-floor`, `npm run gen-sprites` and
   `npm run gen-tiles` change nothing.
-- [ ] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
+- [x] **Step 5:** tick the boxes of Tasks 1 to 6 in this file and commit —
   `Tick the full check of 0033`.
 
 ---
