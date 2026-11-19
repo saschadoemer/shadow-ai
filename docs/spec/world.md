@@ -55,7 +55,9 @@ mover leaves its room. Nothing that moves is solid: the figure, the creatures an
 through it. A colleague, a dog or a vacuum stands while the figure's feet are closer than 20 px;
 a drone flies on. The routes live in the map's `objects` layer; the tables in
 `docs/features/0015-the-moving-floor.md` are the routes until the art pass. Since feature 0018
-the four colleagues can be spoken to, and stop where they are while they speak.
+the four colleagues can be spoken to, and stop where they are while they speak. Since feature
+0040 a fifth colleague walks, in HR, between the desk in the upper left of the room and the
+table; the floor has 23 movers.
 
 | Region | Role |
 |---|---|
@@ -118,6 +120,10 @@ may move either; the gating test then guards the new place.
 HR and Accounting are lifted like the thin ones, and the player enters both rooms; they are
 under their shadow and have nothing of their own until their cases come. The wall of
 Development holds until the colour filter.
+
+**As built** (feature 0040): the case of HR earns the colour filter. With it the lamp has a
+strength of 3 and the wall of Development is lifted like every wall; the room is under its
+shadow and has nothing of its own until its case comes.
 
 **As built** (feature 0023): every region of the floor has an area in the map — a rectangle
 named `region:<id>` in the `objects` layer that covers its room as the layout knows it, with its
@@ -202,6 +208,20 @@ and only from there — and a tool that is missing gets onto the list when someb
 three cases do not depend on each other and may be solved in any order. The case earns no
 upgrade, and its species comes with feature 0038.
 
+**Traces of HR** (feature 0040): three traces lie on the three screens of HR, the desks in the
+upper left, the upper right and the lower left of the room. The room has three workplaces and
+no other device, so the case has three traces, not five. The table of
+`docs/features/0040-the-case-of-hr.md` is the placement until the art pass.
+
+**The case of HR** (feature 0040): the fourth case, by the rules of the first three. Two
+hundred applications come in for one job, a tool sorts them before anybody reads them, and
+nobody can say what it sorts by. Its policy block, in the words of
+`docs/features/0040-the-case-of-hr.md`: about people a person decides — what a machine has
+sorted, somebody looks at, and can say what it was sorted by. The case can be begun only after
+the case of Marketing, because the wall of HR needs the wider cone; among Sales, Marketing and
+Support the order stays free. The case earns the colour filter. Its species and the works
+council come with features of their own.
+
 **Order and gating.** Marketing and Support are open from the start (thin shadow). HR and
 Accounting open after the first upgrade, Development after the second. Management is last: without
 the filter nothing is visible there, and without the vendor as advisor there is no alternative
@@ -255,6 +275,8 @@ Kept as small as the story allows. About thirty figures in all.
   Since feature 0028 the colleague of Marketing — the one in the red shirt, with the printer —
   is the source of the second case, by the same rule. Since feature 0037 the colleague of
   Support — the one in the orange shirt, with the forty tickets — is the source of the third.
+  Since feature 0040 a colleague walks in HR — the one in the yellow shirt, with the two
+  hundred applications — and is the source of the fourth.
 - **The managing director.** The last case. In the first act a sentence of the call (feature
   0026); a figure with the map of Management (M6).
 - **The customer.** A voice on the phone at the start — one sentence of the call (feature 0026).

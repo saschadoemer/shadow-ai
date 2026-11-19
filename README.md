@@ -121,7 +121,11 @@ last of them (feature 0037). Support has a creature of its own: the lurker, an e
 window that is open on three screens. The lamp does not hold it there — `E` closes the window,
 the lurker drops to the floor and can be captured, and two of the room's traces show only
 then. With three species the journal's creatures tab has two pages, turned with the up and
-down arrows (feature 0038).
+down arrows (feature 0038). HR is the fourth case, behind the denser shadow that the wider
+cone lifts: a colleague in a yellow shirt, three traces on the room's three screens, and a
+tool that sorts applications nobody can explain. Solving it gives the lamp the strength for
+the densest shadow, and the way into Development is free. The policy now has pages of three
+blocks (feature 0040).
 Every merge to `main` is deployed to Cloud Run (feature 0030).
 The roadmap is in [docs/plan.md](docs/plan.md).
 
